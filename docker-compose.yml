@@ -1,0 +1,66 @@
+# =============================================================================
+# Module: docker-compose.yml
+# Description: Docker Compose configuration for PolaZhenjing system
+# Created: 2026-04-06
+# Author: PolaZhenjing Team
+# Dependencies: Docker, Docker Compose
+# =============================================================================
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: polazj-db
+    environment:
+      POSTGRES_USER: polazj
+      POSTGRES_PASSWORD: polazj_secret
+      POSTGRES_DB: polazj_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polazj -d polazj_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: polazj-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://polazj:polazj_secret@db:5432/polazj_db
+      JWT_SECRET_KEY: change-me-in-production-use-strong-secret
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      SITE_BASE_URL: ${SITE_BASE_URL:-https://yourusername.github.io/PolaZhenJing}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./site:/site
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # React Frontend (dev mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: polazj-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

@@ -1,0 +1,78 @@
+# =============================================================================
+# Module: mkdocs.yml
+# Description: MkDocs Material configuration for the PolaZhenjing static site.
+#              MkDocs Material 配置文件 - PolaZhenjing 静态站点配置。
+# Created: 2026-04-06
+# Author: PolaZhenjing Team
+# =============================================================================
+
+site_name: PolaZhenjing
+site_description: AI驱动的个人知识百科 – 日常思绪与反思
+site_url: https://yourusername.github.io/PolaZhenJing
+site_author: PolaZhenjing
+
+# Theme
+theme:
+  name: material
+  custom_dir: overrides
+  language: zh
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  font:
+    text: Noto Sans SC
+    code: JetBrains Mono
+
+# Plugins
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+  - tags
+
+# Markdown extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+  - meta
+
+# Navigation
+nav:
+  - 首页: index.md
+  - 文章: posts/
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yourusername/PolaZhenJing
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/yourusername
+  generator: false

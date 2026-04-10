@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{# ==========================================================================
+   Module: overrides/main.html
+   Description: MkDocs Material theme override – adds Open Graph and Twitter
+                Card meta tags for better social media sharing / SEO.
+   Created: 2026-04-06
+   Author: PolaZhenjing Team
+   ========================================================================== #}
+
+{% block extrahead %}
+  {# Open Graph #}
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="{{ config.site_name }}" />
+  {% if page and page.title %}
+    <meta property="og:title" content="{{ page.title }}" />
+  {% else %}
+    <meta property="og:title" content="{{ config.site_name }}" />
+  {% endif %}
+  {% if page and page.meta and page.meta.description %}
+    <meta property="og:description" content="{{ page.meta.description }}" />
+  {% elif config.site_description %}
+    <meta property="og:description" content="{{ config.site_description }}" />
+  {% endif %}
+  {% if page %}
+    <meta property="og:url" content="{{ page.canonical_url }}" />
+  {% endif %}
+
+  {# Twitter Card #}
+  <meta name="twitter:card" content="summary" />
+  {% if page and page.title %}
+    <meta name="twitter:title" content="{{ page.title }}" />
+  {% endif %}
+  {% if page and page.meta and page.meta.description %}
+    <meta name="twitter:description" content="{{ page.meta.description }}" />
+  {% endif %}
+{% endblock %}
