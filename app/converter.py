@@ -5,7 +5,7 @@ import tempfile
 
 
 def convert_pdf(file_path: str) -> str:
-    """Extract text from PDF using PyMuPDF."""
+    """Extract text from PDF using PyMuPDF with basic structure detection."""
     try:
         import fitz  # PyMuPDF
     except ImportError:
@@ -14,9 +14,29 @@ def convert_pdf(file_path: str) -> str:
     doc = fitz.open(file_path)
     text_parts = []
     for page in doc:
-        text_parts.append(page.get_text())
+        blocks = page.get_text('dict')['blocks']
+        for block in blocks:
+            if block['type'] != 0:  # skip images
+                continue
+            for line_data in block.get('lines', []):
+                line_text = ''.join(span['text'] for span in line_data['spans']).strip()
+                if not line_text:
+                    continue
+                # Detect headings by font size
+                max_size = max((span['size'] for span in line_data['spans']), default=0)
+                if max_size >= 18:
+                    line_text = f'# {line_text}'
+                elif max_size >= 14:
+                    line_text = f'## {line_text}'
+                elif max_size >= 12 and len(line_text) < 80 and line_text == line_text.strip():
+                    # Possibly a sub-heading if short and medium-sized
+                    bold = any(span.get('flags', 0) & 2 for span in line_data['spans'])
+                    if bold:
+                        line_text = f'### {line_text}'
+                text_parts.append(line_text)
+        text_parts.append('')  # page break
     doc.close()
-    return '\n\n'.join(text_parts)
+    return '\n'.join(text_parts)
 
 
 def convert_docx(file_path: str) -> str:
@@ -84,4 +104,4 @@ def extract_title(markdown_text: str) -> str:
 
 def _fallback_read(file_path: str, fmt: str) -> str:
     """Fallback when conversion libraries not installed."""
-    return f'[Error: {fmt} conversion requires additional libraries. Please install dependencies.]'
+    raise ImportError(f'{fmt} 转换需要额外的库，请执行: pip install PyMuPDF mammoth html2text')

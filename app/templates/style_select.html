@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Choose Style{% endblock %}
+{% block title %}选择风格{% endblock %}
 {% block card_class %}card-full{% endblock %}
 {% block content %}
-<h2>选择风格 / Choose Style</h2>
+<h2>选择风格</h2>
 <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
-  Article: <strong style="color: var(--gold-primary);">{{ title }}</strong>
+  文章：<strong style="color: var(--gold-primary);">{{ title }}</strong>
 </p>
 
 <form method="POST" action="{{ url_for('uploader.generate') }}" id="style-form">
@@ -23,8 +23,8 @@
   </div>
 
   <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-    <a href="{{ url_for('uploader.upload') }}" class="btn-ghost">← Back</a>
-    <button type="submit" class="btn-gold btn-sm">Generate Article →</button>
+    <a href="{{ url_for('uploader.upload') }}" class="btn-ghost">← 返回</a>
+    <button type="submit" class="btn-gold btn-sm">生成文章 →</button>
   </div>
 </form>
 {% endblock %}

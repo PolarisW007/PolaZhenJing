@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Articles{% endblock %}
+{% block title %}文章管理{% endblock %}
 {% block card_class %}card-full{% endblock %}
 {% block content %}
-<h2>文章管理 / Articles</h2>
+<h2>文章管理</h2>
 
 <div class="action-bar">
-  <a href="{{ url_for('uploader.upload') }}" class="btn-gold btn-sm">+ New Article</a>
+  <a href="{{ url_for('uploader.upload') }}" class="btn-gold btn-sm">+ 新建文章</a>
   <div class="action-bar-right">
     <form method="POST" action="{{ url_for('uploader.sync') }}" style="display: inline;">
-      <button type="submit" class="btn-ghost">Sync to GitHub ↑</button>
+      <button type="submit" class="btn-ghost">同步到 GitHub ↑</button>
     </form>
   </div>
 </div>
@@ -18,16 +18,20 @@
   <table>
     <thead>
       <tr>
-        <th>Title</th>
-        <th>Date</th>
-        <th>Style</th>
-        <th>Actions</th>
+        <th>标题</th>
+        <th>日期</th>
+        <th>风格</th>
+        <th>操作</th>
       </tr>
     </thead>
     <tbody>
       {% for post in posts %}
       <tr>
-        <td>{{ post.title }}</td>
+        <td>
+          <a href="{{ url_for('uploader.view_article', filename=post.filename) }}" style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dashed rgba(228,191,122,0.3);">
+            {{ post.title }}
+          </a>
+        </td>
         <td style="white-space: nowrap; color: var(--text-muted); font-size: 0.8rem;">
           {{ post.get('date', '') }}
         </td>
@@ -38,11 +42,12 @@
           </span>
           {% endif %}
         </td>
-        <td>
+        <td style="white-space: nowrap;">
+          <a href="https://github.com/PolarisW007/PolaZhenJing/blob/main/_posts/{{ post.filename }}" target="_blank" rel="noopener" title="在 GitHub 查看" style="color: var(--gold-primary); text-decoration: none; font-size: 0.8rem; margin-right: 0.5rem;">GitHub ↗</a>
           <form method="POST" action="{{ url_for('uploader.delete_article', filename=post.filename) }}"
                 style="display: inline;"
-                onsubmit="return confirm('Delete this article?')">
-            <button type="submit" class="btn-danger">Delete</button>
+                onsubmit="return confirm('确定删除这篇文章吗？')">
+            <button type="submit" class="btn-danger">删除</button>
           </form>
         </td>
       </tr>
@@ -52,7 +57,7 @@
 </div>
 {% else %}
 <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
-  <p>No articles yet. Upload your first one!</p>
+  <p>还没有文章，去上传第一篇吧！</p>
 </div>
 {% endif %}
 {% endblock %}

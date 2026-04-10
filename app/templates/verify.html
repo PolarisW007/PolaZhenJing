@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Verify Email{% endblock %}
+{% block title %}邮箱验证{% endblock %}
 {% block content %}
-<h2>邮箱验证 / Verify Email</h2>
+<h2>邮箱验证</h2>
 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; text-align: center;">
-  A 6-digit code has been sent to <strong style="color: var(--gold-primary);">{{ session.get('verify_email', '') }}</strong>
+  6位验证码已发送至 <strong style="color: var(--gold-primary);">{{ session.get('verify_email', '') }}</strong>
 </p>
 <form method="POST">
   <div class="form-group">
-    <label for="code">Verification Code</label>
+    <label for="code">验证码</label>
     <input type="text" id="code" name="code" class="form-input" maxlength="6"
            pattern="[0-9]{6}" placeholder="000000"
            style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5em;" required autofocus>
   </div>
-  <button type="submit" class="btn-gold">Verify</button>
+  <button type="submit" class="btn-gold">验证</button>
 </form>
 <div class="form-links">
-  <a href="{{ url_for('auth.register') }}">Resend code</a>
+  <a href="{{ url_for('auth.register') }}">重新发送验证码</a>
 </div>
 {% endblock %}

@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% block title %}登录{% endblock %}
 {% block content %}
-<h2>登录 / Login</h2>
+<h2>登录</h2>
 <form method="POST">
   <div class="form-group">
-    <label for="username">Username</label>
+    <label for="username">用户名</label>
     <input type="text" id="username" name="username" class="form-input" required autofocus>
   </div>
   <div class="form-group">
-    <label for="password">Password</label>
+    <label for="password">密码</label>
     <input type="password" id="password" name="password" class="form-input" required>
   </div>
-  <button type="submit" class="btn-gold">Sign In</button>
+  <button type="submit" class="btn-gold">登录</button>
 </form>
 <div class="form-links">
-  <a href="{{ url_for('auth.register') }}">Create an account</a>
+  <a href="{{ url_for('auth.register') }}">没有账号？去注册</a>
 </div>
 {% endblock %}

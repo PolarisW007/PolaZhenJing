@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from flask import Flask, g
+from flask import Flask, g, redirect, url_for, session
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -57,5 +57,12 @@ def create_app():
     from .uploader import uploader_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(uploader_bp)
+
+    @app.route('/')
+    @app.route('/admin/')
+    def index():
+        if session.get('user_id'):
+            return redirect(url_for('uploader.upload'))
+        return redirect(url_for('auth.login'))
 
     return app

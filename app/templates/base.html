@@ -192,13 +192,13 @@
 </head>
 <body>
   <nav class="admin-nav">
-    <a href="/admin/" class="admin-nav-logo">PolaZhenjing Admin</a>
+    <a href="/admin/" class="admin-nav-logo">PolaZhenjing 管理后台</a>
     <ul class="admin-nav-links">
       {% if session.get('user_id') %}
-      <li><a href="{{ url_for('uploader.upload') }}">Upload</a></li>
-      <li><a href="{{ url_for('uploader.articles') }}">Articles</a></li>
-      <li><a href="{{ url_for('auth.change_password') }}">Password</a></li>
-      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+      <li><a href="{{ url_for('uploader.upload') }}">上传</a></li>
+      <li><a href="{{ url_for('uploader.articles') }}">文章</a></li>
+      <li><a href="{{ url_for('auth.change_password') }}">密码</a></li>
+      <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
       {% endif %}
     </ul>
   </nav>
@@ -217,7 +217,7 @@
   </div>
 
   <footer class="admin-footer">
-    &copy; {{ now().year if now is defined else '2025' }} PolaZhenjing · Management Console
+    &copy; {{ now().year if now is defined else '2025' }} PolaZhenjing · 管理控制台
   </footer>
 
   {% block scripts %}{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ meta.get('title', filename) }}{% endblock %}
+{% block card_class %}card-full{% endblock %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+  <a href="{{ url_for('uploader.articles') }}" class="btn-ghost" style="font-size: 0.85rem;">← 返回文章列表</a>
+  <a href="{{ github_url }}" target="_blank" rel="noopener" class="btn-ghost" style="font-size: 0.85rem; color: var(--gold-primary);">在 GitHub 查看 ↗</a>
+</div>
+
+<h2>{{ meta.get('title', filename) }}</h2>
+
+<div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+  {% if meta.get('date') %}
+  <span style="font-size: 0.8rem; color: var(--text-muted);">📅 {{ meta.date }}</span>
+  {% endif %}
+  {% if meta.get('layout') %}
+  <span class="style-badge" style="background: rgba(228,191,122,0.1); color: var(--gold-primary); border: 1px solid rgba(228,191,122,0.2); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px;">
+    {{ meta.layout }}
+  </span>
+  {% endif %}
+  {% if meta.get('tags') %}
+  <span style="font-size: 0.8rem; color: var(--text-muted);">🏷️ {{ meta.tags }}</span>
+  {% endif %}
+</div>
+
+{% if meta.get('description') %}
+<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; font-style: italic; margin-bottom: 2rem;">
+  {{ meta.description }}
+</p>
+{% endif %}
+
+<hr style="border: none; border-top: 1px solid var(--text-ghost); margin-bottom: 1.5rem;">
+
+<div class="article-body">
+  {{ body_html | safe }}
+</div>
+
+<style>
+  .article-body { color: var(--text-secondary); line-height: 1.9; font-size: 0.92rem; }
+  .article-body h1 { font-size: 1.5rem; color: var(--gold-primary); margin: 2rem 0 1rem; border-bottom: 1px solid var(--text-ghost); padding-bottom: 0.5rem; }
+  .article-body h2 { font-size: 1.25rem; color: var(--text-primary); margin: 1.8rem 0 0.8rem; }
+  .article-body h3 { font-size: 1.1rem; color: var(--text-primary); margin: 1.5rem 0 0.6rem; }
+  .article-body p { margin: 0.8rem 0; }
+  .article-body ul, .article-body ol { padding-left: 1.5rem; margin: 0.8rem 0; }
+  .article-body li { margin: 0.3rem 0; }
+  .article-body code { background: rgba(228,191,122,0.08); color: var(--gold-primary); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  .article-body pre { background: rgba(0,0,0,0.4); border: 1px solid var(--text-ghost); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+  .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+  .article-body blockquote { border-left: 3px solid var(--gold-primary); padding: 0.5rem 1rem; margin: 1rem 0; background: rgba(228,191,122,0.04); border-radius: 0 8px 8px 0; }
+  .article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.85rem; }
+  .article-body th { background: rgba(228,191,122,0.1); color: var(--gold-primary); padding: 0.6rem; text-align: left; border-bottom: 2px solid var(--text-ghost); }
+  .article-body td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--text-ghost); }
+  .article-body strong { color: var(--text-primary); }
+  .article-body a { color: var(--gold-primary); text-decoration: underline; }
+  .article-body hr { border: none; border-top: 1px solid var(--text-ghost); margin: 1.5rem 0; }
+</style>
+
+<hr style="border: none; border-top: 1px solid var(--text-ghost); margin-top: 2rem;">
+
+<div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+  <a href="{{ github_url }}" target="_blank" rel="noopener" class="btn-gold btn-sm" style="font-size: 0.8rem;">在 GitHub 查看 ↗</a>
+  <form method="POST" action="{{ url_for('uploader.delete_article', filename=filename) }}" style="display: inline;" onsubmit="return confirm('确定删除这篇文章吗？')">
+    <button type="submit" class="btn-danger" style="font-size: 0.8rem;">删除文章</button>
+  </form>
+</div>
+{% endblock %}

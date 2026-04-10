@@ -34,9 +34,9 @@ def login():
         user = db.execute('SELECT * FROM users WHERE username = ?',
                           (username,)).fetchone()
         if user is None:
-            error = 'Username not found.'
+            error = '用户名不存在。'
         elif not check_password_hash(user['password_hash'], password):
-            error = 'Incorrect password.'
+            error = '密码错误。'
 
         if error is None:
             session.clear()
@@ -58,13 +58,13 @@ def register():
         error = None
 
         if not username:
-            error = 'Username is required.'
+            error = '请输入用户名。'
         elif not email:
-            error = 'Email is required.'
+            error = '请输入邮箱。'
         elif not password or len(password) < 6:
-            error = 'Password must be at least 6 characters.'
+            error = '密码至少6位。'
         elif not email.endswith('@qq.com'):
-            error = 'Only QQ email (@qq.com) is supported.'
+            error = '仅支持 QQ 邮箱（@qq.com）。'
 
         if error is None:
             try:
@@ -83,14 +83,14 @@ def register():
 
                 sent = send_verification_code(email, code)
                 if sent:
-                    flash('Verification code sent to your email.', 'info')
+                    flash('验证码已发送到您的邮箱。', 'info')
                     return redirect(url_for('auth.verify'))
                 else:
-                    flash('Registration successful. Email sending failed — please login directly.', 'warning')
+                    flash('注册成功。邮件发送失败，请直接登录。', 'warning')
                     return redirect(url_for('auth.login'))
 
             except db.IntegrityError:
-                error = f'User {username} or email {email} is already registered.'
+                error = f'用户 {username} 或邮箱 {email} 已被注册。'
 
         flash(error, 'error')
     return render_template('register.html')
@@ -105,15 +105,15 @@ def verify():
         email = session.get('verify_email')
 
         if not stored_code or not email:
-            flash('No pending verification.', 'error')
+            flash('没有待验证的请求。', 'error')
             return redirect(url_for('auth.register'))
 
         if time.time() - code_time > 300:  # 5 min expiry
-            flash('Verification code expired. Please register again.', 'error')
+            flash('验证码已过期，请重新注册。', 'error')
             return redirect(url_for('auth.register'))
 
         if code != stored_code:
-            flash('Invalid verification code.', 'error')
+            flash('验证码错误。', 'error')
             return render_template('verify.html')
 
         # Mark email as verified
@@ -127,7 +127,7 @@ def verify():
         session.pop('verify_email', None)
         session.pop('pending_user', None)
 
-        flash('Email verified! Please log in.', 'success')
+        flash('邮箱验证成功！请登录。', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('verify.html')
@@ -146,16 +146,16 @@ def change_password():
                           (session['user_id'],)).fetchone()
 
         if not check_password_hash(user['password_hash'], current):
-            flash('Current password is incorrect.', 'error')
+            flash('当前密码错误。', 'error')
         elif len(new_pw) < 6:
-            flash('New password must be at least 6 characters.', 'error')
+            flash('新密码至少6位。', 'error')
         elif new_pw != confirm:
-            flash('New passwords do not match.', 'error')
+            flash('两次输入的新密码不一致。', 'error')
         else:
             db.execute('UPDATE users SET password_hash = ? WHERE id = ?',
                        (generate_password_hash(new_pw), session['user_id']))
             db.commit()
-            flash('Password updated successfully.', 'success')
+            flash('密码已更新。', 'success')
             return redirect(url_for('uploader.upload'))
 
     return render_template('password.html')

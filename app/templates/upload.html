@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Upload{% endblock %}
+{% block title %}上传{% endblock %}
 {% block card_class %}card-wide{% endblock %}
 {% block content %}
-<h2>上传文章 / Upload Article</h2>
+<h2>上传文章</h2>
 
 <div class="tab-bar">
-  <div class="tab active" onclick="switchTab('upload')">Upload File</div>
-  <div class="tab" onclick="switchTab('paste')">Paste Content</div>
+  <div class="tab active" onclick="switchTab('upload')">上传文件</div>
+  <div class="tab" onclick="switchTab('paste')">粘贴内容</div>
 </div>
 
 <!-- Upload Tab -->
@@ -14,24 +14,24 @@
   <form method="POST" enctype="multipart/form-data" id="upload-form">
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="drop-zone-icon">📄</div>
-      <div class="drop-zone-text" id="drop-text">Drop file here or click to browse</div>
-      <div class="drop-zone-hint">PDF, Word, HTML, Markdown supported (max 16MB)</div>
+      <div class="drop-zone-text" id="drop-text">拖拽文件到此处或点击浏览</div>
+      <div class="drop-zone-hint">支持 PDF、Word、HTML、Markdown（最大 16MB）</div>
       <input type="file" id="file-input" name="file" accept=".pdf,.docx,.doc,.html,.htm,.md,.markdown,.txt">
     </div>
 
     <div class="form-group" style="margin-top: 1.25rem;">
-      <label for="title">Title (optional, auto-detected)</label>
-      <input type="text" id="title" name="title" class="form-input" placeholder="Article title...">
+      <label for="title">标题（可选，自动识别）</label>
+      <input type="text" id="title" name="title" class="form-input" placeholder="文章标题...">
     </div>
     <div class="form-group">
-      <label for="tags">Tags (comma separated)</label>
+      <label for="tags">标签（英文逗号分隔）</label>
       <input type="text" id="tags" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
     </div>
     <div class="form-group">
-      <label for="description">Description (optional)</label>
-      <input type="text" id="description" name="description" class="form-input" placeholder="Brief summary...">
+      <label for="description">描述（可选）</label>
+      <input type="text" id="description" name="description" class="form-input" placeholder="简要摘要...">
     </div>
-    <button type="submit" class="btn-gold">Next: Choose Style →</button>
+    <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
 
@@ -39,22 +39,22 @@
 <div id="tab-paste" style="display: none;">
   <form method="POST">
     <div class="form-group">
-      <label for="content">Markdown Content</label>
-      <textarea id="content" name="content" class="form-input" placeholder="# My Article&#10;&#10;Write your content here in Markdown..."></textarea>
+      <label for="content">Markdown 内容</label>
+      <textarea id="content" name="content" class="form-input" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
     </div>
     <div class="form-group">
-      <label for="title2">Title (optional)</label>
-      <input type="text" id="title2" name="title" class="form-input" placeholder="Article title...">
+      <label for="title2">标题（可选）</label>
+      <input type="text" id="title2" name="title" class="form-input" placeholder="文章标题...">
     </div>
     <div class="form-group">
-      <label for="tags2">Tags (comma separated)</label>
+      <label for="tags2">标签（英文逗号分隔）</label>
       <input type="text" id="tags2" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
     </div>
     <div class="form-group">
-      <label for="desc2">Description (optional)</label>
-      <input type="text" id="desc2" name="description" class="form-input" placeholder="Brief summary...">
+      <label for="desc2">描述（可选）</label>
+      <input type="text" id="desc2" name="description" class="form-input" placeholder="简要摘要...">
     </div>
-    <button type="submit" class="btn-gold">Next: Choose Style →</button>
+    <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
 {% endblock %}
