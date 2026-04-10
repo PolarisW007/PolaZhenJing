@@ -10,20 +10,23 @@
 - [app/templates/upload.html](file://app/templates/upload.html)
 - [app/templates/login.html](file://app/templates/login.html)
 - [app/templates/register.html](file://app/templates/register.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
+- [app/templates/base.html](file://app/templates/base.html)
 - [_config.yml](file://_config.yml)
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
 - [PRD.md](file://PRD.md)
+- [requirements.txt](file://requirements.txt)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Removed all REST API documentation sections as the system has migrated from FastAPI to Flask/Jekyll
-- Added new documentation for Flask-based file upload and conversion interface
-- Updated architecture overview to reflect static site generation with Jekyll
-- Replaced API endpoints with management interface endpoints
-- Updated authentication system from JWT to Flask session-based authentication
-- Added file conversion pipeline documentation
-- Updated deployment workflow to GitHub Actions with Jekyll
+- Updated to reflect the complete migration from FastAPI REST API to Flask-based management interface
+- Removed all REST API documentation sections as they no longer exist
+- Added comprehensive documentation for Flask-based authentication system
+- Documented file upload and conversion interface with supported formats
+- Added blog style management documentation with 5 distinct layouts
+- Updated deployment workflow to GitHub Actions with Jekyll static site generation
+- Revised architecture to show server-rendered HTML interface instead of REST endpoints
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -38,14 +41,14 @@
 10. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaces the previous FastAPI RESTful API. The system now operates as a static site generator using Jekyll, with a lightweight Flask application managing file uploads, conversions, and publishing workflows.
+This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaced the previous FastAPI RESTful API. The system now operates as a lightweight Flask application with server-rendered HTML templates, integrated with Jekyll for static site generation and GitHub Actions for automated deployment.
 
 **Key Changes from Previous REST API:**
-- Replaced REST endpoints with server-rendered HTML interface
-- Migrated from JWT authentication to Flask session-based authentication
-- Implemented file conversion pipeline for multiple document formats
-- Switched from dynamic content generation to static site generation
-- Integrated with GitHub Actions for automated deployment
+- Complete removal of all REST endpoints and FastAPI backend
+- Migration from JWT authentication to Flask session-based authentication
+- Implementation of file conversion pipeline for multiple document formats
+- Replacement of dynamic API calls with static site generation
+- Integration with GitHub Actions for automated deployment to GitHub Pages
 
 ## System Architecture
 The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication.
@@ -74,7 +77,7 @@ Site --> GitHubPages["GitHub Pages Deployment<br/>.github/workflows/deploy.yml"]
 - [app/converter.py:1](file://app/converter.py#L1)
 - [app/mailer.py](file://app/mailer.py)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 **Section sources**
 - [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
@@ -234,7 +237,7 @@ JP->>JP : Serve static site
 ```
 
 **Diagram sources**
-- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [.github/workflows/deploy.yml:27-62](file://.github/workflows/deploy.yml#L27-L62)
 
 ### Deployment Endpoints
 - **POST /admin/sync** - Manual synchronization to GitHub
@@ -247,7 +250,7 @@ JP->>JP : Serve static site
 - Environment configuration for GitHub Pages
 
 **Section sources**
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 - [PRD.md:628-681](file://PRD.md#L628-L681)
 
 ## Configuration

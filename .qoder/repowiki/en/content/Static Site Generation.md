@@ -9,6 +9,8 @@
 - [_includes/head.html](file://_includes/head.html)
 - [_includes/header.html](file://_includes/header.html)
 - [_includes/footer.html](file://_includes/footer.html)
+- [_includes/style-badge.html](file://_includes/style-badge.html)
+- [_layouts/default.html](file://_layouts/default.html)
 - [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
 - [assets/css/main.css](file://assets/css/main.css)
 - [assets/css/deep-technical.css](file://assets/css/deep-technical.css)
@@ -22,6 +24,7 @@
 - Added comprehensive Jekyll layout system with six distinct article styles
 - Integrated automatic image optimization through Jekyll plugins
 - Updated asset management with Jekyll-specific CSS organization
+- Migrated from Material theme to custom premium design system
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -42,7 +45,7 @@ This document explains PolaZhenJing's new static site generation system built on
 The static site is now organized under the root directory with Jekyll-specific structure:
 - _config.yml: Jekyll configuration with plugins, pagination, and SEO settings
 - Gemfile: Ruby gem dependencies for Jekyll ecosystem
-- _posts/: Jekyll posts directory (currently empty, to be populated by generated content)
+- _posts/: Jekyll posts directory containing generated content
 - _layouts/: Template layouts for different article styles
 - _includes/: Shared HTML components (head, header, footer, style badges)
 - assets/css/: Style-specific CSS files for each article layout
@@ -77,12 +80,12 @@ WF --> ASSETS
 **Diagram sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
-- [deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
-- [deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 ## Core Components
 - **Jekyll Configuration and Plugins**:
@@ -113,8 +116,8 @@ WF --> ASSETS
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
-- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
-- [deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [assets/css/main.css:1-200](file://assets/css/main.css#L1-L200)
+- [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 ## Architecture Overview
 The new Jekyll-based publishing pipeline integrates dynamic content generation with static site compilation and GitHub Pages deployment.
@@ -141,7 +144,7 @@ GH->>Pages : Deploy to GitHub Pages
 
 **Diagram sources**
 - [_config.yml:18-23](file://_config.yml#L18-L23)
-- [deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
 
 ## Detailed Component Analysis
 
@@ -203,7 +206,7 @@ GH->>Pages : Deploy to GitHub Pages
   - Pagination controls with hover effects
 
 **Section sources**
-- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
+- [assets/css/main.css:1-200](file://assets/css/main.css#L1-L200)
 
 ### Includes and Template System
 - **Header Component**:
@@ -252,7 +255,7 @@ GH->>Pages : Deploy to GitHub Pages
   - Manual dispatch capability for on-demand deployments
   - GitHub Pages permissions for deployment authorization
 - **Ruby Environment Setup**:
-  - Ruby 3.1 environment with Bundler dependency management
+  - Ruby 3.2 environment with Bundler dependency management
   - Gemfile.lock for consistent gem versions
   - Bundle install for plugin dependencies
 - **Build Process**:
@@ -265,7 +268,7 @@ GH->>Pages : Deploy to GitHub Pages
   - Concurrent job cancellation for efficient resource usage
 
 **Section sources**
-- [deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 ## Dependency Analysis
 The Jekyll-based system introduces new dependencies and relationships:
@@ -335,7 +338,7 @@ ASSETS --> STYLECSS["style-specific.css"]
 
 **Section sources**
 - [_config.yml:18-23](file://_config.yml#L18-L23)
-- [deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
 
 ## Conclusion
 PolaZhenJing's new Jekyll-based static site generation system represents a significant evolution from the previous MkDocs implementation. The new architecture leverages Jekyll's mature plugin ecosystem, enhanced SEO capabilities, and automatic image optimization while maintaining the premium design aesthetic. The six-layout system provides flexible content presentation options, and the modular CSS architecture ensures maintainable styling. With automated deployment through GitHub Actions and comprehensive performance optimizations, the system delivers a robust foundation for scalable content publishing.
@@ -361,6 +364,6 @@ PolaZhenJing's new Jekyll-based static site generation system represents a signi
   - Plugin version updates with compatibility testing
 
 **Section sources**
-- [deploy.yml:11-17](file://.github/workflows/deploy.yml#L11-L17)
+- [deploy.yml:7-18](file://.github/workflows/deploy.yml#L7-L18)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [_config.yml:18-23](file://_config.yml#L18-L23)

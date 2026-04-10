@@ -7,6 +7,7 @@
 - [app/auth.py](file://app/auth.py)
 - [app/uploader.py](file://app/uploader.py)
 - [app/converter.py](file://app/converter.py)
+- [app/mailer.py](file://app/mailer.py)
 - [app/templates/base.html](file://app/templates/base.html)
 - [app/templates/upload.html](file://app/templates/upload.html)
 - [app/templates/style_select.html](file://app/templates/style_select.html)
@@ -14,14 +15,16 @@
 - [app/templates/register.html](file://app/templates/register.html)
 - [app/templates/verify.html](file://app/templates/verify.html)
 - [app/templates/password.html](file://app/templates/password.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
 - [_layouts/default.html](file://_layouts/default.html)
-- [_includes/head.html](file://_includes/head.html)
 - [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
 - [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
 - [_layouts/industry-vision.html](file://_layouts/industry-vision.html)
 - [_layouts/friendly-explainer.html](file://_layouts/friendly-explainer.html)
 - [_layouts/creative-visual.html](file://_layouts/creative-visual.html)
 - [index.html](file://index.html)
+- [Gemfile](file://Gemfile)
+- [requirements.txt](file://requirements.txt)
 </cite>
 
 ## Update Summary
@@ -71,6 +74,8 @@ BASE --> STYLE["style_select.html<br/>Style Selection"]
 BASE --> LOGIN["login.html<br/>Login Form"]
 BASE --> REGISTER["register.html<br/>Registration Form"]
 BASE --> VERIFY["verify.html<br/>Email Verification"]
+BASE --> PASSWORD["password.html<br/>Password Change"]
+BASE --> ARTICLES["articles.html<br/>Articles List"]
 END
 subgraph "Layouts"
 DEFAULT["_layouts/default.html<br/>Default Layout"] --> DT["_layouts/deep-technical.html<br/>Technical Layout"]
@@ -81,6 +86,7 @@ DEFAULT --> CV["_layouts/creative-visual.html<br/>Creative Layout"]
 END
 subgraph "Static Processing"
 CONV["converter.py<br/>Content Conversion"] --> JEKYLL["Jekyll<br/>Static Generation"]
+MAILER["mailer.py<br/>Email Verification"] --> AUTH
 END
 AUTH --> BASE
 UP --> BASE
@@ -306,7 +312,7 @@ V-->>U : "Flash success + redirect to login"
 
 ## Content Management
 The content management system handles multiple document formats:
-- **Supported Formats**: PDF, DOCX, DOC, HTML, HTM, MD, MARKDOWN, TXT
+- **Supported Formats**: PDF, DOCX, DOC, HTML, MD, MARKDOWN, TXT
 - **Conversion Pipeline**: Specialized converters with fallback mechanisms
 - **Title Extraction**: Automatic detection from headings or content
 - **Style Selection**: Five distinct visual themes with color coding

@@ -10,15 +10,18 @@
 - [app/templates/register.html](file://app/templates/register.html)
 - [app/templates/verify.html](file://app/templates/verify.html)
 - [_config.yml](file://_config.yml)
+- [requirements.txt](file://requirements.txt)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Complete rewrite of authentication system from JWT-based to session-based approach
-- Replaced multi-user JWT system with single-user model
-- Added QQ email verification workflow with 6-digit codes
+- Complete rewrite of authentication system from JWT-based to session-based Flask approach
+- Replaced multi-user JWT system with single-user model using Flask sessions
+- Added QQ email verification workflow with 6-digit codes and 5-minute expiry
 - Removed token management, refresh mechanisms, and role-based access control
 - Simplified authentication flow to basic username/password with email verification
+- Updated all endpoints to use Flask Blueprint patterns with login decorators
+- Integrated email service for verification code delivery via QQ SMTP
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -32,7 +35,7 @@
 9. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the authentication system for PolaZhenJing. The system has been simplified from a JWT-based multi-user authentication to a basic session-based approach with QQ email verification. It explains the single-user login process, email verification workflow, session management, and protected route patterns. The system focuses on simplicity and ease of deployment while maintaining security through password hashing and email verification.
+This document describes the authentication system for PolaZhenJing. The system has been completely rewritten from a JWT-based multi-user authentication to a simplified session-based approach with QQ email verification. It explains the single-user login process, email verification workflow, session management, and protected route patterns. The system focuses on simplicity and ease of deployment while maintaining security through password hashing and email verification.
 
 ## Project Structure
 The authentication system is built around Flask Blueprints and SQLite database:

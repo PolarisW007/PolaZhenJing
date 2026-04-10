@@ -7,18 +7,21 @@
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/uploader.py](file://app/uploader.py)
+- [wiki.py](file://wiki.py)
 - [PRD.md](file://PRD.md)
+- [_config.yml](file://_config.yml)
+- [requirements.txt](file://requirements.txt)
+- [Gemfile](file://Gemfile)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Completely rewritten architecture documentation to reflect Flask-based management interface
-- Removed FastAPI, JWT authentication, and complex routing structure
-- Added new Flask application factory with SQLite database integration
-- Documented single-user authentication system with QQ email verification
-- Added file upload and conversion pipeline documentation
-- Updated middleware and exception handling to Flask session-based approach
-- Revised security considerations for Flask session cookies and SQLite storage
+- Updated architecture documentation to reflect the complete removal of the FastAPI backend infrastructure
+- Documented the new Flask-based management interface with simplified authentication
+- Added comprehensive coverage of the file upload and conversion pipeline
+- Updated deployment workflow to reflect Jekyll static site generation
+- Revised security model from JWT to Flask session-based authentication
+- Added CLI tool documentation for power-user operations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -26,85 +29,85 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
+6. [Deployment and Operations](#deployment-and-operations)
+7. [Security Considerations](#security-considerations)
+8. [Migration from Previous Architecture](#migration-from-previous-architecture)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the backend application for PolaZhenJing, a Flask-based management interface for a lightweight personal knowledge wiki and blogging platform. The system has been redesigned from a complex FastAPI architecture to a simplified Flask-based solution with single-user authentication, file upload capabilities, and automatic conversion pipeline. It explains the Flask application factory pattern, SQLite database integration, authentication flows using QQ email verification, file conversion pipeline for multiple document formats, and the streamlined request processing pipeline.
+This document describes the backend application for PolaZhenJing v2, a lightweight Flask-based management interface for a personal knowledge wiki and blogging platform. The system has been completely redesigned from the previous complex FastAPI architecture to a simplified Flask-based solution with single-user authentication, file upload capabilities, and automatic conversion pipeline. The new architecture focuses on simplicity with integrated SQLite database storage, QQ email verification, and seamless Jekyll static site generation for GitHub Pages deployment.
+
+**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture.
 
 ## Project Structure
-The backend is now organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with three main components: authentication, file upload/conversion, and content management.
+The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with four main components: authentication, file upload/conversion, content management, and CLI operations.
 
 ```mermaid
 graph TB
-subgraph "Flask App Factory"
+subgraph "Flask Application Factory"
 APP["__init__.py<br/>create_app(), get_db(), init_db()"]
-ENDPT["auth.py<br/>Authentication routes"]
-UP["uploader.py<br/>Upload + conversion + management"]
-CONV["converter.py<br/>Format detection + conversion"]
+AUTH["auth.py<br/>Authentication routes<br/>Login/Register/Verify"]
+UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation"]
+CONV["converter.py<br/>Format detection + conversion<br/>PDF/DOCX/HTML → Markdown"]
 MAIL["mailer.py<br/>QQ email SMTP verification"]
+CLI["wiki.py<br/>CLI management tool<br/>Serve/Build/Admin/New/List/Deploy"]
 end
 subgraph "Database Layer"
 SQLITE["SQLite Database<br/>wiki.db in data/"]
 USERS["users table<br/>username, email, password_hash,<br/>email_verified, created_at"]
 end
-subgraph "Templates"
-LOGIN["login.html<br/>Admin login interface"]
-REG["register.html<br/>Registration with email verification"]
-UPLOAD["upload.html<br/>File upload + paste content"]
-STYLE["style_select.html<br/>Blog style selection"]
-ART["articles.html<br/>Article management"]
-PASS["password.html<br/>Password change"]
+subgraph "Static Site Generation"
+JEKYLL["_config.yml<br/>Jekyll configuration<br/>Layouts, plugins, pagination"]
+LAYOUTS["_layouts/<br/>5 blog style layouts<br/>deep-technical, academic-insight,<br/>industry-vision, friendly-explainer,<br/>creative-visual"]
+INCLUDES["_includes/<br/>Shared components<br/>head.html, header.html,<br/>footer.html, style-badge.html"]
+ASSETS["assets/<br/>CSS + images<br/>main.css + style-specific CSS"]
 end
-APP --> ENDPT
-APP --> UP
-APP --> CONV
-APP --> MAIL
-ENDPT --> SQLITE
+AUTH --> SQLITE
 UP --> SQLITE
 CONV --> SQLITE
 MAIL --> SQLITE
-ENDPT --> LOGIN
-ENDPT --> REG
-UP --> UPLOAD
-UP --> STYLE
-UP --> ART
-UP --> PASS
+CLI --> JEKYLL
+CLI --> LAYOUTS
+CLI --> INCLUDES
+CLI --> ASSETS
 ```
 
 **Diagram sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
 - [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
-- [app/converter.py:1-88](file://app/converter.py#L1-88)
+- [app/converter.py:1-88](file://app/converter.py#L1-L88)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
 **Section sources**
 - [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
 - [PRD.md:181-234](file://PRD.md#L181-L234)
 
 ## Core Components
-- **Application factory pattern**: Flask app created with template and static folder configuration, secret key, and maximum content length settings
+- **Application factory pattern**: Flask app created with template configuration and registers teardown handlers for database connections
 - **Database integration**: SQLite-based user storage with automatic table creation and connection management using Flask's g object pattern
 - **Authentication system**: Single-user authentication with QQ email verification using Flask sessions and secure cookies
 - **File upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with automatic conversion to blog-ready Markdown
 - **Template rendering**: Jinja2-based server-side rendering for all management interfaces
 - **Email verification**: QQ Email SMTP integration for 6-digit verification codes with 5-minute expiration
+- **Static site generation**: Jekyll integration for blog post generation with five predefined styles
+- **CLI operations**: Comprehensive command-line interface for development, deployment, and content management
 
 **Section sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:16-24](file://app/auth.py#L16-L24)
 - [app/converter.py:58-88](file://app/converter.py#L58-L88)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Architecture Overview
-The backend follows a simplified layered architecture focused on content management:
-- **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface
-- **Business logic layer**: Authentication flows, file processing, and content management operations
+The backend follows a simplified layered architecture focused on content management and static site generation:
+- **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface and Jekyll templates for public site
+- **Business logic layer**: Authentication flows, file processing, content management operations, and CLI command handling
 - **Persistence layer**: SQLite database with user management and session-based authentication
-- **Integration layer**: QQ Email SMTP for verification and file conversion library integration
+- **Integration layer**: QQ Email SMTP for verification and Jekyll static site generation for publishing
 
 ```mermaid
 graph TB
@@ -116,6 +119,8 @@ CONV["Converter Module<br/>Format Detection"]
 MAIL["Mailer Module<br/>QQ SMTP Verification"]
 DB["SQLite Database<br/>wiki.db"]
 TEMPLATES["Jinja2 Templates<br/>Server-side Rendering"]
+CLI["CLI Tool<br/>wiki.py<br/>Serve/Build/Admin/New/List/Deploy"]
+JEKYLL["Jekyll Static Site Generator<br/>_config.yml + layouts"]
 CLIENT --> FLASK
 FLASK --> AUTH
 FLASK --> UPLOAD
@@ -125,6 +130,8 @@ UPLOAD --> CONV
 AUTH --> MAIL
 UPLOAD --> TEMPLATES
 AUTH --> TEMPLATES
+CLI --> JEKYLL
+CLI --> DB
 ```
 
 **Diagram sources**
@@ -133,6 +140,7 @@ AUTH --> TEMPLATES
 - [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
 - [app/converter.py:1-88](file://app/converter.py#L1-L88)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Detailed Component Analysis
 
@@ -271,52 +279,82 @@ I --> J["Generate Jekyll post"]
 - [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
-### Security Considerations
+### CLI Management Tool
+- **Development commands**: Serve Jekyll locally, build static site, run Flask admin server
+- **Content operations**: Create new posts, list existing posts, manage content workflow
+- **Deployment automation**: Git operations for GitHub Pages publishing
+- **Power-user features**: Direct control over all backend operations
+
+**Section sources**
+- [wiki.py:1-165](file://wiki.py#L1-L165)
+
+## Deployment and Operations
+The system operates through a streamlined deployment pipeline that leverages Jekyll for static site generation and GitHub Pages for hosting:
+
+```mermaid
+sequenceDiagram
+participant Dev as "Developer"
+participant CLI as "wiki.py"
+participant Jekyll as "Jekyll"
+participant GitHub as "GitHub Pages"
+Dev->>CLI : python wiki.py deploy
+CLI->>CLI : git add + commit + push
+CLI->>GitHub : Push to main branch
+GitHub->>GitHub : Trigger GitHub Actions
+GitHub->>Jekyll : bundle exec jekyll build
+Jekyll->>GitHub : Generate _site/ output
+GitHub->>GitHub : Deploy to gh-pages branch
+GitHub-->>Dev : Live website available
+```
+
+**Diagram sources**
+- [wiki.py:117-130](file://wiki.py#L117-L130)
+- [_config.yml:18-23](file://_config.yml#L18-L23)
+
+**Section sources**
+- [wiki.py:117-130](file://wiki.py#L117-L130)
+- [_config.yml:18-23](file://_config.yml#L18-L23)
+
+## Security Considerations
 - **Session security**: Flask secret key configuration for signed cookies
 - **Input validation**: Form validation for registration, login, and content submission
 - **File restrictions**: Supported formats limited to prevent malicious uploads
 - **Email verification**: QQ email requirement adds an extra authentication layer
 - **Database security**: SQLite file permissions and connection isolation
+- **Environment configuration**: Separate configuration for production vs development
 
 **Section sources**
 - [app/__init__.py:46-47](file://app/__init__.py#L46-L47)
 - [app/auth.py:64-67](file://app/auth.py#L64-L67)
 - [app/uploader.py:31-31](file://app/uploader.py#L31-L31)
 
-## Dependency Analysis
-- **Flask ecosystem**: Core Flask framework with Jinja2 templating and Werkzeug utilities
-- **Database layer**: SQLite with standard library, no external ORM dependencies
-- **Conversion libraries**: Optional third-party libraries for enhanced file processing
-- **Email service**: QQ Email SMTP for verification code delivery
-- **Minimal external dependencies**: Focused on core functionality without complex integrations
+## Migration from Previous Architecture
+The system has undergone complete architectural transformation from the previous FastAPI-based multi-module system to a simplified Flask-based solution:
 
-```mermaid
-graph LR
-FLASK["Flask Framework"] --> APP["App Factory"]
-APP --> AUTH["Auth Blueprint"]
-APP --> UP["Uploader Blueprint"]
-AUTH --> SQLITE["SQLite"]
-UP --> SQLITE
-UP --> CONV["Conversion Libraries"]
-AUTH --> MAIL["QQ SMTP"]
-TEMPLATES["Jinja2 Templates"] --> AUTH
-TEMPLATES --> UP
-```
+**Previous Architecture (Removed):**
+- FastAPI backend with 7 modules (auth, thoughts, tags, research, ai, publish, sharing)
+- PostgreSQL database with Alembic migrations
+- React frontend with TypeScript
+- Docker Compose with 3 containers
+- Complex JWT authentication
+- AI provider integrations (OpenAI/Ollama)
+- Deep Research SSE pipeline
+- Social sharing module
+- Vite build toolchain
+- MkDocs static site generator
 
-**Diagram sources**
-- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/auth.py:13-168](file://app/auth.py#L13-L168)
-- [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
+**Current Architecture:**
+- Flask application with 4 modules (auth, uploader, converter, mailer)
+- SQLite database with zero configuration
+- Simplified Jinja2 templates
+- Jekyll static site generator
+- Single-user authentication
+- File-based conversion pipeline
+- GitHub Actions deployment
+- CLI management tool
 
 **Section sources**
-- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-
-## Performance Considerations
-- **SQLite optimization**: WAL mode enabled for improved concurrent access
-- **Memory efficiency**: File-based processing avoids keeping large documents in memory
-- **Lazy loading**: Database connections created per request and closed automatically
-- **Conversion performance**: Optional libraries only loaded when needed for enhanced formats
-- **Static file serving**: Minimal static assets with efficient image handling
+- [PRD.md:160-180](file://PRD.md#L160-L180)
 
 ## Troubleshooting Guide
 - **Database issues**: Check `data/wiki.db` file permissions and SQLite availability
@@ -324,11 +362,15 @@ TEMPLATES --> UP
 - **File conversion**: Install optional libraries (PyMuPDF, mammoth, html2text) for enhanced format support
 - **Session problems**: Ensure Flask secret key is properly configured in environment
 - **Upload failures**: Check file size limits and supported format extensions
+- **Jekyll build errors**: Verify Ruby environment and gem dependencies
+- **GitHub deployment**: Check Git configuration and remote repository setup
+- **CLI operations**: Ensure proper Python virtual environment activation
 
 **Section sources**
 - [app/__init__.py:12-17](file://app/__init__.py#L12-L17)
 - [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
 - [app/converter.py:85-88](file://app/converter.py#L85-L88)
+- [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Conclusion
-PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage.
+PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.

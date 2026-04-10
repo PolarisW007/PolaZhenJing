@@ -13,6 +13,8 @@
 - [app/templates/style_select.html](file://app/templates/style_select.html)
 - [_config.yml](file://_config.yml)
 - [index.html](file://index.html)
+- [requirements.txt](file://requirements.txt)
+- [wiki.py](file://wiki.py)
 </cite>
 
 ## Update Summary
@@ -22,6 +24,7 @@
 - Removed AI router, provider factory, and frontend AI assistant components
 - Focused documentation on the new content creation and publishing workflow
 - Updated project structure to show the simplified Flask application
+- Removed all references to AI provider factory pattern, strategy pattern, and AI routing endpoints
 
 ## Table of Contents
 1. [Introduction](#introduction)

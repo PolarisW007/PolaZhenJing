@@ -5,17 +5,21 @@
 - [app/__init__.py](file://app/__init__.py)
 - [app/auth.py](file://app/auth.py)
 - [app/uploader.py](file://app/uploader.py)
-- [_config.yml](file://_config.yml)
-- [PRD.md](file://PRD.md)
+- [app/converter.py](file://app/converter.py)
+- [app/mailer.py](file://app/mailer.py)
+- [wiki.py](file://wiki.py)
+- [_posts/2025-01-15-understanding-transformer-attention.md](file://_posts/2025-01-15-understanding-transformer-attention.md)
+- [_posts/2025-02-10-visual-language-of-ai.md](file://_posts/2025-02-10-visual-language-of-ai.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Complete replacement of PostgreSQL + Alembic architecture with SQLite for zero-configuration local development
-- Removed complex relational schema (Users, Thoughts, Tags entities) in favor of simplified single-table design
-- Eliminated migration system and complex authentication token infrastructure
+- Complete removal of PostgreSQL + Alembic architecture and SQLAlchemy models
+- Elimination of complex relational schema (Researches, Thoughts, Tags, Sharing entities)
+- Replacement with simplified SQLite-based single-table design
+- Removal of migration system and complex authentication token infrastructure
 - Streamlined database initialization and connection management
-- Updated all architectural diagrams and component relationships
+- Shift from database-stored content to file-based article management
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -31,6 +35,8 @@
 
 ## Introduction
 This document describes the database design and schema for PolaZhenJing v2, focusing on the simplified SQLite-based architecture for zero-configuration local development. The system has evolved from a complex PostgreSQL-backed application with Alembic migrations to a streamlined Flask-based solution with a single-user authentication table. This document covers the table structures, field definitions, data types, constraints, and the new simplified database design.
+
+**Updated** Removed all references to previous SQLAlchemy models, researches, thoughts, tags, and sharing entities. The system now operates with a completely different architectural foundation.
 
 ## Project Structure
 The database layer now uses a simple SQLite connection managed through Flask's application context. The system eliminates the previous complex relational schema and migration system in favor of a straightforward single-table design optimized for personal blog management. Database initialization occurs automatically during application startup, creating the necessary tables with minimal configuration requirements.
@@ -208,7 +214,7 @@ The database initialization process has been simplified to automatic table creat
 - [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
 
 ### File-Based Article Management
-The system now focuses on file-based article management rather than database-stored content, aligning with the Jekyll static site generation approach.
+**Updated** The system now focuses entirely on file-based article management rather than database-stored content, aligning with the Jekyll static site generation approach. All content is stored as Markdown files in the _posts/ directory with YAML front matter.
 
 - Upload Processing
   - Supports multiple file formats (MD, PDF, DOCX, HTML, etc.)
@@ -225,6 +231,23 @@ The system now focuses on file-based article management rather than database-sto
 **Section sources**
 - [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
 - [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
+
+### Content Storage Architecture
+**Updated** Content is now permanently stored as static files rather than in a database. The system maintains a clean separation between authentication data (stored in SQLite) and content data (stored as files).
+
+- File Organization
+  - Posts stored in _posts/ directory with date-prefixed filenames
+  - Each post contains YAML front matter followed by Markdown content
+  - Supports multiple content formats through conversion pipeline
+
+- Static Site Generation
+  - Direct integration with Jekyll for site building
+  - No database queries required for content retrieval
+  - Simplified deployment to GitHub Pages
+
+**Section sources**
+- [app/uploader.py:49-73](file://app/uploader.py#L49-L73)
+- [app/uploader.py:161-168](file://app/uploader.py#L161-L168)
 
 ## Dependency Analysis
 The dependency structure has been dramatically simplified with SQLite replacing PostgreSQL and Flask's application context managing database connections.
@@ -267,6 +290,11 @@ UploadBP --> FileSystem["File System Operations"]
   - Session-based authentication reduces cryptographic operations
   - Elimination of database queries for token verification
 
+- File-Based Content
+  - Direct file system access eliminates database overhead
+  - Static content serves efficiently without query processing
+  - Reduced memory footprint for content management
+
 ## Troubleshooting Guide
 - Database Connectivity
   - Verify SQLite file permissions in data/wiki.db location
@@ -290,6 +318,8 @@ UploadBP --> FileSystem["File System Operations"]
 
 ## Conclusion
 The PolaZhenJing v2 database design represents a fundamental shift toward simplicity and zero-configuration local development. The elimination of PostgreSQL, Alembic migrations, and complex authentication tokens has resulted in a streamlined architecture focused on essential functionality. The SQLite-based user authentication system, combined with file-based article management and Jekyll static site generation, provides an efficient solution for personal blog management with minimal operational overhead.
+
+**Updated** This represents a complete architectural reset from the previous SQLAlchemy-based design to a much simpler system that prioritizes ease of use and deployment over complex database features.
 
 ## Appendices
 
@@ -321,3 +351,16 @@ The PolaZhenJing v2 database design represents a fundamental shift toward simpli
 **Section sources**
 - [app/auth.py:51-96](file://app/auth.py#L51-L96)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
+
+### Appendix C: File-Based Content Examples
+**Updated** Sample content structure showing the transition from database-stored content to file-based storage.
+
+- Example Post Structure
+  - Date-prefixed filename: YYYY-MM-DD-title.md
+  - YAML front matter with layout, title, date, tags
+  - Markdown content body
+  - Automatic Jekyll processing
+
+**Section sources**
+- [_posts/2025-01-15-understanding-transformer-attention.md:1-50](file://_posts/2025-01-15-understanding-transformer-attention.md#L1-L50)
+- [_posts/2025-02-10-visual-language-of-ai.md:1-50](file://_posts/2025-02-10-visual-language-of-ai.md#L1-L50)

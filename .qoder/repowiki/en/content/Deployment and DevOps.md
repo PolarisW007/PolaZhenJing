@@ -12,16 +12,19 @@
 - [app/uploader.py](file://app/uploader.py)
 - [app/mailer.py](file://app/mailer.py)
 - [PRD.md](file://PRD.md)
+- [wiki.py](file://wiki.py)
+- [requirements.txt](file://requirements.txt)
 </cite>
 
 ## Update Summary
 **Changes Made**
 - Removed all Docker Compose and multi-container deployment references
 - Updated architecture to reflect Jekyll static site generation instead of MkDocs
-- Revised CI/CD pipeline to focus on GitHub Pages deployment
+- Revised CI/CD pipeline to focus on GitHub Pages deployment with direct Git operations
 - Removed backend, frontend, and database components
 - Updated project structure to reflect Flask management server and Jekyll blog generation
 - Removed PostgreSQL, FastAPI, React, and MkDocs references
+- Added CLI tool (wiki.py) for local development and deployment automation
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -47,6 +50,7 @@ The repository is now organized into two primary layers:
 graph TB
 subgraph "Root"
 GHA[".github/workflows/deploy.yml"]
+WIKI["wiki.py"]
 END
 subgraph "App Layer (Flask)"
 FLASK["app/__init__.py"]
@@ -54,61 +58,78 @@ AUTH["app/auth.py"]
 CONV["app/converter.py"]
 UP["app/uploader.py"]
 MAIL["app/mailer.py"]
+REQ["requirements.txt"]
 END
 subgraph "Blog Layer (Jekyll)"
 JCONFIG["_config.yml"]
 GEM["Gemfile"]
 INDEX["index.html"]
 POSTS["_posts/ (generated)"]
+LAYOUTS["_layouts/ (5 styles)"]
+INCLUDES["_includes/ (shared components)"]
+ASSETS["assets/ (CSS + images)"]
 END
 GHA --> JCONFIG
 GHA --> GEM
+WIKI --> FLASK
+WIKI --> JCONFIG
 FLASK --> AUTH
 FLASK --> CONV
 FLASK --> UP
 FLASK --> MAIL
+REQ --> FLASK
 JCONFIG --> INDEX
 JCONFIG --> POSTS
+JCONFIG --> LAYOUTS
+JCONFIG --> INCLUDES
+JCONFIG --> ASSETS
 ```
 
 **Diagram sources**
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 - [app/__init__.py](file://app/__init__.py)
 - [app/auth.py](file://app/auth.py)
 - [app/converter.py](file://app/converter.py)
 - [app/uploader.py](file://app/uploader.py)
 - [app/mailer.py](file://app/mailer.py)
+- [requirements.txt:1-8](file://requirements.txt#L1-L8)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
-- [index.html:1-70](file://index.html#L1-L70)
+- [index.html](file://index.html)
 
 **Section sources**
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
-- [index.html:1-70](file://index.html#L1-L70)
+- [index.html](file://index.html)
 - [app/__init__.py](file://app/__init__.py)
 - [app/auth.py](file://app/auth.py)
 - [app/converter.py](file://app/converter.py)
 - [app/uploader.py](file://app/uploader.py)
 - [app/mailer.py](file://app/mailer.py)
+- [requirements.txt:1-8](file://requirements.txt#L1-L8)
 
 ## Core Components
 - **Flask Management Server**: Lightweight Flask application handling authentication, file uploads, content conversion, and email verification
 - **Jekyll Static Site Generator**: Ruby-based static site generator with 5 blog post styles and automatic content processing
 - **GitHub Actions Pipeline**: Automated deployment workflow building and publishing the static site to GitHub Pages
 - **SQLite Database**: Zero-configuration file-based database for user authentication and session management
+- **CLI Management Tool**: Python-based CLI tool (wiki.py) for local development, content creation, and deployment automation
 
 Key runtime characteristics:
 - Flask server handles all administrative functions and content management
 - Jekyll processes blog posts from the `_posts/` directory into static HTML
 - GitHub Actions workflow automatically builds and deploys changes to GitHub Pages
 - Single-file SQLite database eliminates external dependency requirements
+- CLI tool provides convenient shortcuts for development and deployment tasks
 
 **Section sources**
 - [app/__init__.py](file://app/__init__.py)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
-- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Architecture Overview
 The system follows a simplified single-container architecture focused on static site generation:
@@ -116,6 +137,7 @@ The system follows a simplified single-container architecture focused on static 
 - Jekyll processes content into static HTML for optimal performance
 - GitHub Actions workflow automates deployment to GitHub Pages
 - SQLite database provides lightweight user authentication
+- CLI tool streamlines local development and deployment processes
 
 ```mermaid
 graph TB
@@ -124,16 +146,21 @@ FLASK["Flask Management Server<br/>Auth + Upload + Conversion"]
 JEKYLL["Jekyll Static Generator<br/>5 Blog Styles + Templates"]
 GITHUB["GitHub Actions<br/>Auto-deploy to GitHub Pages"]
 SQLITE["SQLite Database<br/>Zero-config User Storage"]
+CLI["CLI Tool (wiki.py)<br/>Local Dev + Deployment"]
 END
 FLASK --> SQLITE
 FLASK --> JEKYLL
 JEKYLL --> GITHUB
+CLI --> FLASK
+CLI --> JEKYLL
+CLI --> GITHUB
 ```
 
 **Diagram sources**
 - [app/__init__.py](file://app/__init__.py)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
-- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Detailed Component Analysis
 
@@ -168,6 +195,7 @@ class UploaderModule {
 +handle_upload()
 +validate_files()
 +style_selection()
++generate_post()
 }
 class MailerModule {
 +send_verification()
@@ -210,17 +238,17 @@ Configuration highlights:
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
-- [index.html:1-70](file://index.html#L1-L70)
+- [index.html](file://index.html)
 
 ### CI/CD Pipeline (GitHub Actions)
-- **Workflow name**: Deploy MkDocs to GitHub Pages (now Jekyll-based)
-- **Triggers**: Pushes to main branch affecting site/** or manual dispatch
+- **Workflow name**: Deploy Jekyll to GitHub Pages
+- **Triggers**: Pushes to main branch affecting Jekyll configuration files or blog content
 - **Permissions**: Read repository contents, write to GitHub Pages, OIDC tokens
 - **Build job**:
   - Checks out repository
-  - Sets up Python 3.12
+  - Sets up Ruby 3.2 environment
   - Installs Jekyll and dependencies
-  - Builds static site with strict mode
+  - Builds static site with production environment
   - Uploads built site as artifact
 - **Deploy job**:
   - Deploys artifact to GitHub Pages environment
@@ -233,22 +261,39 @@ participant GH as "GitHub Repo"
 participant GA as "GitHub Actions"
 participant JEKYLL as "Jekyll"
 participant GP as "GitHub Pages"
-Dev->>GH : "Push to main (site/**)"
+Dev->>GH : "Push to main (Jekyll files)"
 GH->>GA : "Trigger workflow"
 GA->>GA : "Checkout repo"
-GA->>GA : "Setup Ruby 3.1"
+GA->>GA : "Setup Ruby 3.2"
 GA->>JEKYLL : "Install Jekyll + Dependencies"
-GA->>JEKYLL : "Build site (strict)"
+GA->>JEKYLL : "Build site (production)"
 JEKYLL-->>GA : "Built site artifacts"
 GA->>GP : "Deploy to GitHub Pages"
 GP-->>Dev : "Site URL available"
 ```
 
 **Diagram sources**
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 **Section sources**
-- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+
+### CLI Management Tool (wiki.py)
+- **Local Development**: Jekyll serve with live reload for content preview
+- **Content Creation**: Create new posts with specified styles and metadata
+- **Deployment Automation**: Git operations for adding, committing, and pushing changes
+- **Administrative Tasks**: List posts, manage content lifecycle
+
+Key commands:
+- `python wiki.py serve`: Start Jekyll development server with live reload
+- `python wiki.py build`: Build static site locally for testing
+- `python wiki.py admin`: Start Flask management server for content administration
+- `python wiki.py new "Title"`: Create new post skeleton with specified style
+- `python wiki.py list`: List all existing posts with their styles
+- `python wiki.py deploy`: Git add + commit + push for deployment
+
+**Section sources**
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ### Environment Variables and Secrets Management
 Critical environment variables:
@@ -266,7 +311,7 @@ Production recommendations:
 **Section sources**
 - [_config.yml:18-23](file://_config.yml#L18-L23)
 - [app/mailer.py](file://app/mailer.py)
-- [.github/workflows/deploy.yml:18-21](file://.github/workflows/deploy.yml#L18-L21)
+- [.github/workflows/deploy.yml:20-27](file://.github/workflows/deploy.yml#L20-L27)
 
 ### Security Considerations
 - **Authentication**: SQLite-based user storage with password hashing
@@ -288,17 +333,19 @@ Production recommendations:
 
 **Section sources**
 - [app/__init__.py](file://app/__init__.py)
-- [.github/workflows/deploy.yml:53-63](file://.github/workflows/deploy.yml#L53-L63)
+- [.github/workflows/deploy.yml:52-62](file://.github/workflows/deploy.yml#L52-L62)
 
 ### Maintenance Procedures
 - **Content management**: Use Flask admin interface for blog post creation and management
 - **Theme updates**: Update Jekyll gems in Gemfile for theme improvements
 - **Plugin management**: Add/remove Jekyll plugins via Gemfile as needed
 - **Deployment verification**: Monitor GitHub Actions workflow for successful deployments
+- **Local development**: Use CLI tool for efficient development workflow
 
 **Section sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [_config.yml:18-23](file://_config.yml#L18-L23)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Dependency Analysis
 Runtime and build-time dependencies:
@@ -308,37 +355,48 @@ Runtime and build-time dependencies:
   - Email libraries for QQ SMTP integration
 - **Jekyll Site**:
   - Jekyll 4.3, Jekyll Feed, Jekyll SEO Tag, Jekyll Paginate
-  - Ruby 3.1 runtime environment
+  - Ruby 3.2 runtime environment
 - **GitHub Actions**:
   - Ruby setup action, GitHub Pages deployment action
-  - Python 3.12 for legacy compatibility
+- **CLI Tool**:
+  - Python 3.12 runtime with development dependencies
 
 ```mermaid
 graph LR
 GEM["Gemfile"]
+REQ["requirements.txt"]
 FLASK["app/__init__.py"]
 GHA[".github/workflows/deploy.yml"]
+WIKI["wiki.py"]
 GEM --> JEKYLL["jekyll-core"]
 GEM --> FEED["jekyll-feed"]
 GEM --> SEO["jekyll-seo-tag"]
 GEM --> PAGINATE["jekyll-paginate"]
-FLASK --> FLASKCORE["flask"]
-FLASK --> SQLALCHEMY["flask-sqlalchemy"]
-FLASK --> WTFFORMS["flask-wtf"]
-FLASK --> LOGIN["flask-login"]
+REQ --> FLASKCORE["flask"]
+REQ --> SQLALCHEMY["flask-sqlalchemy"]
+REQ --> WTFFORMS["flask-wtf"]
+REQ --> LOGIN["flask-login"]
+REQ --> PYPDF["pymupdf"]
+REQ --> MAMMOTH["mammoth"]
+REQ --> HTML2TEXT["html2text"]
 GHA --> RUBYSETUP["actions/setup-ruby"]
 GHA --> DEPLOY["actions/deploy-pages"]
+WIKI --> BUNDLE["bundle exec jekyll"]
 ```
 
 **Diagram sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
+- [requirements.txt:1-8](file://requirements.txt#L1-L8)
 - [app/__init__.py](file://app/__init__.py)
-- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 **Section sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
+- [requirements.txt:1-8](file://requirements.txt#L1-L8)
 - [app/__init__.py](file://app/__init__.py)
-- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Performance Considerations
 - **Static site generation**: Jekyll compiles content to static HTML for optimal loading performance
@@ -346,6 +404,7 @@ GHA --> DEPLOY["actions/deploy-pages"]
 - **Caching**: GitHub Pages provides CDN caching for improved global performance
 - **Resource limits**: Single container deployment reduces resource overhead
 - **Build optimization**: Jekyll build process optimized for GitHub Actions environment
+- **Development workflow**: CLI tool provides efficient local development with live reload
 
 ## Troubleshooting Guide
 Common deployment issues and resolutions:
@@ -365,14 +424,19 @@ Common deployment issues and resolutions:
   - Verify QQ SMTP credentials in GitHub Secrets
   - Check email deliverability and spam filters
   - Test SMTP connection manually
+- **CLI tool issues**:
+  - Verify Python dependencies are installed
+  - Check bundle installation for Jekyll development server
+  - Ensure proper file permissions for content directories
 
 **Section sources**
-- [.github/workflows/deploy.yml:43-46](file://.github/workflows/deploy.yml#L43-L46)
+- [.github/workflows/deploy.yml:42-46](file://.github/workflows/deploy.yml#L42-L46)
 - [app/mailer.py](file://app/mailer.py)
 - [_config.yml:18-23](file://_config.yml#L18-L23)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Conclusion
-PolaZhenJing v2 represents a significant simplification from its previous complex multi-container architecture to a streamlined Jekyll-based static site generator with a lightweight Flask management server. The single-container deployment approach dramatically reduces operational complexity while maintaining powerful blogging capabilities. The GitHub Actions workflow provides seamless automation for content management and deployment. Production readiness requires proper email configuration, monitoring of GitHub Pages deployment status, and regular maintenance of Jekyll themes and plugins.
+PolaZhenJing v2 represents a significant simplification from its previous complex multi-container architecture to a streamlined Jekyll-based static site generator with a lightweight Flask management server. The single-container deployment approach dramatically reduces operational complexity while maintaining powerful blogging capabilities. The GitHub Actions workflow provides seamless automation for content management and deployment. The CLI tool (wiki.py) enhances developer experience with convenient shortcuts for local development and deployment. Production readiness requires proper email configuration, monitoring of GitHub Pages deployment status, and regular maintenance of Jekyll themes and plugins.
 
 ## Appendices
 

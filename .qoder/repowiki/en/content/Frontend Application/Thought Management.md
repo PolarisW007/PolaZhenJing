@@ -2,28 +2,41 @@
 
 <cite>
 **Referenced Files in This Document**
-- [__init__.py](file://app/__init__.py)
-- [uploader.py](file://app/uploader.py)
-- [converter.py](file://app/converter.py)
-- [auth.py](file://app/auth.py)
-- [mailer.py](file://app/mailer.py)
-- [base.html](file://app/templates/base.html)
-- [upload.html](file://app/templates/upload.html)
-- [style_select.html](file://app/templates/style_select.html)
-- [login.html](file://app/templates/login.html)
-- [register.html](file://app/templates/register.html)
-- [verify.html](file://app/templates/verify.html)
+- [PRD.md](file://PRD.md)
+- [_config.yml](file://_config.yml)
+- [Gemfile](file://Gemfile)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
+- [app/templates/base.html](file://app/templates/base.html)
+- [app/templates/upload.html](file://app/templates/upload.html)
+- [app/templates/style_select.html](file://app/templates/style_select.html)
+- [app/templates/login.html](file://app/templates/login.html)
+- [app/templates/register.html](file://app/templates/register.html)
+- [app/templates/verify.html](file://app/templates/verify.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
+- [app/templates/password.html](file://app/templates/password.html)
+- [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
+- [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
+- [_layouts/industry-vision.html](file://_layouts/industry-vision.html)
+- [_layouts/friendly-explainer.html](file://_layouts/friendly-explainer.html)
+- [_layouts/creative-visual.html](file://_layouts/creative-visual.html)
+- [_includes/header.html](file://_includes/header.html)
+- [_includes/footer.html](file://_includes/footer.html)
+- [_includes/style-badge.html](file://_includes/style-badge.html)
+- [index.html](file://index.html)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Complete replacement of thought management system with Flask-based file upload and conversion pipeline
-- Replaced REST API endpoints with file-based content processing workflow
-- Integrated authentication system with email verification
-- Added comprehensive file conversion capabilities (PDF, DOCX, HTML to Markdown)
-- Implemented Jekyll-style article generation with multiple layout styles
-- Removed all previous React frontend components and hooks
-- Replaced with server-side rendered Flask application
+- Complete removal of React-based thought management system and all frontend components
+- Replacement with Flask-based server-side rendering architecture
+- Elimination of REST API endpoints, hooks, and frontend state management
+- Implementation of file-based content processing pipeline with Jekyll integration
+- Removal of all React-specific documentation sections
+- Updated architecture to focus on Flask Blueprints and template-based UI
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -69,11 +82,18 @@ STYLE["style_select.html<br/>Style Selection"]
 LOGIN["login.html<br/>Login Form"]
 REG["register.html<br/>Registration"]
 VERIFY["verify.html<br/>Email Verification"]
+ARTICLES["articles.html<br/>Article Management"]
+PASSWORD["password.html<br/>Password Change"]
+end
+subgraph "Jekyll Integration"
+CONFIG["_config.yml<br/>Jekyll Configuration"]
+LAYOUTS["_layouts/<br/>Style Layouts"]
+INCLUDES["_includes/<br/>Shared Components"]
+POSTS["_posts/<br/>Generated Articles"]
 end
 subgraph "Data Storage"
 DB["SQLite Database<br/>users table"]
 UPLOADS["Uploads Directory<br/>Temporary files"]
-POSTS["_posts Directory<br/>Generated articles"]
 end
 APP --> AUTH
 APP --> UP
@@ -88,21 +108,29 @@ BASE --> STYLE
 BASE --> LOGIN
 BASE --> REG
 BASE --> VERIFY
+BASE --> ARTICLES
+BASE --> PASSWORD
+CONFIG --> LAYOUTS
+CONFIG --> INCLUDES
+LAYOUTS --> POSTS
 ```
 
 **Diagram sources**
-- [__init__.py:43-61](file://app/__init__.py#L43-L61)
-- [auth.py:13](file://app/auth.py#L13)
-- [uploader.py:14](file://app/uploader.py#L14)
-- [converter.py:1](file://app/converter.py#L1)
-- [mailer.py:8](file://app/mailer.py#L8)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/converter.py:1](file://app/converter.py#L1)
+- [app/mailer.py:8](file://app/mailer.py#L8)
+- [_config.yml:1](file://_config.yml#L1)
+- [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
 
 **Section sources**
-- [__init__.py:1-62](file://app/__init__.py#L1-L62)
-- [uploader.py:1-210](file://app/uploader.py#L1-L210)
-- [auth.py:1-168](file://app/auth.py#L1-L168)
-- [converter.py:1-88](file://app/converter.py#L1-L88)
-- [mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+- [app/uploader.py:1-210](file://app/uploader.py#L1-L210)
+- [app/auth.py:1-168](file://app/auth.py#L1-L168)
+- [app/converter.py:1-88](file://app/converter.py#L1-L88)
+- [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
 ## Core Components
 - **Flask Application Factory**: Creates and configures the Flask app with database initialization and blueprint registration
@@ -112,14 +140,16 @@ BASE --> VERIFY
 - **Template System**: Server-side rendered HTML templates with responsive design
 - **Database Layer**: SQLite-based user management with session-based authentication
 - **Email Service**: QQ Email SMTP integration for verification codes
+- **Jekyll Integration**: Static site generation with multiple layout styles
 
 **Updated** Complete replacement of React components with Flask Blueprints and server-side templates.
 
 **Section sources**
-- [__init__.py:43-61](file://app/__init__.py#L43-L61)
-- [auth.py:13-168](file://app/auth.py#L13-L168)
-- [uploader.py:14-210](file://app/uploader.py#L14-L210)
-- [converter.py:1-88](file://app/converter.py#L1-L88)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13-168](file://app/auth.py#L13-L168)
+- [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
+- [app/converter.py:1-88](file://app/converter.py#L1-L88)
+- [_config.yml:18-31](file://_config.yml#L18-L31)
 
 ## Architecture Overview
 The system follows a traditional web application architecture with server-side rendering. Users interact through browser forms that submit to Flask routes, which process files, generate content, and render templates. The authentication system uses session-based cookies, while the file processing pipeline handles conversions and article generation.
@@ -149,10 +179,10 @@ Upload-->>User : "Flash success & redirect"
 ```
 
 **Diagram sources**
-- [auth.py:26-48](file://app/auth.py#L26-L48)
-- [uploader.py:76-118](file://app/uploader.py#L76-L118)
-- [uploader.py:130-169](file://app/uploader.py#L130-L169)
-- [converter.py:58-82](file://app/converter.py#L58-L82)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/uploader.py:130-169](file://app/uploader.py#L130-L169)
+- [app/converter.py:58-82](file://app/converter.py#L58-L82)
 
 ## Detailed Component Analysis
 
@@ -160,9 +190,9 @@ Upload-->>User : "Flash success & redirect"
 The application factory pattern creates a configured Flask instance with proper database setup, secret key configuration, and blueprint registration. It initializes the SQLite database with user tables and sets up teardown handlers for database connections.
 
 **Section sources**
-- [__init__.py:9-24](file://app/__init__.py#L9-L24)
-- [__init__.py:26-41](file://app/__init__.py#L26-L41)
-- [__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/__init__.py:9-24](file://app/__init__.py#L9-L24)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
 
 ### Authentication System
 The authentication blueprint provides comprehensive user management including registration with QQ email validation, login/logout functionality, password changes, and email verification via SMTP.
@@ -174,10 +204,10 @@ Users register with username, QQ email, and password. The system generates a 6-d
 Authenticated users gain access to upload functionality. The login_required decorator protects all administrative routes. Session-based authentication stores user_id and username for route protection.
 
 **Section sources**
-- [auth.py:51-96](file://app/auth.py#L51-L96)
-- [auth.py:99-133](file://app/auth.py#L99-L133)
-- [auth.py:26-48](file://app/auth.py#L26-L48)
-- [auth.py:16-23](file://app/auth.py#L16-L23)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
 
 ### File Upload and Conversion Pipeline
 The uploader blueprint implements a sophisticated file processing pipeline supporting multiple input methods and formats.
@@ -198,9 +228,9 @@ The system automatically detects file types and applies appropriate conversion:
 Intelligent title detection from Markdown headers or first non-empty line, with fallback to filename parsing.
 
 **Section sources**
-- [uploader.py:76-118](file://app/uploader.py#L76-L118)
-- [converter.py:7-88](file://app/converter.py#L7-L88)
-- [uploader.py:34-43](file://app/uploader.py#L34-L43)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/converter.py:7-88](file://app/converter.py#L7-L88)
+- [app/uploader.py:34-43](file://app/uploader.py#L34-L43)
 
 ### Article Generation and Publishing
 The system generates Jekyll-compatible articles with configurable layouts and metadata.
@@ -227,9 +257,9 @@ Built-in synchronization functionality performs git operations:
 - Push to remote repository for deployment
 
 **Section sources**
-- [uploader.py:16-27](file://app/uploader.py#L16-L27)
-- [uploader.py:130-169](file://app/uploader.py#L130-L169)
-- [uploader.py:190-210](file://app/uploader.py#L190-L210)
+- [app/uploader.py:16-27](file://app/uploader.py#L16-L27)
+- [app/uploader.py:130-169](file://app/uploader.py#L130-L169)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
 ### Template System
 The Jinja2-based template system provides a responsive, dark-themed admin interface with comprehensive styling.
@@ -249,10 +279,10 @@ The Jinja2-based template system provides a responsive, dark-themed admin interf
 - CSRF protection through Flask-WTF
 
 **Section sources**
-- [base.html:10-31](file://app/templates/base.html#L10-L31)
-- [base.html:164-175](file://app/templates/base.html#L164-L175)
-- [upload.html:7-59](file://app/templates/upload.html#L7-L59)
-- [style_select.html:13-29](file://app/templates/style_select.html#L13-L29)
+- [app/templates/base.html:10-31](file://app/templates/base.html#L10-L31)
+- [app/templates/base.html:164-175](file://app/templates/base.html#L164-L175)
+- [app/templates/upload.html:7-59](file://app/templates/upload.html#L7-L59)
+- [app/templates/style_select.html:13-29](file://app/templates/style_select.html#L13-L29)
 
 ## Authentication System
 The authentication system provides secure user management with email verification integration.
@@ -273,9 +303,9 @@ The system implements a two-step verification process:
 5. Session cleanup removes temporary verification data
 
 **Section sources**
-- [auth.py:51-96](file://app/auth.py#L51-L96)
-- [auth.py:99-133](file://app/auth.py#L99-L133)
-- [mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 
 ## File Upload and Conversion Pipeline
 The conversion pipeline handles multiple document formats with intelligent fallback mechanisms.
@@ -295,8 +325,8 @@ Robust error handling with graceful degradation:
 - Session cleanup prevents orphaned temporary files
 
 **Section sources**
-- [converter.py:7-88](file://app/converter.py#L7-L88)
-- [uploader.py:95-101](file://app/uploader.py#L95-L101)
+- [app/converter.py:7-88](file://app/converter.py#L7-L88)
+- [app/uploader.py:95-101](file://app/uploader.py#L95-L101)
 
 ## Article Generation and Publishing
 The article generation system creates production-ready Jekyll posts with metadata and styling.
@@ -317,8 +347,8 @@ Five distinct layout styles with unique characteristics:
 - **Creative Visual**: Rich media support for visual storytelling
 
 **Section sources**
-- [uploader.py:144-165](file://app/uploader.py#L144-L165)
-- [uploader.py:16-27](file://app/uploader.py#L16-L27)
+- [app/uploader.py:144-165](file://app/uploader.py#L144-L165)
+- [app/uploader.py:16-27](file://app/uploader.py#L16-L27)
 
 ## Template System
 The template system provides a comprehensive admin interface with modern design principles.
@@ -338,9 +368,9 @@ The template system provides a comprehensive admin interface with modern design 
 - Drag-and-drop zone with visual state changes
 
 **Section sources**
-- [base.html:10-31](file://app/templates/base.html#L10-L31)
-- [base.html:164-175](file://app/templates/base.html#L164-L175)
-- [upload.html:62-81](file://app/templates/upload.html#L62-L81)
+- [app/templates/base.html:10-31](file://app/templates/base.html#L10-L31)
+- [app/templates/base.html:164-175](file://app/templates/base.html#L164-L175)
+- [app/templates/upload.html:62-81](file://app/templates/upload.html#L62-L81)
 
 ## Performance Considerations
 The Flask-based system offers several performance advantages:
@@ -382,9 +412,9 @@ Common issues and resolution strategies:
 - **Navigation problems**: Verify blueprint URL prefixes
 
 **Section sources**
-- [auth.py:164-168](file://app/auth.py#L164-L168)
-- [uploader.py:47](file://app/uploader.py#L47)
-- [__init__.py:47](file://app/__init__.py#L47)
+- [app/auth.py:164-168](file://app/auth.py#L164-L168)
+- [app/uploader.py:47](file://app/uploader.py#L47)
+- [app/__init__.py:47](file://app/__init__.py#L47)
 
 ## Conclusion
 The thought management system represents a complete architectural evolution from a React-based API-driven approach to a Flask-powered server-side rendering solution. The new system provides robust file processing capabilities, comprehensive authentication with email verification, and flexible article generation with multiple styling options. While it lacks the real-time features of the previous implementation, it offers improved security, simpler deployment, and better integration with static site generators like Jekyll.

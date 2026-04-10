@@ -9,19 +9,28 @@
 - [app/mailer.py](file://app/mailer.py)
 - [app/templates/base.html](file://app/templates/base.html)
 - [app/templates/upload.html](file://app/templates/upload.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
+- [app/templates/login.html](file://app/templates/login.html)
+- [app/templates/register.html](file://app/templates/register.html)
+- [app/templates/password.html](file://app/templates/password.html)
+- [app/templates/style_select.html](file://app/templates/style_select.html)
 - [_config.yml](file://_config.yml)
 - [Gemfile](file://Gemfile)
+- [requirements.txt](file://requirements.txt)
+- [wiki.py](file://wiki.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Complete migration from FastAPI to Flask/Jekyll architecture
+- Complete migration from FastAPI backend + React frontend to Flask/Jekyll architecture
 - Replaced layered FastAPI architecture with three-blueprint system (auth, uploader, converter)
 - Removed FastAPI-specific components (main.py, database.py, common/exceptions.py, ai modules)
 - Integrated SQLite database with Flask application context
 - Implemented Jekyll static site generation workflow
 - Added QQ email SMTP integration for verification
 - Restructured templates and styling system
+- Added CLI management tool (wiki.py) for Jekyll operations
+- Updated template system with comprehensive admin interface
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -36,10 +45,10 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the application architecture of the PolaZhenJing backend following its complete migration from FastAPI to Flask/Jekyll architecture. The system now operates as a Flask application with three integrated blueprints (auth, uploader, converter) that manage user authentication, content upload and processing, and Jekyll static site generation. The architecture leverages SQLite for data persistence, QQ Email SMTP for verification, and a comprehensive template system with dark gold theming.
+This document describes the application architecture of the PolaZhenJing backend following its complete migration from FastAPI to Flask/Jekyll architecture. The system now operates as a Flask application with three integrated blueprints (auth, uploader, converter) that manage user authentication, content upload and processing, and Jekyll static site generation. The architecture leverages SQLite for data persistence, QQ Email SMTP for verification, and a comprehensive template system with dark gold theming. A CLI management tool (wiki.py) provides additional operational capabilities for Jekyll site management.
 
 ## Project Structure
-The backend is organized around a Flask application factory with three integrated blueprints. The structure follows Flask conventions with separate modules for authentication, content management, and conversion utilities. Configuration is managed through environment variables and Jekyll settings. Templates utilize Jinja2 with custom styling and responsive design.
+The backend is organized around a Flask application factory with three integrated blueprints. The structure follows Flask conventions with separate modules for authentication, content management, and conversion utilities. Configuration is managed through environment variables and Jekyll settings. Templates utilize Jinja2 with custom styling and responsive design. The CLI tool (wiki.py) provides command-line interface for Jekyll operations and Flask administration.
 
 ```mermaid
 graph TB
@@ -53,6 +62,8 @@ ENDPT --> MAIL["mailer.py<br/>QQ Email SMTP"]
 ENDPT --> TPL["templates/<br/>Jinja2 templates"]
 ENDPT --> CFG["_config.yml<br/>Jekyll configuration"]
 ENDPT --> GEM["Gemfile<br/>Ruby dependencies"]
+ENDPT --> REQ["requirements.txt<br/>Python dependencies"]
+ENDPT --> WIKI["wiki.py<br/>CLI management tool"]
 APP --> AUTH
 APP --> UP
 APP --> CONV
@@ -60,6 +71,8 @@ APP --> MAIL
 APP --> TPL
 APP --> CFG
 APP --> GEM
+APP --> REQ
+APP --> WIKI
 ```
 
 **Diagram sources**
@@ -70,10 +83,13 @@ APP --> GEM
 - [app/mailer.py:8](file://app/mailer.py#L8)
 - [_config.yml:1](file://_config.yml#L1)
 - [Gemfile:1](file://Gemfile#L1)
+- [requirements.txt:1](file://requirements.txt#L1)
+- [wiki.py:1](file://wiki.py#L1)
 
 **Section sources**
 - [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
+- [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Core Components
 - **Application Factory**: Flask application creation with template and static folder configuration, secret key management, and database initialization.
@@ -82,12 +98,15 @@ APP --> GEM
 - **Content Management**: File upload handling, content conversion pipeline, and Jekyll post generation with Git synchronization.
 - **Template System**: Comprehensive Jinja2 templates with dark gold theming, responsive design, and interactive UI components.
 - **Blueprint Architecture**: Three integrated blueprints (auth, uploader, converter) with URL prefixes and modular routing.
+- **CLI Management Tool**: Command-line interface for Jekyll operations, Flask administration, and post management.
+- **Static Site Generation**: Jekyll configuration with custom layouts and theme support for GitHub Pages deployment.
 
 **Section sources**
 - [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
 - [app/auth.py:16-23](file://app/auth.py#L16-L23)
 - [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
 - [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
+- [wiki.py:54-60](file://wiki.py#L54-L60)
 
 ## Architecture Overview
 The backend follows a Flask-based architecture with integrated Jekyll static site generation:
@@ -96,6 +115,8 @@ The backend follows a Flask-based architecture with integrated Jekyll static sit
 - **Data Layer**: SQLite database with Flask application context and session management.
 - **Integration Layer**: QQ Email SMTP for verification, Git operations for deployment, and file system operations.
 - **Static Site Generation**: Jekyll configuration with custom layouts and theme support.
+- **Management Interface**: Flask admin interface with comprehensive content management capabilities.
+- **Command Line Interface**: CLI tool for Jekyll operations and administrative tasks.
 
 ```mermaid
 graph TB
@@ -108,6 +129,7 @@ MAIL["Mailer Service<br/>mailer.py"]
 DB["SQLite Database<br/>users table"]
 TPL["Jinja2 Templates<br/>templates/"]
 JEKYLL["Jekyll Static Site<br/>_config.yml"]
+CLI["CLI Management<br/>wiki.py"]
 Client --> FLASK
 FLASK --> AUTH
 FLASK --> UP
@@ -121,6 +143,8 @@ AUTH --> TPL
 UP --> TPL
 CONV --> TPL
 MAIL --> TPL
+CLI --> JEKYLL
+CLI --> FLASK
 ```
 
 **Diagram sources**
@@ -130,6 +154,7 @@ MAIL --> TPL
 - [app/converter.py:1](file://app/converter.py#L1)
 - [app/mailer.py:8](file://app/mailer.py#L8)
 - [_config.yml:1](file://_config.yml#L1)
+- [wiki.py:54-60](file://wiki.py#L54-L60)
 
 ## Detailed Component Analysis
 
@@ -205,6 +230,7 @@ Expired --> Reset["Redirect to Register"]
 - **Conversion System**: Integrated conversion utilities with fallback mechanisms for missing dependencies.
 - **Post Generation**: Automatic Jekyll front matter creation with style selection and metadata.
 - **Git Integration**: Automated Git operations for deployment to GitHub Pages.
+- **Article Management**: CRUD operations for managing generated articles.
 
 ```mermaid
 flowchart TD
@@ -235,6 +261,7 @@ Sync --> Deploy["GitHub Deployment"]
 - **Interactive Components**: Tab switching, drag-and-drop file upload, and form validation.
 - **Flash Messages**: Category-based notification system with visual feedback.
 - **Navigation**: Session-aware navigation with conditional rendering based on authentication state.
+- **Admin Interface**: Comprehensive management interface for content operations.
 
 ```mermaid
 classDiagram
@@ -273,6 +300,8 @@ BaseTemplate <|-- Navigation
 **Section sources**
 - [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
 - [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
+- [app/templates/articles.html:1-59](file://app/templates/articles.html#L1-L59)
+- [app/templates/style_select.html:1-41](file://app/templates/style_select.html#L1-L41)
 
 ### Database Integration and Session Management
 - **SQLite Connection**: Context-aware database connections with automatic cleanup.
@@ -331,13 +360,24 @@ SessionManager --> UserModel : "authenticated"
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 
+### CLI Management Tool
+- **Command Interface**: Comprehensive CLI for Jekyll operations and Flask administration.
+- **Local Development**: Jekyll serve with live reload functionality.
+- **Post Management**: Create, list, and manage blog posts from command line.
+- **Deployment Automation**: Git operations for site deployment.
+
+**Section sources**
+- [wiki.py:1-165](file://wiki.py#L1-L165)
+
 ## Dependency Analysis
-The application exhibits clean separation of concerns with three main blueprints:
+The application exhibits clean separation of concerns with three main blueprints and supporting infrastructure:
 - **Auth Blueprint**: Handles user authentication, session management, and email verification.
 - **Uploader Blueprint**: Manages file uploads, content conversion, and Jekyll integration.
 - **Converter Utilities**: Provides file format conversion capabilities with fallback mechanisms.
 - **Mailer Service**: Encapsulates QQ Email SMTP functionality with error handling.
 - **Template System**: Shared Jinja2 templates with consistent theming across all views.
+- **CLI Infrastructure**: Command-line interface for operational tasks and development workflows.
+- **Static Site Dependencies**: Ruby-based Jekyll ecosystem for site generation.
 
 ```mermaid
 graph TB
@@ -349,6 +389,8 @@ MAIL["app/mailer.py"]
 TPL["app/templates/"]
 CFG["_config.yml"]
 GEM["Gemfile"]
+REQ["requirements.txt"]
+WIKI["wiki.py"]
 APP --> AUTH
 APP --> UP
 APP --> CONV
@@ -356,6 +398,8 @@ APP --> MAIL
 APP --> TPL
 APP --> CFG
 APP --> GEM
+APP --> REQ
+APP --> WIKI
 AUTH --> DB["SQLite Users Table"]
 UP --> DB
 UP --> CONV
@@ -364,6 +408,8 @@ AUTH --> TPL
 UP --> TPL
 CONV --> TPL
 MAIL --> TPL
+WIKI --> JEKYLL
+WIKI --> FLASK["Flask Admin"]
 ```
 
 **Diagram sources**
@@ -374,9 +420,12 @@ MAIL --> TPL
 - [app/mailer.py:8](file://app/mailer.py#L8)
 - [_config.yml:1](file://_config.yml#L1)
 - [Gemfile:1](file://Gemfile#L1)
+- [requirements.txt:1](file://requirements.txt#L1)
+- [wiki.py:54-60](file://wiki.py#L54-L60)
 
 **Section sources**
 - [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [requirements.txt:1-8](file://requirements.txt#L1-L8)
 
 ## Performance Considerations
 - **SQLite Optimization**: WAL mode improves concurrent read/write performance for the small-scale application.
@@ -384,6 +433,8 @@ MAIL --> TPL
 - **File Processing**: Conversion utilities gracefully handle missing dependencies with fallback mechanisms.
 - **Template Rendering**: Jinja2 templates are cached and compiled for efficient rendering.
 - **Git Operations**: Timeout limits prevent hanging operations during deployment.
+- **Static Site Generation**: Jekyll build process optimized for GitHub Pages deployment.
+- **CLI Efficiency**: Command-line operations minimize overhead for administrative tasks.
 
 ## Troubleshooting Guide
 - **Database Issues**: Verify SQLite file permissions and disk space; check WAL mode compatibility.
@@ -392,24 +443,30 @@ MAIL --> TPL
 - **Template Rendering**: Clear browser cache for CSS/JS updates; verify Jinja2 syntax in templates.
 - **Git Deployment**: Check SSH keys and repository permissions; verify GitHub Pages configuration.
 - **Authentication Errors**: Validate session storage and cookie settings; check user table integrity.
+- **Jekyll Build**: Verify Ruby environment and gem installations; check bundle configuration.
+- **CLI Operations**: Ensure proper command syntax and dependency availability for wiki.py commands.
 
 **Section sources**
 - [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
 - [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
 - [app/converter.py:85-87](file://app/converter.py#L85-L87)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
+- [wiki.py:132-165](file://wiki.py#L132-L165)
 
 ## Conclusion
-The PolaZhenJing backend successfully migrated to a Flask/Jekyll architecture with three integrated blueprints. The system provides a comprehensive solution for content management with user authentication, file conversion, and static site generation. The SQLite database integration, QQ Email SMTP service, and responsive template system create a cohesive platform for managing AI knowledge content. The architecture balances simplicity with functionality, making it suitable for personal knowledge blogging and content curation.
+The PolaZhenJing backend successfully migrated to a Flask/Jekyll architecture with three integrated blueprints and comprehensive CLI management capabilities. The system provides a robust solution for content management with user authentication, file conversion, and static site generation. The SQLite database integration, QQ Email SMTP service, and responsive template system create a cohesive platform for managing AI knowledge content. The addition of the CLI tool (wiki.py) enhances operational flexibility with Jekyll integration and administrative functions. The architecture balances simplicity with functionality, making it suitable for personal knowledge blogging and content curation with modern static site generation capabilities.
 
 ## Appendices
 - **Environment Variables**: SECRET_KEY, QQ_EMAIL, QQ_EMAIL_AUTH_CODE for application configuration.
 - **Supported Formats**: PDF, DOCX, HTML, Markdown with automatic conversion pipeline.
-- **Deployment**: GitHub Pages compatible with automated Git operations.
+- **Deployment**: GitHub Pages compatible with automated Git operations and Jekyll build process.
 - **Styling**: Dark gold theme with glass-morphism effects and responsive design.
+- **CLI Commands**: serve, build, admin, new, list, deploy for comprehensive site management.
+- **Template Categories**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual styles.
 
 **Section sources**
 - [app/__init__.py:46](file://app/__init__.py#L46)
 - [app/converter.py:30-38](file://app/converter.py#L30-L38)
 - [_config.yml:18-22](file://_config.yml#L18-L22)
 - [app/templates/base.html:10-31](file://app/templates/base.html#L10-L31)
+- [wiki.py:1-11](file://wiki.py#L1-L11)
