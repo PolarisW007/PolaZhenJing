@@ -199,7 +199,7 @@ def sync():
         subprocess.run(['git', 'commit', '-m', msg], cwd=project_root,
                        capture_output=True, timeout=30)
         result = subprocess.run(['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
-                                capture_output=True, timeout=60, text=True)
+                                capture_output=True, timeout=120, text=True)
         if result.returncode == 0:
             flash('Synced to GitHub successfully.', 'success')
         else:
