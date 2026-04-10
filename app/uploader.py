@@ -198,7 +198,7 @@ def sync():
         msg = f'Update articles - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
         subprocess.run(['git', 'commit', '-m', msg], cwd=project_root,
                        capture_output=True, timeout=30)
-        result = subprocess.run(['git', 'push'], cwd=project_root,
+        result = subprocess.run(['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
                                 capture_output=True, timeout=60, text=True)
         if result.returncode == 0:
             flash('Synced to GitHub successfully.', 'success')
