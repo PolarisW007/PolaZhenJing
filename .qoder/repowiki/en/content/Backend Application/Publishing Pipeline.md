@@ -2,23 +2,23 @@
 
 <cite>
 **Referenced Files in This Document**
-- [backend/app/publish/router.py](file://backend/app/publish/router.py)
-- [backend/app/publish/service.py](file://backend/app/publish/service.py)
-- [backend/app/publish/markdown_gen.py](file://backend/app/publish/markdown_gen.py)
-- [backend/app/thoughts/service.py](file://backend/app/thoughts/service.py)
-- [backend/app/thoughts/models.py](file://backend/app/thoughts/models.py)
-- [backend/app/config.py](file://backend/app/config.py)
-- [backend/app/main.py](file://backend/app/main.py)
-- [backend/app/database.py](file://backend/app/database.py)
-- [backend/app/common/models.py](file://backend/app/common/models.py)
-- [backend/app/tags/models.py](file://backend/app/tags/models.py)
-- [site/mkdocs.yml](file://site/mkdocs.yml)
-- [site/overrides/main.html](file://site/overrides/main.html)
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
-- [docker-compose.yml](file://docker-compose.yml)
-- [backend/requirements.txt](file://backend/requirements.txt)
-- [backend/tests/test_markdown_gen.py](file://backend/tests/test_markdown_gen.py)
+- [_config.yml](file://_config.yml)
+- [Gemfile](file://Gemfile)
+- [app/__init__.py](file://app/__init__.py)
+- [index.html](file://index.html)
+- [_layouts/default.html](file://_layouts/default.html)
+- [_includes/footer.html](file://_includes/footer.html)
+- [PRD.md](file://PRD.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Complete replacement of FastAPI publishing system with Jekyll-based static site generation
+- Removal of MkDocs dependency and complex backend publishing pipeline
+- Simplification to GitHub Actions workflow for automated Jekyll build and deployment
+- Migration from database-driven content to file-based Jekyll workflow
+- Elimination of FastAPI routers, services, and Markdown generation components
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -33,405 +33,269 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the publishing pipeline for PolaZhenJing. It covers how content is exported from the database, transformed into Markdown with frontmatter, compiled into a static site using MkDocs, and deployed automatically via GitHub Actions. It also documents the publishing service implementation, Markdown generation workflow, routing endpoints, MkDocs configuration and theme customization, and operational concerns such as validation, error handling, and deployment automation.
+This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment.
 
 ## Project Structure
-The publishing pipeline spans backend services, MkDocs site configuration, and CI/CD automation:
-- Backend FastAPI application exposes publishing endpoints and orchestrates Markdown generation and site builds.
-- MkDocs site configuration defines the theme, plugins, navigation, and metadata integration.
-- GitHub Actions workflow automates building and deploying the static site to GitHub Pages.
-- Docker Compose sets up the backend, database, and shared volume for the MkDocs project.
+The publishing pipeline has been streamlined to focus on Jekyll static site generation with automated deployment:
+- Jekyll configuration defines site metadata, build settings, and plugin ecosystem
+- GitHub Actions workflow automates the complete build and deployment process
+- Flask backend provides lightweight management interface for content creation
+- Ruby-based dependency management through Gemfile for Jekyll ecosystem
+- File-based content storage in `_posts/` directory with YAML frontmatter
 
 ```mermaid
 graph TB
-subgraph "Backend"
-A["FastAPI App<br/>backend/app/main.py"]
-B["Publish Router<br/>backend/app/publish/router.py"]
-C["Publish Service<br/>backend/app/publish/service.py"]
-D["Markdown Generator<br/>backend/app/publish/markdown_gen.py"]
-E["Thoughts Service/Models<br/>backend/app/thoughts/*"]
-F["Config<br/>backend/app/config.py"]
-G["DB Session Factory<br/>backend/app/database.py"]
+subgraph "Jekyll Site"
+A["Jekyll Config<br/>_config.yml"]
+B["Posts Directory<br/>_posts/"]
+C["Layout Templates<br/>_layouts/"]
+D["Includes<br/>_includes/"]
+E["Index Page<br/>index.html"]
 end
-subgraph "Site"
-H["MkDocs Config<br/>site/mkdocs.yml"]
-I["Theme Overrides<br/>site/overrides/main.html"]
+subgraph "Management"
+F["Flask App<br/>app/__init__.py"]
+G["Upload Interface<br/>templates/upload.html"]
+H["Articles Management<br/>templates/articles.html"]
 end
 subgraph "CI/CD"
-J["GitHub Actions Workflow<br/>.github/workflows/deploy.yml"]
+I["GitHub Actions<br/>.github/workflows/deploy.yml"]
 end
-subgraph "Runtime"
-K["Docker Compose<br/>docker-compose.yml"]
+subgraph "Dependencies"
+J["Ruby Gems<br/>Gemfile"]
+K["Jekyll Ecosystem<br/>jekyll, jekyll-feed, jekyll-seo-tag"]
 end
 A --> B
-B --> C
-C --> D
-C --> E
-C --> F
-C --> G
-D --> H
-H --> I
-K --> A
-K --> H
-J --> H
+A --> C
+A --> D
+A --> E
+F --> B
+I --> A
+I --> B
+J --> K
 ```
 
 **Diagram sources**
-- [backend/app/main.py:40-73](file://backend/app/main.py#L40-L73)
-- [backend/app/publish/router.py:24-64](file://backend/app/publish/router.py#L24-L64)
-- [backend/app/publish/service.py:31-111](file://backend/app/publish/service.py#L31-L111)
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/app/thoughts/service.py:68-79](file://backend/app/thoughts/service.py#L68-L79)
-- [backend/app/thoughts/models.py:31-67](file://backend/app/thoughts/models.py#L31-L67)
-- [backend/app/config.py:52-54](file://backend/app/config.py#L52-L54)
-- [backend/app/database.py:47-62](file://backend/app/database.py#L47-L62)
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [index.html:1-70](file://index.html#L1-L70)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
-- [docker-compose.yml:9-67](file://docker-compose.yml#L9-L67)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
 
 **Section sources**
-- [backend/app/main.py:40-73](file://backend/app/main.py#L40-L73)
-- [docker-compose.yml:9-67](file://docker-compose.yml#L9-L67)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [index.html:1-70](file://index.html#L1-L70)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
 
 ## Core Components
-- Publishing Router: Exposes endpoints to publish a single thought and to trigger a full site build.
-- Publishing Service: Validates thought status, aggregates metadata, generates Markdown, writes to the MkDocs posts directory, and invokes MkDocs build.
-- Markdown Generator: Produces a complete Markdown document with YAML frontmatter and escaped content.
-- MkDocs Configuration: Defines theme, plugins, navigation, and SEO-related metadata integration.
-- GitHub Actions Workflow: Builds the MkDocs site and deploys to GitHub Pages on pushes to the main branch.
-- Runtime Environment: Docker Compose mounts the site directory into the backend container for persistent writes.
+- **Jekyll Configuration**: Defines site metadata, build settings, pagination, plugins, and defaults for post processing
+- **GitHub Actions Workflow**: Automates Jekyll build and deployment to GitHub Pages on pushes to main branch
+- **Flask Management Server**: Provides lightweight interface for content creation, file uploads, and basic authentication
+- **Ruby Gem Dependencies**: Manages Jekyll ecosystem including jekyll-feed, jekyll-seo-tag, and jekyll-paginate
+- **File-Based Content Storage**: Posts stored in `_posts/` directory with automatic YAML frontmatter processing
 
 **Section sources**
-- [backend/app/publish/router.py:37-64](file://backend/app/publish/router.py#L37-L64)
-- [backend/app/publish/service.py:38-111](file://backend/app/publish/service.py#L38-L111)
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
-- [docker-compose.yml:44-46](file://docker-compose.yml#L44-L46)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
 
 ## Architecture Overview
-The publishing pipeline follows a clear separation of concerns:
-- API layer validates permissions and routes requests.
-- Service layer encapsulates business logic and external process invocation.
-- Markdown generator produces structured content with frontmatter.
-- MkDocs consumes the generated Markdown and renders the static site.
-- CI/CD automates deployment to GitHub Pages.
+The new publishing pipeline follows a simplified file-based approach:
+- Content creation through Flask management interface
+- Automatic Jekyll processing of `_posts/` directory
+- GitHub Actions orchestration for build and deployment
+- Native GitHub Pages integration for hosting
 
 ```mermaid
 sequenceDiagram
-participant Client as "Client"
-participant API as "Publish Router<br/>publish/router.py"
-participant Svc as "Publish Service<br/>publish/service.py"
-participant Gen as "Markdown Generator<br/>publish/markdown_gen.py"
-participant DB as "Thoughts Service/Models<br/>thoughts/*"
-participant FS as "Site Dir<br/>site/docs/posts/"
-participant MK as "MkDocs CLI<br/>site/mkdocs.yml"
-Client->>API : POST /api/publish/{thought_id}
-API->>Svc : publish_thought(db, thought_id)
-Svc->>DB : fetch thought + tags
-DB-->>Svc : Thought object
-Svc->>Gen : thought_to_markdown(...)
-Gen-->>Svc : Markdown string
-Svc->>FS : write {slug}.md
-Svc-->>API : file_path
-API-->>Client : {message, file_path}
-Client->>API : POST /api/publish/build
-API->>Svc : build_mkdocs()
-Svc->>MK : mkdocs build
-MK-->>Svc : exit status
-Svc-->>API : success/failure
-API-->>Client : {success, message}
+participant User as "User"
+participant Flask as "Flask Management<br/>app/__init__.py"
+participant Jekyll as "Jekyll Processor<br/>_config.yml"
+participant GH as "GitHub Actions<br/>.github/workflows/deploy.yml"
+participant Pages as "GitHub Pages"
+User->>Flask : Create/Edit Post
+Flask->>Jekyll : Generate _posts/*.md
+Jekyll->>GH : Trigger build on push
+GH->>GH : Install Ruby gems
+GH->>GH : Run jekyll build
+GH->>Pages : Deploy to GitHub Pages
+Pages-->>User : Live site
 ```
 
 **Diagram sources**
-- [backend/app/publish/router.py:37-64](file://backend/app/publish/router.py#L37-L64)
-- [backend/app/publish/service.py:38-111](file://backend/app/publish/service.py#L38-L111)
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/app/thoughts/service.py:68-79](file://backend/app/thoughts/service.py#L68-L79)
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 ## Detailed Component Analysis
 
-### Publishing Router Endpoints
-- Endpoint: POST /api/publish/{thought_id}
-  - Purpose: Export a single published thought as a Markdown file under site/docs/posts/.
-  - Validation: Requires authenticated user via dependency.
-  - Behavior: Calls publish_thought and returns the generated file path.
-- Endpoint: POST /api/publish/build
-  - Purpose: Trigger a full MkDocs site build.
-  - Behavior: Invokes build_mkdocs and returns success/failure status.
+### Jekyll Configuration and Site Setup
+The Jekyll configuration defines the complete publishing infrastructure:
+- **Site Metadata**: Title, description, URL, base URL, and author information
+- **Build Settings**: Markdown processor (kramdown), highlighter (rouge), permalink structure, timezone
+- **Pagination**: Configured for 10 posts per page with pagination path
+- **Plugins**: jekyll-feed for RSS, jekyll-seo-tag for SEO, jekyll-paginate for navigation
+- **Defaults**: Automatic layout assignment for posts in `_posts/` directory
+- **Exclusions**: Development files, Python cache, and unnecessary directories excluded from build
+
+**Section sources**
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+
+### GitHub Actions Deployment Workflow
+The deployment workflow automates the complete publishing process:
+- **Triggers**: Automatic on pushes to main branch targeting site files
+- **Permissions**: Read/write access to pages and ID tokens
+- **Concurrency**: Prevents conflicting deployments with group-based control
+- **Build Job**: Sets up Python, installs MkDocs dependencies, builds site with strict mode
+- **Deploy Job**: Deploys artifact to GitHub Pages with environment configuration
 
 ```mermaid
 flowchart TD
-Start(["Request Received"]) --> CheckAuth["Authenticate User"]
-CheckAuth --> Choice{"Endpoint?"}
-Choice --> |Single Publish| CallPublish["Call publish_thought()"]
-Choice --> |Build| CallBuild["Call build_mkdocs()"]
-CallPublish --> WriteFile["Write Markdown to site/docs/posts/"]
-WriteFile --> ReturnPublish["Return {message, file_path}"]
-CallBuild --> MkdocsBuild["Spawn 'mkdocs build'"]
-MkdocsBuild --> ReturnBuild["Return {success, message}"]
-ReturnPublish --> End(["Done"])
-ReturnBuild --> End
+Start(["Push to main branch"]) --> Check["Check paths: site/**"]
+Check --> Build["Build Job: Setup Python<br/>Install MkDocs<br/>Build site with strict mode"]
+Build --> Artifact["Upload artifact: site/site"]
+Artifact --> Deploy["Deploy Job: Deploy to GitHub Pages"]
+Deploy --> Live["Site live at GitHub Pages URL"]
 ```
 
 **Diagram sources**
-- [backend/app/publish/router.py:37-64](file://backend/app/publish/router.py#L37-L64)
-- [backend/app/publish/service.py:38-111](file://backend/app/publish/service.py#L38-L111)
-
-**Section sources**
-- [backend/app/publish/router.py:37-64](file://backend/app/publish/router.py#L37-L64)
-
-### Publishing Service Implementation
-Responsibilities:
-- Validate thought existence and PUBLISHED status.
-- Aggregate metadata (title, summary, category, tags, author, created date, slug).
-- Delegate Markdown generation to thought_to_markdown.
-- Write the Markdown file to site/docs/posts/{slug}.md.
-- Invoke MkDocs build via subprocess and return status.
-
-Key behaviors:
-- Directory creation: Ensures site/docs/posts/ exists.
-- Error handling: Propagates exceptions for invalid/non-published thoughts; logs and returns failure for MkDocs build errors.
-- Logging: Emits info-level logs for successful publishes and build outcomes.
-
-```mermaid
-flowchart TD
-A["publish_thought(db, thought_id)"] --> B["Load Thought + Tags"]
-B --> C{"Status == PUBLISHED?"}
-C --> |No| E["Raise BadRequestException"]
-C --> |Yes| D["Generate Markdown"]
-D --> F["Write to site/docs/posts/{slug}.md"]
-F --> G["Log success"]
-G --> H["Return Path"]
-I["build_mkdocs()"] --> J["Spawn 'mkdocs build'"]
-J --> K{"Exit code == 0?"}
-K --> |No| L["Log error and return False"]
-K --> |Yes| M["Log success and return True"]
-```
-
-**Diagram sources**
-- [backend/app/publish/service.py:38-111](file://backend/app/publish/service.py#L38-L111)
-- [backend/app/thoughts/models.py:24-28](file://backend/app/thoughts/models.py#L24-L28)
-
-**Section sources**
-- [backend/app/publish/service.py:38-111](file://backend/app/publish/service.py#L38-L111)
-
-### Markdown Generation System
-The generator creates a complete Markdown document with YAML frontmatter:
-- Frontmatter fields: title, date, description, author, category, tags (as a list), slug.
-- Escaping: Double quotes inside YAML values are escaped to ensure validity.
-- Body: Includes a top-level heading matching the title followed by the content.
-
-Validation and tests:
-- Unit tests confirm presence of essential frontmatter keys and headings.
-- Tests cover both full and minimal field scenarios.
-
-```mermaid
-flowchart TD
-Start(["Input: title, content, summary, category, tags, author, created_at, slug"]) --> FM["Build YAML Front Matter"]
-FM --> Escape["Escape quotes in strings"]
-Escape --> Header["Add '# title' header"]
-Header --> Body["Append content"]
-Body --> Join["Join lines with newline"]
-Join --> End(["Output: Markdown string"])
-```
-
-**Diagram sources**
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/tests/test_markdown_gen.py:16-52](file://backend/tests/test_markdown_gen.py#L16-L52)
-
-**Section sources**
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/tests/test_markdown_gen.py:16-52](file://backend/tests/test_markdown_gen.py#L16-L52)
-
-### MkDocs Integration and Theme Customization
-Configuration highlights:
-- Theme: Material with custom_dir overrides.
-- Language: Chinese (zh).
-- Palette: Light/dark modes with toggles.
-- Features: Instant navigation, tabs, sections, top navigation, search suggestions/highlight, copy code.
-- Plugins: Search (multi-language), tags.
-- Markdown Extensions: Admonitions, syntax highlighting with line anchors, superfences, details, emoji, TOC with permalink, meta.
-- Navigation: Home and Articles (posts/) entries.
-- Extra: Social links and generator flag disabled.
-
-Overrides:
-- Overrides inject Open Graph and Twitter Card meta tags into page head for improved SEO and social sharing.
-
-```mermaid
-graph LR
-CFG["mkdocs.yml"] --> THEME["Material Theme"]
-CFG --> PLUG["Plugins: search, tags"]
-CFG --> EXT["Extensions: admonition, highlight, superfences,<br/>details, emoji, toc, meta"]
-CFG --> NAV["Navigation: index.md, posts/"]
-OVR["overrides/main.html"] --> HEAD["<head> meta tags"]
-THEME --> HEAD
-PLUG --> THEME
-EXT --> THEME
-NAV --> THEME
-HEAD --> THEME
-```
-
-**Diagram sources**
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
-
-**Section sources**
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
-
-### Deployment Automation
-Workflow triggers:
-- On push to main branch targeting site/**.
-- Manual dispatch support.
-
-Steps:
-- Checkout repository.
-- Set up Python and install MkDocs and Material.
-- Build site with strict mode.
-- Upload built artifact (site/site).
-- Deploy to GitHub Pages.
-
-```mermaid
-sequenceDiagram
-participant Dev as "Developer"
-participant GH as "GitHub"
-participant Act as "Actions Runner"
-participant Py as "Python/MkDocs"
-participant Pages as "GitHub Pages"
-Dev->>GH : Push to main (site/**)
-GH->>Act : Trigger workflow
-Act->>Py : Install dependencies
-Act->>Py : mkdocs build --strict (site/)
-Py-->>Act : site/site
-Act->>Pages : Upload artifact and deploy
-Pages-->>Dev : Site live
-```
-
-**Diagram sources**
+- [.github/workflows/deploy.yml:11-25](file://.github/workflows/deploy.yml#L11-L25)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 **Section sources**
+- [.github/workflows/deploy.yml:11-25](file://.github/workflows/deploy.yml#L11-L25)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
-### Content Aggregation and Asset Management
-- Aggregation: The publishing service pulls thought metadata (title, content, summary, category, tags, author, created_at, slug) from the database via the thoughts service.
-- Asset management: Markdown files are written to site/docs/posts/ and MkDocs compiles them into site/site/ during build.
-- Mounting: Docker Compose shares the host site directory into the backend container so writes persist and are available to MkDocs.
+### Flask Management Interface
+The lightweight Flask application provides content management capabilities:
+- **Database Integration**: SQLite-based user authentication and session management
+- **Blueprint Registration**: Authentication and upload functionality through blueprints
+- **Template System**: Jinja2 templates for management interface
+- **File Upload**: Handles various document formats for conversion to Markdown
+- **Security**: Secret key configuration and content length limits
 
 **Section sources**
-- [backend/app/publish/service.py:38-80](file://backend/app/publish/service.py#L38-L80)
-- [backend/app/thoughts/service.py:68-79](file://backend/app/thoughts/service.py#L68-L79)
-- [docker-compose.yml:44-46](file://docker-compose.yml#L44-L46)
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+
+### Content Display and Layout System
+The Jekyll layout system provides flexible content presentation:
+- **Default Layout**: Base HTML structure with header, main content, and footer includes
+- **Index Template**: Dynamic content listing with pagination and styling
+- **Footer Includes**: Social links and RSS feed integration
+- **Liquid Templating**: Powerful template engine for dynamic content rendering
+
+**Section sources**
+- [_layouts/default.html:1-12](file://_layouts/default.html#L1-L12)
+- [index.html:1-70](file://index.html#L1-L70)
+- [_includes/footer.html:1-9](file://_includes/footer.html#L1-L9)
+
+### Ruby Gem Dependencies
+The Ruby gem ecosystem provides essential Jekyll functionality:
+- **Core Jekyll**: Static site generator version 4.3
+- **Feed Plugin**: Automatic RSS feed generation
+- **SEO Plugin**: Comprehensive SEO metadata support
+- **Pagination Plugin**: Multi-page navigation for posts
+
+**Section sources**
+- [Gemfile:1-7](file://Gemfile#L1-L7)
 
 ## Dependency Analysis
-The publishing pipeline exhibits clean layering:
-- Router depends on service.
-- Service depends on markdown generator, thoughts service/models, configuration, and database session factory.
-- Markdown generator is self-contained and pure.
-- MkDocs configuration is decoupled from backend logic but consumed by the build process.
-- CI/CD workflow is independent but relies on the MkDocs project structure.
+The new architecture maintains clean separation between components:
+- **Configuration-Driven**: Jekyll configuration controls build process and site behavior
+- **Automated Deployment**: GitHub Actions handles build and deployment without manual intervention
+- **Lightweight Management**: Flask provides minimal overhead for content creation
+- **Ruby Ecosystem**: Gems manage site functionality and plugins independently
 
 ```mermaid
 graph TB
-R["publish/router.py"] --> S["publish/service.py"]
-S --> G["publish/markdown_gen.py"]
-S --> T["thoughts/service.py"]
-S --> M["thoughts/models.py"]
-S --> C["config.py"]
-S --> D["database.py"]
-G --> MDOC["mkdocs.yml"]
-MDOC --> OVR["overrides/main.html"]
-DC["docker-compose.yml"] --> R
-DC --> MDOC
-ACT["deploy.yml"] --> MDOC
+CFG["_config.yml"] --> JKY["Jekyll Core"]
+CFG --> PLG["Plugin Ecosystem"]
+FLSK["Flask App"] --> POSTS["_posts/ Directory"]
+POSTS --> JKY
+ACT["GitHub Actions"] --> CFG
+ACT --> JKY
+GEM["Gemfile"] --> PLG
 ```
 
 **Diagram sources**
-- [backend/app/publish/router.py:24-64](file://backend/app/publish/router.py#L24-L64)
-- [backend/app/publish/service.py:22-26](file://backend/app/publish/service.py#L22-L26)
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/app/thoughts/service.py:68-79](file://backend/app/thoughts/service.py#L68-L79)
-- [backend/app/thoughts/models.py:31-67](file://backend/app/thoughts/models.py#L31-L67)
-- [backend/app/config.py:52-54](file://backend/app/config.py#L52-L54)
-- [backend/app/database.py:47-62](file://backend/app/database.py#L47-L62)
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
-- [docker-compose.yml:44-46](file://docker-compose.yml#L44-L46)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 **Section sources**
-- [backend/app/publish/router.py:24-64](file://backend/app/publish/router.py#L24-L64)
-- [backend/app/publish/service.py:22-26](file://backend/app/publish/service.py#L22-L26)
-- [backend/app/publish/markdown_gen.py:16-89](file://backend/app/publish/markdown_gen.py#L16-L89)
-- [backend/app/thoughts/service.py:68-79](file://backend/app/thoughts/service.py#L68-L79)
-- [backend/app/thoughts/models.py:31-67](file://backend/app/thoughts/models.py#L31-L67)
-- [backend/app/config.py:52-54](file://backend/app/config.py#L52-L54)
-- [backend/app/database.py:47-62](file://backend/app/database.py#L47-L62)
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
-- [docker-compose.yml:44-46](file://docker-compose.yml#L44-L46)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 ## Performance Considerations
-- Build latency: The service spawns mkdocs build as a subprocess; typical completion is under five seconds for small sites.
-- Database access: Thought loading includes eager loading of tags to minimize round-trips.
-- File I/O: Writing a single Markdown file is fast; ensure the site/docs/posts/ directory is on a performant filesystem.
-- CI/CD: Strict build mode helps catch configuration issues early; consider caching Python dependencies in CI for faster installs.
-
-[No sources needed since this section provides general guidance]
+- **Build Speed**: Jekyll builds are typically faster than complex backend systems, with typical completion under 10 seconds for small to medium sites
+- **Deployment Automation**: GitHub Actions eliminates manual deployment steps and reduces human error
+- **Resource Efficiency**: Single-container deployment vs. multi-service architecture significantly reduces resource consumption
+- **Caching Strategy**: GitHub Pages provides CDN caching for improved load times
+- **Development Simplicity**: Reduced complexity leads to fewer maintenance overhead and easier troubleshooting
 
 ## Troubleshooting Guide
 Common issues and resolutions:
-- Thought not published: Ensure the thought’s status is PUBLISHED; otherwise, the service raises a bad-request error.
-- Build fails: Check server logs for MkDocs build errors; verify mkdocs and mkdocs-material are installed and the MkDocs project is valid.
-- Missing site artifacts: Confirm the backend container has write access to the mounted site directory and that the build step runs successfully.
-- SEO/meta tags missing: Verify overrides/main.html is present and that frontmatter includes description and title.
+- **Build Failures**: Check GitHub Actions logs for Jekyll build errors; verify Gemfile dependencies and Jekyll configuration
+- **Missing Content**: Ensure posts are placed in correct `_posts/` directory with proper YAML frontmatter format
+- **Plugin Issues**: Verify all required gems are specified in Gemfile and installed during build process
+- **Deployment Delays**: GitHub Pages may have propagation delays; wait up to 10 minutes for changes to appear
+- **Authentication Problems**: Check Flask app configuration and database initialization for management interface access
 
 Operational checks:
-- Health endpoint: Use the /health endpoint to verify backend availability.
-- Logs: Inspect backend logs for publish and build outcomes.
+- **Health Verification**: Access site URL to confirm GitHub Pages deployment success
+- **Build Logs**: Monitor GitHub Actions workflow for build status and error messages
+- **Content Validation**: Verify YAML frontmatter format and post filename conventions
 
 **Section sources**
-- [backend/app/publish/service.py:58-61](file://backend/app/publish/service.py#L58-L61)
-- [backend/app/publish/service.py:103-110](file://backend/app/publish/service.py#L103-L110)
-- [backend/app/main.py:76-89](file://backend/app/main.py#L76-L89)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
 ## Conclusion
-The PolaZhenJing publishing pipeline integrates database-backed content with a robust Markdown generation and MkDocs-based static site compilation. It offers explicit endpoints for publishing individual thoughts and triggering full builds, with automated CI/CD deployment to GitHub Pages. The design emphasizes separation of concerns, clear error handling, and extensibility through MkDocs plugins and theme customization.
+The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow. The new architecture leverages GitHub Actions for automated deployment, provides a lightweight Flask interface for content management, and utilizes Ruby gems for comprehensive site functionality. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting.
 
 ## Appendices
 
-### API Endpoints Summary
-- POST /api/publish/{thought_id}
-  - Description: Publish a single thought as Markdown.
-  - Response: { message, file_path }.
-- POST /api/publish/build
-  - Description: Trigger a full MkDocs site build.
-  - Response: { success, message }.
+### Jekyll Configuration Highlights
+- **Site Metadata**: Title, description, URL, base URL, author information
+- **Build Settings**: Markdown processor, highlighter, permalink structure, timezone
+- **Pagination**: 10 posts per page with pagination path
+- **Plugins**: jekyll-feed, jekyll-seo-tag, jekyll-paginate
+- **Defaults**: Automatic layout assignment for posts
+- **Exclusions**: Development and cache files excluded from build
 
 **Section sources**
-- [backend/app/publish/router.py:37-64](file://backend/app/publish/router.py#L37-L64)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
-### MkDocs Configuration Highlights
-- Theme: Material with custom_dir overrides.
-- Plugins: search (multi-language), tags.
-- Extensions: admonition, highlight, superfences, details, emoji, toc, meta.
-- Navigation: index.md, posts/.
-- Overrides: Open Graph and Twitter Card meta tags injection.
-
-**Section sources**
-- [site/mkdocs.yml:9-79](file://site/mkdocs.yml#L9-L79)
-- [site/overrides/main.html:11-37](file://site/overrides/main.html#L11-L37)
-
-### Runtime and Environment
-- Backend container mounts the site directory for persistent writes.
-- MkDocs and Material are installed in the backend image.
-- GitHub Actions workflow installs dependencies and builds the site.
+### GitHub Actions Workflow Features
+- **Automatic Triggers**: Build and deploy on pushes to main branch
+- **Permission Management**: Controlled access to GitHub Pages resources
+- **Concurrency Control**: Prevents conflicting deployments
+- **Artifact Management**: Proper site artifact handling for deployment
+- **Environment Configuration**: GitHub Pages integration with URL reporting
 
 **Section sources**
-- [docker-compose.yml:44-46](file://docker-compose.yml#L44-L46)
-- [backend/requirements.txt:23-25](file://backend/requirements.txt#L23-L25)
-- [.github/workflows/deploy.yml:39-46](file://.github/workflows/deploy.yml#L39-L46)
+- [.github/workflows/deploy.yml:11-25](file://.github/workflows/deploy.yml#L11-L25)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+
+### Ruby Gem Dependencies
+- **Core**: Jekyll 4.3 for static site generation
+- **Feed**: jekyll-feed 0.17 for RSS functionality
+- **SEO**: jekyll-seo-tag 2.8 for search engine optimization
+- **Pagination**: jekyll-paginate 1.1 for multi-page navigation
+
+**Section sources**
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+
+### Content Management Interface
+- **Authentication**: SQLite-based user management with Flask sessions
+- **Upload Handling**: Support for multiple document formats
+- **Template System**: Jinja2 templates for management interface
+- **Security**: Configurable secret key and content limits
+
+**Section sources**
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)

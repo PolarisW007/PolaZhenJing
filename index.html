@@ -1,0 +1,69 @@
+---
+layout: default
+title: Home
+---
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">PolaZhenjing</h1>
+    <p class="hero-subtitle">个人 AI 知识博客 · Personal AI Knowledge Blog</p>
+  </div>
+</section>
+
+<section class="articles-section">
+  <div class="container">
+    <h2 class="section-title">最新文章 / Latest Articles</h2>
+
+    {% if paginator.posts.size > 0 %}
+    <div class="article-grid">
+      {% for post in paginator.posts %}
+      <article class="article-card">
+        <div class="article-card-inner">
+          {% if post.layout and post.layout != 'default' %}
+          <span class="style-badge style-{{ post.layout }}">{{ post.layout | replace: '-', ' ' }}</span>
+          {% endif %}
+          <h3 class="article-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          </h3>
+          <time class="article-date" datetime="{{ post.date | date_to_xmlschema }}">
+            {{ post.date | date: "%Y-%m-%d" }}
+          </time>
+          {% if post.description %}
+          <p class="article-desc">{{ post.description }}</p>
+          {% elsif post.excerpt %}
+          <p class="article-desc">{{ post.excerpt | strip_html | truncate: 120 }}</p>
+          {% endif %}
+          {% if post.tags.size > 0 %}
+          <div class="article-tags">
+            {% for tag in post.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if paginator.total_pages > 1 %}
+    <nav class="pagination">
+      {% if paginator.previous_page %}
+      <a href="{{ paginator.previous_page_path | relative_url }}" class="btn-ghost">&laquo; 上一页</a>
+      {% endif %}
+      <span class="page-info">{{ paginator.page }} / {{ paginator.total_pages }}</span>
+      {% if paginator.next_page %}
+      <a href="{{ paginator.next_page_path | relative_url }}" class="btn-ghost">下一页 &raquo;</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <p>还没有文章，点击「新建文章」开始吧</p>
+      <p>No articles yet. Create your first one!</p>
+    </div>
+    {% endif %}
+  </div>
+</section>

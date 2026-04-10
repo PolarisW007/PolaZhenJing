@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin{% endblock %} · PolaZhenjing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── Inline dark gold admin styles ── */
+    :root {
+      --bg-deepest: #050508;
+      --bg-card: rgba(255,255,255,0.06);
+      --bg-card-hover: rgba(255,255,255,0.12);
+      --gold-primary: #E4BF7A;
+      --gold-dark: #D4A050;
+      --gold-light: #F0D8A8;
+      --gold-brown: #6B4300;
+      --text-primary: rgba(255,255,255,1.0);
+      --text-secondary: rgba(255,255,255,0.80);
+      --text-body: rgba(255,255,255,0.65);
+      --text-muted: rgba(255,255,255,0.45);
+      --text-ghost: rgba(255,255,255,0.12);
+      --gradient-gold-btn: linear-gradient(135deg, #E4BF7A, #D4A050);
+      --shadow-glass: inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 24px rgba(228,191,122,0.16);
+      --ease-primary: cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, "system-ui", "PingFang SC", sans-serif;
+      background: var(--bg-deepest);
+      color: var(--text-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--gold-primary); text-decoration: none; }
+    a:hover { color: var(--gold-light); }
+
+    /* Nav */
+    .admin-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: rgba(5,5,8,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--text-ghost);
+    }
+    .admin-nav-logo {
+      font-family: "Noto Serif SC", serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--text-primary);
+    }
+    .admin-nav-links { display: flex; gap: 1.25rem; align-items: center; list-style: none; }
+    .admin-nav-links a { color: var(--text-muted); font-size: 0.85rem; transition: color 0.3s; }
+    .admin-nav-links a:hover { color: var(--gold-primary); }
+
+    /* Main */
+    .admin-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+
+    /* Card */
+    .card {
+      width: 100%; max-width: 440px;
+      background: var(--bg-card);
+      border: 1px solid var(--text-ghost);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-glass);
+    }
+    .card-wide { max-width: 720px; }
+    .card-full { max-width: 960px; }
+    .card h2 {
+      font-family: "Noto Serif SC", serif;
+      color: var(--text-primary); font-size: 1.5rem;
+      margin-bottom: 1.5rem; text-align: center;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block; font-size: 0.8rem; color: var(--text-muted);
+      margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .form-input {
+      width: 100%; padding: 0.7rem 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--text-ghost);
+      border-radius: var(--radius-md);
+      color: var(--text-primary); font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    .form-input:focus { outline: none; border-color: var(--gold-primary); }
+    textarea.form-input { min-height: 200px; resize: vertical; font-family: monospace; }
+
+    /* Buttons */
+    .btn-gold {
+      display: inline-block; width: 100%;
+      background: var(--gradient-gold-btn);
+      color: var(--gold-brown); font-weight: 600;
+      font-size: 0.95rem; padding: 0.75rem;
+      border: none; border-radius: var(--radius-md);
+      cursor: pointer; text-align: center;
+      transition: all 0.3s var(--ease-primary);
+    }
+    .btn-gold:hover { box-shadow: 0 4px 16px rgba(228,191,122,0.3); transform: translateY(-2px); }
+    .btn-ghost {
+      display: inline-block; padding: 0.5rem 1rem;
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--text-ghost); border-radius: var(--radius-md);
+      font-size: 0.85rem; cursor: pointer; transition: all 0.3s;
+      text-decoration: none;
+    }
+    .btn-ghost:hover { color: var(--gold-primary); border-color: rgba(228,191,122,0.3); }
+    .btn-danger {
+      display: inline-block; padding: 0.4rem 0.75rem;
+      background: transparent; color: #e63946;
+      border: 1px solid rgba(230,57,70,0.3); border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer; transition: all 0.3s;
+    }
+    .btn-danger:hover { background: rgba(230,57,70,0.1); border-color: #e63946; }
+    .btn-sm { width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem; }
+
+    /* Flash messages */
+    .flash { padding: 0.75rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.85rem; }
+    .flash-error { background: rgba(230,57,70,0.1); border: 1px solid rgba(230,57,70,0.3); color: #ff6b6b; }
+    .flash-success { background: rgba(45,106,79,0.1); border: 1px solid rgba(45,106,79,0.3); color: #52b788; }
+    .flash-info { background: rgba(79,168,254,0.1); border: 1px solid rgba(79,168,254,0.3); color: #4FA8FE; }
+    .flash-warning { background: rgba(244,162,97,0.1); border: 1px solid rgba(244,162,97,0.3); color: #f4a261; }
+
+    /* Links */
+    .form-links { text-align: center; margin-top: 1rem; font-size: 0.85rem; }
+    .form-links a { color: var(--text-muted); }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--text-ghost); }
+    th { color: var(--gold-primary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { font-size: 0.9rem; color: var(--text-secondary); }
+
+    /* Style badges */
+    .style-badge { display: inline-block; font-size: 0.625rem; font-weight: 600; padding: 0.2em 0.6em; border-radius: 6px; }
+
+    /* Tabs */
+    .tab-bar { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--text-ghost); }
+    .tab { padding: 0.6rem 1.25rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.3s; }
+    .tab.active { color: var(--gold-primary); border-bottom-color: var(--gold-primary); }
+
+    /* Style cards grid */
+    .style-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .style-card {
+      border: 2px solid var(--text-ghost); border-radius: var(--radius-lg);
+      padding: 1.25rem; cursor: pointer; transition: all 0.3s var(--ease-primary);
+    }
+    .style-card:hover { border-color: rgba(228,191,122,0.4); transform: translateY(-2px); }
+    .style-card.selected { border-color: var(--gold-primary); box-shadow: 0 0 20px rgba(228,191,122,0.15); }
+    .style-card-color { width: 32px; height: 32px; border-radius: 8px; margin-bottom: 0.75rem; }
+    .style-card h4 { color: var(--text-primary); font-size: 1rem; margin-bottom: 0.4rem; }
+    .style-card p { color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; }
+
+    /* Drag & drop zone */
+    .drop-zone {
+      border: 2px dashed var(--text-ghost); border-radius: var(--radius-lg);
+      padding: 2.5rem; text-align: center; color: var(--text-muted);
+      transition: all 0.3s; cursor: pointer;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--gold-primary); background: rgba(228,191,122,0.04); }
+    .drop-zone input[type="file"] { display: none; }
+    .drop-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .drop-zone-text { font-size: 0.85rem; }
+    .drop-zone-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    /* Footer */
+    .admin-footer {
+      padding: 1rem 1.5rem; text-align: center;
+      color: var(--text-muted); font-size: 0.75rem;
+      border-top: 1px solid var(--text-ghost);
+    }
+
+    /* Action bar */
+    .action-bar { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; }
+    .action-bar-right { margin-left: auto; }
+
+    @media (max-width: 640px) {
+      .card { padding: 1.5rem; }
+      .style-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="admin-nav">
+    <a href="/admin/" class="admin-nav-logo">PolaZhenjing Admin</a>
+    <ul class="admin-nav-links">
+      {% if session.get('user_id') %}
+      <li><a href="{{ url_for('uploader.upload') }}">Upload</a></li>
+      <li><a href="{{ url_for('uploader.articles') }}">Articles</a></li>
+      <li><a href="{{ url_for('auth.change_password') }}">Password</a></li>
+      <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="admin-main">
+    <div class="card {% block card_class %}{% endblock %}">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <footer class="admin-footer">
+    &copy; {{ now().year if now is defined else '2025' }} PolaZhenjing · Management Console
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

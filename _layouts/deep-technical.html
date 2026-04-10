@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<article class="post-deep-technical">
+  <header class="post-header container">
+    {% include style-badge.html style="deep-technical" %}
+    <h1>{{ page.title }}</h1>
+    <div class="post-meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+      {% if page.tags.size > 0 %}
+      <span class="post-meta-sep">·</span>
+      <span>{{ page.tags | join: ", " }}</span>
+      {% endif %}
+      <span class="post-meta-sep">·</span>
+      <span>{{ content | number_of_words }} words</span>
+    </div>
+  </header>
+  <div class="post-content container">
+    {{ content }}
+  </div>
+</article>

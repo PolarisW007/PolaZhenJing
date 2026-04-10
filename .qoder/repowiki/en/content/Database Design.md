@@ -2,17 +2,20 @@
 
 <cite>
 **Referenced Files in This Document**
-- [backend/app/database.py](file://backend/app/database.py)
-- [backend/app/config.py](file://backend/app/config.py)
-- [backend/migrations/env.py](file://backend/migrations/env.py)
-- [backend/alembic.ini](file://backend/alembic.ini)
-- [backend/app/common/models.py](file://backend/app/common/models.py)
-- [backend/app/thoughts/models.py](file://backend/app/thoughts/models.py)
-- [backend/app/tags/models.py](file://backend/app/tags/models.py)
-- [backend/app/auth/service.py](file://backend/app/auth/service.py)
-- [backend/app/auth/schemas.py](file://backend/app/auth/schemas.py)
-- [backend/app/main.py](file://backend/app/main.py)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/uploader.py](file://app/uploader.py)
+- [_config.yml](file://_config.yml)
+- [PRD.md](file://PRD.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Complete replacement of PostgreSQL + Alembic architecture with SQLite for zero-configuration local development
+- Removed complex relational schema (Users, Thoughts, Tags entities) in favor of simplified single-table design
+- Eliminated migration system and complex authentication token infrastructure
+- Streamlined database initialization and connection management
+- Updated all architectural diagrams and component relationships
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -27,146 +30,88 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the database design and schema for PolaZhenJing, focusing on the core entities Users, Thoughts, Tags, and the implicit Token mechanism used for authentication. It documents table structures, field definitions, data types, constraints, primary and foreign key relationships, indexing strategy, normalization, migration system, schema evolution, and data integrity mechanisms. It also explains the SQLAlchemy ORM models, relationship configurations, and typical query patterns used by the application.
+This document describes the database design and schema for PolaZhenJing v2, focusing on the simplified SQLite-based architecture for zero-configuration local development. The system has evolved from a complex PostgreSQL-backed application with Alembic migrations to a streamlined Flask-based solution with a single-user authentication table. This document covers the table structures, field definitions, data types, constraints, and the new simplified database design.
 
 ## Project Structure
-The database layer is implemented with SQLAlchemy (async) and Alembic for migrations. The application loads configuration from environment variables, initializes an async PostgreSQL engine, and exposes a dependency to obtain sessions for request-scoped database operations. Models are defined under shared and feature-specific modules, and migrations are orchestrated via Alembic’s async environment.
+The database layer now uses a simple SQLite connection managed through Flask's application context. The system eliminates the previous complex relational schema and migration system in favor of a straightforward single-table design optimized for personal blog management. Database initialization occurs automatically during application startup, creating the necessary tables with minimal configuration requirements.
 
 ```mermaid
 graph TB
-Config["Settings<br/>DATABASE_URL"] --> Engine["Async Engine"]
-Engine --> Session["Async Session Factory"]
-Session --> Dependency["get_db() Dependency"]
-Dependency --> App["FastAPI App"]
-App --> Routers["Routers (auth/thoughts/tags/...)"]
-Routers --> DBLayer["ORM Models"]
-DBLayer --> Alembic["Alembic Migrations"]
+Config["Environment Variables"] --> App["Flask App"]
+App --> DBInit["init_db()"]
+DBInit --> SQLite["SQLite Database<br/>wiki.db"]
+SQLite --> UsersTable["users Table"]
+UsersTable --> AuthFlow["Authentication Flow"]
+AuthFlow --> Session["Flask Sessions"]
+Session --> UploadBP["Uploader Blueprint"]
 ```
 
 **Diagram sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/app/database.py:24-36](file://backend/app/database.py#L24-L36)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
-- [backend/app/main.py:58-71](file://backend/app/main.py#L58-L71)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
 
 **Section sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/app/database.py:24-36](file://backend/app/database.py#L24-L36)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
-- [backend/app/main.py:58-71](file://backend/app/main.py#L58-L71)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
 
 ## Core Components
-This section documents the core relational entities and their constraints.
+The simplified database design consists of a single table structure optimized for personal blog management with basic user authentication.
 
-- Users
-  - Purpose: Application users with authentication and profile attributes.
-  - Primary key: id (UUID).
-  - Unique indexes: username, email.
-  - Additional fields: hashed_password, display_name, is_active, is_superuser.
-  - Timestamps: created_at, updated_at via TimestampMixin.
-  - Relationships: One-to-many with Thoughts (author_id).
+- Users Table
+  - Purpose: Store user authentication credentials and verification status
+  - Primary key: id (INTEGER, AUTOINCREMENT)
+  - Unique indexes: username, email
+  - Additional fields: password_hash, email_verified (INTEGER flag), created_at (TIMESTAMP)
   - Business constraints:
-    - Username and email must be unique.
-    - is_active can be toggled to deactivate accounts (soft delete).
-    - Passwords are stored as hashes.
-
-- Thoughts
-  - Purpose: Individual reflections/articles authored by Users.
-  - Primary key: id (UUID).
-  - Unique indexes: slug.
-  - Regular indexes: category.
-  - Fields: title, slug, content, summary, category, status (enum draft/published/archived).
-  - Foreign key: author_id → users.id (on delete CASCADE).
-  - Relationships: Many-to-one with User (author), many-to-many with Tag via thought_tags.
-  - Business constraints:
-    - Author must exist.
-    - Status defaults to draft.
-    - Slug is unique and URL-friendly.
-
-- Tags
-  - Purpose: Labels for categorizing Thoughts.
-  - Primary key: id (UUID).
-  - Unique indexes: name, slug.
-  - Optional field: color (hex).
-  - Relationships: Many-to-many with Thoughts via thought_tags.
-  - Business constraints:
-    - Name and slug must be unique.
-    - Color is optional.
-
-- Association table: thought_tags
-  - Columns: thought_id (UUID, FK to thoughts.id, CASCADE), tag_id (UUID, FK to tags.id, CASCADE).
-  - Composite primary key: (thought_id, tag_id).
-  - Behavior: On deletion of a Thought or Tag, related rows in thought_tags are removed (CASCADE).
-
-Normalization
-- The schema is normalized to third normal form (3NF):
-  - Atomic values and no transitive dependencies.
-  - Repeated groupings (Thought-Tag) are separated into a dedicated association table.
-  - Timestamps are centralized via a mixin to avoid duplication.
-
-Constraints and Indexing
-- Unique constraints enforced at the database level for usernames, emails, tag names, tag slugs, and thought slugs.
-- Indexes on frequently filtered/searched columns: user.username, user.email, tag.name, tag.slug, thought.slug, thought.category.
-- Foreign keys enforce referential integrity between Thoughts.author_id → Users.id and association rows → Thoughts/Tags.
+    - Username and email must be unique
+    - Passwords are stored as hashes using Werkzeug security
+    - Email verification tracked via integer flag (0/1)
+    - Automatic timestamp creation on user registration
 
 **Section sources**
-- [backend/app/common/models.py:40-76](file://backend/app/common/models.py#L40-L76)
-- [backend/app/thoughts/models.py:30-70](file://backend/app/thoughts/models.py#L30-L70)
-- [backend/app/tags/models.py:21-66](file://backend/app/tags/models.py#L21-L66)
+- [app/__init__.py:30-40](file://app/__init__.py#L30-L40)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
 
 ## Architecture Overview
-The database architecture centers around asynchronous SQLAlchemy with Alembic migrations. The application constructs an async engine from configuration, creates a session factory, and exposes a dependency for route handlers. Models are organized by domain (common, thoughts, tags), and migrations detect metadata from imported models.
+The new architecture eliminates the previous PostgreSQL and Alembic complexity in favor of a lightweight SQLite solution. The system initializes the database automatically during application startup, creates the users table with appropriate constraints, and manages connections through Flask's application context. Authentication flows through Flask sessions rather than JWT tokens.
 
 ```mermaid
 graph TB
 subgraph "Configuration"
-Cfg["Settings.DATABASE_URL"]
+Env["Environment Variables"]
+DotEnv[".env file"]
 end
 subgraph "Database Layer"
-Eng["Async Engine"]
-Sess["Async Session Factory"]
-Dep["get_db()"]
+SQLite["SQLite Engine"]
+WikiDB["wiki.db file"]
+UsersTbl["users table"]
 end
 subgraph "Application"
-FA["FastAPI App"]
-RT["Routers"]
+FlaskApp["Flask App"]
+AuthBP["Auth Blueprint"]
+UploadBP["Uploader Blueprint"]
 end
-subgraph "Models"
-U["User"]
-T["Thought"]
-TG["Tag"]
-AT["thought_tags"]
+subgraph "Session Management"
+Session["Flask Sessions"]
+LoginReq["login_required decorator"]
 end
-subgraph "Migrations"
-AE["Alembic Env"]
-AL["alembic.ini"]
-end
-Cfg --> Eng
-Eng --> Sess
-Sess --> Dep
-Dep --> FA
-FA --> RT
-RT --> U
-RT --> T
-RT --> TG
-T --> AT
-TG --> AT
-AE --> U
-AE --> T
-AE --> TG
-AL --> AE
+Env --> DotEnv
+DotEnv --> FlaskApp
+FlaskApp --> SQLite
+SQLite --> WikiDB
+WikiDB --> UsersTbl
+UsersTbl --> AuthBP
+AuthBP --> LoginReq
+LoginReq --> UploadBP
 ```
 
 **Diagram sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/app/database.py:24-36](file://backend/app/database.py#L24-L36)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
-- [backend/app/main.py:58-71](file://backend/app/main.py#L58-L71)
-- [backend/app/thoughts/models.py:20-21](file://backend/app/thoughts/models.py#L20-L21)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
-- [backend/alembic.ini:4-6](file://backend/alembic.ini#L4-L6)
+- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
 
 ## Detailed Component Analysis
 
@@ -174,323 +119,205 @@ AL --> AE
 ```mermaid
 erDiagram
 USERS {
-uuid id PK
-string username UK
-string email UK
-string hashed_password
-string display_name
-boolean is_active
-boolean is_superuser
-timestamptz created_at
-timestamptz updated_at
+integer id PK
+text username UK
+text email UK
+text password_hash
+integer email_verified
+timestamp created_at
 }
-THOUGHTS {
-uuid id PK
-string title
-string slug UK
-text content
-text summary
-string category
-enum status
-uuid author_id FK
-timestamptz created_at
-timestamptz updated_at
-}
-TAGS {
-uuid id PK
-string name UK
-string slug UK
-string color
-timestamptz created_at
-timestamptz updated_at
-}
-THOUGHT_TAGS {
-uuid thought_id PK,FK
-uuid tag_id PK,FK
-}
-USERS ||--o{ THOUGHTS : "authors"
-THOUGHTS ||--o{ THOUGHT_TAGS : "has"
-TAGS ||--o{ THOUGHT_TAGS : "has"
 ```
 
 **Diagram sources**
-- [backend/app/common/models.py:40-76](file://backend/app/common/models.py#L40-L76)
-- [backend/app/thoughts/models.py:30-70](file://backend/app/thoughts/models.py#L30-L70)
-- [backend/app/tags/models.py:21-66](file://backend/app/tags/models.py#L21-L66)
+- [app/__init__.py:31-38](file://app/__init__.py#L31-L38)
 
-### ORM Models and Relationship Configuration
-- TimestampMixin
-  - Adds created_at and updated_at with server-side defaults and updates.
-  - Applied to User, Thought, and Tag to standardize audit fields.
+### Simplified Authentication Flow
+The authentication system now operates through Flask sessions rather than JWT tokens, significantly simplifying the authentication mechanism for personal blog management.
 
-- User
-  - Primary key: id (UUID).
-  - Unique indexes: username, email.
-  - Relationship: thoughts back-populates from Thought.author.
-  - Lazy loading: selectin for author-thoughts traversal.
+- User Registration
+  - Validates username, email, and password requirements
+  - Generates 6-digit verification code sent via QQ email SMTP
+  - Stores user with email_verified flag set to 0 initially
+  - Commits transaction on successful registration
 
-- Thought
-  - Primary key: id (UUID).
-  - Unique index: slug.
-  - Index: category.
-  - Enum: status (Draft/Published/Archived).
-  - Foreign key: author_id → users.id (CASCADE).
-  - Relationships:
-    - author back_populates to User.thoughts.
-    - tags via secondary association table thought_tags.
+- User Login
+  - Verifies username exists and password hash matches
+  - Checks email_verified flag equals 1
+  - Creates Flask session with user_id and username
+  - Redirects to article management interface
 
-- Tag
-  - Primary key: id (UUID).
-  - Unique indexes: name, slug.
-  - Optional color.
-  - Relationship: thoughts via secondary thought_tags.
-
-- Association table thought_tags
-  - Composite primary key: (thought_id, tag_id).
-  - Foreign keys: thought_id → thoughts.id (CASCADE), tag_id → tags.id (CASCADE).
-
-**Section sources**
-- [backend/app/common/models.py:24-38](file://backend/app/common/models.py#L24-L38)
-- [backend/app/common/models.py:40-76](file://backend/app/common/models.py#L40-L76)
-- [backend/app/thoughts/models.py:23-28](file://backend/app/thoughts/models.py#L23-L28)
-- [backend/app/thoughts/models.py:30-70](file://backend/app/thoughts/models.py#L30-L70)
-- [backend/app/tags/models.py:21-66](file://backend/app/tags/models.py#L21-L66)
-
-### Migration System and Schema Evolution
-- Alembic Environment
-  - Imports all models to ensure metadata detection.
-  - Supports offline and online modes.
-  - Uses async engine for online migrations.
-
-- Alembic Configuration
-  - script_location points to migrations.
-  - sqlalchemy.url mirrors DATABASE_URL for migration connectivity.
-
-- Execution Flow
-  - Offline: Alembic runs migrations against DATABASE_URL with literal binds.
-  - Online: Alembic connects asynchronously and runs migrations against the configured database.
+- Session Management
+  - login_required decorator protects all admin endpoints
+  - Session cleared on logout operation
+  - No token persistence or refresh mechanisms
 
 ```mermaid
 sequenceDiagram
-participant Dev as "Developer"
-participant CLI as "alembic CLI"
-participant Env as "migrations/env.py"
-participant DB as "PostgreSQL"
-Dev->>CLI : "alembic upgrade/head"
-CLI->>Env : "load env"
-Env->>Env : "configure target_metadata"
-Env->>DB : "connect async engine"
-Env->>DB : "run_migrations()"
-DB-->>Env : "migration results"
-Env-->>CLI : "success/failure"
-CLI-->>Dev : "status"
+participant Client as "Client Browser"
+participant Auth as "Auth Blueprint"
+participant DB as "SQLite Database"
+participant Session as "Flask Session"
+Client->>Auth : "POST /admin/register"
+Auth->>Auth : "Validate input requirements"
+Auth->>DB : "Insert user with email_verified=0"
+DB-->>Auth : "Success"
+Auth->>Session : "Store verification code"
+Auth-->>Client : "Redirect to /admin/verify"
+Client->>Auth : "POST /admin/verify"
+Auth->>Session : "Verify code and timestamp"
+Auth->>DB : "UPDATE users SET email_verified=1"
+DB-->>Auth : "Success"
+Auth->>Session : "Clear verification data"
+Auth-->>Client : "Redirect to /admin/login"
+Client->>Auth : "POST /admin/login"
+Auth->>DB : "SELECT user by username"
+DB-->>Auth : "User record"
+Auth->>Auth : "Verify password hash"
+Auth->>Auth : "Check email_verified=1"
+Auth->>Session : "Create session with user_id"
+Auth-->>Client : "Redirect to /admin/upload"
 ```
 
 **Diagram sources**
-- [backend/migrations/env.py:29-54](file://backend/migrations/env.py#L29-L54)
-- [backend/alembic.ini:4-6](file://backend/alembic.ini#L4-L6)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
 
 **Section sources**
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
-- [backend/migrations/env.py:29-54](file://backend/migrations/env.py#L29-L54)
-- [backend/alembic.ini:4-6](file://backend/alembic.ini#L4-L6)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
 
-### Authentication Token Mechanism
-While tokens are not persisted in the database, the authentication flow relies on JWT tokens generated by the backend. The token lifecycle is handled in service and router modules.
+### Database Initialization and Connection Management
+The database initialization process has been simplified to automatic table creation during application startup, eliminating the need for manual migration commands or complex configuration.
 
-- Token Creation
-  - Access token: short-lived, includes subject (user id) and expiration.
-  - Refresh token: long-lived, includes subject and expiration.
+- Connection Management
+  - get_db() function manages SQLite connections per request
+  - Uses Flask's application context (g) for connection storage
+  - Enables WAL mode for improved concurrency
+  - Implements row_factory for dict-like access to records
 
-- Token Validation
-  - Decoding validates signature and expiration; rejects invalid or expired tokens.
-  - Enforces token type checks during refresh.
-
-- User Operations
-  - Registration enforces unique username and email, hashes passwords.
-  - Login authenticates credentials and ensures the user is active.
-  - Retrieval by id supports protected routes.
-
-```mermaid
-sequenceDiagram
-participant Client as "Client"
-participant Auth as "Auth Router"
-participant Svc as "Auth Service"
-participant DB as "Database"
-Client->>Auth : "POST /auth/register"
-Auth->>Svc : "register_user(...)"
-Svc->>DB : "check unique constraints"
-DB-->>Svc : "conflict or ok"
-Svc-->>Auth : "User"
-Auth-->>Client : "UserResponse"
-Client->>Auth : "POST /auth/login"
-Auth->>Svc : "authenticate_user(...)"
-Svc->>DB : "fetch user"
-DB-->>Svc : "User"
-Svc-->>Auth : "User"
-Auth-->>Client : "TokenResponse"
-Client->>Auth : "POST /auth/refresh"
-Auth->>Svc : "decode_token(refresh)"
-Svc-->>Auth : "payload"
-Auth->>Svc : "get_user_by_id(sub)"
-Svc->>DB : "fetch user"
-DB-->>Svc : "User"
-Svc-->>Auth : "User"
-Auth-->>Client : "TokenResponse"
-```
-
-**Diagram sources**
-- [backend/app/auth/router.py:42-90](file://backend/app/auth/router.py#L42-L90)
-- [backend/app/auth/service.py:91-165](file://backend/app/auth/service.py#L91-L165)
-- [backend/app/auth/schemas.py:19-57](file://backend/app/auth/schemas.py#L19-L57)
+- Automatic Initialization
+  - init_db() function creates users table if it doesn't exist
+  - Applies all necessary constraints and indexes automatically
+  - Executes within application context during startup
+  - No manual migration steps required
 
 **Section sources**
-- [backend/app/auth/service.py:42-88](file://backend/app/auth/service.py#L42-L88)
-- [backend/app/auth/service.py:91-165](file://backend/app/auth/service.py#L91-L165)
-- [backend/app/auth/router.py:42-90](file://backend/app/auth/router.py#L42-L90)
-- [backend/app/auth/schemas.py:19-57](file://backend/app/auth/schemas.py#L19-L57)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
 
-### Typical Query Patterns
-- User queries
-  - By unique username or email.
-  - By primary key id.
-  - Filtering by activity status.
+### File-Based Article Management
+The system now focuses on file-based article management rather than database-stored content, aligning with the Jekyll static site generation approach.
 
-- Thought queries
-  - By author id (author-thoughts).
-  - By slug (lookup).
-  - By category (filtered listing).
-  - With eager loading of tags and author.
+- Upload Processing
+  - Supports multiple file formats (MD, PDF, DOCX, HTML, etc.)
+  - Converts various formats to Markdown for processing
+  - Stores converted content in _posts/ directory
+  - Generates Jekyll-compatible front matter
 
-- Tag queries
-  - By name or slug.
-  - With related thoughts (many-to-many).
-
-- Association queries
-  - Join or filter by thought_id or tag_id.
-  - Cascade behavior on deletion.
+- Article Generation
+  - Creates Jekyll posts with proper front matter
+  - Supports multiple predefined styles/layouts
+  - Handles tagging and description metadata
+  - Integrates with GitHub Pages deployment
 
 **Section sources**
-- [backend/app/auth/service.py:108-112](file://backend/app/auth/service.py#L108-L112)
-- [backend/app/auth/service.py:125-149](file://backend/app/auth/service.py#L125-L149)
-- [backend/app/auth/service.py:152-164](file://backend/app/auth/service.py#L152-L164)
-- [backend/app/thoughts/models.py:63-66](file://backend/app/thoughts/models.py#L63-L66)
-- [backend/app/tags/models.py:60-62](file://backend/app/tags/models.py#L60-L62)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
 
 ## Dependency Analysis
-- Database engine and session
-  - Created from settings.DATABASE_URL.
-  - Session dependency commits or rolls back per request.
-
-- Model imports for migrations
-  - Alembic env imports models to detect metadata.
-
-- Application wiring
-  - FastAPI app includes routers and lifecycle hooks dispose the engine.
+The dependency structure has been dramatically simplified with SQLite replacing PostgreSQL and Flask's application context managing database connections.
 
 ```mermaid
 graph LR
-Settings["Settings.DATABASE_URL"] --> Engine["Async Engine"]
-Engine --> SessionFactory["Async Session Factory"]
-SessionFactory --> GetDB["get_db()"]
-GetDB --> Routers["Routers"]
-Routers --> Models["ORM Models"]
-Models --> AlembicEnv["Alembic Env"]
+EnvVars["Environment Variables"] --> FlaskApp["Flask Application"]
+FlaskApp --> DBConn["SQLite Connection"]
+DBConn --> UsersTable["users Table"]
+UsersTable --> AuthBP["Authentication Blueprint"]
+AuthBP --> SessionMgr["Session Management"]
+SessionMgr --> UploadBP["Uploader Blueprint"]
+UploadBP --> FileSystem["File System Operations"]
 ```
 
 **Diagram sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/app/database.py:24-36](file://backend/app/database.py#L24-L36)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
+- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
 
 **Section sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/app/database.py:24-36](file://backend/app/database.py#L24-L36)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
+- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
+- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
 
 ## Performance Considerations
-- Asynchronous I/O
-  - Async engine and sessions reduce contention under concurrent load.
+- SQLite Advantages
+  - Zero-configuration local development eliminates setup complexity
+  - Single-file database reduces deployment overhead
+  - WAL mode improves concurrent read/write performance
+  - Automatic memory management reduces resource overhead
 
-- Connection pooling
-  - Pool pre-ping enabled; tuned pool size and overflow to balance throughput and resource usage.
+- Connection Management
+  - Flask's application context ensures proper connection cleanup
+  - Row factory enables efficient data access patterns
+  - Automatic table creation eliminates runtime schema checks
 
-- Indexing strategy
-  - Unique indexes on high-cardinality identifiers (username, email, tag name/slug, thought slug).
-  - Index on category for filtered listings.
-
-- Eager loading
-  - Selectin loading for relationships reduces N+1 query risks.
-
-- Timestamps
-  - Server defaults minimize application-side overhead.
-
-[No sources needed since this section provides general guidance]
+- Simplified Authentication
+  - No JWT token validation overhead
+  - Session-based authentication reduces cryptographic operations
+  - Elimination of database queries for token verification
 
 ## Troubleshooting Guide
-- Database connectivity
-  - Verify DATABASE_URL in settings and environment.
-  - Confirm PostgreSQL is reachable and credentials are correct.
+- Database Connectivity
+  - Verify SQLite file permissions in data/wiki.db location
+  - Check that data/ directory is writable by the application
+  - Ensure Python has read/write access to the database file
 
-- Migration failures
-  - Ensure models are imported in Alembic env so metadata is detected.
-  - Run migrations in online mode to connect asynchronously.
+- Authentication Issues
+  - Verify SECRET_KEY environment variable is set
+  - Check QQ email SMTP configuration for verification emails
+  - Confirm verification codes are not expired (5-minute window)
 
-- Constraint violations
-  - Unique constraint errors indicate duplicate usernames, emails, tag names, or slugs.
-  - Fix duplicates or adjust inputs accordingly.
-
-- Session lifecycle
-  - get_db() automatically commits or rolls back; ensure exceptions propagate to trigger rollback.
+- File Operations
+  - Ensure _posts/ directory exists and is writable
+  - Verify sufficient disk space for uploaded files
+  - Check file format support for conversion operations
 
 **Section sources**
-- [backend/app/config.py:34-35](file://backend/app/config.py#L34-L35)
-- [backend/migrations/env.py:16-26](file://backend/migrations/env.py#L16-L26)
-- [backend/app/database.py:46-61](file://backend/app/database.py#L46-L61)
+- [app/__init__.py:12-16](file://app/__init__.py#L12-L16)
+- [app/auth.py:66-67](file://app/auth.py#L66-L67)
+- [app/uploader.py:29-31](file://app/uploader.py#L29-L31)
 
 ## Conclusion
-The PolaZhenJing database design leverages SQLAlchemy’s async ORM with Alembic migrations to maintain a clean, normalized schema. Users, Thoughts, and Tags are modeled with explicit primary and foreign keys, unique constraints, and targeted indexes. The many-to-many relationship between Thoughts and Tags is implemented via an association table with cascade semantics. Authentication is token-based and does not require persistent token storage, while the database enforces strong data integrity through constraints and referential integrity.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The PolaZhenJing v2 database design represents a fundamental shift toward simplicity and zero-configuration local development. The elimination of PostgreSQL, Alembic migrations, and complex authentication tokens has resulted in a streamlined architecture focused on essential functionality. The SQLite-based user authentication system, combined with file-based article management and Jekyll static site generation, provides an efficient solution for personal blog management with minimal operational overhead.
 
 ## Appendices
 
-### Appendix A: Sample Data Structures
-- User
-  - id: UUID
-  - username: string (unique)
-  - email: string (unique)
-  - hashed_password: string
-  - display_name: string or null
-  - is_active: boolean
-  - is_superuser: boolean
-  - created_at, updated_at: timestamps
-
-- Thought
-  - id: UUID
-  - title: string
-  - slug: string (unique)
-  - content: text
-  - summary: text or null
-  - category: string or null
-  - status: enum (draft/published/archived)
-  - author_id: UUID (foreign key to users)
-  - created_at, updated_at: timestamps
-
-- Tag
-  - id: UUID
-  - name: string (unique)
-  - slug: string (unique)
-  - color: string or null
-  - created_at, updated_at: timestamps
-
-- Association table: thought_tags
-  - thought_id: UUID (foreign key to thoughts)
-  - tag_id: UUID (foreign key to tags)
+### Appendix A: SQLite Schema Definition
+- Users Table Structure
+  - id: INTEGER PRIMARY KEY AUTOINCREMENT
+  - username: TEXT UNIQUE NOT NULL
+  - email: TEXT UNIQUE NOT NULL
+  - password_hash: TEXT NOT NULL
+  - email_verified: INTEGER DEFAULT 0
+  - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 **Section sources**
-- [backend/app/common/models.py:40-76](file://backend/app/common/models.py#L40-L76)
-- [backend/app/thoughts/models.py:30-70](file://backend/app/thoughts/models.py#L30-L70)
-- [backend/app/tags/models.py:21-66](file://backend/app/tags/models.py#L21-L66)
+- [app/__init__.py:31-38](file://app/__init__.py#L31-L38)
+
+### Appendix B: Authentication Flow Summary
+- Registration Process
+  - Input validation for username, email, password
+  - QQ email verification with 6-digit code
+  - Automatic user creation with email_verified=0
+  - Verification code expiration handling
+
+- Login Process
+  - Username/password validation
+  - Email verification requirement check
+  - Flask session establishment
+  - Protected route access control
+
+**Section sources**
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)

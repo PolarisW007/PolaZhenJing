@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h2>登录 / Login</h2>
+<form method="POST">
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" class="form-input" required autofocus>
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" class="form-input" required>
+  </div>
+  <button type="submit" class="btn-gold">Sign In</button>
+</form>
+<div class="form-links">
+  <a href="{{ url_for('auth.register') }}">Create an account</a>
+</div>
+{% endblock %}

@@ -2,22 +2,37 @@
 
 <cite>
 **Referenced Files in This Document**
-- [main.tsx](file://frontend/src/main.tsx)
-- [App.tsx](file://frontend/src/App.tsx)
-- [authStore.ts](file://frontend/src/stores/authStore.ts)
-- [client.ts](file://frontend/src/api/client.ts)
-- [package.json](file://frontend/package.json)
-- [Dashboard.tsx](file://frontend/src/pages/Dashboard.tsx)
-- [Login.tsx](file://frontend/src/pages/Login.tsx)
-- [Register.tsx](file://frontend/src/pages/Register.tsx)
-- [Settings.tsx](file://frontend/src/pages/Settings.tsx)
-- [ThoughtEditor.tsx](file://frontend/src/pages/ThoughtEditor.tsx)
-- [useThoughts.ts](file://frontend/src/hooks/useThoughts.ts)
-- [ThoughtCard.tsx](file://frontend/src/components/ThoughtCard.tsx)
-- [TagSelector.tsx](file://frontend/src/components/TagSelector.tsx)
-- [AIAssistant.tsx](file://frontend/src/components/AIAssistant.tsx)
-- [ShareDialog.tsx](file://frontend/src/components/ShareDialog.tsx)
+- [_config.yml](file://_config.yml)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/converter.py](file://app/converter.py)
+- [app/templates/base.html](file://app/templates/base.html)
+- [app/templates/upload.html](file://app/templates/upload.html)
+- [app/templates/style_select.html](file://app/templates/style_select.html)
+- [app/templates/login.html](file://app/templates/login.html)
+- [app/templates/register.html](file://app/templates/register.html)
+- [app/templates/verify.html](file://app/templates/verify.html)
+- [app/templates/password.html](file://app/templates/password.html)
+- [_layouts/default.html](file://_layouts/default.html)
+- [_includes/head.html](file://_includes/head.html)
+- [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
+- [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
+- [_layouts/industry-vision.html](file://_layouts/industry-vision.html)
+- [_layouts/friendly-explainer.html](file://_layouts/friendly-explainer.html)
+- [_layouts/creative-visual.html](file://_layouts/creative-visual.html)
+- [index.html](file://index.html)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Complete architectural replacement from React/TypeScript to Flask/Jinja2 templating
+- Replaced client-side routing with server-side Flask blueprints
+- Removed all React components, hooks, and Zustand stores
+- Implemented premium dark gold aesthetic with glass-morphism effects
+- Integrated static Jekyll processing for blog generation
+- Added Flask authentication system with session-based security
+- Created comprehensive Jinja2 template system with base templates and style variants
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -25,408 +40,348 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Template System](#template-system)
+7. [Authentication Flow](#authentication-flow)
+8. [Content Management](#content-management)
+9. [Styling and Design System](#styling-and-design-system)
+10. [Deployment and Static Generation](#deployment-and-static-generation)
+11. [Migration Impact](#migration-impact)
+12. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the frontend application built with React 19 and TypeScript. It covers the component architecture, routing configuration, state management via Zustand stores, page structure (dashboard, editor, login, registration, settings), custom hooks, API client integration, and utility components. It also explains the styling approach, responsive design patterns, component composition strategies, authentication flow, protected routes, user session management, performance optimization techniques, TypeScript integration patterns, and development workflow.
+This document describes the frontend application built with Flask and Jinja2 templating, replacing the previous React/TypeScript architecture. The system now follows a premium dark gold aesthetic with glass-morphism effects, utilizing Flask blueprints for routing, session-based authentication, and static Jekyll processing for blog generation. The application maintains administrative functionality for content upload, style selection, and article management while leveraging Jinja2 templates for dynamic content rendering.
 
 ## Project Structure
-The frontend is organized by feature and responsibility:
-- Entry point renders the root application component.
-- Routing defines public and protected routes with a ProtectedRoute wrapper.
-- Pages implement domain-specific views.
-- Components encapsulate reusable UI and logic.
-- Hooks abstract data fetching and stateful logic.
-- Stores manage global state (authentication).
-- API client centralizes HTTP requests and token handling.
+The application is organized around Flask blueprints and Jinja2 templates:
+- Flask application factory creates the WSGI application with configured blueprints
+- Authentication blueprint handles login, registration, verification, and password management
+- Uploader blueprint manages file uploads, content conversion, style selection, and article generation
+- Template system provides base templates with style variants and reusable components
+- Jekyll integration processes generated content into static blog posts
 
 ```mermaid
 graph TB
-subgraph "Entry"
-M["main.tsx"]
-A["App.tsx"]
+subgraph "Flask Application"
+APP["app/__init__.py<br/>create_app()"] --> AUTH["auth.py<br/>Authentication Blueprint"]
+APP --> UP["uploader.py<br/>Uploader Blueprint"]
 end
-subgraph "Routing"
-R["React Router DOM"]
-PR["ProtectedRoute"]
-end
-subgraph "Pages"
-D["Dashboard.tsx"]
-L["Login.tsx"]
-RG["Register.tsx"]
-S["Settings.tsx"]
-TE["ThoughtEditor.tsx"]
-end
-subgraph "Components"
-TC["ThoughtCard.tsx"]
-TS["TagSelector.tsx"]
-AA["AIAssistant.tsx"]
-SD["ShareDialog.tsx"]
-end
-subgraph "Hooks"
-UT["useThoughts.ts"]
-end
-subgraph "Stores"
-AS["authStore.ts"]
-end
-subgraph "API"
-C["client.ts"]
-end
-M --> A
-A --> R
-R --> PR
-PR --> D
-PR --> TE
-PR --> S
-R --> L
-R --> RG
-D --> TC
-D --> UT
-TE --> TS
-TE --> AA
-TE --> SD
-D --> AS
-L --> AS
-RG --> AS
-S --> AS
-TE --> C
-D --> C
-UT --> C
-AA --> C
-SD --> C
-AS --> C
+subgraph "Templates"
+BASE["base.html<br/>Base Template"] --> UPLOAD["upload.html<br/>Upload Interface"]
+BASE --> STYLE["style_select.html<br/>Style Selection"]
+BASE --> LOGIN["login.html<br/>Login Form"]
+BASE --> REGISTER["register.html<br/>Registration Form"]
+BASE --> VERIFY["verify.html<br/>Email Verification"]
+END
+subgraph "Layouts"
+DEFAULT["_layouts/default.html<br/>Default Layout"] --> DT["_layouts/deep-technical.html<br/>Technical Layout"]
+DEFAULT --> AI["_layouts/academic-insight.html<br/>Academic Layout"]
+DEFAULT --> IV["_layouts/industry-vision.html<br/>Industry Layout"]
+DEFAULT --> FE["_layouts/friendly-explainer.html<br/>Explainer Layout"]
+DEFAULT --> CV["_layouts/creative-visual.html<br/>Creative Layout"]
+END
+subgraph "Static Processing"
+CONV["converter.py<br/>Content Conversion"] --> JEKYLL["Jekyll<br/>Static Generation"]
+END
+AUTH --> BASE
+UP --> BASE
+UPLOAD --> DT
+UPLOAD --> AI
+UPLOAD --> IV
+UPLOAD --> FE
+UPLOAD --> CV
 ```
 
 **Diagram sources**
-- [main.tsx:1-20](file://frontend/src/main.tsx#L1-L20)
-- [App.tsx:41-94](file://frontend/src/App.tsx#L41-L94)
-- [Dashboard.tsx:20-166](file://frontend/src/pages/Dashboard.tsx#L20-L166)
-- [Login.tsx:17-103](file://frontend/src/pages/Login.tsx#L17-L103)
-- [Register.tsx:17-120](file://frontend/src/pages/Register.tsx#L17-L120)
-- [Settings.tsx:17-93](file://frontend/src/pages/Settings.tsx#L17-L93)
-- [ThoughtEditor.tsx:23-221](file://frontend/src/pages/ThoughtEditor.tsx#L23-L221)
-- [ThoughtCard.tsx:26-70](file://frontend/src/components/ThoughtCard.tsx#L26-L70)
-- [TagSelector.tsx:19-57](file://frontend/src/components/TagSelector.tsx#L19-L57)
-- [AIAssistant.tsx:23-146](file://frontend/src/components/AIAssistant.tsx#L23-L146)
-- [ShareDialog.tsx:31-144](file://frontend/src/components/ShareDialog.tsx#L31-L144)
-- [useThoughts.ts:45-95](file://frontend/src/hooks/useThoughts.ts#L45-L95)
-- [authStore.ts:37-101](file://frontend/src/stores/authStore.ts#L37-L101)
-- [client.ts:14-63](file://frontend/src/api/client.ts#L14-L63)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/auth.py:13-168](file://app/auth.py#L13-L168)
+- [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
+- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
+- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
+- [app/templates/style_select.html:1-41](file://app/templates/style_select.html#L1-L41)
 
 **Section sources**
-- [main.tsx:1-20](file://frontend/src/main.tsx#L1-L20)
-- [App.tsx:41-94](file://frontend/src/App.tsx#L41-L94)
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+- [app/auth.py:1-168](file://app/auth.py#L1-L168)
+- [app/uploader.py:1-210](file://app/uploader.py#L1-L210)
 
 ## Core Components
-- Entry point: Initializes the React root and mounts the App component.
-- App: Configures routing, protected routes, and bootstraps user session on load.
-- Authentication store: Centralizes login, registration, logout, user fetching, and error handling.
-- API client: Axios instance with request/response interceptors for JWT handling and automatic retry on 401.
-- Pages: Dashboard, Login, Register, Settings, ThoughtEditor.
-- Hooks: useThoughts for paginated thought listing and metadata fetching.
-- Components: ThoughtCard, TagSelector, AIAssistant, ShareDialog.
+- **Flask Application Factory**: Creates the WSGI application with database initialization, secret key configuration, and blueprint registration
+- **Authentication Blueprint**: Handles user authentication, registration with email verification, password management, and session-based security
+- **Uploader Blueprint**: Manages file uploads, content conversion, style selection, article generation, and Git deployment
+- **Template System**: Base templates with dark gold aesthetic, glass-morphism effects, and style variants for different content types
+- **Content Converter**: Processes PDF, DOCX, HTML, and Markdown files into standardized content format
+- **Jekyll Integration**: Generates static blog posts with proper front matter and metadata
 
 Key implementation patterns:
-- ProtectedRoute ensures authenticated access to dashboard, editor, and settings.
-- Zustand store manages user state and exposes async actions that update local storage and server state.
-- Axios interceptors attach Authorization headers and refresh tokens automatically.
+- Session-based authentication with login decorators for route protection
+- Modular blueprint architecture for clean separation of concerns
+- Jinja2 template inheritance for consistent styling across pages
+- Static file processing pipeline for content transformation
+- Git automation for seamless deployment workflow
 
 **Section sources**
-- [main.tsx:10-20](file://frontend/src/main.tsx#L10-L20)
-- [App.tsx:23-39](file://frontend/src/App.tsx#L23-L39)
-- [authStore.ts:37-101](file://frontend/src/stores/authStore.ts#L37-L101)
-- [client.ts:19-60](file://frontend/src/api/client.ts#L19-L60)
-- [Dashboard.tsx:20-166](file://frontend/src/pages/Dashboard.tsx#L20-L166)
-- [useThoughts.ts:45-95](file://frontend/src/hooks/useThoughts.ts#L45-L95)
-- [ThoughtCard.tsx:26-70](file://frontend/src/components/ThoughtCard.tsx#L26-L70)
-- [TagSelector.tsx:19-57](file://frontend/src/components/TagSelector.tsx#L19-L57)
-- [AIAssistant.tsx:23-146](file://frontend/src/components/AIAssistant.tsx#L23-L146)
-- [ShareDialog.tsx:31-144](file://frontend/src/components/ShareDialog.tsx#L31-L144)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/templates/base.html:10-191](file://app/templates/base.html#L10-L191)
+- [app/converter.py:58-88](file://app/converter.py#L58-L88)
 
 ## Architecture Overview
-The frontend follows a layered architecture:
-- Presentation layer: Pages and components.
-- Domain logic: Hooks and components encapsulating business logic.
-- State management: Zustand stores for global state.
-- Data access: Axios client with interceptors.
-- Routing: React Router with protected route wrapper.
+The application follows a server-side rendered architecture with Flask and Jinja2:
+- **Presentation Layer**: Jinja2 templates with base layouts and style variants
+- **Business Logic**: Flask blueprints handling authentication and content management
+- **Data Access**: SQLite database with SQLAlchemy-like interface through Flask g object
+- **Static Generation**: Jekyll processing for blog post creation and deployment
+- **Security**: Session-based authentication with CSRF protection and secure password hashing
 
 ```mermaid
 graph TB
-UI["UI Layer<br/>Pages + Components"] --> H["Domain Hooks<br/>useThoughts"]
-UI --> ST["State Stores<br/>authStore"]
-H --> AC["API Client<br/>Axios + Interceptors"]
-ST --> AC
-AC --> BE["Backend API"]
-subgraph "Routing"
-BR["BrowserRouter"]
-PR["ProtectedRoute"]
-end
-BR --> PR
-PR --> UI
+UI["Jinja2 Templates<br/>base.html + variants"] --> BP["Flask Blueprints<br/>auth + uploader"]
+BP --> DB["SQLite Database<br/>users table"]
+BP --> FS["File System<br/>_posts + uploads"]
+BP --> CONV["Content Converter<br/>PDF/DOCX/HTML → Markdown"]
+CONV --> JEKYLL["Jekyll Processor<br/>Static Site Generation"]
+JEKYLL --> GH["GitHub Pages<br/>Deployment"]
+subgraph "Authentication"
+SESSION["Session Management<br/>user_id + username"]
+LOGIN["Login Decorator<br/>@login_required"]
+END
+BP --> SESSION
+SESSION --> LOGIN
 ```
 
 **Diagram sources**
-- [App.tsx:48-94](file://frontend/src/App.tsx#L48-L94)
-- [authStore.ts:37-101](file://frontend/src/stores/authStore.ts#L37-L101)
-- [client.ts:14-63](file://frontend/src/api/client.ts#L14-L63)
-- [useThoughts.ts:45-95](file://frontend/src/hooks/useThoughts.ts#L45-L95)
+- [app/templates/base.html:194-225](file://app/templates/base.html#L194-L225)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
+- [app/converter.py:58-88](file://app/converter.py#L58-L88)
 
 ## Detailed Component Analysis
 
-### Authentication Flow and Protected Routes
-The authentication flow integrates the auth store with routing:
-- On app mount, user session is fetched.
-- ProtectedRoute checks authentication state and navigates unauthenticated users to login.
-- Login and Register pages use the auth store to submit credentials and handle errors.
-- Logout clears tokens and resets state.
+### Flask Application Factory
+The application factory pattern creates a configured Flask instance with:
+- Database connection management through `get_db()` and teardown handlers
+- Environment variable loading for configuration
+- Blueprint registration for authentication and uploader functionality
+- Secret key configuration for session security
+- Maximum file upload size enforcement
+
+```mermaid
+sequenceDiagram
+participant CF as "create_app()"
+participant ENV as ".env Variables"
+participant DB as "Database Init"
+participant BP as "Blueprints"
+CF->>ENV : "load_dotenv()"
+CF->>DB : "init_db(app)"
+CF->>BP : "register auth_bp"
+CF->>BP : "register uploader_bp"
+CF-->>CF : "return Flask app"
+```
+
+**Diagram sources**
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+
+**Section sources**
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+
+### Authentication Blueprint
+Handles user authentication lifecycle:
+- Login with username/password validation and session establishment
+- Registration with QQ email requirement and verification code system
+- Email verification with 5-minute expiry and session-based flow
+- Password change functionality with current password verification
+- Logout with session cleanup and redirect
 
 ```mermaid
 sequenceDiagram
 participant U as "User"
-participant App as "App.tsx"
-participant PR as "ProtectedRoute"
-participant R as "React Router"
-participant LS as "localStorage"
-participant Store as "authStore.ts"
-participant API as "client.ts"
-U->>App : "Open app"
-App->>Store : "fetchUser()"
-Store->>LS : "Read access_token"
-alt "Token present"
-Store->>API : "GET /auth/me"
-API-->>Store : "User profile"
-Store-->>App : "Set user"
-else "No token"
-Store-->>App : "No user"
+participant L as "Login Route"
+participant DB as "Database"
+participant S as "Session"
+U->>L : "POST credentials"
+L->>DB : "Query user by username"
+DB-->>L : "User record"
+L->>L : "Verify password hash"
+alt "Valid credentials"
+L->>S : "Store user_id + username"
+L-->>U : "Redirect to upload"
+else "Invalid credentials"
+L-->>U : "Flash error + render login"
 end
-U->>R : "Navigate to protected route"
-R->>PR : "Render"
-PR->>Store : "Check user + isLoading"
-alt "Loading"
-PR-->>U : "Show spinner"
-else "Not authenticated"
-PR-->>U : "Redirect to /login"
-else "Authenticated"
-PR-->>U : "Render child"
-end
-U->>Store : "login(username,password)"
-Store->>API : "POST /auth/login"
-API-->>Store : "{access_token, refresh_token}"
-Store->>LS : "Persist tokens"
-Store->>API : "GET /auth/me"
-API-->>Store : "User profile"
-Store-->>App : "Set user"
 ```
 
 **Diagram sources**
-- [App.tsx:42-46](file://frontend/src/App.tsx#L42-L46)
-- [App.tsx:23-39](file://frontend/src/App.tsx#L23-L39)
-- [authStore.ts:42-58](file://frontend/src/stores/authStore.ts#L42-L58)
-- [authStore.ts:79-83](file://frontend/src/stores/authStore.ts#L79-L83)
-- [authStore.ts:85-95](file://frontend/src/stores/authStore.ts#L85-L95)
-- [client.ts:29-60](file://frontend/src/api/client.ts#L29-L60)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/auth.py:34-45](file://app/auth.py#L34-L45)
 
 **Section sources**
-- [App.tsx:23-39](file://frontend/src/App.tsx#L23-L39)
-- [authStore.ts:37-101](file://frontend/src/stores/authStore.ts#L37-L101)
-- [client.ts:19-60](file://frontend/src/api/client.ts#L19-L60)
+- [app/auth.py:1-168](file://app/auth.py#L1-L168)
 
-### Dashboard Page
-The dashboard lists thoughts with search, filtering, pagination, and navigation to the editor. It composes ThoughtCard for item rendering and uses useThoughts for data fetching.
+### Uploader Blueprint
+Manages content upload and article generation:
+- File upload handling with drag-and-drop support and size limits
+- Content conversion pipeline for various document formats
+- Style selection with five distinct visual themes
+- Article generation with proper Jekyll front matter
+- Git automation for deployment workflow
 
 ```mermaid
 flowchart TD
-Start(["Dashboard mount"]) --> Fetch["useThoughts(options)"]
-Fetch --> BuildParams["Build URLSearchParams<br/>search, status, page, page_size"]
-BuildParams --> GET["client.get('/api/thoughts?...')"]
-GET --> Success{"Success?"}
-Success --> |Yes| SetState["Set thoughts + total"]
-Success --> |No| SetError["Set error message"]
-SetState --> Render["Render cards + pagination"]
-SetError --> Render
-Render --> Nav["Navigate to /thought/:id"]
-Render --> New["Navigate to /thought/new"]
-Render --> Settings["Navigate to /settings"]
-Render --> Logout["logout() + navigate('/login')"]
+Start(["Upload Request"]) --> CheckType{"File or Paste?"}
+CheckType --> |File| Upload["Handle file upload"]
+CheckType --> |Paste| Paste["Process paste content"]
+Upload --> Convert["detect_and_convert()"]
+Paste --> Extract["extract_title()"]
+Convert --> Store["Store in session"]
+Extract --> Store
+Store --> Style["Redirect to style_select"]
+Style --> Select["User selects style"]
+Select --> Generate["Generate Jekyll post"]
+Generate --> Write["Write to _posts/"]
+Write --> Success["Flash success + redirect"]
 ```
 
 **Diagram sources**
-- [Dashboard.tsx:27-34](file://frontend/src/pages/Dashboard.tsx#L27-L34)
-- [useThoughts.ts:51-71](file://frontend/src/hooks/useThoughts.ts#L51-L71)
-- [client.ts:14-17](file://frontend/src/api/client.ts#L14-L17)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
+- [app/converter.py:58-88](file://app/converter.py#L58-L88)
 
 **Section sources**
-- [Dashboard.tsx:20-166](file://frontend/src/pages/Dashboard.tsx#L20-L166)
-- [useThoughts.ts:45-95](file://frontend/src/hooks/useThoughts.ts#L45-L95)
-- [ThoughtCard.tsx:26-70](file://frontend/src/components/ThoughtCard.tsx#L26-L70)
+- [app/uploader.py:1-210](file://app/uploader.py#L1-L210)
+- [app/converter.py:1-88](file://app/converter.py#L1-L88)
 
-### Thought Editor Page
-The editor supports creating and editing thoughts, with metadata fields, tags, AI assistant integration, and publishing to a static site.
+## Template System
+The Jinja2 template system provides a flexible foundation for consistent UI:
+- **Base Template**: Comprehensive dark gold aesthetic with glass-morphism effects
+- **Navigation**: Session-aware navigation with conditional rendering
+- **Form Components**: Consistent styling for inputs, buttons, and validation states
+- **Layout Variants**: Five distinct content layouts for different writing styles
+- **Responsive Design**: Mobile-first approach with breakpoint-specific adjustments
+
+Key template features:
+- CSS custom properties for theme consistency
+- Glass-morphism card containers with backdrop blur
+- Dark gold color scheme with gradient accents
+- Interactive elements with hover states and transitions
+- Flash messaging system for user feedback
+
+**Section sources**
+- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
+- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
+- [app/templates/style_select.html:1-41](file://app/templates/style_select.html#L1-L41)
+
+## Authentication Flow
+The authentication system implements session-based security:
+- Login decorator protects routes requiring authentication
+- Session storage for user identity and preferences
+- Flash messaging for error and success states
+- Secure password hashing with Werkzeug utilities
+- Email verification workflow for registration
 
 ```mermaid
 sequenceDiagram
 participant U as "User"
-participant TE as "ThoughtEditor.tsx"
-participant API as "client.ts"
-participant TSel as "TagSelector.tsx"
-participant AA as "AIAssistant.tsx"
-participant SD as "ShareDialog.tsx"
-U->>TE : "Open /thought/new or /thought/ : id"
-alt "Editing existing"
-TE->>API : "GET /api/thoughts/ : id"
-API-->>TE : "Populate form fields"
-end
-U->>TE : "Fill metadata + content"
-TE->>TSel : "Select tags"
-U->>AA : "Open AI panel"
-AA->>API : "POST /api/ai/polish|summarize|suggest-tags|expand"
-API-->>AA : "Result"
-AA-->>TE : "Apply content/summary"
-U->>TE : "Save"
-alt "New thought"
-TE->>API : "POST /api/thoughts"
-API-->>TE : "New id"
-TE->>U : "Navigate to /thought/ : id"
-else "Update"
-TE->>API : "PATCH /api/thoughts/ : id"
-end
-U->>TE : "Publish"
-TE->>API : "POST /api/publish/ : id"
-API-->>TE : "OK"
-TE->>SD : "Open share dialog"
+participant R as "Registration"
+participant M as "Mailer"
+participant V as "Verification"
+U->>R : "POST registration form"
+R->>R : "Validate input requirements"
+R->>M : "send_verification_code()"
+M-->>R : "Email delivery status"
+R->>V : "Redirect to verify"
+U->>V : "POST verification code"
+V->>V : "Validate code + expiry"
+V->>DB : "Update user email_verified"
+V-->>U : "Flash success + redirect to login"
 ```
 
 **Diagram sources**
-- [ThoughtEditor.tsx:40-53](file://frontend/src/pages/ThoughtEditor.tsx#L40-L53)
-- [ThoughtEditor.tsx:55-79](file://frontend/src/pages/ThoughtEditor.tsx#L55-L79)
-- [TagSelector.tsx:19-57](file://frontend/src/components/TagSelector.tsx#L19-L57)
-- [AIAssistant.tsx:29-49](file://frontend/src/components/AIAssistant.tsx#L29-L49)
-- [ShareDialog.tsx:36-42](file://frontend/src/components/ShareDialog.tsx#L36-L42)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
 
 **Section sources**
-- [ThoughtEditor.tsx:23-221](file://frontend/src/pages/ThoughtEditor.tsx#L23-L221)
-- [TagSelector.tsx:19-57](file://frontend/src/components/TagSelector.tsx#L19-L57)
-- [AIAssistant.tsx:23-146](file://frontend/src/components/AIAssistant.tsx#L23-L146)
-- [ShareDialog.tsx:31-144](file://frontend/src/components/ShareDialog.tsx#L31-L144)
+- [app/auth.py:1-168](file://app/auth.py#L1-L168)
 
-### Login and Registration Pages
-Both pages use the auth store to submit credentials and display errors. They integrate with ProtectedRoute indirectly by transitioning to protected routes after success.
+## Content Management
+The content management system handles multiple document formats:
+- **Supported Formats**: PDF, DOCX, DOC, HTML, HTM, MD, MARKDOWN, TXT
+- **Conversion Pipeline**: Specialized converters with fallback mechanisms
+- **Title Extraction**: Automatic detection from headings or content
+- **Style Selection**: Five distinct visual themes with color coding
+- **Front Matter Generation**: Proper Jekyll metadata for blog posts
 
-```mermaid
-sequenceDiagram
-participant U as "User"
-participant P as "Page (Login/Register)"
-participant Store as "authStore.ts"
-participant API as "client.ts"
-U->>P : "Submit form"
-P->>Store : "login()/register()"
-Store->>API : "POST /auth/login|register"
-API-->>Store : "Response"
-alt "Login success"
-Store->>API : "GET /auth/me"
-API-->>Store : "User"
-Store-->>P : "Set user"
-P-->>U : "Navigate to '/'"
-else "Failure"
-Store-->>P : "Set error"
-P-->>U : "Show error"
-end
-```
-
-**Diagram sources**
-- [Login.tsx:23-31](file://frontend/src/pages/Login.tsx#L23-L31)
-- [Register.tsx:25-33](file://frontend/src/pages/Register.tsx#L25-L33)
-- [authStore.ts:42-77](file://frontend/src/stores/authStore.ts#L42-L77)
-- [client.ts:14-17](file://frontend/src/api/client.ts#L14-L17)
+Content processing workflow:
+1. File upload or paste content submission
+2. Format detection and conversion
+3. Title extraction and metadata collection
+4. Style selection interface
+5. Jekyll post generation with front matter
+6. Static file writing to `_posts/` directory
 
 **Section sources**
-- [Login.tsx:17-103](file://frontend/src/pages/Login.tsx#L17-L103)
-- [Register.tsx:17-120](file://frontend/src/pages/Register.tsx#L17-L120)
-- [authStore.ts:37-101](file://frontend/src/stores/authStore.ts#L37-L101)
+- [app/uploader.py:29-47](file://app/uploader.py#L29-L47)
+- [app/converter.py:58-88](file://app/converter.py#L58-L88)
+- [app/uploader.py:143-168](file://app/uploader.py#L143-L168)
 
-### Settings Page
-Displays user profile and informational sections about AI provider configuration and site publishing.
+## Styling and Design System
+The premium dark gold aesthetic implements glass-morphism effects:
+- **Color Palette**: Deep blacks (#050508), dark gold (#E4BF7A), and warm accents
+- **Glass Effects**: Backdrop blur with translucent backgrounds
+- **Typography**: Noto Serif SC for headings, system fonts for body text
+- **Interactive States**: Smooth transitions with cubic-bezier easing
+- **Component Library**: Cards, forms, buttons, and navigation elements
 
-**Section sources**
-- [Settings.tsx:17-93](file://frontend/src/pages/Settings.tsx#L17-L93)
-- [authStore.ts:25-35](file://frontend/src/stores/authStore.ts#L25-L35)
-
-### Custom Hooks
-- useThoughts: Fetches paginated thoughts with configurable filters and exposes loading/error states and a refresh function.
-- useTags: Loads available tags for selection.
-
-**Section sources**
-- [useThoughts.ts:45-95](file://frontend/src/hooks/useThoughts.ts#L45-L95)
-
-### Utility Components
-- ThoughtCard: Renders a single thought preview with status, summary, date, tags, and category.
-- TagSelector: Multi-select tag chips backed by useTags.
-- AIAssistant: Calls AI endpoints to polish, summarize, suggest tags, and expand content; supports applying results or copying text.
-- ShareDialog: Fetches share URLs and platform links; supports copying text and opening external links.
+Design system features:
+- CSS custom properties for theme variables
+- Responsive grid layouts for style cards
+- Hover animations with transform and shadow effects
+- Gradient button styling with gold accents
+- Consistent spacing and typography scales
 
 **Section sources**
-- [ThoughtCard.tsx:26-70](file://frontend/src/components/ThoughtCard.tsx#L26-L70)
-- [TagSelector.tsx:19-57](file://frontend/src/components/TagSelector.tsx#L19-L57)
-- [AIAssistant.tsx:23-146](file://frontend/src/components/AIAssistant.tsx#L23-L146)
-- [ShareDialog.tsx:31-144](file://frontend/src/components/ShareDialog.tsx#L31-L144)
+- [app/templates/base.html:10-191](file://app/templates/base.html#L10-L191)
+- [app/templates/upload.html:14-35](file://app/templates/upload.html#L14-L35)
+- [app/templates/style_select.html:13-29](file://app/templates/style_select.html#L13-L29)
 
-## Dependency Analysis
-External dependencies include React 19, React Router DOM, Zustand, Axios, TailwindCSS v4, and Lucide React icons. The project uses Vite for dev/build and TypeScript for type safety.
+## Deployment and Static Generation
+The system integrates with Jekyll for static site generation:
+- **Configuration**: Jekyll settings in `_config.yml` with pagination and plugins
+- **Post Processing**: Generated Markdown files with proper front matter
+- **Layout Selection**: Automatic layout assignment based on content style
+- **Git Automation**: One-click deployment through Git commands
+- **GitHub Pages**: Seamless integration with GitHub hosting
 
-```mermaid
-graph LR
-P["package.json"] --> REACT["react@^19"]
-P --> RRD["react-router-dom@^7"]
-P --> ZUS["zustand@^5"]
-P --> AX["axios@^1.14"]
-P --> TW["tailwindcss@^4"]
-P --> LUCIDE["lucide-react@^1"]
-P --> RMD["react-markdown@^10"]
-```
-
-**Diagram sources**
-- [package.json:12-36](file://frontend/package.json#L12-L36)
+Deployment workflow:
+1. Article generation with Jekyll-compatible front matter
+2. Git staging and commit with timestamp messages
+3. Push to remote repository for GitHub Pages deployment
+4. Automatic site regeneration through GitHub Actions
 
 **Section sources**
-- [package.json:12-36](file://frontend/package.json#L12-L36)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
-## Performance Considerations
-- Memoization and callbacks: useThoughts uses a memoized fetch callback keyed on options to avoid unnecessary re-fetches.
-- Conditional rendering: ProtectedRoute shows a spinner while loading; pages render skeleton states for lists and modals.
-- Minimal re-renders: Zustand store updates only affected slices; components subscribe to minimal state.
-- Lazy loading: Consider lazy-loading heavy components or pages if bundle size grows.
-- Network retries: Axios interceptor handles 401 and attempts token refresh to reduce user interruptions.
-- Pagination: Dashboard uses fixed page size and calculates total pages to limit DOM growth.
+## Migration Impact
+The migration from React/TypeScript to Flask/Jinja2 brings significant changes:
+- **Architectural Shift**: Client-side JavaScript replaced with server-side rendering
+- **State Management**: Global state replaced with Flask sessions and database persistence
+- **Routing**: Dynamic client-side routing replaced with server-side Flask routes
+- **Styling**: TailwindCSS replaced with custom CSS-in-JS approach
+- **Build Process**: Single-page application replaced with static site generation
+- **Performance**: Reduced client-side complexity, increased server-side processing
 
-[No sources needed since this section provides general guidance]
-
-## Troubleshooting Guide
-Common issues and remedies:
-- Authentication errors: Check error messages from the auth store and ensure tokens are persisted in localStorage.
-- 401 Unauthorized: Verify interceptors attach Authorization header and refresh flow executes; confirm refresh tokens exist.
-- API failures: Inspect error messages returned by endpoints and surface them to users.
-- Token cleanup: On logout or 401, tokens are removed and user state reset; ensure navigation to login occurs.
+Benefits of the new architecture:
+- Simplified deployment with static site generation
+- Improved SEO through server-side rendering
+- Enhanced security through server-side authentication
+- Reduced client-side dependencies and bundle size
+- Better integration with GitHub Pages workflow
 
 **Section sources**
-- [authStore.ts:51-57](file://frontend/src/stores/authStore.ts#L51-L57)
-- [authStore.ts:79-83](file://frontend/src/stores/authStore.ts#L79-L83)
-- [client.ts:29-60](file://frontend/src/api/client.ts#L29-L60)
-- [Dashboard.tsx:113-117](file://frontend/src/pages/Dashboard.tsx#L113-L117)
-- [Login.tsx:44-51](file://frontend/src/pages/Login.tsx#L44-L51)
+- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/templates/base.html:10-191](file://app/templates/base.html#L10-L191)
 
 ## Conclusion
-The frontend employs a clean separation of concerns with React 19, TypeScript, and Zustand. Routing is secured with a ProtectedRoute wrapper, and authentication state is centralized. The API client centralizes HTTP concerns with interceptors for token management. Pages and components are modular and reusable, with hooks abstracting data fetching. The design leverages TailwindCSS for responsive layouts and Lucide React for icons. The architecture supports scalability and maintainability through clear boundaries and predictable data flows.
-
-[No sources needed since this section summarizes without analyzing specific files]
-
-## Appendices
-- Development workflow: Use Vite for fast development, TypeScript for type safety, ESLint for linting, and TailwindCSS for styling.
-- Styling approach: Utility-first CSS with Tailwind v4; responsive breakpoints and component-level styling.
-- Component composition: Presentational components (ThoughtCard, TagSelector, AIAssistant, ShareDialog) accept props and callbacks; pages orchestrate data and navigation.
-
-[No sources needed since this section provides general guidance]
+The application successfully migrated from a React/TypeScript architecture to a Flask/Jinja2-based system, implementing a premium dark gold aesthetic with glass-morphism effects. The new architecture leverages server-side rendering, session-based authentication, and static Jekyll processing for content generation. The template system provides consistent styling across all administrative interfaces, while the blueprint architecture maintains clean separation of concerns. This migration improves deployment simplicity, enhances security through server-side processing, and provides better integration with static hosting platforms.

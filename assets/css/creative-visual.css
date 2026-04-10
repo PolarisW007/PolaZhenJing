@@ -1,0 +1,87 @@
+/* ── Creative Visual Style ─────────────────────────────────── */
+/* Inspired by Jim Fan — visual storytelling, rich media      */
+
+.post-creative-visual .post-header-creative {
+  background: linear-gradient(180deg, rgba(123,44,191,0.1) 0%, var(--bg-deepest) 100%);
+  padding-bottom: 4rem;
+}
+
+.post-creative-visual h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #b68efc, #7b2cbf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.post-creative-visual .post-content h2 {
+  color: #b68efc;
+  border-bottom: none;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.post-creative-visual .post-content h3 {
+  color: #a06cd5;
+  font-size: 1.3rem;
+}
+
+/* Full-width images */
+.post-content-creative {
+  max-width: 900px;
+}
+
+.post-content-creative img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(123,44,191,0.2);
+  margin: 2em 0;
+}
+
+/* Gallery grid for consecutive images */
+.post-content-creative p:has(img) + p:has(img) {
+  margin-top: -0.5em;
+}
+
+/* Card-like sections */
+.post-creative-visual blockquote {
+  border-left: 4px solid #7b2cbf;
+  background: rgba(123,44,191,0.06);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  padding: 1.25rem 1.75rem;
+  font-size: 1.1rem;
+}
+
+.post-creative-visual code {
+  background: rgba(123,44,191,0.1);
+  color: #b68efc;
+}
+
+.post-creative-visual pre {
+  border-color: rgba(123,44,191,0.15);
+  border-radius: var(--radius-lg);
+}
+
+.post-creative-visual table th {
+  color: #b68efc;
+}
+
+/* Emphasis */
+.post-creative-visual strong {
+  color: #b68efc;
+}
+
+.post-creative-visual .post-content {
+  font-size: 1.08rem;
+  line-height: 1.85;
+}
+
+@media (max-width: 768px) {
+  .post-creative-visual h1 {
+    font-size: 2rem;
+  }
+  .post-content-creative {
+    max-width: 100%;
+  }
+}

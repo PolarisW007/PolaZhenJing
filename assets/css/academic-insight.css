@@ -1,0 +1,88 @@
+/* ── Academic Insight Style ────────────────────────────────── */
+/* Inspired by Yann LeCun — scholarly, citation-heavy         */
+
+.post-academic-insight .post-header {
+  background: linear-gradient(180deg, rgba(45,106,79,0.15) 0%, var(--bg-deepest) 100%);
+  padding-bottom: 3rem;
+}
+
+.post-academic-insight h1 {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Georgia", serif;
+  font-size: 2.75rem;
+}
+
+/* Abstract box */
+.academic-abstract {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  background: rgba(45,106,79,0.08);
+  border: 1px solid rgba(45,106,79,0.2);
+  border-radius: var(--radius-md);
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+}
+
+.academic-abstract h4 {
+  color: #52b788;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.academic-abstract p {
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.post-academic-insight .post-content {
+  font-family: "Noto Serif SC", "Georgia", serif;
+  font-size: 1.05rem;
+  line-height: 1.9;
+}
+
+.post-academic-insight .post-content h2 {
+  color: #52b788;
+  border-bottom: 2px solid rgba(45,106,79,0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 1.5rem;
+}
+
+.post-academic-insight .post-content h3 {
+  color: #76c8a0;
+  font-size: 1.2rem;
+}
+
+/* Citation-style blockquotes */
+.post-academic-insight blockquote {
+  border-left: 4px solid #52b788;
+  background: rgba(45,106,79,0.06);
+  font-style: italic;
+  padding: 1rem 1.5rem;
+}
+
+.post-academic-insight blockquote p {
+  margin-bottom: 0.5em;
+}
+
+/* Bordered sections */
+.post-academic-insight .post-content > p + h2,
+.post-academic-insight .post-content > ul + h2,
+.post-academic-insight .post-content > ol + h2 {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--text-ghost);
+}
+
+.post-academic-insight table th {
+  color: #52b788;
+  border-bottom: 2px solid rgba(45,106,79,0.3);
+}
+
+.post-academic-insight code {
+  background: rgba(45,106,79,0.1);
+  color: #76c8a0;
+}

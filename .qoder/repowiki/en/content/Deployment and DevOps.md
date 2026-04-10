@@ -2,20 +2,26 @@
 
 <cite>
 **Referenced Files in This Document**
-- [docker-compose.yml](file://docker-compose.yml)
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
-- [backend/Dockerfile](file://backend/Dockerfile)
-- [frontend/Dockerfile](file://frontend/Dockerfile)
-- [backend/app/config.py](file://backend/app/config.py)
-- [backend/app/main.py](file://backend/app/main.py)
-- [backend/app/database.py](file://backend/app/database.py)
-- [backend/requirements.txt](file://backend/requirements.txt)
-- [backend/alembic.ini](file://backend/alembic.ini)
-- [backend/migrations/env.py](file://backend/migrations/env.py)
-- [site/mkdocs.yml](file://site/mkdocs.yml)
-- [backend/tests/test_health.py](file://backend/tests/test_health.py)
-- [frontend/package.json](file://frontend/package.json)
+- [_config.yml](file://_config.yml)
+- [Gemfile](file://Gemfile)
+- [index.html](file://index.html)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
+- [PRD.md](file://PRD.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Removed all Docker Compose and multi-container deployment references
+- Updated architecture to reflect Jekyll static site generation instead of MkDocs
+- Revised CI/CD pipeline to focus on GitHub Pages deployment
+- Removed backend, frontend, and database components
+- Updated project structure to reflect Flask management server and Jekyll blog generation
+- Removed PostgreSQL, FastAPI, React, and MkDocs references
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -30,231 +36,210 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document provides comprehensive deployment and DevOps guidance for PolaZhenJing. It covers Docker Compose orchestration, multi-service deployment strategy, environment configuration, production deployment process, containerization approach, service dependencies, CI/CD pipeline configuration, automated testing integration, deployment workflows, environment variables and secrets management, security considerations, monitoring and logging setup, maintenance procedures, scaling considerations, backup strategies, disaster recovery planning, and troubleshooting for common deployment issues.
+This document provides comprehensive deployment and DevOps guidance for PolaZhenJing v2. The project has undergone a major architectural transformation from a complex multi-container FastAPI application to a streamlined Jekyll-based static site generator with a lightweight Flask management server. This document covers the new single-container deployment strategy, GitHub Actions CI/CD pipeline, environment configuration, production deployment process, static site generation approach, service dependencies, automated deployment workflows, environment variables and secrets management, security considerations, monitoring and logging setup, maintenance procedures, scaling considerations, backup strategies, disaster recovery planning, and troubleshooting for common deployment issues.
 
 ## Project Structure
-The repository is organized into three primary layers:
-- Backend: FastAPI application with asynchronous database connectivity, AI provider routing, authentication, tagging, publishing, and sharing modules.
-- Frontend: React-based Vite development server for local iteration.
-- Site: MkDocs static site configuration for documentation publishing.
+The repository is now organized into two primary layers:
+- **App**: Lightweight Flask management server with authentication, file upload, conversion, and email verification modules
+- **Blog**: Jekyll static site generator with 5 distinct blog post styles and automatic content generation
 
 ```mermaid
 graph TB
 subgraph "Root"
-DC["docker-compose.yml"]
-end
-subgraph "Backend"
-BDF["backend/Dockerfile"]
-BCFG["backend/app/config.py"]
-BM["backend/app/main.py"]
-BD["backend/app/database.py"]
-BREQ["backend/requirements.txt"]
-ALEMBIC["backend/alembic.ini"]
-AENV["backend/migrations/env.py"]
-TESTS["backend/tests/test_health.py"]
-end
-subgraph "Frontend"
-FDF["frontend/Dockerfile"]
-FPKG["frontend/package.json"]
-end
-subgraph "Site"
-MK["site/mkdocs.yml"]
-end
-DC --> BDF
-DC --> FDF
-BDF --> BREQ
-BM --> BCFG
-BD --> BCFG
-AENV --> BCFG
-ALEMBIC --> BD
-TESTS --> BM
-FDF --> FPKG
-DC -. "mounts site/docs" .-> MK
+GHA[".github/workflows/deploy.yml"]
+END
+subgraph "App Layer (Flask)"
+FLASK["app/__init__.py"]
+AUTH["app/auth.py"]
+CONV["app/converter.py"]
+UP["app/uploader.py"]
+MAIL["app/mailer.py"]
+END
+subgraph "Blog Layer (Jekyll)"
+JCONFIG["_config.yml"]
+GEM["Gemfile"]
+INDEX["index.html"]
+POSTS["_posts/ (generated)"]
+END
+GHA --> JCONFIG
+GHA --> GEM
+FLASK --> AUTH
+FLASK --> CONV
+FLASK --> UP
+FLASK --> MAIL
+JCONFIG --> INDEX
+JCONFIG --> POSTS
 ```
 
 **Diagram sources**
-- [docker-compose.yml:1-67](file://docker-compose.yml#L1-L67)
-- [backend/Dockerfile:1-29](file://backend/Dockerfile#L1-L29)
-- [frontend/Dockerfile:1-20](file://frontend/Dockerfile#L1-L20)
-- [backend/app/config.py:1-61](file://backend/app/config.py#L1-L61)
-- [backend/app/main.py:1-88](file://backend/app/main.py#L1-L88)
-- [backend/app/database.py:1-62](file://backend/app/database.py#L1-L62)
-- [backend/requirements.txt:1-34](file://backend/requirements.txt#L1-L34)
-- [backend/alembic.ini:1-40](file://backend/alembic.ini#L1-L40)
-- [backend/migrations/env.py:1-55](file://backend/migrations/env.py#L1-L55)
-- [site/mkdocs.yml:1-78](file://site/mkdocs.yml#L1-L78)
-- [backend/tests/test_health.py:1-49](file://backend/tests/test_health.py#L1-L49)
-- [frontend/package.json:1-38](file://frontend/package.json#L1-L38)
+- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [index.html:1-70](file://index.html#L1-L70)
 
 **Section sources**
-- [docker-compose.yml:1-67](file://docker-compose.yml#L1-L67)
-- [backend/Dockerfile:1-29](file://backend/Dockerfile#L1-L29)
-- [frontend/Dockerfile:1-20](file://frontend/Dockerfile#L1-L20)
-- [backend/app/config.py:1-61](file://backend/app/config.py#L1-L61)
-- [backend/app/main.py:1-88](file://backend/app/main.py#L1-L88)
-- [backend/app/database.py:1-62](file://backend/app/database.py#L1-L62)
-- [backend/requirements.txt:1-34](file://backend/requirements.txt#L1-L34)
-- [backend/alembic.ini:1-40](file://backend/alembic.ini#L1-L40)
-- [backend/migrations/env.py:1-55](file://backend/migrations/env.py#L1-L55)
-- [site/mkdocs.yml:1-78](file://site/mkdocs.yml#L1-L78)
-- [backend/tests/test_health.py:1-49](file://backend/tests/test_health.py#L1-L49)
-- [frontend/package.json:1-38](file://frontend/package.json#L1-L38)
+- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [index.html:1-70](file://index.html#L1-L70)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
 
 ## Core Components
-- PostgreSQL database service with health checks and persistent volume.
-- FastAPI backend service with configurable AI provider selection, JWT secret, OpenAI/Ollama integration, and MkDocs site publishing.
-- React frontend service running a Vite development server for local development.
-- Shared MkDocs site configuration for documentation publishing.
+- **Flask Management Server**: Lightweight Flask application handling authentication, file uploads, content conversion, and email verification
+- **Jekyll Static Site Generator**: Ruby-based static site generator with 5 blog post styles and automatic content processing
+- **GitHub Actions Pipeline**: Automated deployment workflow building and publishing the static site to GitHub Pages
+- **SQLite Database**: Zero-configuration file-based database for user authentication and session management
 
 Key runtime characteristics:
-- Backend exposes port 8000 and mounts backend and site directories for live updates.
-- Frontend exposes port 5173 and mounts node_modules to avoid host-side installs.
-- Database persists data under a named volume and exposes port 5432.
+- Flask server handles all administrative functions and content management
+- Jekyll processes blog posts from the `_posts/` directory into static HTML
+- GitHub Actions workflow automatically builds and deploys changes to GitHub Pages
+- Single-file SQLite database eliminates external dependency requirements
 
 **Section sources**
-- [docker-compose.yml:9-67](file://docker-compose.yml#L9-L67)
-- [backend/app/config.py:34-57](file://backend/app/config.py#L34-L57)
-- [backend/app/main.py:74-88](file://backend/app/main.py#L74-L88)
+- [app/__init__.py](file://app/__init__.py)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 ## Architecture Overview
-The system follows a multi-container architecture orchestrated by Docker Compose:
-- Backend depends on a healthy database before starting.
-- Frontend depends on the backend being reachable.
-- Environment variables configure database credentials, AI provider endpoints, JWT secrets, and site base URLs.
+The system follows a simplified single-container architecture focused on static site generation:
+- Flask management server handles all administrative operations
+- Jekyll processes content into static HTML for optimal performance
+- GitHub Actions workflow automates deployment to GitHub Pages
+- SQLite database provides lightweight user authentication
 
 ```mermaid
 graph TB
-subgraph "Docker Compose Orchestration"
-DB["PostgreSQL Service<br/>Health-checked"]
-BE["FastAPI Backend<br/>Uvicorn + Config + DB Pool"]
-FE["React Frontend<br/>Vite Dev Server"]
-SITE["MkDocs Site<br/>Static Docs"]
-end
-DB --> BE
-BE --> FE
-BE -. "publishes docs to /site" .-> SITE
+subgraph "Single Container Architecture"
+FLASK["Flask Management Server<br/>Auth + Upload + Conversion"]
+JEKYLL["Jekyll Static Generator<br/>5 Blog Styles + Templates"]
+GITHUB["GitHub Actions<br/>Auto-deploy to GitHub Pages"]
+SQLITE["SQLite Database<br/>Zero-config User Storage"]
+END
+FLASK --> SQLITE
+FLASK --> JEKYLL
+JEKYLL --> GITHUB
 ```
 
 **Diagram sources**
-- [docker-compose.yml:9-67](file://docker-compose.yml#L9-L67)
-- [backend/app/main.py:74-88](file://backend/app/main.py#L74-L88)
-- [site/mkdocs.yml:1-78](file://site/mkdocs.yml#L1-L78)
+- [app/__init__.py](file://app/__init__.py)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 ## Detailed Component Analysis
 
-### Database Service
-- Image: postgres:16-alpine
-- Ports: 5432:5432
-- Environment: user, password, database name
-- Health check: uses pg_isready against configured user/db
-- Persistent volume: pgdata
-
-Operational notes:
-- Use strong secrets in production.
-- Persist data via named volume.
-- Ensure network isolation and firewall rules for port 5432.
-
-**Section sources**
-- [docker-compose.yml:10-27](file://docker-compose.yml#L10-L27)
-
-### Backend Service
-- Containerized with Python 3.12 slim image.
-- Installs system dependencies (gcc, libpq-dev) and Python packages from requirements.txt.
-- Starts Uvicorn server on port 8000 with hot reload enabled.
-- Environment-driven configuration via pydantic-settings:
-  - DATABASE_URL
-  - JWT_SECRET_KEY
-  - AI_PROVIDER
-  - OPENAI_API_KEY and OPENAI_BASE_URL
-  - OLLAMA_BASE_URL
-  - SITE_BASE_URL
-- Mounts backend and site directories for live updates.
-
-Configuration highlights:
-- Settings class centralizes configuration with defaults and .env support.
-- Database engine uses asyncpg with connection pooling and pre-ping.
-- Health endpoint returns application metadata.
+### Flask Management Server
+- **Containerized with Python 3.12 Alpine image**
+- **Handles**: User authentication, file uploads, content conversion, email verification
+- **Database**: SQLite for zero-configuration user storage
+- **Security**: Flask sessions with secure cookies, password hashing, email verification via QQ SMTP
 
 ```mermaid
 classDiagram
-class Settings {
-+APP_NAME : str
-+APP_VERSION : str
-+DEBUG : bool
-+DATABASE_URL : str
-+JWT_SECRET_KEY : str
-+JWT_ALGORITHM : str
-+JWT_ACCESS_TOKEN_EXPIRE_MINUTES : int
-+JWT_REFRESH_TOKEN_EXPIRE_DAYS : int
-+AI_PROVIDER : str
-+OPENAI_API_KEY : str
-+OPENAI_BASE_URL : str
-+OPENAI_MODEL : str
-+OLLAMA_BASE_URL : str
-+OLLAMA_MODEL : str
-+SITE_BASE_URL : str
-+SITE_DIR : str
-+CORS_ORIGINS : str[]
+class FlaskApp {
++app_factory()
++auth_routes()
++upload_routes()
++converter_routes()
++mailer_routes()
 }
-class Database {
-+engine
-+async_session_factory
-+Base
-+get_db()
+class AuthModule {
++register_user()
++login_user()
++reset_password()
++verify_email()
 }
-Settings <.. Database : "consumed by"
+class ConverterModule {
++convert_pdf()
++convert_word()
++convert_html()
++extract_images()
+}
+class UploaderModule {
++handle_upload()
++validate_files()
++style_selection()
+}
+class MailerModule {
++send_verification()
++smtp_qq_config()
++email_validation()
+}
+FlaskApp --> AuthModule
+FlaskApp --> ConverterModule
+FlaskApp --> UploaderModule
+FlaskApp --> MailerModule
 ```
 
 **Diagram sources**
-- [backend/app/config.py:15-61](file://backend/app/config.py#L15-L61)
-- [backend/app/database.py:24-62](file://backend/app/database.py#L24-L62)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
 
 **Section sources**
-- [backend/Dockerfile:1-29](file://backend/Dockerfile#L1-L29)
-- [backend/app/config.py:15-61](file://backend/app/config.py#L15-L61)
-- [backend/app/database.py:24-62](file://backend/app/database.py#L24-L62)
-- [backend/app/main.py:74-88](file://backend/app/main.py#L74-L88)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
 
-### Frontend Service
-- Containerized with Node 20 Alpine image.
-- Installs dependencies from package.json and runs Vite dev server.
-- Exposes port 5173 and mounts node_modules to avoid host installs.
+### Jekyll Static Site Generator
+- **Ruby-based static site generator** with Jekyll 4.3
+- **5 distinct blog post styles**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual
+- **Automatic content processing**: Converts uploaded content to styled blog posts
+- **Theme ecosystem**: 1000+ blog themes available for customization
+- **GitHub Pages native integration**: Built-in support for GitHub Pages deployment
 
-Development workflow:
-- Edit frontend files locally; changes reflect inside the container.
-- Access the UI at http://localhost:5173.
+Configuration highlights:
+- **Front matter processing**: Automatic YAML metadata generation for blog posts
+- **Image optimization**: Automatic extraction and embedding of extracted images
+- **Responsive design**: Mobile-first approach with CSS frameworks
+- **Search functionality**: Full-text search across all articles
 
 **Section sources**
-- [frontend/Dockerfile:1-20](file://frontend/Dockerfile#L1-L20)
-- [frontend/package.json:1-38](file://frontend/package.json#L1-L38)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [index.html:1-70](file://index.html#L1-L70)
 
 ### CI/CD Pipeline (GitHub Actions)
-- Workflow name: Deploy MkDocs to GitHub Pages
-- Triggers: pushes to main branch affecting site/**, manual dispatch
-- Permissions: read repository contents, write to GitHub Pages, OIDC tokens
-- Build job:
+- **Workflow name**: Deploy MkDocs to GitHub Pages (now Jekyll-based)
+- **Triggers**: Pushes to main branch affecting site/** or manual dispatch
+- **Permissions**: Read repository contents, write to GitHub Pages, OIDC tokens
+- **Build job**:
   - Checks out repository
   - Sets up Python 3.12
-  - Installs MkDocs and Material theme
-  - Builds site in strict mode
+  - Installs Jekyll and dependencies
+  - Builds static site with strict mode
   - Uploads built site as artifact
-- Deploy job:
-  - Deploys artifact to GitHub Pages environment with URL exposed
+- **Deploy job**:
+  - Deploys artifact to GitHub Pages environment
+  - Exposes deployment URL
 
 ```mermaid
 sequenceDiagram
 participant Dev as "Developer"
 participant GH as "GitHub Repo"
 participant GA as "GitHub Actions"
-participant MK as "MkDocs"
+participant JEKYLL as "Jekyll"
 participant GP as "GitHub Pages"
 Dev->>GH : "Push to main (site/**)"
 GH->>GA : "Trigger workflow"
 GA->>GA : "Checkout repo"
-GA->>GA : "Setup Python 3.12"
-GA->>MK : "Install MkDocs + Material"
-GA->>MK : "Build site (strict)"
-MK-->>GA : "Built site artifacts"
+GA->>GA : "Setup Ruby 3.1"
+GA->>JEKYLL : "Install Jekyll + Dependencies"
+GA->>JEKYLL : "Build site (strict)"
+JEKYLL-->>GA : "Built site artifacts"
 GA->>GP : "Deploy to GitHub Pages"
 GP-->>Dev : "Site URL available"
 ```
@@ -264,169 +249,149 @@ GP-->>Dev : "Site URL available"
 
 **Section sources**
 - [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
-- [site/mkdocs.yml:1-78](file://site/mkdocs.yml#L1-L78)
-
-### Automated Testing Integration
-- Backend tests use pytest with pytest-asyncio and httpx ASGI transport.
-- Test coverage includes:
-  - Health check endpoint verification
-  - Basic authentication flow validation
-
-Recommended improvements:
-- Add database-backed tests with a test-specific database URL.
-- Integrate coverage reporting and linting in CI.
-- Expand test suite to cover AI provider integrations and publishing flows.
-
-**Section sources**
-- [backend/tests/test_health.py:1-49](file://backend/tests/test_health.py#L1-L49)
-- [backend/requirements.txt:27-30](file://backend/requirements.txt#L27-L30)
 
 ### Environment Variables and Secrets Management
 Critical environment variables:
-- DATABASE_URL: Postgres connection string
-- JWT_SECRET_KEY: Strong secret for signing tokens
-- AI_PROVIDER: "openai" or "ollama"
-- OPENAI_API_KEY and OPENAI_BASE_URL: OpenAI configuration
-- OLLAMA_BASE_URL: Local Ollama endpoint
-- SITE_BASE_URL: Base URL for published site
+- **GitHub Pages deployment**: Automatic via GitHub Actions OIDC tokens
+- **Email configuration**: QQ SMTP credentials for email verification
+- **Application settings**: Flask configuration for session management
+- **Jekyll configuration**: Site metadata, plugins, and build settings
 
 Production recommendations:
-- Store secrets externally (e.g., HashiCorp Vault, AWS Secrets Manager, Docker secrets).
-- Use environment files or orchestrator-native secret injection.
-- Rotate secrets regularly and enforce least privilege.
+- Store email SMTP credentials in GitHub Secrets
+- Use environment files for local development
+- Implement proper error handling for email failures
+- Monitor GitHub Pages deployment status
 
 **Section sources**
-- [docker-compose.yml:34-41](file://docker-compose.yml#L34-L41)
-- [backend/app/config.py:34-57](file://backend/app/config.py#L34-L57)
+- [_config.yml:18-23](file://_config.yml#L18-L23)
+- [app/mailer.py](file://app/mailer.py)
+- [.github/workflows/deploy.yml:18-21](file://.github/workflows/deploy.yml#L18-L21)
 
 ### Security Considerations
-- Enforce HTTPS in production and secure cookies.
-- Restrict CORS origins to trusted domains.
-- Use strong JWT secrets and rotate periodically.
-- Limit database user privileges and network exposure.
-- Scan images and dependencies regularly.
+- **Authentication**: SQLite-based user storage with password hashing
+- **Email verification**: QQ SMTP integration for secure user registration
+- **Session management**: Flask sessions with secure cookie settings
+- **File uploads**: Input validation and sanitization for uploaded documents
+- **GitHub Pages**: Secure deployment via GitHub Actions with proper permissions
 
 **Section sources**
-- [backend/app/config.py:55-57](file://backend/app/config.py#L55-L57)
-- [backend/app/config.py:37-42](file://backend/app/config.py#L37-L42)
+- [app/auth.py](file://app/auth.py)
+- [app/mailer.py](file://app/mailer.py)
+- [app/uploader.py](file://app/uploader.py)
 
 ### Monitoring Setup and Logging Configuration
-- Backend logs at INFO level by default; DEBUG increases verbosity.
-- Health endpoint supports external health checks.
-- Consider integrating structured logging and metrics collection (e.g., Prometheus/OpenTelemetry).
+- **Application logging**: Flask application logs for debugging and monitoring
+- **GitHub Pages monitoring**: Automatic deployment status tracking
+- **Error handling**: Comprehensive error handling for file conversions and email delivery
+- **Health checks**: Basic application health verification
 
 **Section sources**
-- [backend/app/main.py:20-25](file://backend/app/main.py#L20-L25)
-- [backend/app/main.py:74-88](file://backend/app/main.py#L74-L88)
+- [app/__init__.py](file://app/__init__.py)
+- [.github/workflows/deploy.yml:53-63](file://.github/workflows/deploy.yml#L53-L63)
 
 ### Maintenance Procedures
-- Apply database migrations using Alembic with the configured database URL.
-- Back up the PostgreSQL data volume regularly.
-- Review and update dependencies periodically.
+- **Content management**: Use Flask admin interface for blog post creation and management
+- **Theme updates**: Update Jekyll gems in Gemfile for theme improvements
+- **Plugin management**: Add/remove Jekyll plugins via Gemfile as needed
+- **Deployment verification**: Monitor GitHub Actions workflow for successful deployments
 
 **Section sources**
-- [backend/alembic.ini:4-6](file://backend/alembic.ini#L4-L6)
-- [backend/migrations/env.py:43-54](file://backend/migrations/env.py#L43-L54)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [_config.yml:18-23](file://_config.yml#L18-L23)
 
 ## Dependency Analysis
 Runtime and build-time dependencies:
-- Backend:
-  - FastAPI, Uvicorn, SQLAlchemy asyncio, asyncpg, Alembic
-  - Pydantic and pydantic-settings for configuration
-  - python-jose for JWT, passlib for password hashing
-  - httpx for HTTP client, mkdocs-material for publishing
-  - pytest and pytest-asyncio for testing
-- Frontend:
-  - React, Vite, TypeScript, TailwindCSS, Axios, react-router-dom
-  - ESLint and related plugins for linting
+- **Flask App**:
+  - Flask web framework, Flask-SQLAlchemy for database operations
+  - Flask-WTF for form handling, Flask-Login for authentication
+  - Email libraries for QQ SMTP integration
+- **Jekyll Site**:
+  - Jekyll 4.3, Jekyll Feed, Jekyll SEO Tag, Jekyll Paginate
+  - Ruby 3.1 runtime environment
+- **GitHub Actions**:
+  - Ruby setup action, GitHub Pages deployment action
+  - Python 3.12 for legacy compatibility
 
 ```mermaid
 graph LR
-BREQ["backend/requirements.txt"]
-FP["frontend/package.json"]
-BREQ --> FA["fastapi"]
-BREQ --> UV["uvicorn"]
-BREQ --> SA["sqlalchemy[asyncio]"]
-BREQ --> APG["asyncpg"]
-BREQ --> AL["alembic"]
-BREQ --> PYD["pydantic-settings"]
-BREQ --> JOSE["python-jose"]
-BREQ --> PASS["passlib"]
-BREQ --> HTTPX["httpx"]
-BREQ --> MK["mkdocs + material"]
-BREQ --> PYTEST["pytest + pytest-asyncio"]
-FP --> REACT["react + dom"]
-FP --> VITE["vite + typescript"]
-FP --> AX["axios"]
-FP --> RT["react-router-dom"]
-FP --> TWCSS["tailwindcss + plugins"]
-FP --> ESL["eslint + plugins"]
+GEM["Gemfile"]
+FLASK["app/__init__.py"]
+GHA[".github/workflows/deploy.yml"]
+GEM --> JEKYLL["jekyll-core"]
+GEM --> FEED["jekyll-feed"]
+GEM --> SEO["jekyll-seo-tag"]
+GEM --> PAGINATE["jekyll-paginate"]
+FLASK --> FLASKCORE["flask"]
+FLASK --> SQLALCHEMY["flask-sqlalchemy"]
+FLASK --> WTFFORMS["flask-wtf"]
+FLASK --> LOGIN["flask-login"]
+GHA --> RUBYSETUP["actions/setup-ruby"]
+GHA --> DEPLOY["actions/deploy-pages"]
 ```
 
 **Diagram sources**
-- [backend/requirements.txt:1-34](file://backend/requirements.txt#L1-L34)
-- [frontend/package.json:1-38](file://frontend/package.json#L1-L38)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [app/__init__.py](file://app/__init__.py)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 **Section sources**
-- [backend/requirements.txt:1-34](file://backend/requirements.txt#L1-L34)
-- [frontend/package.json:1-38](file://frontend/package.json#L1-L38)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [app/__init__.py](file://app/__init__.py)
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
 
 ## Performance Considerations
-- Database connection pooling: tune pool_size and max_overflow for workload.
-- AI provider latency: monitor OpenAI/Ollama response times and implement timeouts.
-- Static site generation: cache MkDocs build artifacts when possible.
-- Container resource limits: set CPU/memory constraints in production orchestration.
-
-[No sources needed since this section provides general guidance]
+- **Static site generation**: Jekyll compiles content to static HTML for optimal loading performance
+- **Image optimization**: Automatic extraction and embedding of optimized images
+- **Caching**: GitHub Pages provides CDN caching for improved global performance
+- **Resource limits**: Single container deployment reduces resource overhead
+- **Build optimization**: Jekyll build process optimized for GitHub Actions environment
 
 ## Troubleshooting Guide
 Common deployment issues and resolutions:
-- Backend fails to start due to database unavailability:
-  - Verify database health check passes and credentials are correct.
-  - Confirm network connectivity between backend and database containers.
-- Database volume issues:
-  - Recreate the pgdata volume if corruption occurs; back up before recreation.
-- Frontend hot reload not working:
-  - Ensure proper volume mounts and port 5173 is free.
-- AI provider errors:
-  - Validate API keys and base URLs; confirm network access to provider endpoints.
-- MkDocs build failures:
-  - Run build locally with strict mode to catch issues early.
-- Health check failures:
-  - Check backend logs and verify the /health endpoint responds with expected JSON.
+- **GitHub Pages deployment failures**:
+  - Verify Ruby version compatibility in GitHub Actions workflow
+  - Check Jekyll build logs for syntax errors in markdown files
+  - Ensure proper Gemfile configuration and dependencies
+- **Flask application errors**:
+  - Check SQLite database connectivity and file permissions
+  - Verify email SMTP configuration for QQ email verification
+  - Review Flask application logs for authentication failures
+- **Jekyll build errors**:
+  - Validate YAML front matter in blog posts
+  - Check file encoding and character set issues
+  - Ensure proper directory structure for `_posts/` content
+- **Email verification failures**:
+  - Verify QQ SMTP credentials in GitHub Secrets
+  - Check email deliverability and spam filters
+  - Test SMTP connection manually
 
 **Section sources**
-- [docker-compose.yml:22-26](file://docker-compose.yml#L22-L26)
-- [backend/app/main.py:74-88](file://backend/app/main.py#L74-L88)
 - [.github/workflows/deploy.yml:43-46](file://.github/workflows/deploy.yml#L43-L46)
+- [app/mailer.py](file://app/mailer.py)
+- [_config.yml:18-23](file://_config.yml#L18-L23)
 
 ## Conclusion
-PolaZhenJing provides a clear, modular architecture suitable for containerized deployment. The Docker Compose setup enables rapid local development, while the GitHub Actions workflow automates documentation publishing. Production readiness requires hardened secrets management, robust monitoring/logging, database backups, and CI/CD expansion to include backend tests and security scanning.
-
-[No sources needed since this section summarizes without analyzing specific files]
+PolaZhenJing v2 represents a significant simplification from its previous complex multi-container architecture to a streamlined Jekyll-based static site generator with a lightweight Flask management server. The single-container deployment approach dramatically reduces operational complexity while maintaining powerful blogging capabilities. The GitHub Actions workflow provides seamless automation for content management and deployment. Production readiness requires proper email configuration, monitoring of GitHub Pages deployment status, and regular maintenance of Jekyll themes and plugins.
 
 ## Appendices
 
 ### Production Deployment Checklist
-- Replace default secrets with strong, managed secrets.
-- Configure HTTPS termination and secure cookie settings.
-- Set up database backups and point-in-time recovery.
-- Instrument application metrics and logs.
-- Harden container images and OS-level security.
-- Implement blue/green or rolling deployments.
-- Plan capacity sizing and auto-scaling policies.
-
-[No sources needed since this section provides general guidance]
+- **Environment setup**: Configure GitHub Secrets for email SMTP credentials
+- **Domain configuration**: Set up custom domain via GitHub Pages CNAME support
+- **Monitoring**: Enable GitHub Pages deployment notifications and status checks
+- **Backup strategy**: Regular backup of content in `_posts/` directory
+- **Security hardening**: Implement proper error handling and input validation
+- **Performance optimization**: Monitor GitHub Pages performance and optimize images
 
 ### Backup and Disaster Recovery
-- Database:
-  - Schedule regular logical backups of the pgdata volume.
-  - Test restore procedures periodically.
-- Application:
-  - Preserve container image digests for reproducible rollbacks.
-  - Maintain configuration snapshots (environment variables, compose files).
-- Recovery:
-  - Document RTO/RPO targets and recovery playbooks.
-  - Automate restoration steps where possible.
+- **Content backup**: Regular backup of `_posts/` directory containing all blog content
+- **Configuration backup**: Preserve `_config.yml` and Gemfile for environment recreation
+- **Database backup**: SQLite database file backup for user authentication data
+- **Recovery procedures**: Document steps to recreate environment and redeploy
+- **Rollback strategy**: GitHub Pages allows easy rollback to previous deployments
 
-[No sources needed since this section provides general guidance]
+**Section sources**
+- [_config.yml:32-49](file://_config.yml#L32-L49)
+- [Gemfile:1-7](file://Gemfile#L1-L7)
+- [PRD.md:160-179](file://PRD.md#L160-L179)

@@ -1,0 +1,25 @@
+---
+layout: default
+---
+<article class="post-friendly-explainer">
+  <header class="post-header container">
+    {% include style-badge.html style="friendly-explainer" %}
+    <h1>{{ page.title }}</h1>
+    <div class="post-meta">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+      {% if page.tags.size > 0 %}
+      <span class="post-meta-sep">·</span>
+      <span>{{ page.tags | join: ", " }}</span>
+      {% endif %}
+    </div>
+  </header>
+  {% if page.tldr %}
+  <div class="tldr-box container">
+    <strong>TL;DR</strong>
+    <p>{{ page.tldr }}</p>
+  </div>
+  {% endif %}
+  <div class="post-content container">
+    {{ content }}
+  </div>
+</article>

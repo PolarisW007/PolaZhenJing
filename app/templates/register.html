@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h2>注册 / Register</h2>
+<form method="POST">
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" class="form-input" required autofocus>
+  </div>
+  <div class="form-group">
+    <label for="email">QQ Email</label>
+    <input type="email" id="email" name="email" class="form-input" placeholder="yourname@qq.com" required>
+  </div>
+  <div class="form-group">
+    <label for="password">Password (min 6 chars)</label>
+    <input type="password" id="password" name="password" class="form-input" minlength="6" required>
+  </div>
+  <button type="submit" class="btn-gold">Register & Verify Email</button>
+</form>
+<div class="form-links">
+  <a href="{{ url_for('auth.login') }}">Already have an account? Login</a>
+</div>
+{% endblock %}

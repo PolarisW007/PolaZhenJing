@@ -2,24 +2,26 @@
 
 <cite>
 **Referenced Files in This Document**
-- [backend/app/main.py](file://backend/app/main.py)
-- [backend/app/config.py](file://backend/app/config.py)
-- [backend/app/database.py](file://backend/app/database.py)
-- [backend/app/common/middleware.py](file://backend/app/common/middleware.py)
-- [backend/app/common/exceptions.py](file://backend/app/common/exceptions.py)
-- [backend/app/auth/router.py](file://backend/app/auth/router.py)
-- [backend/app/auth/service.py](file://backend/app/auth/service.py)
-- [backend/app/auth/dependencies.py](file://backend/app/auth/dependencies.py)
-- [backend/app/auth/schemas.py](file://backend/app/auth/schemas.py)
-- [backend/app/ai/factory.py](file://backend/app/ai/factory.py)
-- [backend/app/ai/base_provider.py](file://backend/app/ai/base_provider.py)
-- [backend/app/ai/openai_provider.py](file://backend/app/ai/openai_provider.py)
-- [backend/app/ai/ollama_provider.py](file://backend/app/ai/ollama_provider.py)
-- [backend/app/thoughts/router.py](file://backend/app/thoughts/router.py)
-- [backend/app/tags/router.py](file://backend/app/tags/router.py)
-- [backend/app/publish/router.py](file://backend/app/publish/router.py)
-- [backend/app/sharing/router.py](file://backend/app/sharing/router.py)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/converter.py](file://app/converter.py)
+- [app/mailer.py](file://app/mailer.py)
+- [app/templates/base.html](file://app/templates/base.html)
+- [app/templates/upload.html](file://app/templates/upload.html)
+- [_config.yml](file://_config.yml)
+- [Gemfile](file://Gemfile)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Complete migration from FastAPI to Flask/Jekyll architecture
+- Replaced layered FastAPI architecture with three-blueprint system (auth, uploader, converter)
+- Removed FastAPI-specific components (main.py, database.py, common/exceptions.py, ai modules)
+- Integrated SQLite database with Flask application context
+- Implemented Jekyll static site generation workflow
+- Added QQ email SMTP integration for verification
+- Restructured templates and styling system
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,486 +36,380 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the application architecture of the PolaZhenJing backend. It explains how the FastAPI application is initialized, how routing and middleware are configured, and how configuration, database, and AI integrations are structured. It also documents the exception handling system, application lifecycle, logging, health checks, and monitoring integration.
+This document describes the application architecture of the PolaZhenJing backend following its complete migration from FastAPI to Flask/Jekyll architecture. The system now operates as a Flask application with three integrated blueprints (auth, uploader, converter) that manage user authentication, content upload and processing, and Jekyll static site generation. The architecture leverages SQLite for data persistence, QQ Email SMTP for verification, and a comprehensive template system with dark gold theming.
 
 ## Project Structure
-The backend is organized around a FastAPI application factory with modular routers grouped by domain features (authentication, thoughts, tags, AI, publishing, sharing). Configuration is centralized via a settings class loaded from environment variables. Database integration uses SQLAlchemy asyncio with a session factory and dependency injection. Middleware provides CORS and request logging. Exception handling ensures consistent error responses.
+The backend is organized around a Flask application factory with three integrated blueprints. The structure follows Flask conventions with separate modules for authentication, content management, and conversion utilities. Configuration is managed through environment variables and Jekyll settings. Templates utilize Jinja2 with custom styling and responsive design.
 
 ```mermaid
 graph TB
-subgraph "FastAPI App"
-M["main.py<br/>App factory, lifespan, routers, health"]
-MW["common/middleware.py<br/>CORS, request logging"]
-EX["common/exceptions.py<br/>Global exception handlers"]
-end
-subgraph "Configuration"
-CFG["config.py<br/>Settings (environment-driven)"]
-end
-subgraph "Database"
-DB["database.py<br/>Async engine, session factory, Base"]
-end
-subgraph "Routers"
-AUTH["auth/router.py"]
-THOUGHTS["thoughts/router.py"]
-TAGS["tags/router.py"]
-AI["ai/router.py"]
-PUBLISH["publish/router.py"]
-SHARE["sharing/router.py"]
-end
-M --> MW
-M --> EX
-M --> AUTH
-M --> THOUGHTS
-M --> TAGS
-M --> AI
-M --> PUBLISH
-M --> SHARE
-M --> CFG
-M --> DB
+subgraph "Flask App Factory"
+APP["app/__init__.py<br/>create_app(), get_db(), init_db()"]
+ENDPT["Endpoints"]
+ENDPT --> AUTH["auth.py<br/>Authentication routes"]
+ENDPT --> UP["uploader.py<br/>Upload & Jekyll integration"]
+ENDPT --> CONV["converter.py<br/>File conversion utilities"]
+ENDPT --> MAIL["mailer.py<br/>QQ Email SMTP"]
+ENDPT --> TPL["templates/<br/>Jinja2 templates"]
+ENDPT --> CFG["_config.yml<br/>Jekyll configuration"]
+ENDPT --> GEM["Gemfile<br/>Ruby dependencies"]
+APP --> AUTH
+APP --> UP
+APP --> CONV
+APP --> MAIL
+APP --> TPL
+APP --> CFG
+APP --> GEM
 ```
 
 **Diagram sources**
-- [backend/app/main.py:1-88](file://backend/app/main.py#L1-L88)
-- [backend/app/common/middleware.py:1-59](file://backend/app/common/middleware.py#L1-L59)
-- [backend/app/common/exceptions.py:1-87](file://backend/app/common/exceptions.py#L1-L87)
-- [backend/app/config.py:1-62](file://backend/app/config.py#L1-L62)
-- [backend/app/database.py:1-62](file://backend/app/database.py#L1-L62)
-- [backend/app/auth/router.py:1-91](file://backend/app/auth/router.py#L1-L91)
-- [backend/app/thoughts/router.py:1-115](file://backend/app/thoughts/router.py#L1-L115)
-- [backend/app/tags/router.py:1-72](file://backend/app/tags/router.py#L1-L72)
-- [backend/app/publish/router.py:1-64](file://backend/app/publish/router.py#L1-L64)
-- [backend/app/sharing/router.py:1-46](file://backend/app/sharing/router.py#L1-L46)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/converter.py:1](file://app/converter.py#L1)
+- [app/mailer.py:8](file://app/mailer.py#L8)
+- [_config.yml:1](file://_config.yml#L1)
+- [Gemfile:1](file://Gemfile#L1)
 
 **Section sources**
-- [backend/app/main.py:1-88](file://backend/app/main.py#L1-L88)
-- [backend/app/config.py:1-62](file://backend/app/config.py#L1-L62)
+- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
 ## Core Components
-- Application factory and lifecycle: The FastAPI app is created with metadata and a lifespan manager that logs startup and disposes the database engine on shutdown.
-- Configuration: Centralized settings class loads environment variables and provides defaults for application name/version, debug mode, database URL, JWT configuration, AI provider settings, site/publishing settings, and CORS origins.
-- Database: An async SQLAlchemy engine and session factory are created from settings. A dependency yields sessions per request and handles commit/rollback automatically.
-- Middleware: CORS is configured from settings; request logging middleware records method, path, status code, and elapsed time.
-- Exception handling: Global handlers convert custom exceptions to JSON responses and mask unexpected errors in production.
-- Routing: Feature routers are included under dedicated prefixes and tagged for documentation.
+- **Application Factory**: Flask application creation with template and static folder configuration, secret key management, and database initialization.
+- **Database Integration**: SQLite connection management with Flask's application context, WAL mode for improved concurrency, and automatic cleanup.
+- **Authentication System**: User registration, login, password management, and email verification with QQ Email SMTP integration.
+- **Content Management**: File upload handling, content conversion pipeline, and Jekyll post generation with Git synchronization.
+- **Template System**: Comprehensive Jinja2 templates with dark gold theming, responsive design, and interactive UI components.
+- **Blueprint Architecture**: Three integrated blueprints (auth, uploader, converter) with URL prefixes and modular routing.
 
 **Section sources**
-- [backend/app/main.py:28-87](file://backend/app/main.py#L28-L87)
-- [backend/app/config.py:16-61](file://backend/app/config.py#L16-L61)
-- [backend/app/database.py:23-61](file://backend/app/database.py#L23-L61)
-- [backend/app/common/middleware.py:22-58](file://backend/app/common/middleware.py#L22-L58)
-- [backend/app/common/exceptions.py:66-86](file://backend/app/common/exceptions.py#L66-L86)
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/thoughts/router.py:33-114](file://backend/app/thoughts/router.py#L33-L114)
-- [backend/app/tags/router.py:28-71](file://backend/app/tags/router.py#L28-L71)
-- [backend/app/publish/router.py:23-63](file://backend/app/publish/router.py#L23-L63)
-- [backend/app/sharing/router.py:22-45](file://backend/app/sharing/router.py#L22-L45)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:16-23](file://app/auth.py#L16-L23)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
 
 ## Architecture Overview
-The backend follows a layered architecture:
-- Presentation layer: FastAPI routes and dependencies.
-- Domain services: Feature-specific services (auth, thoughts, tags, AI, publish, share).
-- Persistence: SQLAlchemy async ORM with a shared Base and session dependency.
-- Configuration: Environment-driven settings.
-- Cross-cutting concerns: Middleware (CORS, logging), exception handling, and health checks.
+The backend follows a Flask-based architecture with integrated Jekyll static site generation:
+- **Presentation Layer**: Flask blueprints with Jinja2 templates and responsive design.
+- **Business Logic**: Modular services within blueprints for authentication, content management, and conversion.
+- **Data Layer**: SQLite database with Flask application context and session management.
+- **Integration Layer**: QQ Email SMTP for verification, Git operations for deployment, and file system operations.
+- **Static Site Generation**: Jekyll configuration with custom layouts and theme support.
 
 ```mermaid
 graph TB
-Client["Client"]
-FA["FastAPI App<br/>main.py"]
-CORS["CORS Middleware"]
-LOG["Request Logging Middleware"]
-AUTH_R["Auth Router"]
-THOUGHTS_R["Thoughts Router"]
-TAGS_R["Tags Router"]
-AI_R["AI Router"]
-PUBLISH_R["Publish Router"]
-SHARE_R["Share Router"]
-AUTH_S["Auth Service"]
-THOUGHTS_S["Thoughts Service"]
-TAGS_S["Tags Service"]
-AI_F["AI Factory"]
-AI_B["BaseAIProvider"]
-AI_O["OpenAIProvider"]
-AI_L["OllamaProvider"]
-DB["SQLAlchemy Async Engine<br/>Session Factory"]
-CFG["Settings"]
-Client --> FA
-FA --> CORS
-FA --> LOG
-FA --> AUTH_R
-FA --> THOUGHTS_R
-FA --> TAGS_R
-FA --> AI_R
-FA --> PUBLISH_R
-FA --> SHARE_R
-AUTH_R --> AUTH_S
-THOUGHTS_R --> THOUGHTS_S
-TAGS_R --> TAGS_S
-AI_R --> AI_F
-AI_F --> AI_B
-AI_F --> AI_O
-AI_F --> AI_L
-AUTH_R --> DB
-THOUGHTS_R --> DB
-TAGS_R --> DB
-PUBLISH_R --> DB
-SHARE_R --> DB
-FA --> CFG
-DB --> CFG
+Client["Web Browser"]
+FLASK["Flask App<br/>app/__init__.py"]
+AUTH["Auth Blueprint<br/>auth.py"]
+UP["Uploader Blueprint<br/>uploader.py"]
+CONV["Converter Utilities<br/>converter.py"]
+MAIL["Mailer Service<br/>mailer.py"]
+DB["SQLite Database<br/>users table"]
+TPL["Jinja2 Templates<br/>templates/"]
+JEKYLL["Jekyll Static Site<br/>_config.yml"]
+Client --> FLASK
+FLASK --> AUTH
+FLASK --> UP
+FLASK --> CONV
+FLASK --> MAIL
+AUTH --> DB
+UP --> DB
+UP --> CONV
+UP --> JEKYLL
+AUTH --> TPL
+UP --> TPL
+CONV --> TPL
+MAIL --> TPL
 ```
 
 **Diagram sources**
-- [backend/app/main.py:40-87](file://backend/app/main.py#L40-L87)
-- [backend/app/common/middleware.py:22-58](file://backend/app/common/middleware.py#L22-L58)
-- [backend/app/auth/router.py:22-32](file://backend/app/auth/router.py#L22-L32)
-- [backend/app/thoughts/router.py:25-31](file://backend/app/thoughts/router.py#L25-L31)
-- [backend/app/tags/router.py:19-26](file://backend/app/tags/router.py#L19-L26)
-- [backend/app/publish/router.py:21-21](file://backend/app/publish/router.py#L21-L21)
-- [backend/app/sharing/router.py:19-20](file://backend/app/sharing/router.py#L19-L20)
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/ai/openai_provider.py:24-104](file://backend/app/ai/openai_provider.py#L24-L104)
-- [backend/app/ai/ollama_provider.py:23-98](file://backend/app/ai/ollama_provider.py#L23-L98)
-- [backend/app/database.py:23-61](file://backend/app/database.py#L23-L61)
-- [backend/app/config.py:16-61](file://backend/app/config.py#L16-L61)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/converter.py:1](file://app/converter.py#L1)
+- [app/mailer.py:8](file://app/mailer.py#L8)
+- [_config.yml:1](file://_config.yml#L1)
 
 ## Detailed Component Analysis
 
-### FastAPI Application Initialization and Lifecycle
-- App factory: Creates the FastAPI instance with title, version, description, and lifespan.
-- Lifespan: Logs startup and disposes the async engine on shutdown.
-- Health check: A lightweight GET endpoint returns application metadata and status.
+### Flask Application Factory and Lifecycle
+- **Application Creation**: Flask instance with template folder configuration and security settings.
+- **Database Management**: Context-aware SQLite connection with automatic cleanup and WAL mode.
+- **Blueprint Registration**: Three integrated blueprints (auth, uploader) with URL prefixes.
+- **Environment Configuration**: Secret key loading from environment variables with development fallback.
 
 ```mermaid
 sequenceDiagram
 participant Proc as "Process"
-participant App as "FastAPI App"
-participant Lifespan as "Lifespan Manager"
-participant DB as "SQLAlchemy Engine"
-Proc->>App : Import main.py
-App->>Lifespan : Start lifespan
-Lifespan->>Proc : Log startup
-Proc-->>App : Requests handled
-App->>Lifespan : End lifespan
-Lifespan->>DB : Dispose engine pool
-Lifespan-->>Proc : Log shutdown
+participant App as "Flask App"
+participant DB as "SQLite Connection"
+participant Auth as "Auth Blueprint"
+participant Up as "Uploader Blueprint"
+Proc->>App : create_app()
+App->>DB : get_db() (lazy init)
+App->>Auth : register_blueprint()
+App->>Up : register_blueprint()
+App-->>Proc : Flask app ready
+Proc->>App : Request handling
+App->>DB : get_db() (per-request)
+App->>Auth : Route handler
+App->>Up : Route handler
+App->>DB : close_db() (teardown)
 ```
 
 **Diagram sources**
-- [backend/app/main.py:28-36](file://backend/app/main.py#L28-L36)
-- [backend/app/database.py:23-30](file://backend/app/database.py#L23-L30)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
 
 **Section sources**
-- [backend/app/main.py:28-87](file://backend/app/main.py#L28-L87)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
 
-### Configuration Management
-- Centralized settings class with environment-driven values and defaults.
-- Includes application metadata, database URL, JWT parameters, AI provider selection and endpoints, site/publishing base URL and directory, and CORS origins.
+### Authentication System
+- **User Management**: Registration with QQ email validation, password hashing, and email verification workflow.
+- **Session Security**: Login-required decorators, session-based authentication, and secure password handling.
+- **Verification Workflow**: 6-digit code generation with 5-minute expiry, email delivery via QQ SMTP.
+- **Password Operations**: Secure password hashing, verification, and change functionality.
 
 ```mermaid
 flowchart TD
-Start(["Load Settings"]) --> EnvFile["Read .env file"]
-EnvFile --> MergeEnv["Merge environment variables"]
-MergeEnv --> ApplyDefaults["Apply defaults"]
-ApplyDefaults --> Expose["Expose settings singleton"]
+Start(["User Registration"]) --> Validate["Validate Input<br/>Username, Email, Password"]
+Validate --> Exists{"User Exists?"}
+Exists --> |Yes| Error["Flash Error<br/>Already Registered"]
+Exists --> |No| Hash["Hash Password"]
+Hash --> Create["Create User Record"]
+Create --> Code["Generate 6-digit Code"]
+Code --> Email["Send QQ Email"]
+Email --> Verify["Verification Page"]
+Verify --> Valid{"Valid Code?"}
+Valid --> |Yes| Activate["Mark Verified"]
+Valid --> |No| Expired["Code Expired/Error"]
+Activate --> Success["Redirect to Login"]
+Expired --> Reset["Redirect to Register"]
 ```
 
 **Diagram sources**
-- [backend/app/config.py:24-61](file://backend/app/config.py#L24-L61)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 
 **Section sources**
-- [backend/app/config.py:16-61](file://backend/app/config.py#L16-L61)
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/auth.py:136-167](file://app/auth.py#L136-L167)
+
+### Content Management and Jekyll Integration
+- **Upload Pipeline**: Multi-format support (PDF, DOCX, HTML, Markdown) with drag-and-drop interface.
+- **Conversion System**: Integrated conversion utilities with fallback mechanisms for missing dependencies.
+- **Post Generation**: Automatic Jekyll front matter creation with style selection and metadata.
+- **Git Integration**: Automated Git operations for deployment to GitHub Pages.
+
+```mermaid
+flowchart TD
+Upload["File Upload"] --> Detect["Detect Format<br/>PDF/DOCX/HTML/MD"]
+Detect --> Convert{"Conversion Available?"}
+Convert --> |Yes| Convert["Run Converter"]
+Convert --> |No| Fallback["Fallback Text"]
+Convert --> Title["Extract Title"]
+Title --> Style["Style Selection"]
+Style --> Generate["Generate Jekyll Post"]
+Generate --> Save["Save to _posts/"]
+Save --> Sync["Git Sync"]
+Sync --> Deploy["GitHub Deployment"]
+```
+
+**Diagram sources**
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/converter.py:58-87](file://app/converter.py#L58-L87)
+- [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
+
+**Section sources**
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
+
+### Template System and Styling
+- **Base Template**: Comprehensive dark gold theming with glass-morphism effects and responsive design.
+- **Interactive Components**: Tab switching, drag-and-drop file upload, and form validation.
+- **Flash Messages**: Category-based notification system with visual feedback.
+- **Navigation**: Session-aware navigation with conditional rendering based on authentication state.
+
+```mermaid
+classDiagram
+class BaseTemplate {
++admin-nav
++admin-main
++card
++flash-messages
++responsive-design
+}
+class UploadTemplate {
++tab-switching
++drag-drop-zone
++multi-format-support
++form-validation
+}
+class StyleCards {
++style-grid
++style-selection
++preview-themes
+}
+class Navigation {
++session-aware
++conditional-rendering
++user-menu
+}
+BaseTemplate <|-- UploadTemplate
+BaseTemplate <|-- StyleCards
+BaseTemplate <|-- Navigation
+```
+
+**Diagram sources**
+- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
+- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
+
+**Section sources**
+- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
+- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
 
 ### Database Integration and Session Management
-- Async engine creation from settings with echo, pool_pre_ping, pool_size, and max_overflow.
-- Async session factory bound to the engine.
-- Declarative Base class for ORM models.
-- Dependency that yields sessions per request, commits on success, rolls back on exceptions.
+- **SQLite Connection**: Context-aware database connections with automatic cleanup.
+- **WAL Mode**: Write-Ahead Logging for improved concurrent access.
+- **User Schema**: Comprehensive user table with verification status and timestamps.
+- **Session Management**: Flask session-based authentication with secure storage.
 
 ```mermaid
 classDiagram
-class Settings {
-+DATABASE_URL
-+DEBUG
+class DatabaseManager {
++get_db() : Connection
++close_db() : void
++init_db() : void
 }
-class Engine {
-+create_async_engine()
+class UserModel {
++id : INTEGER
++username : TEXT
++email : TEXT
++password_hash : TEXT
++email_verified : INTEGER
++created_at : TIMESTAMP
 }
-class AsyncSessionMaker {
-+async_session_factory
+class SessionManager {
++user_id : INTEGER
++username : TEXT
++verify_code : STRING
++verify_code_time : FLOAT
 }
-class Base {
-<<DeclarativeBase>>
-}
-class GetDB {
-+get_db() AsyncGenerator
-}
-Settings --> Engine : "provides DATABASE_URL"
-Engine --> AsyncSessionMaker : "bind"
-AsyncSessionMaker --> GetDB : "creates sessions"
-Base <.. GetDB : "models inherit"
+DatabaseManager --> UserModel : "manages"
+SessionManager --> UserModel : "authenticated"
 ```
 
 **Diagram sources**
-- [backend/app/database.py:23-61](file://backend/app/database.py#L23-L61)
-- [backend/app/config.py:35-36](file://backend/app/config.py#L35-L36)
+- [app/__init__.py:9-40](file://app/__init__.py#L9-L40)
+- [app/__init__.py:30-39](file://app/__init__.py#L30-L39)
 
 **Section sources**
-- [backend/app/database.py:23-61](file://backend/app/database.py#L23-L61)
+- [app/__init__.py:9-40](file://app/__init__.py#L9-L40)
+- [app/__init__.py:30-39](file://app/__init__.py#L30-L39)
 
-### Middleware Stack
-- CORS: Configured from settings with allow_origins, credentials, methods, and headers.
-- Request logging: Measures elapsed time and logs method, path, and status code.
-
-```mermaid
-flowchart TD
-Req["Incoming Request"] --> CORS["CORS Middleware"]
-CORS --> Logger["Request Logging Middleware"]
-Logger --> Route["Route Handler"]
-Route --> Resp["Response"]
-```
-
-**Diagram sources**
-- [backend/app/common/middleware.py:22-58](file://backend/app/common/middleware.py#L22-L58)
+### QQ Email SMTP Integration
+- **SMTP Configuration**: QQ Email SMTP with SSL connection and authentication.
+- **HTML Templates**: Professional verification email with styled layout.
+- **Error Handling**: Graceful degradation when SMTP credentials are unavailable.
+- **Timeout Management**: Controlled timeout for email delivery operations.
 
 **Section sources**
-- [backend/app/common/middleware.py:22-58](file://backend/app/common/middleware.py#L22-L58)
+- [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 
-### Exception Handling and Error Responses
-- Custom exception hierarchy with specific HTTP statuses.
-- Global handlers:
-  - Converts custom exceptions to JSON with detail.
-  - Catches generic exceptions and returns a safe internal server error message.
-
-```mermaid
-flowchart TD
-Try["Route Handler"] --> |Exception| Catch["Global Exception Handler"]
-Catch --> Custom{"Is AppException?"}
-Custom --> |Yes| JSONResp["JSONResponse with status and detail"]
-Custom --> |No| SafeResp["JSONResponse 500 with generic message"]
-```
-
-**Diagram sources**
-- [backend/app/common/exceptions.py:66-86](file://backend/app/common/exceptions.py#L66-L86)
+### Jekyll Configuration and Static Site Generation
+- **Site Configuration**: Jekyll settings with pagination, SEO plugins, and permalink structure.
+- **Build Exclusions**: System excludes for Python files, development directories, and configuration files.
+- **Layout Defaults**: Default layout assignment for blog posts.
+- **Deployment Ready**: Optimized for GitHub Pages deployment workflow.
 
 **Section sources**
-- [backend/app/common/exceptions.py:16-86](file://backend/app/common/exceptions.py#L16-L86)
-
-### Authentication Flow
-- Dependencies extract and validate bearer tokens, ensuring access token type and active user.
-- Services handle password hashing, JWT creation/verification, and user operations.
-
-```mermaid
-sequenceDiagram
-participant Client as "Client"
-participant Router as "Auth Router"
-participant Dep as "get_current_user"
-participant Service as "Auth Service"
-participant DB as "Database"
-Client->>Router : GET /auth/me (Authorization : Bearer ...)
-Router->>Dep : Extract and validate token
-Dep->>Service : decode_token(credentials)
-Service-->>Dep : payload
-Dep->>Service : get_user_by_id(user_id)
-Service->>DB : SELECT User
-DB-->>Service : User
-Service-->>Dep : User
-Dep-->>Router : User
-Router-->>Client : UserResponse
-```
-
-**Diagram sources**
-- [backend/app/auth/router.py:87-90](file://backend/app/auth/router.py#L87-L90)
-- [backend/app/auth/dependencies.py:27-51](file://backend/app/auth/dependencies.py#L27-L51)
-- [backend/app/auth/service.py:71-87](file://backend/app/auth/service.py#L71-L87)
-- [backend/app/database.py:45-61](file://backend/app/database.py#L45-L61)
-
-**Section sources**
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/auth/dependencies.py:27-65](file://backend/app/auth/dependencies.py#L27-L65)
-- [backend/app/auth/service.py:28-87](file://backend/app/auth/service.py#L28-L87)
-
-### AI Provider Strategy
-- Factory selects provider based on settings (OpenAI or Ollama) and caches the singleton.
-- Base interface defines text polishing, summarization, tagging suggestions, and thought expansion.
-- Concrete providers implement OpenAI-compatible and Ollama APIs.
-
-```mermaid
-classDiagram
-class Settings {
-+AI_PROVIDER
-+OPENAI_API_KEY
-+OPENAI_BASE_URL
-+OPENAI_MODEL
-+OLLAMA_BASE_URL
-+OLLAMA_MODEL
-}
-class BaseAIProvider {
-<<abstract>>
-+polish_text(text, style)
-+generate_summary(text, max_length)
-+suggest_tags(text, max_tags)
-+expand_thought(text, direction)
-}
-class OpenAIProvider {
--api_key
--base_url
--model
-}
-class OllamaProvider {
--base_url
--model
-}
-class Factory {
-+get_ai_provider() BaseAIProvider
-}
-Settings --> Factory : "drives selection"
-Factory --> BaseAIProvider : "returns instance"
-Factory --> OpenAIProvider : "when AI_PROVIDER=openai"
-Factory --> OllamaProvider : "when AI_PROVIDER=ollama"
-BaseAIProvider <|-- OpenAIProvider
-BaseAIProvider <|-- OllamaProvider
-```
-
-**Diagram sources**
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/ai/openai_provider.py:24-104](file://backend/app/ai/openai_provider.py#L24-L104)
-- [backend/app/ai/ollama_provider.py:23-98](file://backend/app/ai/ollama_provider.py#L23-L98)
-- [backend/app/config.py:44-50](file://backend/app/config.py#L44-L50)
-
-**Section sources**
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/ai/openai_provider.py:24-104](file://backend/app/ai/openai_provider.py#L24-L104)
-- [backend/app/ai/ollama_provider.py:23-98](file://backend/app/ai/ollama_provider.py#L23-L98)
-
-### Routing Configuration
-- Authentication: register, login, refresh, and profile retrieval.
-- Thoughts: CRUD endpoints with filtering and pagination.
-- Tags: CRUD endpoints with usage counts.
-- Publishing: publish a thought and trigger a site build.
-- Sharing: generate share metadata and links.
-
-```mermaid
-graph LR
-A["/auth/*"] --> AR["auth/router.py"]
-T["/api/thoughts/*"] --> TR["thoughts/router.py"]
-G["/api/tags/*"] --> TG["tags/router.py"]
-P["/api/publish/*"] --> PR["publish/router.py"]
-S["/api/share/*"] --> SR["sharing/router.py"]
-```
-
-**Diagram sources**
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/thoughts/router.py:33-114](file://backend/app/thoughts/router.py#L33-L114)
-- [backend/app/tags/router.py:28-71](file://backend/app/tags/router.py#L28-L71)
-- [backend/app/publish/router.py:23-63](file://backend/app/publish/router.py#L23-L63)
-- [backend/app/sharing/router.py:22-45](file://backend/app/sharing/router.py#L22-L45)
-
-**Section sources**
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/thoughts/router.py:33-114](file://backend/app/thoughts/router.py#L33-L114)
-- [backend/app/tags/router.py:28-71](file://backend/app/tags/router.py#L28-L71)
-- [backend/app/publish/router.py:23-63](file://backend/app/publish/router.py#L23-L63)
-- [backend/app/sharing/router.py:22-45](file://backend/app/sharing/router.py#L22-L45)
-
-### Logging Configuration
-- Logging is configured at module import time with level derived from settings.DEBUG and a consistent format.
-- Request logging middleware logs method, path, status code, and elapsed time.
-
-**Section sources**
-- [backend/app/main.py:20-25](file://backend/app/main.py#L20-L25)
-- [backend/app/common/middleware.py:40-58](file://backend/app/common/middleware.py#L40-L58)
-
-### Health Checks and Monitoring Integration
-- Health endpoint returns application name, version, and status.
-- Used by container health checks and monitoring systems.
-
-**Section sources**
-- [backend/app/main.py:74-87](file://backend/app/main.py#L74-L87)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
 
 ## Dependency Analysis
-The application exhibits low coupling and high cohesion:
-- Routers depend on services and the database dependency.
-- Services depend on the database session and configuration.
-- Middleware and exception handlers are globally registered and decoupled from route logic.
-- AI provider selection is driven by configuration, enabling runtime substitution.
+The application exhibits clean separation of concerns with three main blueprints:
+- **Auth Blueprint**: Handles user authentication, session management, and email verification.
+- **Uploader Blueprint**: Manages file uploads, content conversion, and Jekyll integration.
+- **Converter Utilities**: Provides file format conversion capabilities with fallback mechanisms.
+- **Mailer Service**: Encapsulates QQ Email SMTP functionality with error handling.
+- **Template System**: Shared Jinja2 templates with consistent theming across all views.
 
 ```mermaid
 graph TB
-MAIN["main.py"]
-CFG["config.py"]
-DB["database.py"]
-MW["common/middleware.py"]
-EX["common/exceptions.py"]
-AUTH["auth/router.py"]
-THOUGHTS["thoughts/router.py"]
-TAGS["tags/router.py"]
-PUBLISH["publish/router.py"]
-SHARE["sharing/router.py"]
-AI["ai/factory.py"]
-MAIN --> CFG
-MAIN --> DB
-MAIN --> MW
-MAIN --> EX
-MAIN --> AUTH
-MAIN --> THOUGHTS
-MAIN --> TAGS
-MAIN --> PUBLISH
-MAIN --> SHARE
-MAIN --> AI
+APP["app/__init__.py"]
+AUTH["app/auth.py"]
+UP["app/uploader.py"]
+CONV["app/converter.py"]
+MAIL["app/mailer.py"]
+TPL["app/templates/"]
+CFG["_config.yml"]
+GEM["Gemfile"]
+APP --> AUTH
+APP --> UP
+APP --> CONV
+APP --> MAIL
+APP --> TPL
+APP --> CFG
+APP --> GEM
+AUTH --> DB["SQLite Users Table"]
+UP --> DB
+UP --> CONV
+UP --> JEKYLL["Jekyll Posts"]
+AUTH --> TPL
+UP --> TPL
+CONV --> TPL
+MAIL --> TPL
 ```
 
 **Diagram sources**
-- [backend/app/main.py:1-87](file://backend/app/main.py#L1-L87)
-- [backend/app/config.py:1-62](file://backend/app/config.py#L1-L62)
-- [backend/app/database.py:1-62](file://backend/app/database.py#L1-L62)
-- [backend/app/common/middleware.py:1-59](file://backend/app/common/middleware.py#L1-L59)
-- [backend/app/common/exceptions.py:1-87](file://backend/app/common/exceptions.py#L1-L87)
-- [backend/app/auth/router.py:1-91](file://backend/app/auth/router.py#L1-L91)
-- [backend/app/thoughts/router.py:1-115](file://backend/app/thoughts/router.py#L1-L115)
-- [backend/app/tags/router.py:1-72](file://backend/app/tags/router.py#L1-L72)
-- [backend/app/publish/router.py:1-64](file://backend/app/publish/router.py#L1-L64)
-- [backend/app/sharing/router.py:1-46](file://backend/app/sharing/router.py#L1-L46)
-- [backend/app/ai/factory.py:1-44](file://backend/app/ai/factory.py#L1-L44)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/converter.py:1](file://app/converter.py#L1)
+- [app/mailer.py:8](file://app/mailer.py#L8)
+- [_config.yml:1](file://_config.yml#L1)
+- [Gemfile:1](file://Gemfile#L1)
 
 **Section sources**
-- [backend/app/main.py:1-87](file://backend/app/main.py#L1-L87)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
 
 ## Performance Considerations
-- Asynchronous database operations reduce blocking and improve concurrency.
-- Connection pooling parameters (pool_size and max_overflow) should be tuned based on workload and database capacity.
-- Request logging adds minimal overhead but can be disabled or reduced in production by adjusting logging levels.
-- AI provider timeouts are set per provider; ensure they align with expected latency SLAs.
-
-[No sources needed since this section provides general guidance]
+- **SQLite Optimization**: WAL mode improves concurrent read/write performance for the small-scale application.
+- **Memory Management**: Flask's application context ensures proper database connection cleanup.
+- **File Processing**: Conversion utilities gracefully handle missing dependencies with fallback mechanisms.
+- **Template Rendering**: Jinja2 templates are cached and compiled for efficient rendering.
+- **Git Operations**: Timeout limits prevent hanging operations during deployment.
 
 ## Troubleshooting Guide
-- Database connectivity: Verify DATABASE_URL and network access; enable echo in debug mode for SQL logs.
-- CORS issues: Confirm allowed origins match frontend origin; adjust CORS_ORIGINS accordingly.
-- Authentication failures: Check JWT secret, algorithm, and expiration settings; ensure tokens are sent with Authorization header.
-- AI provider errors: Validate provider configuration (base URLs, API keys, model names); review provider logs for HTTP errors.
-- Unexpected errors: Production masks generic messages; inspect server logs for stack traces.
+- **Database Issues**: Verify SQLite file permissions and disk space; check WAL mode compatibility.
+- **Email Delivery**: Confirm QQ Email credentials and SMTP_SSL configuration; verify firewall settings.
+- **File Conversion**: Install required dependencies (PyMuPDF, mammoth, html2text) for full conversion support.
+- **Template Rendering**: Clear browser cache for CSS/JS updates; verify Jinja2 syntax in templates.
+- **Git Deployment**: Check SSH keys and repository permissions; verify GitHub Pages configuration.
+- **Authentication Errors**: Validate session storage and cookie settings; check user table integrity.
 
 **Section sources**
-- [backend/app/config.py:35-57](file://backend/app/config.py#L35-L57)
-- [backend/app/common/middleware.py:22-58](file://backend/app/common/middleware.py#L22-L58)
-- [backend/app/common/exceptions.py:80-86](file://backend/app/common/exceptions.py#L80-L86)
-- [backend/app/ai/openai_provider.py:38-65](file://backend/app/ai/openai_provider.py#L38-L65)
-- [backend/app/ai/ollama_provider.py:36-59](file://backend/app/ai/ollama_provider.py#L36-L59)
+- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
+- [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
+- [app/converter.py:85-87](file://app/converter.py#L85-L87)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
 ## Conclusion
-The PolaZhenJing backend is structured around a clean FastAPI application factory with environment-driven configuration, robust database integration, and modular routers. The middleware stack provides CORS and request logging, while the exception handling system ensures consistent error responses. The AI provider strategy enables flexible integration with external services. Health checks and logging support operational monitoring and maintenance.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The PolaZhenJing backend successfully migrated to a Flask/Jekyll architecture with three integrated blueprints. The system provides a comprehensive solution for content management with user authentication, file conversion, and static site generation. The SQLite database integration, QQ Email SMTP service, and responsive template system create a cohesive platform for managing AI knowledge content. The architecture balances simplicity with functionality, making it suitable for personal knowledge blogging and content curation.
 
 ## Appendices
-- Environment variables and defaults are defined centrally and can be overridden via .env or environment.
-- Database session management centralizes transaction handling and simplifies error recovery.
-- AI provider selection supports both cloud and local LLM backends.
+- **Environment Variables**: SECRET_KEY, QQ_EMAIL, QQ_EMAIL_AUTH_CODE for application configuration.
+- **Supported Formats**: PDF, DOCX, HTML, Markdown with automatic conversion pipeline.
+- **Deployment**: GitHub Pages compatible with automated Git operations.
+- **Styling**: Dark gold theme with glass-morphism effects and responsive design.
 
 **Section sources**
-- [backend/app/config.py:16-61](file://backend/app/config.py#L16-L61)
-- [backend/app/database.py:45-61](file://backend/app/database.py#L45-L61)
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
+- [app/__init__.py:46](file://app/__init__.py#L46)
+- [app/converter.py:30-38](file://app/converter.py#L30-L38)
+- [_config.yml:18-22](file://_config.yml#L18-L22)
+- [app/templates/base.html:10-31](file://app/templates/base.html#L10-L31)

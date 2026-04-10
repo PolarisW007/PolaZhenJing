@@ -2,548 +2,347 @@
 
 <cite>
 **Referenced Files in This Document**
-- [backend/app/main.py](file://backend/app/main.py)
-- [backend/app/auth/router.py](file://backend/app/auth/router.py)
-- [backend/app/auth/schemas.py](file://backend/app/auth/schemas.py)
-- [backend/app/auth/dependencies.py](file://backend/app/auth/dependencies.py)
-- [backend/app/thoughts/router.py](file://backend/app/thoughts/router.py)
-- [backend/app/thoughts/schemas.py](file://backend/app/thoughts/schemas.py)
-- [backend/app/tags/router.py](file://backend/app/tags/router.py)
-- [backend/app/tags/schemas.py](file://backend/app/tags/schemas.py)
-- [backend/app/ai/router.py](file://backend/app/ai/router.py)
-- [backend/app/ai/base_provider.py](file://backend/app/ai/base_provider.py)
-- [backend/app/ai/factory.py](file://backend/app/ai/factory.py)
-- [backend/app/publish/router.py](file://backend/app/publish/router.py)
-- [backend/app/sharing/router.py](file://backend/app/sharing/router.py)
-- [backend/app/common/exceptions.py](file://backend/app/common/exceptions.py)
-- [backend/app/common/models.py](file://backend/app/common/models.py)
-- [backend/app/config.py](file://backend/app/config.py)
+- [app/__init__.py](file://app/__init__.py)
+- [app/auth.py](file://app/auth.py)
+- [app/converter.py](file://app/converter.py)
+- [app/uploader.py](file://app/uploader.py)
+- [app/mailer.py](file://app/mailer.py)
+- [app/templates/upload.html](file://app/templates/upload.html)
+- [app/templates/login.html](file://app/templates/login.html)
+- [app/templates/register.html](file://app/templates/register.html)
+- [_config.yml](file://_config.yml)
+- [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
+- [PRD.md](file://PRD.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Removed all REST API documentation sections as the system has migrated from FastAPI to Flask/Jekyll
+- Added new documentation for Flask-based file upload and conversion interface
+- Updated architecture overview to reflect static site generation with Jekyll
+- Replaced API endpoints with management interface endpoints
+- Updated authentication system from JWT to Flask session-based authentication
+- Added file conversion pipeline documentation
+- Updated deployment workflow to GitHub Actions with Jekyll
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Project Structure](#project-structure)
-3. [Core Components](#core-components)
-4. [Architecture Overview](#architecture-overview)
-5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+2. [System Architecture](#system-architecture)
+3. [Authentication System](#authentication-system)
+4. [File Upload and Conversion Interface](#file-upload-and-conversion-interface)
+5. [Blog Style Management](#blog-style-management)
+6. [Article Management](#article-management)
+7. [Deployment and Publishing](#deployment-and-publishing)
+8. [Configuration](#configuration)
+9. [Migration from REST API](#migration-from-rest-api)
+10. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-This document provides a comprehensive API reference for PolaZhenJing’s backend REST endpoints. It covers:
-- Authentication API (register, login, refresh, profile)
-- Thought management API (CRUD, filtering, pagination)
-- Tag system API (CRUD, counts)
-- AI integration API (content polishing, summarization, tag suggestions, expansion)
-- Publishing API (export to Markdown and build MkDocs site)
-- Sharing API (platform-specific share links and metadata)
+This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaces the previous FastAPI RESTful API. The system now operates as a static site generator using Jekyll, with a lightweight Flask application managing file uploads, conversions, and publishing workflows.
 
-Each endpoint specifies HTTP method, URL pattern, request/response schemas, authentication requirements, and error handling behavior. Practical examples and integration guidelines are included to help developers integrate with the backend effectively.
+**Key Changes from Previous REST API:**
+- Replaced REST endpoints with server-rendered HTML interface
+- Migrated from JWT authentication to Flask session-based authentication
+- Implemented file conversion pipeline for multiple document formats
+- Switched from dynamic content generation to static site generation
+- Integrated with GitHub Actions for automated deployment
 
-## Project Structure
-The backend is a FastAPI application that wires together modular routers for each functional domain. Global middleware and exception handlers are registered at startup. Configuration is centralized via environment-driven settings.
+## System Architecture
+The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication.
 
 ```mermaid
 graph TB
-Main["main.py<br/>App factory, middleware, exception handlers, routers"] --> AuthR["auth/router.py<br/>/auth/*"]
-Main --> ThoughtsR["thoughts/router.py<br/>/api/thoughts/*"]
-Main --> TagsR["tags/router.py<br/>/api/tags/*"]
-Main --> AIR["ai/router.py<br/>/api/ai/*"]
-Main --> PubR["publish/router.py<br/>/api/publish/*"]
-Main --> ShareR["sharing/router.py<br/>/api/share/*"]
-AuthR --> AuthDeps["auth/dependencies.py<br/>JWT bearer extraction"]
-AuthR --> AuthSchemas["auth/schemas.py<br/>Pydantic models"]
-ThoughtsR --> ThoughtsSchemas["thoughts/schemas.py"]
-TagsR --> TagsSchemas["tags/schemas.py"]
-AIR --> AIProvider["ai/base_provider.py<br/>Strategy interface"]
-AIR --> AIFactory["ai/factory.py<br/>Provider selection"]
-Main --> Cfg["config.py<br/>Settings"]
-Main --> Ex["common/exceptions.py<br/>Global handlers"]
-Main --> Models["common/models.py<br/>Shared models"]
+FlaskApp["Flask Management App<br/>app/__init__.py"] --> AuthBP["Authentication Blueprint<br/>app/auth.py"]
+FlaskApp --> UploadBP["Upload Blueprint<br/>app/uploader.py"]
+FlaskApp --> Converter["File Conversion Pipeline<br/>app/converter.py"]
+FlaskApp --> Mailer["Email Verification<br/>app/mailer.py"]
+AuthBP --> Templates["Jinja2 Templates<br/>app/templates/"]
+UploadBP --> Templates
+UploadBP --> Converter
+UploadBP --> Jekyll["Jekyll Static Generator<br/>_config.yml"]
+Templates --> HTML["Generated HTML Pages"]
+Converter --> Posts["_posts/ Directory<br/>Markdown Articles"]
+Posts --> Jekyll
+Jekyll --> Site["_site/ Directory<br/>Static Website"]
+Site --> GitHubPages["GitHub Pages Deployment<br/>.github/workflows/deploy.yml"]
 ```
 
 **Diagram sources**
-- [backend/app/main.py:39-71](file://backend/app/main.py#L39-L71)
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/thoughts/router.py:33-114](file://backend/app/thoughts/router.py#L33-L114)
-- [backend/app/tags/router.py:28-71](file://backend/app/tags/router.py#L28-L71)
-- [backend/app/ai/router.py:23-108](file://backend/app/ai/router.py#L23-L108)
-- [backend/app/publish/router.py:23-63](file://backend/app/publish/router.py#L23-L63)
-- [backend/app/sharing/router.py:22-45](file://backend/app/sharing/router.py#L22-L45)
-- [backend/app/auth/dependencies.py:27-51](file://backend/app/auth/dependencies.py#L27-L51)
-- [backend/app/auth/schemas.py:19-56](file://backend/app/auth/schemas.py#L19-L56)
-- [backend/app/thoughts/schemas.py:20-64](file://backend/app/thoughts/schemas.py#L20-L64)
-- [backend/app/tags/schemas.py:18-45](file://backend/app/tags/schemas.py#L18-L45)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/config.py:15-60](file://backend/app/config.py#L15-L60)
-- [backend/app/common/exceptions.py:66-86](file://backend/app/common/exceptions.py#L66-L86)
-- [backend/app/common/models.py:41-75](file://backend/app/common/models.py#L41-L75)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/converter.py:1](file://app/converter.py#L1)
+- [app/mailer.py](file://app/mailer.py)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
 
 **Section sources**
-- [backend/app/main.py:39-87](file://backend/app/main.py#L39-L87)
+- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
+- [PRD.md:143-180](file://PRD.md#L143-L180)
 
-## Core Components
-- Authentication: JWT-based access/refresh tokens, protected routes via bearer scheme.
-- Thought Management: Full CRUD with filtering, pagination, and status transitions.
-- Tag System: Create/update/delete tags; list with usage counts.
-- AI Integration: Pluggable provider strategy supporting OpenAI and Ollama-compatible APIs.
-- Publishing: Export individual thoughts to Markdown and trigger MkDocs builds.
-- Sharing: Generate platform-specific share links and Open Graph metadata.
+## Authentication System
+The system uses Flask session-based authentication with SQLite for user management and QQ email SMTP verification.
 
-**Section sources**
-- [backend/app/auth/router.py:37-90](file://backend/app/auth/router.py#L37-L90)
-- [backend/app/thoughts/router.py:36-114](file://backend/app/thoughts/router.py#L36-L114)
-- [backend/app/tags/router.py:31-71](file://backend/app/tags/router.py#L31-L71)
-- [backend/app/ai/router.py:51-108](file://backend/app/ai/router.py#L51-L108)
-- [backend/app/publish/router.py:36-63](file://backend/app/publish/router.py#L36-L63)
-- [backend/app/sharing/router.py:25-45](file://backend/app/sharing/router.py#L25-L45)
+### Authentication Endpoints
+- **POST /admin/login** - User login with username and password
+- **POST /admin/register** - User registration with QQ email verification
+- **POST /admin/verify** - Email verification with 6-digit code
+- **POST /admin/password** - Password change for authenticated users
+- **GET /admin/logout** - Logout and clear session
 
-## Architecture Overview
-The API follows a layered architecture:
-- Routers define endpoints and bind to Pydantic schemas.
-- Dependencies enforce authentication and authorization.
-- Services encapsulate business logic.
-- Providers implement pluggable AI strategies.
-- Global exception handlers standardize error responses.
-
+### Authentication Flow
 ```mermaid
 sequenceDiagram
-participant Client as "Client"
-participant AuthR as "Auth Router"
-participant Deps as "Auth Dependencies"
-participant DB as "Database"
-participant JWT as "JWT Service"
-Client->>AuthR : POST /auth/login
-AuthR->>DB : authenticate_user(username, password)
-DB-->>AuthR : User
-AuthR->>JWT : create_access_token(user.id)
-AuthR->>JWT : create_refresh_token(user.id)
-AuthR-->>Client : {access_token, refresh_token}
-Client->>AuthR : GET /auth/me (Authorization : Bearer ...)
-AuthR->>Deps : get_current_user()
-Deps->>JWT : decode_token(credentials)
-Deps->>DB : get_user_by_id(sub)
-DB-->>Deps : User
-Deps-->>AuthR : User
-AuthR-->>Client : UserResponse
+participant User as "User Browser"
+participant Auth as "Auth Blueprint"
+participant DB as "SQLite Database"
+participant Mail as "SMTP Server"
+User->>Auth : POST /admin/register
+Auth->>DB : Insert user record
+Auth->>Mail : Send verification code
+Mail-->>Auth : Success/Failure
+Auth-->>User : Redirect to /admin/verify
+User->>Auth : POST /admin/verify
+Auth->>DB : Verify email code
+DB-->>Auth : Verified user
+Auth-->>User : Redirect to /admin/login
+User->>Auth : POST /admin/login
+Auth->>DB : Verify credentials
+DB-->>Auth : Valid user
+Auth-->>User : Set Flask session + redirect
 ```
 
 **Diagram sources**
-- [backend/app/auth/router.py:56-90](file://backend/app/auth/router.py#L56-L90)
-- [backend/app/auth/dependencies.py:27-51](file://backend/app/auth/dependencies.py#L27-L51)
-- [backend/app/auth/schemas.py:34-56](file://backend/app/auth/schemas.py#L34-L56)
-
-## Detailed Component Analysis
-
-### Authentication API
-- Base path: /auth
-- Authentication requirement: Not required for register and login; required for /me and protected endpoints in other routers.
-
-Endpoints
-- POST /auth/register
-  - Description: Register a new user.
-  - Request: RegisterRequest
-  - Response: UserResponse
-  - Status: 201 Created
-  - Example request body:
-    - username: string (min length 3, max 64)
-    - email: string (valid email)
-    - password: string (min length 8, max 128)
-    - display_name: string | null (max 128)
-  - Example response body:
-    - id: uuid
-    - username: string
-    - email: string
-    - display_name: string | null
-    - is_active: boolean
-    - is_superuser: boolean
-    - created_at: datetime (ISO 8601)
-
-- POST /auth/login
-  - Description: Authenticate and receive access/refresh tokens.
-  - Request: LoginRequest
-  - Response: TokenResponse
-  - Status: 200 OK
-  - Example request body:
-    - username: string (username or email)
-    - password: string
-  - Example response body:
-    - access_token: string
-    - refresh_token: string
-    - token_type: string ("bearer")
-
-- POST /auth/refresh
-  - Description: Exchange a valid refresh token for a new token pair.
-  - Request: RefreshRequest
-  - Response: TokenResponse
-  - Status: 200 OK
-  - Validation: Requires a valid refresh token (type: "refresh").
-  - Error: 401 Unauthorized if token type is invalid.
-
-- GET /auth/me
-  - Description: Get the current authenticated user profile.
-  - Authentication: Required (Bearer access token).
-  - Response: UserResponse
-  - Status: 200 OK
-
-Authentication and Authorization
-- Access tokens are validated by extracting the Authorization header, decoding the JWT, and verifying the token type is "access". Deactivated users are rejected.
-- Refresh tokens must have type "refresh" to be accepted.
-
-Common use cases
-- First-time setup: POST /auth/register, then POST /auth/login.
-- Session management: Use POST /auth/refresh periodically to renew tokens.
-- Profile retrieval: GET /auth/me after login.
-
-Integration guidelines
-- Set Authorization header to "Bearer <access_token>" for protected endpoints.
-- Store tokens securely; rotate refresh tokens periodically.
+- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [app/auth.py:99-133](file://app/auth.py#L99-L133)
+- [app/auth.py:136-167](file://app/auth.py#L136-L167)
 
 **Section sources**
-- [backend/app/auth/router.py:37-90](file://backend/app/auth/router.py#L37-L90)
-- [backend/app/auth/schemas.py:19-56](file://backend/app/auth/schemas.py#L19-L56)
-- [backend/app/auth/dependencies.py:27-51](file://backend/app/auth/dependencies.py#L27-L51)
-- [backend/app/common/exceptions.py:44-55](file://backend/app/common/exceptions.py#L44-L55)
+- [app/auth.py:26-167](file://app/auth.py#L26-L167)
+- [PRD.md:258-280](file://PRD.md#L258-L280)
 
-### Thought Management API
-- Base path: /api/thoughts
-- Authentication requirement: Required for all endpoints.
+## File Upload and Conversion Interface
+The upload interface supports multiple document formats with automatic conversion to Markdown and style selection.
 
-Endpoints
-- GET /api/thoughts
-  - Description: List thoughts with optional filters and pagination.
-  - Query parameters:
-    - category: string | null
-    - tag: string | null (filter by tag slug)
-    - search: string | null (full-text search)
-    - status: string | null
-    - page: int (default 1, min 1)
-    - page_size: int (default 20, min 1, max 100)
-  - Response: ThoughtListResponse
-  - Status: 200 OK
+### Upload Endpoints
+- **GET /admin/upload** - Upload form with file upload and paste content options
+- **POST /admin/upload** - Process uploaded files or pasted content
+- **GET /admin/upload/style** - Style selection interface
+- **POST /admin/generate** - Generate final blog post with selected style
 
-- POST /api/thoughts
-  - Description: Create a new thought.
-  - Request: ThoughtCreate
-  - Response: ThoughtResponse
-  - Status: 201 Created
-  - Fields:
-    - title: string (required, 1–256 chars)
-    - content: string (optional)
-    - summary: string | null (optional)
-    - category: string | null (max 64)
-    - status: string (default "draft"; allowed: draft, published, archived)
-    - tag_ids: list[uuid] (optional)
+### Supported File Formats
+| Format | Extension | Processing Method |
+|--------|-----------|-------------------|
+| Markdown | `.md` | Direct passthrough |
+| PDF | `.pdf` | PyMuPDF text extraction + image extraction |
+| Word | `.docx`, `.doc` | Mammoth HTML conversion + html2text |
+| HTML | `.html`, `.htm` | Direct HTML to Markdown conversion |
 
-- GET /api/thoughts/{thought_id}
-  - Description: Retrieve a single thought by ID.
-  - Path parameter: thought_id (uuid)
-  - Response: ThoughtResponse
-  - Status: 200 OK
-
-- PATCH /api/thoughts/{thought_id}
-  - Description: Partially update a thought.
-  - Path parameter: thought_id (uuid)
-  - Request: ThoughtUpdate (all fields optional)
-  - Response: ThoughtResponse
-  - Status: 200 OK
-
-- DELETE /api/thoughts/{thought_id}
-  - Description: Delete a thought.
-  - Path parameter: thought_id (uuid)
-  - Status: 204 No Content
-
-Response schema highlights
-- ThoughtResponse includes tags, author_id, timestamps, and computed slug.
-- ThoughtListResponse includes pagination metadata.
-
-Common use cases
-- Bulk browsing: GET /api/thoughts with filters and page/page_size.
-- Draft-to-publish workflow: create with status=draft, update content, then PATCH to status=published.
-- Tag association: pass tag_ids during create/update.
-
-Integration guidelines
-- Always include Authorization: Bearer <access_token>.
-- Use tag slugs for filtering; fetch tags from /api/tags to discover available slugs.
-
-**Section sources**
-- [backend/app/thoughts/router.py:36-114](file://backend/app/thoughts/router.py#L36-L114)
-- [backend/app/thoughts/schemas.py:20-64](file://backend/app/thoughts/schemas.py#L20-L64)
-
-### Tag System API
-- Base path: /api/tags
-- Authentication requirement: Required for create/update/delete; listing is public.
-
-Endpoints
-- GET /api/tags
-  - Description: List all tags with usage counts.
-  - Response: list[TagWithCountResponse]
-  - Status: 200 OK
-
-- POST /api/tags
-  - Description: Create a new tag.
-  - Request: TagCreate
-  - Response: TagResponse
-  - Status: 201 Created
-  - Fields:
-    - name: string (1–64 chars)
-    - color: string | null (pattern: #RRGGBB)
-
-- GET /api/tags/{tag_id}
-  - Description: Retrieve a single tag by ID.
-  - Path parameter: tag_id (uuid)
-  - Response: TagResponse
-  - Status: 200 OK
-
-- PATCH /api/tags/{tag_id}
-  - Description: Update tag name or color.
-  - Path parameter: tag_id (uuid)
-  - Request: TagUpdate
-  - Response: TagResponse
-  - Status: 200 OK
-
-- DELETE /api/tags/{tag_id}
-  - Description: Delete a tag.
-  - Path parameter: tag_id (uuid)
-  - Status: 204 No Content
-
-Response schema highlights
-- TagWithCountResponse extends TagResponse with thought_count.
-
-Common use cases
-- Pre-populate tag selector: GET /api/tags to load available tags.
-- Assign tags to thoughts: include tag_ids in ThoughtCreate/ThoughtUpdate.
-- Organize content: create descriptive tags with optional colors.
-
-Integration guidelines
-- Use TagWithCountResponse to inform tag popularity and avoid unused tags.
-
-**Section sources**
-- [backend/app/tags/router.py:31-71](file://backend/app/tags/router.py#L31-L71)
-- [backend/app/tags/schemas.py:18-45](file://backend/app/tags/schemas.py#L18-L45)
-
-### AI Integration API
-- Base path: /api/ai
-- Authentication requirement: Required.
-- Provider selection: Configured via settings.AI_PROVIDER; supported values include "openai" and "ollama".
-
-Endpoints
-- POST /api/ai/polish
-  - Description: Polish/rephrase text for clarity and style.
-  - Request: PolishRequest
-    - text: string (required, min length 1)
-    - style: string (default "professional")
-  - Response: TextResponse
-    - result: string
-  - Status: 200 OK
-  - Error: 502 Bad Gateway if provider fails.
-
-- POST /api/ai/summarize
-  - Description: Generate a concise summary.
-  - Request: SummarizeRequest
-    - text: string (required, min length 1)
-    - max_length: int (default 200, range 50–1000)
-  - Response: TextResponse
-  - Status: 200 OK
-  - Error: 502 Bad Gateway if provider fails.
-
-- POST /api/ai/suggest-tags
-  - Description: Suggest relevant tags for the given text.
-  - Request: SuggestTagsRequest
-    - text: string (required, min length 1)
-    - max_tags: int (default 5, range 1–10)
-  - Response: TagsResponse
-    - tags: list[string]
-  - Status: 200 OK
-  - Error: 502 Bad Gateway if provider fails.
-
-- POST /api/ai/expand
-  - Description: Expand a brief thought into a fuller piece.
-  - Request: ExpandRequest
-    - text: string (required, min length 1)
-    - direction: string (default "elaborate")
-  - Response: TextResponse
-  - Status: 200 OK
-  - Error: 502 Bad Gateway if provider fails.
-
-Provider interface
-- BaseAIProvider defines four abstract methods: polish_text, generate_summary, suggest_tags, expand_thought.
-- Factory resolves provider based on settings.AI_PROVIDER.
-
-Common use cases
-- Improve writing quality: POST /api/ai/polish before publishing.
-- Auto-generate summaries: POST /api/ai/summarize for quick previews.
-- Discover tags: POST /api/ai/suggest-tags to enrich thoughts.
-- Brainstorm expansion: POST /api/ai/expand to develop ideas.
-
-Integration guidelines
-- Configure AI provider and credentials via environment variables (see Configuration).
-- Handle 502 responses gracefully; retry or notify users when AI service is unavailable.
-
-**Section sources**
-- [backend/app/ai/router.py:51-108](file://backend/app/ai/router.py#L51-L108)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/config.py:43-49](file://backend/app/config.py#L43-L49)
-
-### Publishing API
-- Base path: /api/publish
-- Authentication requirement: Required.
-
-Endpoints
-- POST /api/publish/{thought_id}
-  - Description: Publish a thought as a Markdown file in the MkDocs docs/ directory. Thought must be in PUBLISHED status.
-  - Path parameter: thought_id (uuid)
-  - Response: PublishResponse
-    - message: string
-    - file_path: string | null
-  - Status: 200 OK
-
-- POST /api/publish/build
-  - Description: Trigger a full MkDocs site build.
-  - Response: BuildResponse
-    - success: boolean
-    - message: string
-  - Status: 200 OK
-
-Common use cases
-- One-click publishing: After setting status=published, POST /api/publish/{id} to export Markdown.
-- Site regeneration: POST /api/publish/build to rebuild the static site.
-
-Integration guidelines
-- Ensure MkDocs project path and base URL are configured correctly.
-- Verify that the thought’s status is PUBLISHED before publishing.
-
-**Section sources**
-- [backend/app/publish/router.py:36-63](file://backend/app/publish/router.py#L36-L63)
-
-### Sharing API
-- Base path: /api/share
-- Authentication requirement: Required.
-
-Endpoint
-- GET /api/share/{thought_id}
-  - Description: Generate share URLs and Open Graph metadata for the given thought.
-  - Path parameter: thought_id (uuid)
-  - Response: Platform-specific share links and metadata (returned as a JSON object)
-  - Status: 200 OK
-  - Behavior: Returns platform-specific share links (e.g., X, Weibo, Xiaohongshu), Open Graph tags, and a pre-formatted share text for clipboard.
-
-Common use cases
-- Cross-platform distribution: Use the returned metadata to post to social networks.
-- Copy-and-paste sharing: Use the pre-formatted text for quick sharing.
-
-Integration guidelines
-- Combine returned metadata with your frontend share dialog component.
-
-**Section sources**
-- [backend/app/sharing/router.py:25-45](file://backend/app/sharing/router.py#L25-L45)
-
-## Dependency Analysis
-Key dependencies and relationships:
-- Routers depend on Pydantic schemas for request/response validation.
-- Authentication depends on bearer token extraction and JWT decoding.
-- AI endpoints depend on a pluggable provider resolved by the factory.
-- Global exception handlers unify error responses across the app.
-- Configuration drives JWT secrets, AI provider selection, and site settings.
-
+### Upload Process Flow
 ```mermaid
-graph LR
-AuthR["auth/router.py"] --> AuthDeps["auth/dependencies.py"]
-AuthR --> AuthS["auth/schemas.py"]
-ThoughtsR["thoughts/router.py"] --> ThS["thoughts/schemas.py"]
-TagsR["tags/router.py"] --> TsS["tags/schemas.py"]
-AIR["ai/router.py"] --> AIF["ai/factory.py"]
-AIR --> AIB["ai/base_provider.py"]
-Main["main.py"] --> Ex["common/exceptions.py"]
-Main --> Cfg["config.py"]
-Main --> Models["common/models.py"]
+flowchart TD
+A[User Upload Form] --> B{File or Paste?}
+B --> |File Upload| C[File Validation]
+B --> |Paste Content| D[Content Processing]
+C --> E[Format Detection]
+E --> F[Conversion Pipeline]
+D --> F
+F --> G[Title Extraction]
+G --> H[Style Selection]
+H --> I[Final Generation]
+I --> J[Markdown Output]
 ```
 
 **Diagram sources**
-- [backend/app/auth/router.py:34-90](file://backend/app/auth/router.py#L34-L90)
-- [backend/app/auth/dependencies.py:27-51](file://backend/app/auth/dependencies.py#L27-L51)
-- [backend/app/thoughts/router.py:33-114](file://backend/app/thoughts/router.py#L33-L114)
-- [backend/app/tags/router.py:28-71](file://backend/app/tags/router.py#L28-L71)
-- [backend/app/ai/router.py:23-108](file://backend/app/ai/router.py#L23-L108)
-- [backend/app/ai/factory.py:18-43](file://backend/app/ai/factory.py#L18-L43)
-- [backend/app/ai/base_provider.py:16-79](file://backend/app/ai/base_provider.py#L16-L79)
-- [backend/app/main.py:54-56](file://backend/app/main.py#L54-L56)
-- [backend/app/common/exceptions.py:66-86](file://backend/app/common/exceptions.py#L66-L86)
-- [backend/app/config.py:15-60](file://backend/app/config.py#L15-L60)
-- [backend/app/common/models.py:41-75](file://backend/app/common/models.py#L41-L75)
+- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/converter.py:58-87](file://app/converter.py#L58-L87)
 
 **Section sources**
-- [backend/app/main.py:54-56](file://backend/app/main.py#L54-L56)
-- [backend/app/common/exceptions.py:66-86](file://backend/app/common/exceptions.py#L66-L86)
+- [app/uploader.py:76-210](file://app/uploader.py#L76-L210)
+- [app/converter.py:1-88](file://app/converter.py#L1-L88)
+- [PRD.md:40-62](file://PRD.md#L40-L62)
 
-## Performance Considerations
-- Pagination: Use page and page_size parameters to limit response sizes (max page_size is 100).
-- Filtering: Apply category, tag slug, status, and search filters to reduce database load.
-- AI calls: Expect latency and potential 502 responses; implement retries and fallbacks.
-- Token reuse: Prefer refresh tokens to minimize re-authentication overhead.
-- Database connections: Leverage the shared async session dependency to avoid connection thrashing.
+## Blog Style Management
+The system supports 5 distinct blog styles with custom layouts and CSS.
+
+### Available Styles
+1. **Deep Technical** - Code-heavy, dark-mode optimized
+2. **Academic Insight** - Research paper structure, citation format
+3. **Industry Vision** - Bold headlines, modern layout
+4. **Friendly Explainer** - Warm storytelling, beginner-friendly
+5. **Creative Visual** - Image-first, gallery presentation
+
+### Style Selection Interface
+The style selection page displays 5 cards with:
+- Style name (Chinese + English)
+- Mini preview thumbnail
+- Brief description
+- "Best for" recommendations
+- Live content preview
+
+**Section sources**
+- [app/uploader.py:16-27](file://app/uploader.py#L16-L27)
+- [PRD.md:64-99](file://PRD.md#L64-L99)
+
+## Article Management
+The management interface provides CRUD operations for blog posts.
+
+### Article Management Endpoints
+- **GET /admin/articles** - List all articles with metadata
+- **POST /admin/articles/<filename>/delete** - Delete specific article
+- **POST /admin/sync** - Sync to GitHub for deployment
+
+### Article Metadata
+Each article includes:
+- Title (from front matter or extracted)
+- Date (automatically generated)
+- Tags (comma-separated)
+- Description (optional)
+- Style (selected during generation)
+- Author (current user)
+
+### Article List Features
+- Chronological ordering (newest first)
+- Style badges with color coding
+- Tag-based filtering
+- Action buttons (preview, edit, delete)
+- Status indicators (published/local only)
+
+**Section sources**
+- [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
+- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
+- [PRD.md:428-470](file://PRD.md#L428-L470)
+
+## Deployment and Publishing
+The system integrates with GitHub Actions for automated deployment to GitHub Pages.
+
+### Deployment Workflow
+```mermaid
+sequenceDiagram
+participant Dev as "Developer"
+participant Git as "Git Repository"
+participant GH as "GitHub Actions"
+participant JP as "GitHub Pages"
+Dev->>Git : Push to main branch
+Git->>GH : Trigger workflow
+GH->>GH : Checkout repository
+GH->>GH : Setup Ruby + Jekyll
+GH->>GH : bundle exec jekyll build
+GH->>JP : Deploy to gh-pages branch
+JP->>JP : Serve static site
+```
+
+**Diagram sources**
+- [.github/workflows/deploy.yml:27-63](file://.github/workflows/deploy.yml#L27-L63)
+
+### Deployment Endpoints
+- **POST /admin/sync** - Manual synchronization to GitHub
+- Automatic deployment on pushes to main branch
+
+### GitHub Actions Features
+- Auto-build on push to main branch
+- Strict build validation
+- Artifact upload and deployment
+- Environment configuration for GitHub Pages
+
+**Section sources**
+- [.github/workflows/deploy.yml:1-63](file://.github/workflows/deploy.yml#L1-L63)
+- [PRD.md:628-681](file://PRD.md#L628-L681)
+
+## Configuration
+The system uses environment variables and configuration files for customization.
+
+### Environment Variables
+- `SECRET_KEY` - Flask application secret key
+- `SMTP_HOST` - QQ email SMTP server host
+- `SMTP_PORT` - SMTP server port (SSL: 465)
+- `SMTP_USERNAME` - QQ email address
+- `SMTP_PASSWORD` - QQ email authorization code
+
+### Configuration Files
+- `_config.yml` - Jekyll configuration with plugins and defaults
+- `Gemfile` - Ruby dependencies for Jekyll
+- `requirements.txt` - Python dependencies for Flask app
+
+### Jekyll Configuration
+Key settings include:
+- Site title and description
+- GitHub Pages URL configuration
+- Build plugins (feed, SEO, paginate)
+- Default layout for posts
+- Build exclusions
+
+**Section sources**
+- [app/__init__.py:46](file://app/__init__.py#L46)
+- [_config.yml:1-49](file://_config.yml#L1-L49)
+- [PRD.md:281-307](file://PRD.md#L281-L307)
+
+## Migration from REST API
+The system has been completely migrated from the previous FastAPI RESTful architecture to a Flask-based management interface.
+
+### Removed Components
+- FastAPI backend with 7 modules (auth, thoughts, tags, research, ai, publish, sharing)
+- PostgreSQL database with 5 tables
+- JWT authentication system
+- AI provider integration (OpenAI/Ollama)
+- Complex routing structure
+- Docker Compose deployment
+
+### New Architecture Benefits
+- **Simplified**: ~30 organized files vs. ~65+ scattered files
+- **Zero-config**: SQLite instead of PostgreSQL
+- **Fast**: Static site generation instead of dynamic API calls
+- **Reliable**: GitHub Actions for automated deployment
+- **Lightweight**: Single Flask application with Jekyll
+
+### Migration Impact
+- **Authentication**: Changed from JWT to Flask sessions
+- **Content Management**: From REST endpoints to file-based Markdown
+- **Publishing**: From manual export to automated GitHub Pages
+- **Development**: Simplified local setup without Docker/PostgreSQL
+
+**Section sources**
+- [PRD.md:160-180](file://PRD.md#L160-L180)
+- [PRD.md:770-800](file://PRD.md#L770-L800)
 
 ## Troubleshooting Guide
-Common errors and resolutions
-- 400 Bad Request
-  - Cause: Invalid request payload (e.g., field length violations).
-  - Resolution: Validate inputs against schema constraints (min/max lengths, patterns).
 
-- 401 Unauthorized
-  - Cause: Missing or invalid Authorization header; token type mismatch; deactivated user.
-  - Resolution: Ensure Bearer access token is present and valid; refresh if expired.
+### Common Issues and Solutions
 
-- 403 Forbidden
-  - Cause: Insufficient privileges (e.g., attempting privileged operations without superuser role).
-  - Resolution: Verify user permissions.
+#### Authentication Issues
+- **Problem**: "Username not found" or "Incorrect password"
+  - **Solution**: Verify credentials in SQLite database
+  - **Check**: User registration completed successfully
 
-- 404 Not Found
-  - Cause: Resource does not exist (e.g., thought_id or tag_id).
-  - Resolution: Confirm resource identifiers.
+- **Problem**: "Please verify your email first"
+  - **Solution**: Complete email verification process
+  - **Check**: Verification code expiration (5 minutes)
 
-- 409 Conflict
-  - Cause: Resource conflict (e.g., unique constraint violation).
-  - Resolution: Adjust inputs to avoid duplicates.
+#### Upload Issues
+- **Problem**: "Unsupported file type"
+  - **Solution**: Use supported formats (.md, .pdf, .docx, .html)
+  - **Check**: File extension validation
 
-- 502 Bad Gateway (AI endpoints)
-  - Cause: AI provider service unavailable or unreachable.
-  - Resolution: Retry later or switch provider; check provider configuration.
+- **Problem**: "Conversion error"
+  - **Solution**: Install required dependencies (PyMuPDF, mammoth, html2text)
+  - **Check**: Library availability in environment
 
-Operational checks
-- Health endpoint: GET /health for basic system status.
-- Logging: Enable debug mode via configuration for detailed logs.
+#### Style Selection Issues
+- **Problem**: No style preview available
+  - **Solution**: Ensure Jekyll layouts are properly configured
+  - **Check**: CSS files in assets/css/ directory
 
-**Section sources**
-- [backend/app/common/exceptions.py:30-63](file://backend/app/common/exceptions.py#L30-L63)
-- [backend/app/auth/dependencies.py:38-51](file://backend/app/auth/dependencies.py#L38-L51)
-- [backend/app/ai/router.py:61-63](file://backend/app/ai/router.py#L61-L63)
+#### Deployment Issues
+- **Problem**: "Push failed: Permission denied"
+  - **Solution**: Configure Git remote and authentication
+  - **Check**: SSH key or GitHub token setup
 
-## Conclusion
-PolaZhenJing’s API provides a cohesive set of endpoints for authentication, thought and tag management, AI-assisted content enhancement, publishing, and cross-platform sharing. By following the documented schemas, authentication requirements, and error handling patterns, integrators can build robust clients and automate workflows around personal knowledge management and publishing.
-
-## Appendices
-
-### Authentication and Token Management
-- Access token lifetime and refresh token lifetime are configurable.
-- Token type validation ensures access vs. refresh usage.
-- Refresh endpoints require a valid refresh token with type "refresh".
+- **Problem**: "GitHub Pages deployment failed"
+  - **Solution**: Check GitHub Actions logs for build errors
+  - **Check**: Jekyll configuration and dependencies
 
 **Section sources**
-- [backend/app/auth/router.py:70-84](file://backend/app/auth/router.py#L70-L84)
-- [backend/app/auth/dependencies.py:41-43](file://backend/app/auth/dependencies.py#L41-L43)
-- [backend/app/config.py:37-41](file://backend/app/config.py#L37-L41)
-
-### Configuration Options
-Key environment-driven settings:
-- JWT: secret, algorithm, access/refresh lifetimes
-- AI: provider, OpenAI/Ollama base URLs and models
-- Site: base URL and MkDocs project path
-- CORS: allowed origins
-
-**Section sources**
-- [backend/app/config.py:37-56](file://backend/app/config.py#L37-L56)
+- [app/auth.py:34-48](file://app/auth.py#L34-L48)
+- [app/uploader.py:84-100](file://app/uploader.py#L84-L100)
+- [app/uploader.py:195-209](file://app/uploader.py#L195-L209)

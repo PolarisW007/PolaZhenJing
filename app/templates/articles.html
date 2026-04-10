@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Articles{% endblock %}
+{% block card_class %}card-full{% endblock %}
+{% block content %}
+<h2>文章管理 / Articles</h2>
+
+<div class="action-bar">
+  <a href="{{ url_for('uploader.upload') }}" class="btn-gold btn-sm">+ New Article</a>
+  <div class="action-bar-right">
+    <form method="POST" action="{{ url_for('uploader.sync') }}" style="display: inline;">
+      <button type="submit" class="btn-ghost">Sync to GitHub ↑</button>
+    </form>
+  </div>
+</div>
+
+{% if posts %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Date</th>
+        <th>Style</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for post in posts %}
+      <tr>
+        <td>{{ post.title }}</td>
+        <td style="white-space: nowrap; color: var(--text-muted); font-size: 0.8rem;">
+          {{ post.get('date', '') }}
+        </td>
+        <td>
+          {% if post.get('layout') %}
+          <span class="style-badge" style="background: rgba(228,191,122,0.1); color: var(--gold-primary); border: 1px solid rgba(228,191,122,0.2);">
+            {{ post.layout }}
+          </span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('uploader.delete_article', filename=post.filename) }}"
+                style="display: inline;"
+                onsubmit="return confirm('Delete this article?')">
+            <button type="submit" class="btn-danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+  <p>No articles yet. Upload your first one!</p>
+</div>
+{% endif %}
+{% endblock %}

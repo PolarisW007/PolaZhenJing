@@ -1,0 +1,92 @@
+/* ── Friendly Explainer Style ──────────────────────────────── */
+/* Inspired by Andrew Ng — warm, approachable, clear          */
+
+.post-friendly-explainer .post-header {
+  background: linear-gradient(180deg, rgba(244,162,97,0.08) 0%, var(--bg-deepest) 100%);
+  padding-bottom: 3rem;
+}
+
+.post-friendly-explainer h1 {
+  font-size: 2.75rem;
+  font-weight: 800;
+}
+
+/* TL;DR Box */
+.tldr-box {
+  max-width: 780px;
+  margin: 0 auto 2rem;
+  padding: 1.25rem 1.75rem;
+  background: rgba(244,162,97,0.08);
+  border: 1px solid rgba(244,162,97,0.25);
+  border-radius: var(--radius-lg);
+}
+
+.tldr-box strong {
+  color: #f4a261;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.tldr-box p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+
+.post-friendly-explainer .post-content {
+  font-size: 1.08rem;
+  line-height: 1.9;
+}
+
+.post-friendly-explainer .post-content h2 {
+  color: #f4a261;
+  font-size: 1.6rem;
+  border-bottom: 2px solid rgba(244,162,97,0.2);
+}
+
+.post-friendly-explainer .post-content h3 {
+  color: #f4a261;
+  font-size: 1.25rem;
+}
+
+/* Insight callout */
+.post-friendly-explainer blockquote {
+  border-left: 4px solid #f4a261;
+  background: rgba(244,162,97,0.06);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 1rem 1.5rem;
+}
+
+/* Generous spacing */
+.post-friendly-explainer .post-content p {
+  margin-bottom: 1.3em;
+}
+
+.post-friendly-explainer .post-content li {
+  margin: 0.6em 0;
+  line-height: 1.7;
+}
+
+/* Soft code */
+.post-friendly-explainer code {
+  background: rgba(244,162,97,0.1);
+  color: #f4a261;
+  border-radius: 6px;
+}
+
+.post-friendly-explainer pre {
+  border-radius: var(--radius-lg);
+  border-color: rgba(244,162,97,0.15);
+}
+
+.post-friendly-explainer table th {
+  color: #f4a261;
+}
+
+/* Rounded images */
+.post-friendly-explainer .post-content img {
+  border-radius: var(--radius-lg);
+}

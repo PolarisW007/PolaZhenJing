@@ -1,0 +1,70 @@
+/* ── Deep Technical Style ──────────────────────────────────── */
+/* Inspired by Andrej Karpathy — code-heavy, technical depth  */
+
+.post-deep-technical .post-header {
+  background: linear-gradient(180deg, #1a1a2e 0%, var(--bg-deepest) 100%);
+  padding-bottom: 3rem;
+}
+
+.post-deep-technical h1 {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-weight: 700;
+  font-size: 2.5rem;
+  color: #8b9dc3;
+}
+
+.post-deep-technical .post-content h2 {
+  color: #8b9dc3;
+  border-bottom-color: rgba(139,157,195,0.2);
+  font-family: "JetBrains Mono", monospace;
+}
+
+.post-deep-technical .post-content h3 {
+  color: #a0b4d4;
+}
+
+/* Enhanced code blocks */
+.post-deep-technical pre {
+  background: #0d1117;
+  border: 1px solid rgba(139,157,195,0.15);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.post-deep-technical pre::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #8b9dc3, #4FA8FE);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.post-deep-technical pre code {
+  color: #c9d1d9;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.post-deep-technical code {
+  background: rgba(139,157,195,0.1);
+  color: #8b9dc3;
+  border: 1px solid rgba(139,157,195,0.15);
+}
+
+/* Numbered sections feel */
+.post-deep-technical .post-content {
+  counter-reset: section;
+}
+
+.post-deep-technical blockquote {
+  border-left-color: #8b9dc3;
+  background: rgba(139,157,195,0.05);
+}
+
+.post-deep-technical table th {
+  color: #8b9dc3;
+}

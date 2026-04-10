@@ -1,18 +1,20 @@
 # =============================================================================
-# Module: deploy.yml
-# Description: GitHub Actions workflow – builds MkDocs site and deploys to
-#              GitHub Pages on every push to main branch.
-# Created: 2026-04-06
-# Author: PolaZhenjing Team
+# PolaZhenjing v2 — Jekyll Build & Deploy to GitHub Pages
 # =============================================================================
 
-name: Deploy MkDocs to GitHub Pages
+name: Deploy Jekyll to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'site/**'
+      - '_posts/**'
+      - '_layouts/**'
+      - '_includes/**'
+      - '_config.yml'
+      - 'index.html'
+      - 'assets/**'
+      - 'Gemfile'
   workflow_dispatch:
 
 permissions:
@@ -31,24 +33,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          python-version: '3.12'
+          ruby-version: '3.2'
+          bundler-cache: true
 
-      - name: Install MkDocs and dependencies
-        run: |
-          pip install mkdocs==1.6.1 mkdocs-material==9.5.47
-
-      - name: Build MkDocs site
-        run: |
-          cd site
-          mkdocs build --strict
+      - name: Build Jekyll site
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site/site
+          path: _site
 
   deploy:
     environment:

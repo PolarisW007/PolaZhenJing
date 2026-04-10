@@ -1,0 +1,72 @@
+/* ── Industry Vision Style ─────────────────────────────────── */
+/* Inspired by Kai-Fu Lee — bold opinions, industry trends    */
+
+.post-industry-vision .post-header-vision {
+  background: linear-gradient(180deg, rgba(230,57,70,0.1) 0%, var(--bg-deepest) 100%);
+  padding-bottom: 4rem;
+}
+
+.post-industry-vision h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.post-industry-vision .post-content {
+  font-family: -apple-system, "system-ui", sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.post-industry-vision .post-content h2 {
+  color: #ff6b6b;
+  font-size: 1.85rem;
+  font-weight: 800;
+  border-bottom: none;
+  margin-top: 3rem;
+}
+
+.post-industry-vision .post-content h3 {
+  color: #e63946;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Pull quotes */
+.post-industry-vision blockquote {
+  border-left: 4px solid #e63946;
+  background: rgba(230,57,70,0.06);
+  font-size: 1.25rem;
+  font-style: italic;
+  padding: 1.25rem 1.75rem;
+  color: var(--text-primary);
+}
+
+/* Card-like sections for key points */
+.post-industry-vision .post-content > h2 + p,
+.post-industry-vision .post-content > h2 + ul {
+  padding-left: 1rem;
+  border-left: 2px solid rgba(230,57,70,0.2);
+}
+
+.post-industry-vision code {
+  background: rgba(230,57,70,0.08);
+  color: #ff6b6b;
+}
+
+.post-industry-vision table th {
+  color: #ff6b6b;
+}
+
+/* Bold emphasis */
+.post-industry-vision strong {
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .post-industry-vision h1 {
+    font-size: 2.25rem;
+  }
+}

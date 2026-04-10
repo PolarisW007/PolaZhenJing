@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Verify Email{% endblock %}
+{% block content %}
+<h2>邮箱验证 / Verify Email</h2>
+<p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; text-align: center;">
+  A 6-digit code has been sent to <strong style="color: var(--gold-primary);">{{ session.get('verify_email', '') }}</strong>
+</p>
+<form method="POST">
+  <div class="form-group">
+    <label for="code">Verification Code</label>
+    <input type="text" id="code" name="code" class="form-input" maxlength="6"
+           pattern="[0-9]{6}" placeholder="000000"
+           style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5em;" required autofocus>
+  </div>
+  <button type="submit" class="btn-gold">Verify</button>
+</form>
+<div class="form-links">
+  <a href="{{ url_for('auth.register') }}">Resend code</a>
+</div>
+{% endblock %}
