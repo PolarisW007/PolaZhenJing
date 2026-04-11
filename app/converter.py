@@ -130,13 +130,13 @@ def extract_title(markdown_text: str) -> str:
     raw = re.sub(r'\*\*\s*_?|_?\s*\*\*', '', raw)
     raw = re.sub(r'__|[*_]', '', raw)
     raw = raw.strip()
-    # Truncate at first sentence boundary within 20 chars
-    if len(raw) > 20:
-        for punct in ['，', '。', '、', '；', ',', '.', ' ']:
-            idx = raw.find(punct, 8)  # at least 8 chars
-            if 0 < idx <= 20:
+    # Truncate at first sentence boundary within 64 chars
+    if len(raw) > 64:
+        for punct in ['。', '！', '？', '，', '、', '；', '.', '!', '?', ',', ' ']:
+            idx = raw.rfind(punct, 20, 64)  # between 20-64 chars
+            if idx > 0:
                 return raw[:idx]
-        return raw[:20]
+        return raw[:64]
     return raw or 'Untitled'
 
 

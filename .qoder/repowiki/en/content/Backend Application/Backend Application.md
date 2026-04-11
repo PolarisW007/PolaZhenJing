@@ -19,12 +19,11 @@
 
 ## Update Summary
 **Changes Made**
-- Updated literary narrative style section to reflect the new "耕烟煮云" style with enhanced CSS styling and LLM integration
-- Added documentation for MiniMax API integration and LLM-based content rewriting capabilities
-- Enhanced metadata processing section with improved summary generation and reading time estimation
-- Updated error handling documentation to include LLM API integration and enhanced fallback mechanisms
-- Added new asset management integration documentation for improved file handling
-- Updated troubleshooting guide to include MiniMax API configuration and LLM-related issues
+- Updated enhanced document conversion pipeline section to reflect new DOCX formatting cleanup functionality
+- Added documentation for improved title extraction with enhanced markdown formatting removal
+- Enhanced PDF conversion pipeline documentation with sophisticated font analysis capabilities
+- Updated troubleshooting guide to include DOCX formatting cleanup and title extraction improvements
+- Added new section on DOCX formatting cleanup and title extraction functionality
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -41,7 +40,7 @@
 ## Introduction
 This document describes the backend application for PolaZhenJing v2, a lightweight Flask-based management interface for a personal knowledge wiki and blogging platform. The system has been completely redesigned from the previous complex FastAPI architecture to a simplified Flask-based solution with single-user authentication, file upload capabilities, and automatic conversion pipeline. The new architecture focuses on simplicity with integrated SQLite database storage, QQ email verification, and seamless Jekyll static site generation for GitHub Pages deployment.
 
-**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture. The system now features enhanced literary narrative style support with MiniMax API integration for content rewriting.
+**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture. The system now features enhanced literary narrative style support with MiniMax API integration for content rewriting and sophisticated document conversion capabilities.
 
 ## Project Structure
 The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with six main components: authentication, file upload/conversion, content management, LLM integration, literary styling, and CLI operations.
@@ -52,7 +51,7 @@ subgraph "Flask Application Factory"
 APP["__init__.py<br/>create_app(), get_db(), init_db()"]
 AUTH["auth.py<br/>Authentication routes<br/>Login/Register/Verify"]
 UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation<br/>LLM integration + asset management"]
-CONV["converter.py<br/>Enhanced PDF structure detection<br/>PDF/DOCX/HTML → Markdown"]
+CONV["converter.py<br/>Enhanced PDF structure detection<br/>DOCX formatting cleanup<br/>Improved title extraction<br/>Multi-format conversion"]
 MAIL["mailer.py<br/>QQ email SMTP verification"]
 CLI["wiki.py<br/>CLI management tool<br/>Serve/Build/Admin/New/List/Deploy"]
 end
@@ -84,7 +83,7 @@ UP --> MINIMAX
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
 - [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
-- [app/converter.py:1-88](file://app/converter.py#L1-L88)
+- [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
@@ -97,7 +96,7 @@ UP --> MINIMAX
 - **Application factory pattern**: Flask app created with template configuration and registers teardown handlers for database connections
 - **Database integration**: SQLite-based user storage with automatic table creation and connection management using Flask's g object pattern
 - **Authentication system**: Single-user authentication with QQ email verification using Flask sessions and secure cookies
-- **Enhanced file upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with advanced PDF structure detection and automatic conversion to blog-ready Markdown
+- **Enhanced file upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with advanced PDF structure detection, DOCX formatting cleanup, and automatic conversion to blog-ready Markdown
 - **Template rendering**: Jinja2-based server-side rendering for all management interfaces
 - **Email verification**: QQ Email SMTP integration for 6-digit verification codes with 5-minute expiration
 - **Static site generation**: Jekyll integration for blog post generation with six predefined styles including literary narrative
@@ -107,7 +106,7 @@ UP --> MINIMAX
 **Section sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:16-24](file://app/auth.py#L16-L24)
-- [app/converter.py:58-88](file://app/converter.py#L58-L88)
+- [app/converter.py:58-145](file://app/converter.py#L58-L145)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
 - [wiki.py:1-165](file://wiki.py#L1-L165)
@@ -115,7 +114,7 @@ UP --> MINIMAX
 ## Architecture Overview
 The backend follows a simplified layered architecture focused on content management and static site generation:
 - **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface and Jekyll templates for public site
-- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection, content management operations, LLM-based content rewriting, and CLI command handling
+- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection and DOCX formatting cleanup, content management operations, LLM-based content rewriting, and CLI command handling
 - **Persistence layer**: SQLite database with user management and session-based authentication
 - **Integration layer**: QQ Email SMTP for verification, MiniMax API for content rewriting, and Jekyll static site generation for publishing
 
@@ -125,7 +124,7 @@ CLIENT["Admin Browser"]
 FLASK["Flask App Factory"]
 AUTH["Auth Blueprint<br/>Login/Register/Verify"]
 UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage<br/>Style selection + LLM integration"]
-CONV["Converter Module<br/>Enhanced PDF Structure Detection"]
+CONV["Converter Module<br/>Enhanced PDF Structure Detection<br/>DOCX Formatting Cleanup<br/>Improved Title Extraction"]
 MAIL["Mailer Module<br/>QQ SMTP Verification"]
 DB["SQLite Database<br/>wiki.db"]
 TEMPLATES["Jinja2 Templates<br/>Server-side Rendering"]
@@ -150,7 +149,7 @@ CLI --> DB
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
 - [app/uploader.py:126-129](file://app/uploader.py#L126-L129)
-- [app/converter.py:1-88](file://app/converter.py#L1-L88)
+- [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
 - [wiki.py:1-165](file://wiki.py#L1-L165)
 
@@ -250,73 +249,117 @@ Auth-->>User : Redirect to /admin/login
 - [app/auth.py:99-133](file://app/auth.py#L99-L133)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 
-### Enhanced PDF Conversion Pipeline
-**Updated** The PDF conversion pipeline now features advanced structure detection capabilities with sophisticated font analysis and intelligent heading identification.
+### Enhanced Document Conversion Pipeline
+**Updated** The document conversion pipeline now features sophisticated DOCX formatting cleanup and improved title extraction functionality.
 
 - **Advanced PDF structure detection**: PyMuPDF-based text extraction with font size analysis for automatic heading detection
 - **Intelligent heading classification**: Multi-level heading detection using font size thresholds (≥18px: H1, ≥14px: H2, ≥12px: H3)
 - **Bold text detection**: Sub-heading identification through font weight analysis for enhanced document structure
+- **DOCX formatting cleanup**: Sophisticated markdown formatting cleanup to remove excessive bold/italic wrappers from Word documents
+- **Enhanced title extraction**: Improved title detection with markdown formatting removal and CJK/latin character truncation
 - **Robust error handling**: Graceful fallback mechanisms when conversion libraries are unavailable
 - **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
-- **Title detection**: Automatic title extraction from first heading or content
 - **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
 
 ```mermaid
 flowchart TD
-A["PDF Upload"] --> B{"PyMuPDF Analysis"}
-B --> C["Extract Text Blocks"]
-C --> D["Font Size Analysis"]
-D --> E{"Heading Detection"}
-E --> |"Font ≥ 18px"| F["# H1 Heading"]
-E --> |"Font ≥ 14px"| G["## H2 Heading"]
-E --> |"Font ≥ 12px"| H["### H3 Heading"]
-E --> |"Other"| I["Regular Paragraph"]
-F --> J["Extract Images"]
-G --> J
-H --> J
-I --> J
-J --> K["Store in Session"]
-K --> L["Style Selection"]
-L --> M["Generate Jekyll Post"]
+A["Document Upload"] --> B{"Format Detection"}
+B --> C["PDF Processing"]
+B --> D["DOCX Processing"]
+B --> E["HTML Processing"]
+B --> F["Markdown/TXT Processing"]
+C --> G["PyMuPDF Analysis"]
+G --> H["Font Size Detection"]
+H --> I["Heading Classification"]
+I --> J["Image Extraction"]
+D --> K["Mammoth Conversion"]
+K --> L["HTML2Text Conversion"]
+L --> M["Formatting Cleanup"]
+M --> N["Bold/Italic Removal"]
+N --> O["Title Extraction"]
+E --> P["HTML2Text Conversion"]
+F --> Q["Direct Read"]
+Q --> R["Title Extraction"]
+J --> S["Store in Session"]
+O --> S
+R --> S
+S --> T["Style Selection"]
+T --> U["Generate Jekyll Post"]
 ```
 
 **Diagram sources**
 - [app/converter.py:7-39](file://app/converter.py#L7-L39)
+- [app/converter.py:58-76](file://app/converter.py#L58-L76)
+- [app/converter.py:112-140](file://app/converter.py#L112-L140)
 - [app/uploader.py:123-128](file://app/uploader.py#L123-L128)
 
 **Section sources**
-- [app/converter.py:1-108](file://app/converter.py#L1-L108)
+- [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
+
+### DOCX Formatting Cleanup and Title Extraction
+**New** The system now includes sophisticated DOCX formatting cleanup and enhanced title extraction functionality.
+
+- **DOCX formatting cleanup**: Advanced markdown formatting cleanup removes excessive bold/italic wrappers that commonly appear when Word documents use bold+italic styling throughout
+- **Pattern recognition**: Removes patterns like `**_text_**` or `** _text_ **` that result from Word's combined formatting
+- **Standalone wrapper removal**: Strips standalone bold wrappers like `**text**` that can appear in converted content
+- **Whitespace normalization**: Cleans up leftover double spaces and normalizes whitespace
+- **Enhanced title extraction**: Improved title detection algorithm that strips markdown formatting and truncates appropriately for CJK and latin characters
+- **Sentence boundary detection**: Smart truncation at first sentence boundary within 20 characters for optimal readability
+- **Fallback handling**: Graceful fallback to 'Untitled' when no title can be detected
+
+```mermaid
+flowchart TD
+A["DOCX Content"] --> B["HTML Conversion"]
+B --> C["HTML2Text Conversion"]
+C --> D["Formatting Cleanup"]
+D --> E["Remove Bold+Italic Wrappers"]
+E --> F["Strip Standalone Bold"]
+F --> G["Clean Whitespace"]
+G --> H["Extract Title"]
+H --> I["Strip Markdown Formatting"]
+I --> J["Truncate at Sentence Boundary"]
+J --> K["Return Clean Content"]
+```
+
+**Diagram sources**
+- [app/converter.py:42-55](file://app/converter.py#L42-L55)
+- [app/converter.py:112-140](file://app/converter.py#L112-L140)
+
+**Section sources**
+- [app/converter.py:42-55](file://app/converter.py#L42-L55)
+- [app/converter.py:112-140](file://app/converter.py#L112-L140)
 
 ### File Upload and Conversion Pipeline
 - **Multi-format support**: PDF, DOCX, HTML, Markdown, and TXT with automatic format detection
 - **Conversion library integration**: PyMuPDF for PDF (with enhanced structure detection), mammoth for DOCX, html2text for HTML
 - **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
-- **Title detection**: Automatic title extraction from first heading or content
+- **Title detection**: Automatic title extraction from first heading or content with enhanced formatting cleanup
 - **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
 
 ```mermaid
 flowchart TD
 A["File Upload"] --> B{"Format Detection"}
 B --> |PDF| C["Enhanced PyMuPDF extraction<br/>with structure detection"]
-B --> |DOCX| D["Mammoth + html2text"]
+B --> |DOCX| D["Mammoth + html2text<br/>+ formatting cleanup"]
 B --> |HTML| E["html2text conversion"]
-B --> |MD/TXT| F["Direct read"]
+B --> |MD/TXT| F["Direct read + title extraction"]
 C --> G["Extract images to assets/images/"]
-D --> G
-E --> G
-F --> H["Store in session"]
-G --> H
-H --> I["Style Selection"]
-I --> J["Generate Jekyll post"]
+D --> H["Apply formatting cleanup"]
+E --> I["Store in session"]
+F --> I
+G --> I
+H --> I
+I --> J["Style Selection"]
+J --> K["Generate Jekyll post"]
 ```
 
 **Diagram sources**
-- [app/converter.py:78-91](file://app/converter.py#L78-L91)
+- [app/converter.py:78-109](file://app/converter.py#L78-L109)
 - [app/uploader.py:123-128](file://app/uploader.py#L123-L128)
 
 **Section sources**
-- [app/converter.py:1-108](file://app/converter.py#L1-L108)
+- [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
 
 ### Literary Narrative Style and LLM Integration
@@ -437,7 +480,7 @@ The system has undergone complete architectural transformation from the previous
 - Simplified Jinja2 templates
 - Jekyll static site generator
 - Single-user authentication
-- Enhanced file-based conversion pipeline with PDF structure detection
+- Enhanced file-based conversion pipeline with PDF structure detection and DOCX formatting cleanup
 - Literary narrative style with MiniMax API integration
 - GitHub Actions deployment
 - CLI management tool
@@ -446,15 +489,17 @@ The system has undergone complete architectural transformation from the previous
 - [PRD.md:160-180](file://PRD.md#L160-L180)
 
 ## Troubleshooting Guide
-**Updated** Enhanced troubleshooting guidance for the new PDF conversion capabilities, literary narrative style, and MiniMax API integration.
+**Updated** Enhanced troubleshooting guidance for the new DOCX formatting cleanup, improved title extraction, and MiniMax API integration.
 
 - **Database issues**: Check `data/wiki.db` file permissions and SQLite availability
 - **Email verification**: Verify QQ email credentials and SMTP_SSL configuration
 - **PDF conversion errors**: Install PyMuPDF library (`pip install PyMuPDF`) for enhanced PDF structure detection
-- **DOCX conversion issues**: Install mammoth library (`pip install mammoth`) for DOCX processing
+- **DOCX conversion issues**: Install mammoth library (`pip install mammoth`) for DOCX processing and formatting cleanup
 - **HTML conversion problems**: Install html2text library (`pip install html2text`) for HTML to Markdown conversion
 - **Missing conversion libraries**: The system provides clear error messages indicating which libraries need to be installed
 - **PDF structure detection failures**: Font size analysis may fail on documents with unusual typography or embedded fonts
+- **DOCX formatting cleanup failures**: Formatting cleanup may not work properly if conversion libraries are not installed
+- **Title extraction issues**: Title extraction may fail if content lacks proper formatting or contains special characters
 - **Session problems**: Ensure Flask secret key is properly configured in environment
 - **Upload failures**: Check file size limits and supported format extensions
 - **Jekyll build errors**: Verify Ruby environment and gem dependencies
@@ -467,13 +512,15 @@ The system has undergone complete architectural transformation from the previous
 **Section sources**
 - [app/__init__.py:12-17](file://app/__init__.py#L12-L17)
 - [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
-- [app/converter.py:105-108](file://app/converter.py#L105-L108)
+- [app/converter.py:143-145](file://app/converter.py#L143-L145)
 - [app/converter.py:7-39](file://app/converter.py#L7-L39)
+- [app/converter.py:42-55](file://app/converter.py#L42-L55)
+- [app/converter.py:112-140](file://app/converter.py#L112-L140)
 - [app/uploader.py:135-147](file://app/uploader.py#L135-L147)
 - [app/uploader.py:150-191](file://app/uploader.py#L150-L191)
 - [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Conclusion
-PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation.
+PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection and sophisticated DOCX formatting cleanup. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation.
 
-**Updated** The enhanced PDF conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. The addition of literary narrative style with MiniMax API integration provides powerful content rewriting capabilities with style-specific prompts, enabling poetic and imagery-driven content generation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.
+**Updated** The enhanced document conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The new DOCX formatting cleanup functionality removes excessive markdown formatting artifacts that commonly appear when converting Word documents, resulting in cleaner and more readable content. The improved title extraction functionality with enhanced markdown formatting removal ensures optimal title detection for blog posts. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. The addition of literary narrative style with MiniMax API integration provides powerful content rewriting capabilities with style-specific prompts, enabling poetic and imagery-driven content generation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.

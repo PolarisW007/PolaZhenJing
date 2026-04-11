@@ -26,15 +26,19 @@
 - [_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md](file://_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md)
 - [_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md](file://_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md)
 - [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md)
+- [app/uploader.py](file://app/uploader.py)
+- [app/converter.py](file://app/converter.py)
+- [wiki.py](file://wiki.py)
+- [PRD.md](file://PRD.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive literary narrative style support with new CSS framework for poetic prose
-- Enhanced asset serving infrastructure with improved /assets/ route handler for static file management
-- Expanded layout system to include six distinct article styles with specialized styling
-- Updated CSS architecture with modular design supporting literary, technical, and visual content types
-- Improved static file management with enhanced asset pipeline and conditional loading
+- Added comprehensive generic LLM rewrite prompt system for content optimization with skill-based and generic prompts
+- Enhanced deployment workflows with improved GitHub Actions concurrency and manual dispatch capabilities
+- Integrated MiniMax LLM API for automated content rewriting and optimization
+- Expanded content processing pipeline with advanced file conversion and markdown cleaning
+- Improved CLI deployment tool with unified git workflow management
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -50,12 +54,12 @@
 11. [Appendices](#appendices)
 
 ## Introduction
-This document explains PolaZhenJing's enhanced static site generation system built on Jekyll with a comprehensive asset serving infrastructure. The system features six distinct article layouts, literary narrative styling, and improved static file management through the /assets/ route handler. It covers Jekyll configuration, theme customization, content processing, asset management, and automated deployment pipeline to GitHub Pages. The system maintains the core concept of generating static content from dynamic sources while introducing modern Jekyll features for enhanced performance, maintainability, and content diversity.
+This document explains PolaZhenJing's enhanced static site generation system built on Jekyll with a comprehensive asset serving infrastructure and advanced content optimization capabilities. The system features six distinct article layouts, literary narrative styling, and improved static file management through the /assets/ route handler. It now includes a sophisticated generic LLM rewrite prompt system for content optimization and enhanced deployment workflows with improved GitHub Actions concurrency and manual dispatch capabilities. The system covers Jekyll configuration, theme customization, content processing, asset management, and automated deployment pipeline to GitHub Pages, representing a significant evolution from the previous implementation.
 
-**Updated** Added comprehensive literary narrative style support with new CSS framework for poetic prose and enhanced asset serving infrastructure with improved static file management.
+**Updated** Added comprehensive generic LLM rewrite prompt system for content optimization with skill-based and generic prompts, enhanced deployment workflows with improved GitHub Actions concurrency and manual dispatch capabilities, and integrated MiniMax LLM API for automated content rewriting and optimization.
 
 ## Project Structure
-The static site is organized under the root directory with Jekyll-specific structure featuring enhanced asset management:
+The static site is organized under the root directory with Jekyll-specific structure featuring enhanced asset management and content optimization infrastructure:
 - _config.yml: Jekyll configuration with plugins, pagination, and SEO settings
 - Gemfile: Ruby gem dependencies for Jekyll ecosystem
 - _posts/: Jekyll posts directory containing generated content
@@ -64,7 +68,9 @@ The static site is organized under the root directory with Jekyll-specific struc
 - assets/css/: Comprehensive CSS framework with six layout-specific styles and literary narrative support
 - assets/images/: Image assets for enhanced visual content
 - index.html: Landing page with pagination and article listing
-- .github/workflows/deploy.yml: GitHub Actions workflow for automated deployment
+- .github/workflows/deploy.yml: Enhanced GitHub Actions workflow for automated deployment with concurrency control
+- app/: Python application with LLM integration and content processing
+- wiki.py: CLI management tool for streamlined deployment workflow
 
 ```mermaid
 graph TB
@@ -82,6 +88,14 @@ end
 subgraph "GitHub Actions"
 WF[".github/workflows/deploy.yml"]
 end
+subgraph "Python Application"
+APP["app/"]
+UPLOADER["app/uploader.py"]
+CONVERTER["app/converter.py"]
+end
+subgraph "CLI Tools"
+WIKI["wiki.py"]
+end
 CONF --> POSTS
 CONF --> LAYOUTS
 CONF --> INCLUDES
@@ -94,17 +108,24 @@ WF --> POSTS
 WF --> LAYOUTS
 WF --> INCLUDES
 WF --> ASSETS
+APP --> UPLOADER
+APP --> CONVERTER
+WIKI --> WF
 ```
 
 **Diagram sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+- [app/uploader.py:126-149](file://app/uploader.py#L126-L149)
+- [wiki.py:117-130](file://wiki.py#L117-L130)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+- [app/uploader.py:126-149](file://app/uploader.py#L126-L149)
+- [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Core Components
 - **Jekyll Configuration and Plugins**:
@@ -132,10 +153,21 @@ WF --> ASSETS
   - Font loading optimization with preconnect headers
   - Literary narrative styling with ink-wash aesthetics and drop-cap features
 - **Robust Deployment Pipeline**:
-  - GitHub Actions workflow for automated Jekyll builds
+  - Enhanced GitHub Actions workflow for automated Jekyll builds with concurrency control
   - Ruby environment setup with Bundler dependency management
   - Enhanced asset pipeline integration
   - GitHub Pages deployment with artifact upload
+  - Manual dispatch capability for on-demand deployments
+- **Advanced Content Optimization System**:
+  - Generic LLM rewrite prompt system for content optimization
+  - Skill-based LLM rewriting with dedicated prompts for literary and friendly styles
+  - MiniMax API integration for automated content rewriting
+  - Advanced file conversion pipeline supporting PDF, DOCX, HTML, and Markdown
+  - Intelligent markdown cleaning and formatting optimization
+- **Enhanced CLI Management Tool**:
+  - Unified git workflow management with automatic add, commit, and push
+  - Streamlined deployment process with single command execution
+  - Local development server integration with live reload support
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -149,19 +181,26 @@ WF --> ASSETS
 - [assets/css/friendly-explainer.css:1-93](file://assets/css/friendly-explainer.css#L1-L93)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+- [app/uploader.py:126-149](file://app/uploader.py#L126-L149)
+- [app/converter.py:1-146](file://app/converter.py#L1-146)
+- [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Architecture Overview
-The enhanced Jekyll-based publishing pipeline integrates dynamic content generation with sophisticated static site compilation, advanced asset management, and GitHub Pages deployment.
+The enhanced Jekyll-based publishing pipeline integrates dynamic content generation with sophisticated static site compilation, advanced asset management, GitHub Pages deployment, and intelligent content optimization through LLM integration.
 
 ```mermaid
 sequenceDiagram
 participant Admin as "Admin User"
 participant App as "Dynamic Application"
+participant LLM as "MiniMax LLM API"
 participant Jekyll as "Jekyll Compiler"
 participant Assets as "Asset Pipeline"
 participant GH as "GitHub Actions"
 participant Pages as "GitHub Pages"
 Admin->>App : Generate content
+App->>App : Convert & Clean content
+App->>LLM : Apply rewrite prompts
+LLM-->>App : Optimized content
 App->>Jekyll : Place in _posts/ directory
 Jekyll->>Assets : Process assets via /assets/ route
 Assets->>Assets : Apply layout-specific CSS loading
@@ -179,6 +218,7 @@ GH->>Pages : Deploy to GitHub Pages
 **Diagram sources**
 - [_config.yml:18-23](file://_config.yml#L18-L23)
 - [deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [app/uploader.py:170-210](file://app/uploader.py#L170-L210)
 
 ## Detailed Component Analysis
 
@@ -233,7 +273,7 @@ GH->>Pages : Deploy to GitHub Pages
 - **Industry Vision Layout**:
   - Professional business presentation
   - Clear structure for industry analysis
-  - Corporate-friendly color scheme
+  - corporate-friendly color scheme
 
 **Section sources**
 - [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
@@ -317,11 +357,12 @@ GH->>Pages : Deploy to GitHub Pages
 **Section sources**
 - [index.html:1-70](file://index.html#L1-L70)
 
-### GitHub Actions Deployment Pipeline
+### Enhanced GitHub Actions Deployment Pipeline
 - **Enhanced Workflow Configuration**:
   - Triggered on pushes to main branch affecting site/** paths including assets/**
   - Manual dispatch capability for on-demand deployments
   - GitHub Pages permissions for deployment authorization
+  - Enhanced concurrency control with group-based cancellation
 - **Advanced Ruby Environment Setup**:
   - Ruby 3.2 environment with Bundler dependency management
   - Gemfile.lock for consistent gem versions
@@ -338,6 +379,47 @@ GH->>Pages : Deploy to GitHub Pages
 
 **Section sources**
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+
+### Advanced Content Optimization System
+- **Generic LLM Rewrite Prompt System**:
+  - Skill-based LLM rewriting with dedicated prompts for literary and friendly styles
+  - Generic LLM rewrite prompt for styles without dedicated prompts
+  - MiniMax API integration with authentication and error handling
+  - Content optimization including formatting cleanup, section headings, and restructuring
+- **Enhanced File Conversion Pipeline**:
+  - Support for PDF, DOCX, HTML, and Markdown file formats
+  - Intelligent content extraction with structure preservation
+  - Automatic image extraction and optimization
+  - Advanced markdown cleaning and formatting optimization
+- **Content Processing Workflow**:
+  - Multi-step conversion process with format detection
+  - Title auto-detection from various sources
+  - Metadata extraction and validation
+  - Session-based content storage for processing stages
+
+**Section sources**
+- [app/uploader.py:126-149](file://app/uploader.py#L126-L149)
+- [app/uploader.py:170-210](file://app/uploader.py#L170-L210)
+- [app/converter.py:1-146](file://app/converter.py#L1-146)
+
+### Enhanced CLI Management Tool
+- **Unified Git Workflow Management**:
+  - Single command deployment with automatic add, commit, and push
+  - Error handling and status reporting for deployment operations
+  - Integration with GitHub Actions for seamless workflow
+- **Local Development Server Integration**:
+  - Live reload support for development workflow
+  - Jekyll build and serve commands
+  - Flask admin server for content management
+- **Content Creation and Management**:
+  - New post creation with style selection
+  - Post listing and management utilities
+  - Slug generation and file organization
+
+**Section sources**
+- [wiki.py:117-130](file://wiki.py#L117-L130)
+- [wiki.py:35-52](file://wiki.py#L35-L52)
+- [wiki.py:62-89](file://wiki.py#L62-L89)
 
 ## Content Analysis and New Blog Posts
 
@@ -401,6 +483,8 @@ The enhanced Jekyll-based system introduces new dependencies and relationships:
 - **Enhanced Configuration Dependencies**: Layout inheritance and plugin configurations with literary narrative support
 - **Advanced Asset Dependencies**: CSS modularization with conditional loading and improved static file management
 - **Enhanced Deployment Dependencies**: GitHub Actions workflow and GitHub Pages integration with asset pipeline support
+- **LLM Integration Dependencies**: MiniMax API integration with authentication and error handling
+- **Content Processing Dependencies**: File conversion libraries and markdown cleaning utilities
 
 ```mermaid
 graph LR
@@ -416,15 +500,25 @@ INCLUDES --> HTML["Shared HTML Components"]
 ASSETS --> MAINCSS["main.css"]
 ASSETS --> LITERARYCSS["literary-narrative.css"]
 ASSETS --> STYLECSS["Other style-specific.css"]
+subgraph "LLM Integration"
+UPLOADER["app/uploader.py"] --> MINIMAX["MiniMax API"]
+END
+subgraph "Content Processing"
+CONVERTER["app/converter.py"] --> FILES["File Conversion Libraries"]
+END
 ```
 
 **Diagram sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [_config.yml:18-31](file://_config.yml#L18-L31)
+- [app/uploader.py:151-152](file://app/uploader.py#L151-L152)
+- [app/converter.py:1-146](file://app/converter.py#L1-146)
 
 **Section sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [_config.yml:18-31](file://_config.yml#L18-L31)
+- [app/uploader.py:151-152](file://app/uploader.py#L151-L152)
+- [app/converter.py:1-146](file://app/converter.py#L1-146)
 
 ## Performance Considerations
 - **Enhanced Build Performance**:
@@ -437,6 +531,11 @@ ASSETS --> STYLECSS["Other style-specific.css"]
   - Conditional CSS loading based on layout usage optimizes page load times
   - Font preconnect optimization for faster typography loading
   - Enhanced /assets/ route handler improves static file serving performance
+- **Enhanced LLM Integration Performance**:
+  - Asynchronous content processing with timeout handling
+  - API key management with environment variable fallback
+  - Error handling and retry mechanisms for LLM requests
+  - Content caching to reduce repeated processing
 - **Improved Caching Strategy**:
   - GitHub Pages provides CDN caching for static assets
   - Browser caching through proper HTTP headers
@@ -447,6 +546,10 @@ ASSETS --> STYLECSS["Other style-specific.css"]
   - Responsive image handling with appropriate sizing
   - Modern formats support for improved compression
   - Literary narrative styling supports high-quality visual content
+- **Deployment Performance**:
+  - Concurrency control prevents resource conflicts
+  - Manual dispatch allows for controlled deployment timing
+  - Artifact caching reduces rebuild times
 
 ## Troubleshooting Guide
 - **Enhanced Jekyll Build Failures**:
@@ -469,17 +572,29 @@ ASSETS --> STYLECSS["Other style-specific.css"]
   - Check artifact upload and download processes
   - Verify GitHub Pages environment configuration
   - Ensure asset pipeline integration in deployment
+- **LLM Integration Issues**:
+  - Verify MINIMAX_TOKEN_PLAN_API_KEY environment variable is set
+  - Check MiniMax API connectivity and rate limits
+  - Review error handling and logging for LLM failures
+  - Validate content formatting and prompt optimization
+- **Content Processing Errors**:
+  - Check file conversion library installations
+  - Verify markdown cleaning and formatting processes
+  - Review file size and format limitations
+  - Validate session-based content storage and retrieval
 
 **Section sources**
 - [_config.yml:18-23](file://_config.yml#L18-L23)
 - [deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
+- [app/uploader.py:175-178](file://app/uploader.py#L175-L178)
+- [app/converter.py:143-146](file://app/converter.py#L143-L146)
 
 ## Conclusion
 PolaZhenJing's enhanced Jekyll-based static site generation system represents a significant evolution from the previous implementation. The new architecture leverages Jekyll's mature plugin ecosystem, enhanced SEO capabilities, automatic image optimization, and comprehensive asset management through the /assets/ route handler. The expanded six-layout system provides flexible content presentation options including literary narrative styling, and the modular CSS architecture ensures maintainable styling across diverse content types.
 
-**Updated** The addition of literary narrative style support with ink-wash aesthetics, enhanced asset serving infrastructure, and improved static file management demonstrates the system's capability to handle diverse content styles while maintaining consistent presentation standards. The integration of complex analytical content and poetic prose showcases the system's maturity and flexibility in supporting both technical and literary expression.
+**Updated** The addition of the comprehensive generic LLM rewrite prompt system with skill-based and generic prompts, enhanced deployment workflows with improved GitHub Actions concurrency and manual dispatch capabilities, and integrated MiniMax LLM API for automated content rewriting and optimization demonstrates the system's capability to handle diverse content styles while maintaining consistent presentation standards. The integration of complex analytical content and poetic prose showcases the system's maturity and flexibility in supporting both technical and literary expression.
 
-With automated deployment through GitHub Actions, comprehensive performance optimizations, and advanced asset pipeline integration, the system delivers a robust foundation for scalable content publishing across multiple content styles and presentation formats.
+The enhanced content processing pipeline with advanced file conversion and markdown cleaning, combined with the streamlined CLI deployment tool, creates a robust foundation for scalable content publishing across multiple content styles and presentation formats. With automated deployment through GitHub Actions, comprehensive performance optimizations, and advanced asset pipeline integration, the system delivers a modern, efficient, and feature-rich platform for content creation and distribution.
 
 ## Appendices
 
@@ -489,16 +604,19 @@ With automated deployment through GitHub Actions, comprehensive performance opti
   - Run `bundle install` to install gem dependencies
   - Use `bundle exec jekyll serve` for local development server
   - Test literary narrative and other new layouts locally
+  - Verify LLM integration with test API keys
 - **Content Creation**:
   - Place new posts in _posts/ directory with proper YAML front matter
   - Select appropriate layout based on content type (friendly-explainer for narrative content, deep-technical for code-heavy content, literary-narrative for poetic content)
   - Test locally before pushing to main branch
   - Validate asset loading for new layout-specific styles
+  - Test LLM rewrite functionality with sample content
 - **Enhanced Deployment Process**:
   - Push to main branch to trigger automated deployment
   - Manual dispatch available through GitHub Actions interface
   - Monitor build logs for any configuration or plugin errors
   - Verify asset pipeline integration in deployment
+  - Check LLM API integration and content optimization
 - **Advanced Maintenance Tasks**:
   - Regular gem updates through Bundler
   - CSS architecture review for layout-specific styles
@@ -506,8 +624,17 @@ With automated deployment through GitHub Actions, comprehensive performance opti
   - Content analysis and security research updates
   - Literary narrative style refinement and optimization
   - Asset pipeline performance monitoring and optimization
+  - LLM API key rotation and security updates
+  - CLI tool enhancements and bug fixes
+- **Content Optimization Workflow**:
+  - Test LLM rewrite prompts with various content types
+  - Monitor API usage and optimize prompt effectiveness
+  - Validate content quality and readability after optimization
+  - Update generic prompts based on content patterns and feedback
 
 **Section sources**
 - [deploy.yml:7-18](file://.github/workflows/deploy.yml#L7-L18)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [_config.yml:18-23](file://_config.yml#L18-L23)
+- [app/uploader.py:144-149](file://app/uploader.py#L144-L149)
+- [wiki.py:117-130](file://wiki.py#L117-L130)
