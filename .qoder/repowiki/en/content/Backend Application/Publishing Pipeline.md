@@ -21,13 +21,12 @@
 
 ## Update Summary
 **Changes Made**
-- Added comprehensive article preview system with dedicated article view endpoint
-- Implemented integrated GitHub integration for seamless article synchronization
-- Enhanced management interface with real-time article listing and status indicators
-- Added file conversion pipeline supporting multiple document formats
-- Implemented authentication and authorization system with QQ email verification
-- Enhanced error handling and user feedback mechanisms throughout the system
-- Added comprehensive styling system with five distinct blog layouts
+- Enhanced uploader functionality with comprehensive auto-sync mechanism for automatic GitHub synchronization
+- Added robust git operations including staging, committing, and pushing to remote origin with timeout protection
+- Implemented comprehensive error handling and flash message feedback system for user notifications
+- Integrated automatic GitHub synchronization into the article generation workflow
+- Added dedicated `/sync` endpoint for manual GitHub synchronization with upstream tracking
+- Enhanced flash messaging system with categorized notifications (success, warning, error, info)
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -42,16 +41,17 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators.
+This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators and robust error handling.
 
 ## Project Structure
 The publishing pipeline has been streamlined to focus on Jekyll static site generation with automated deployment and enhanced content management:
 - Jekyll configuration defines site metadata, build settings, and plugin ecosystem with proper GitHub Pages URL configuration
 - GitHub Actions workflow automates the complete build and deployment process to GitHub Pages with enhanced concurrency control
-- Flask backend provides comprehensive management interface for content creation, preview, and GitHub synchronization
+- Flask backend provides comprehensive management interface for content creation, preview, and GitHub synchronization with automatic deployment triggers
 - File-based content storage in `_posts/` directory with YAML frontmatter and automatic deployment triggers
 - Five distinct blog layouts with custom styling and responsive design
 - Integrated authentication system with QQ email verification for secure access
+- Robust flash messaging system for user feedback and error notifications
 
 ```mermaid
 graph TB
@@ -69,18 +69,20 @@ H["Articles Management<br/>templates/articles.html"]
 I["Article Preview<br/>templates/article_view.html"]
 J["Auth System<br/>app/auth.py"]
 K["File Converter<br/>app/converter.py"]
+L["Auto-Sync System<br/>app/uploader.py<br/>git add -A, commit, push -u origin main<br/>Timeout: 30s/120s"]
 end
 subgraph "GitHub Integration"
-L["Git Operations<br/>app/uploader.py<br/>git push -u origin main<br/>Timeout: 120s"]
-M["GitHub Actions<br/>.github/workflows/deploy.yml<br/>Deploy to GitHub Pages<br/>Concurrency: cancel-in-progress"]
-N["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"]
+M["Git Operations<br/>Automatic Sync<br/>Upstream Tracking"]
+N["GitHub Actions<br/>.github/workflows/deploy.yml<br/>Deploy to GitHub Pages<br/>Concurrency: cancel-in-progress"]
+O["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"]
 end
 subgraph "Email System"
-O["QQ Email SMTP<br/>app/mailer.py<br/>Verification Codes"]
+P["QQ Email SMTP<br/>app/mailer.py<br/>Verification Codes"]
 end
 subgraph "Dependencies"
-P["Ruby Gems<br/>Gemfile<br/>jekyll, jekyll-feed, jekyll-seo-tag<br/>Ruby 3.2 + Bundler Cache"]
-Q["Python Packages<br/>requirements.txt<br/>flask, PyMuPDF, mammoth, html2text"]
+Q["Ruby Gems<br/>Gemfile<br/>jekyll, jekyll-feed, jekyll-seo-tag<br/>Ruby 3.2 + Bundler Cache"]
+R["Python Packages<br/>requirements.txt<br/>flask, PyMuPDF, mammoth, html2text"]
+S["Flash Messaging<br/>templates/base.html<br/>Success/Warning/Error/Info Categories"]
 end
 A --> B
 A --> C
@@ -92,28 +94,34 @@ F --> H
 F --> I
 F --> J
 F --> K
-J --> O
+F --> L
+J --> P
 L --> M
 M --> N
-P --> A
-Q --> F
+N --> O
+Q --> A
+R --> F
+S --> F
 ```
 
 **Diagram sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [index.html:1-70](file://index.html#L1-L70)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [index.html:1-70](file://index.html#L1-L70)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
@@ -123,11 +131,12 @@ Q --> F
 ## Core Components
 - **Jekyll Configuration**: Defines site metadata, build settings, pagination, plugins, and GitHub Pages URL configuration with proper baseurl for repository-based deployment
 - **Enhanced GitHub Actions Workflow**: Automates Jekyll build and deployment to GitHub Pages with improved concurrency control, Ruby 3.2/Bundler caching, and comprehensive error handling
-- **Flask Management Server**: Provides comprehensive interface for content creation, file uploads, article preview, and integrated git push functionality with timeout protection
+- **Flask Management Server**: Provides comprehensive interface for content creation, file uploads, article preview, and integrated git push functionality with timeout protection and flash messaging
 - **Article Preview System**: Dedicated endpoint for previewing individual articles with GitHub integration and markdown rendering
-- **GitHub Integration**: Seamless synchronization between local content and GitHub repository with automatic deployment triggers
+- **Automatic GitHub Synchronization**: Seamless synchronization between local content and GitHub repository with automatic deployment triggers and upstream tracking
 - **File Conversion Pipeline**: Supports multiple document formats (PDF, DOCX, HTML, Markdown) with intelligent content extraction and formatting
 - **Authentication System**: Secure access control with QQ email verification and session management
+- **Robust Flash Messaging**: Comprehensive notification system with categorized feedback (success, warning, error, info) for user experience
 - **Ruby Gem Dependencies**: Manages Jekyll ecosystem including jekyll-feed, jekyll-seo-tag, and jekyll-paginate for comprehensive site functionality
 - **Five Distinct Blog Styles**: Custom layouts with unique styling, responsive design, and comprehensive content formatting
 
@@ -135,10 +144,11 @@ Q --> F
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/uploader.py:222-246](file://app/uploader.py#L222-L246)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 
 ## Architecture Overview
@@ -150,31 +160,35 @@ The new publishing pipeline follows a simplified file-based approach with enhanc
 - Enhanced git push functionality with upstream tracking and timeout protection for improved deployment reliability
 - Real-time article preview system with markdown rendering and GitHub integration
 - Comprehensive authentication system with QQ email verification for secure access
+- Robust flash messaging system for user feedback and error notifications
+- Automatic synchronization mechanism that performs git operations with comprehensive error handling
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant Flask as "Flask Management<br/>app/__init__.py"
 participant Converter as "File Converter<br/>app/converter.py"
-participant Git as "Git Repository<br/>app/uploader.py<br/>git push -u origin main<br/>Timeout : 120s"
+participant Git as "Git Repository<br/>Automatic Sync<br/>git add -A, commit, push -u origin main<br/>Timeout : 30s/120s"
 participant Jekyll as "Jekyll Processor<br/>_config.yml"
 participant GH as "GitHub Actions<br/>.github/workflows/deploy.yml<br/>Concurrency : cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"
 participant Pages as "GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"
 User->>Flask : Create/Edit Post
 Flask->>Converter : Convert PDF/DOCX/HTML to Markdown
 Converter-->>Flask : Converted Content
-Flask->>Git : git add -A, git commit, git push -u origin main
+Flask->>Git : Automatic Sync : git add -A, git commit, git push -u origin main
 Git->>GH : Trigger build on push
 GH->>GH : Setup Ruby 3.2 with bundler-cache
 GH->>GH : Run jekyll build with JEKYLL_ENV=production
 GH->>Pages : Deploy to GitHub Pages
 Pages-->>User : Live site at polarisw007.github.io/PolaZhenJing
+Note over Git,Pages : Flash Messages : Success, Warning, Error, Info
 ```
 
 **Diagram sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 
@@ -232,18 +246,36 @@ The lightweight Flask application provides comprehensive content management capa
 - **File Upload**: Handles various document formats for conversion to Markdown
 - **Security**: Secret key configuration and content length limits
 - **Enhanced Git Integration**: Integrated git push functionality with upstream tracking for reliable deployment, timeout protection for git operations
-- **Error Handling**: Comprehensive error handling for git operations, deployment failures, and timeout scenarios
+- **Automatic Synchronization**: Seamless integration between content creation and GitHub deployment with comprehensive error handling
+- **Flash Messaging System**: Comprehensive notification system with categorized feedback (success, warning, error, info) for user experience
 - **Authentication System**: Secure access control with QQ email verification and session management
 - **Article Preview**: Dedicated endpoint for previewing individual articles with GitHub integration
 - **Status Indicators**: Real-time status indicators for published/local-only articles
 
-**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability
+**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability. Added comprehensive flash messaging system for user feedback and error notifications.
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
-- [app/uploader.py:222-246](file://app/uploader.py#L222-L246)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+
+### Automatic GitHub Synchronization System
+The comprehensive auto-sync mechanism provides seamless integration between local content creation and GitHub deployment:
+- **Automatic Article Generation**: When creating new articles, the system automatically performs git operations including staging, committing, and pushing to remote origin
+- **Manual Synchronization**: Dedicated `/sync` endpoint allows users to manually trigger GitHub synchronization with upstream tracking
+- **Git Operations**: Performs `git add -A`, `git commit`, and `git push -u origin main` with comprehensive error handling
+- **Timeout Protection**: Strategic timeout limits (30 seconds for add/commit, 120 seconds for push) prevent hanging operations
+- **Error Handling**: Comprehensive error handling with detailed feedback for failed operations
+- **Flash Message Feedback**: Categorized notifications (success, warning, error) provide clear user feedback
+- **Integration Points**: Automatic sync triggered after successful article generation, manual sync available through dedicated endpoint
+
+**Updated** Added comprehensive auto-sync mechanism that performs git operations including staging, committing, and pushing to remote origin with robust error handling and flash message feedback.
+
+**Section sources**
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 
 ### File Conversion Pipeline
 The comprehensive file conversion system supports multiple document formats with intelligent content extraction and formatting:
@@ -283,9 +315,8 @@ The comprehensive article management system provides real-time preview and GitHu
 - **Responsive Design**: Mobile-friendly interface with comprehensive styling system
 
 **Section sources**
-- [app/uploader.py:211-216](file://app/uploader.py#L211-L216)
-- [app/uploader.py:222-246](file://app/uploader.py#L222-L246)
-- [app/templates/articles.html:1-48](file://app/templates/articles.html#L1-L48)
+- [app/uploader.py:238-262](file://app/uploader.py#L238-L262)
+- [app/templates/articles.html:1-64](file://app/templates/articles.html#L1-L64)
 - [app/templates/article_view.html:1-67](file://app/templates/article_view.html#L1-L67)
 
 ### Content Display and Layout System
@@ -315,14 +346,32 @@ The Ruby gem ecosystem provides essential Jekyll functionality with proper versi
 **Section sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 
+### Flash Messaging and User Feedback System
+The comprehensive flash messaging system provides clear user feedback and error notifications:
+- **Message Categories**: Success (green), Warning (orange), Error (red), Info (blue) notifications
+- **Integration Points**: Used throughout the application for user feedback on operations
+- **Automatic Sync Feedback**: Provides clear notifications for successful synchronization, warnings for partial failures, and errors for complete failures
+- **Article Creation Feedback**: Notifies users of successful article creation and synchronization status
+- **Error Context**: Provides specific error messages for debugging and user guidance
+- **Visual Styling**: Custom CSS styling for different message categories with appropriate colors and borders
+
+**Updated** Added comprehensive flash messaging system with categorized notifications for enhanced user experience and clear feedback on all operations.
+
+**Section sources**
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [app/uploader.py:218-223](file://app/uploader.py#L218-L223)
+- [app/uploader.py:290-295](file://app/uploader.py#L290-L295)
+
 ## Dependency Analysis
 The new architecture maintains clean separation between components with enhanced deployment automation, comprehensive content management, and seamless GitHub integration:
 - **Configuration-Driven**: Jekyll configuration controls build process, site behavior, and GitHub Pages URL routing
 - **Automated Deployment**: GitHub Actions handles build and deployment without manual intervention, with enhanced concurrency control and error handling
 - **Comprehensive Management**: Flask provides full-featured content management with integrated git functionality, file conversion, and authentication
+- **Automatic Synchronization**: Seamless integration between content creation and GitHub deployment with comprehensive error handling
 - **File Conversion Pipeline**: Multiple document formats supported with intelligent content extraction and formatting
 - **GitHub Integration**: Seamless synchronization between local content and GitHub repository with automatic deployment triggers
 - **Authentication System**: Secure access control with QQ email verification and session management
+- **Flash Messaging System**: Comprehensive notification system providing user feedback across all operations
 - **Ruby Ecosystem**: Gems manage site functionality and plugins independently with version constraints and bundler cache optimization
 - **Git Integration**: Enhanced git operations with upstream tracking and timeout protection for reliable deployment automation
 
@@ -331,15 +380,17 @@ graph TB
 CFG["_config.yml<br/>URL: polarisw007.github.io<br/>Base URL: /PolaZhenJing"] --> JKY["Jekyll Core"]
 CFG --> PLG["Plugin Ecosystem"]
 FLSK["Flask App"] --> POSTS["_posts/ Directory"]
-FLSK --> GIT["Git Operations<br/>git push -u origin main<br/>Timeout: 120s"]
+FLSK --> GIT["Git Operations<br/>Automatic Sync<br/>git add -A, commit, push -u origin main<br/>Timeout: 30s/120s"]
 FLSK --> AUTH["Authentication<br/>QQ Email Verification"]
 FLSK --> CONV["File Conversion<br/>PDF/DOCX/HTML/MD"]
+FLSK --> FLASH["Flash Messaging<br/>Success/Warning/Error/Info"]
 POSTS --> JKY
 GIT --> ACT["GitHub Actions<br/>Concurrency: cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"]
 ACT --> CFG
 ACT --> JKY
 GEM["Gemfile"] --> PLG
 AUTH --> MAIL["QQ Email SMTP"]
+FLASH --> UI["User Interface<br/>templates/base.html"]
 PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site"]
 ```
 
@@ -347,20 +398,24 @@ PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 
 ## Performance Considerations
@@ -375,6 +430,8 @@ PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site
 - **Timeout Protection**: Strategic timeout limits prevent hanging operations and improve system reliability
 - **File Conversion**: Efficient conversion pipeline with fallback mechanisms for optimal performance
 - **Authentication**: Session-based authentication reduces database overhead and improves response times
+- **Flash Messaging**: Lightweight notification system with minimal performance impact
+- **Automatic Synchronization**: Background git operations with timeout protection prevent blocking user interactions
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -390,6 +447,8 @@ Common issues and resolutions:
 - **File Conversion Errors**: Verify conversion libraries are installed; check file format support; review conversion logs
 - **Email Verification Issues**: Check QQ email SMTP configuration; verify authentication code; ensure proper email format
 - **Article Preview Problems**: Verify article exists in `_posts/` directory; check frontmatter format; ensure proper markdown rendering
+- **Flash Message Issues**: Verify flash messaging system is properly configured in base template; check message categories and styling
+- **Automatic Sync Failures**: Check git credentials and remote repository access; verify timeout limits are appropriate; review flash message feedback
 
 Operational checks:
 - **Health Verification**: Access site URL (`polarisw007.github.io/PolaZhenJing`) to confirm GitHub Pages deployment success
@@ -402,17 +461,21 @@ Operational checks:
 - **Authentication Testing**: Verify login functionality and email verification process
 - **File Conversion Testing**: Test conversion of various document formats
 - **GitHub Integration**: Verify synchronization between local content and GitHub repository
+- **Flash Message Testing**: Verify proper display of success, warning, error, and info notifications
+- **Automatic Sync Testing**: Test automatic synchronization after article creation and manual sync endpoint
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [_config.yml:1-50](file://_config.yml#L1-L50)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 
 ## Conclusion
-The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation and comprehensive content management capabilities. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the five distinct blog layouts offer flexible content presentation. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, and seamless GitHub integration for efficient content management and deployment.
+The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation and comprehensive content management capabilities. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the five distinct blog layouts offer flexible content presentation. Most importantly, the new automatic synchronization system provides seamless integration between content creation and GitHub deployment with comprehensive error handling and flash message feedback, significantly improving the user experience and operational reliability. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, and seamless GitHub integration for efficient content management and deployment.
 
 ## Appendices
 
@@ -461,12 +524,14 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Article Preview**: Dedicated endpoint for previewing individual articles with GitHub integration
 - **Status Indicators**: Real-time visual indicators for article publication status
 - **Action Controls**: Delete functionality with confirmation prompts
+- **Flash Messaging**: Comprehensive notification system with categorized feedback
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
-- [app/uploader.py:222-246](file://app/uploader.py#L222-L246)
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 
 ### Enhanced Git Push Functionality
 - **Upstream Tracking**: Git push with `-u` flag establishes upstream relationship for improved deployment automation
@@ -474,9 +539,26 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Error Handling**: Comprehensive error handling for git operations with user feedback
 - **Integration**: Seamless integration with Flask management interface for one-click deployment
 - **Reliability**: Upstream tracking and timeout protection improve git operation reliability and reduce manual configuration
+- **Automatic Synchronization**: Seamless integration between content creation and GitHub deployment
 
 **Section sources**
-- [app/uploader.py:261-281](file://app/uploader.py#L261-L281)
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
+
+### Automatic Synchronization System Features
+- **Automatic Article Generation**: Seamless git operations after successful article creation
+- **Manual Synchronization**: Dedicated `/sync` endpoint for user-initiated GitHub synchronization
+- **Git Operations**: Staged changes, commit with timestamp, push with upstream tracking
+- **Timeout Management**: Strategic timeout limits (30s for add/commit, 120s for push)
+- **Error Handling**: Comprehensive error handling with detailed user feedback
+- **Flash Message Integration**: Categorized notifications for success, warning, and error states
+- **Integration Points**: Automatic sync after article generation, manual sync endpoint
+
+**Updated** Added comprehensive auto-sync mechanism with automatic article generation and manual synchronization capabilities.
+
+**Section sources**
+- [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
+- [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 
 ### File Conversion Pipeline Features
 - **Multi-format Support**: PDF, DOCX, HTML, and Markdown conversion with intelligent content extraction
@@ -513,10 +595,22 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Responsive Design**: Mobile-friendly interface with comprehensive styling system
 
 **Section sources**
-- [app/uploader.py:211-216](file://app/uploader.py#L211-L216)
-- [app/uploader.py:222-246](file://app/uploader.py#L222-L246)
-- [app/templates/articles.html:1-48](file://app/templates/articles.html#L1-L48)
+- [app/uploader.py:238-262](file://app/uploader.py#L238-L262)
+- [app/templates/articles.html:1-64](file://app/templates/articles.html#L1-L64)
 - [app/templates/article_view.html:1-67](file://app/templates/article_view.html#L1-L67)
+
+### Flash Messaging System Features
+- **Message Categories**: Success (green), Warning (orange), Error (red), Info (blue) notifications
+- **Integration Points**: Used throughout application for user feedback on operations
+- **Automatic Sync Feedback**: Provides clear notifications for successful synchronization, warnings for partial failures, and errors for complete failures
+- **Article Creation Feedback**: Notifies users of successful article creation and synchronization status
+- **Error Context**: Provides specific error messages for debugging and user guidance
+- **Visual Styling**: Custom CSS styling for different message categories with appropriate colors and borders
+
+**Updated** Added comprehensive flash messaging system with categorized notifications for enhanced user experience and clear feedback on all operations.
+
+**Section sources**
+- [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 
 ### Concurrency Control and Performance Optimization
 - **Group-Based Concurrency**: All deployments grouped under "pages" for consistent resource management
@@ -524,6 +618,7 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Ruby 3.2/Bundler Cache**: Optimized dependency installation with Ruby 3.2 compatibility
 - **Production Environment**: JEKYLL_ENV set to production for optimized build performance
 - **Timeout Limits**: Strategic timeout configuration prevents system hangs and improves reliability
+- **Automatic Synchronization**: Background git operations with timeout protection prevent blocking user interactions
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)

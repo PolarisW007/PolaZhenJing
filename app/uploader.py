@@ -5,7 +5,10 @@ import subprocess
 import tempfile
 import json
 import hashlib
+import logging
 from datetime import datetime
+from urllib.request import Request, urlopen
+from urllib.error import URLError
 
 import markdown as md_lib
 
@@ -14,6 +17,8 @@ from flask import (Blueprint, flash, redirect, render_template,
 
 from .auth import login_required
 from .converter import detect_and_convert, extract_title
+
+logger = logging.getLogger(__name__)
 
 uploader_bp = Blueprint('uploader', __name__, url_prefix='/admin')
 
@@ -25,15 +30,197 @@ STYLES = [
     {'id': 'industry-vision', 'name': '产业视野', 'color': '#e63946',
      'desc': '大胆观点，行业趋势。灵感来源：李开复。'},
     {'id': 'friendly-explainer', 'name': '亲和讲解', 'color': '#f4a261',
-     'desc': '温暖亲切，通俗易懂。灵感来源：Andrew Ng。'},
+     'desc': '温暖亲切，通俗易懂。灵感来源：数字生命卡兹克。'},
     {'id': 'creative-visual', 'name': '创意视觉', 'color': '#7b2cbf',
      'desc': '视觉叙事，富媒体。灵感来源：Jim Fan。'},
+    {'id': 'literary-narrative', 'name': '耕烟煮云', 'color': '#5c6b73',
+     'desc': '文学叙事，诗意笔法。灵感来源：陈春成。'},
 ]
 
 POSTS_DIR = os.path.join(os.path.dirname(__file__), '..', '_posts')
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'uploads')
 DRAFT_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'drafts')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
+
+# Style accent colors for summary box theming
+STYLE_ACCENTS = {
+    'deep-technical': '#8b9dc3',
+    'academic-insight': '#52b788',
+    'industry-vision': '#e63946',
+    'friendly-explainer': '#f4a261',
+    'creative-visual': '#b68efc',
+    'literary-narrative': '#8a9ba8',
+}
+
+# ── Skill-based LLM rewriting ──────────────────────────────────────
+# Map style IDs to their writer skill system prompts.
+# When a style has a skill, the raw content is rewritten by the LLM.
+
+_POLA_NICE_WRITER_PROMPT = """你正在以「炽驹Polaris」的身份写一篇公众号长文。
+
+炽驹Polaris是一个关注AI与技术前沿的内容创作者，文风师法陈春成，追求在科技叙事中注入文学的肌理与诗意。风格一句话概括：「用写小说的笔法，讲这个时代正在发生的事。」
+
+核心价值观：万物皆可入梦，文字应当有自己的光泽，真诚地面对困惑，有所不为。
+
+风格内核：
+- 语言的质地：追求每一个句子都有触感，在现代汉语中混入古典的骨骼
+- 意象思维：不直接说结论，找到意象来承载感受，一篇文章有一个贯穿全文的核心意象
+- 虚实交织：在论述中插入虚构场景、想象的对话，让文章获得梦的质地
+- 节奏如呼吸：句子长短交替像呼吸一样自然，段落之间留白
+- 通感与联觉：打通不同感官界限，代码的气味，算法的触感
+- 克制的抒情：情感浓烈但表达克制，用画面传递情绪
+- 时间的褶皱：叙事中折叠时间，制造纵深感
+- 回环结构：结尾回到开头的意象
+- 留白与省略：不把话说满
+- 私人视角：用「我想起了」「我总觉得」连接个人记忆和公共议题
+
+绝对禁区：
+- 禁用套话：首先其次最后、综上所述、值得注意的是、让我们来看看
+- 不使用冒号「：」用逗号代替，不使用破折号「——」，不使用双引号用「」
+- 禁用词：说白了、意味着什么、本质上、换句话说、不可否认、震撼、赋能、助力、打造
+- 禁止直白抒情，禁止教科书式开头
+
+开头从具体画面或意象切入。文章4000-8000字，段落长短交替，不加小标题像散文流动。
+
+固定尾部：
+以上，既然看到这里了，如果觉得不错，随手点个赞、在看、转发三连吧，如果想第一时间收到推送，也可以给我个星标⭐～
+谢谢你读到这里。下次见。
+> / 作者：炽驹Polaris
+> / 投稿或爆料，请联系邮箱：wsyxjer@gmail.com"""
+
+_KHAZIX_WRITER_PROMPT = """你正在以「数字生命卡兹克」的身份写一篇公众号长文。
+
+卡兹克（Khazix）是一个在AI行业深耕三年的内容创作者和创业者，运营着公众号「数字生命卡兹克」。风格一句话概括："有见识的普通人在认真聊一件打动他的事。"
+
+核心价值观：永远对世界保持好奇，讲人话像个活人，真诚是唯一的捷径，有所为有所不为。
+
+风格内核：
+- 节奏感：像跟朋友聊天，句子时长时短，大量逗号制造口语停顿，一句话自成一段制造重点
+- 论述中故意打破：口语打断来破坏严谨性，让论述有温度
+- 知识输出方式：聊着聊着顺手掏出来，不是来给大家科普
+- 私人视角：从自己真实经历切入
+- 判断力：敢下判断，但以承认被影响的姿态表达
+- 情绪表达：用。。。表示语气拖长，会自嘲，直接表达兴奋
+- 亲自下场：让读者感觉到这个人真的做了这件事
+- 文化升维：聊完具体事情后连接到更大的文化哲学历史参照物
+- 句式断裂：极短句子独立成段制造重量感
+- 回环呼应（契诃夫之枪）：前面埋的细节后面都得响
+- 谦逊铺垫法：给出建议前先用自谦的话降低防御心
+
+推荐口语化词组：坦率的讲、说真的、怎么说呢、其实吧、你想想看、这玩意、不是哥们、太牛逼了
+
+绝对禁区：
+- 禁用套话：首先其次最后、综上所述、值得注意的是
+- 不使用冒号用逗号代替，不使用破折号，不使用双引号用「」
+- 禁用词：说白了、意味着什么、本质上、换句话说、不可否认
+- 禁止假设性例子，禁止教科书式开头
+
+开头永远从具体当下事件切入。文章4000-8000字，段落要短，很多时候一句话就是一段。
+
+固定尾部：
+以上，既然看到这里了，如果觉得不错，随手点个赞、在看、转发三连吧，如果想第一时间收到推送，也可以给我个星标⭐～
+谢谢你看我的文章，我们，下次再见。
+> / 作者：卡兹克
+> / 投稿或爆料，请联系邮箱：wzglyay@virxact.com"""
+
+STYLE_SKILL_MAP = {
+    'literary-narrative': _POLA_NICE_WRITER_PROMPT,
+    'friendly-explainer': _KHAZIX_WRITER_PROMPT,
+}
+
+MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
+MINIMAX_MODEL = 'MiniMax-Text-01'
+
+
+def _get_minimax_api_key() -> str | None:
+    """Read MINIMAX_TOKEN_PLAN_API_KEY from environment."""
+    key = os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY')
+    if not key:
+        # Try sourcing from ~/.zshrc
+        try:
+            result = subprocess.run(
+                ['zsh', '-c', 'source ~/.zshrc 2>/dev/null && echo $MINIMAX_TOKEN_PLAN_API_KEY'],
+                capture_output=True, text=True, timeout=10)
+            key = result.stdout.strip()
+        except Exception:
+            pass
+    return key or None
+
+
+def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | None:
+    """Call MiniMax LLM to rewrite content using the given skill prompt.
+
+    Returns rewritten content string, or None on failure.
+    """
+    api_key = _get_minimax_api_key()
+    if not api_key:
+        logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping LLM rewrite')
+        return None
+
+    user_msg = f'请根据以下素材，以你的风格写一篇公众号长文。标题是「{title}」。\n\n素材内容：\n{content}'
+
+    payload = json.dumps({
+        'model': MINIMAX_MODEL,
+        'messages': [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_msg},
+        ],
+        'temperature': 0.8,
+        'max_tokens': 16000,
+    }, ensure_ascii=False).encode('utf-8')
+
+    req = Request(MINIMAX_API_URL, data=payload, method='POST')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('Authorization', f'Bearer {api_key}')
+
+    try:
+        with urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return data['choices'][0]['message']['content']
+    except Exception as e:
+        logger.error('LLM rewrite failed: %s', e)
+        return None
+
+
+def _generate_summary(content: str, max_chars: int = 200) -> str:
+    """Extract a concise summary from article content.
+
+    Uses extractive approach: picks the first 2-3 meaningful paragraphs,
+    skipping very short lines, title echoes, and sign-off boilerplate.
+    Future: plug in LLM call with pola-nice-writer prompt for literary style.
+    """
+    lines = content.strip().split('\n')
+    paragraphs = []
+    for line in lines:
+        line = line.strip()
+        # Skip empty, very short, markdown headings, and boilerplate
+        if not line or len(line) < 10:
+            continue
+        if line.startswith('#') or line.startswith('>'):
+            continue
+        if any(kw in line for kw in ['点个赞', '在看', '转发', '星标', '下次再见', '联系邮箱', '作者：']):
+            continue
+        paragraphs.append(line)
+    # Join and trim to max_chars at sentence boundary
+    joined = ''.join(paragraphs)
+    if len(joined) <= max_chars:
+        return joined
+    # Try to cut at a sentence-ending punctuation
+    truncated = joined[:max_chars]
+    for punct in ['。', '！', '？', '.', '!', '?']:
+        idx = truncated.rfind(punct)
+        if idx > max_chars // 2:
+            return truncated[:idx + 1]
+    return truncated + '…'
+
+
+def _calc_read_time(content: str) -> int:
+    """Estimate reading time in minutes for Chinese/mixed content."""
+    # Count CJK characters + word-split for latin
+    cjk_count = sum(1 for c in content if '\u4e00' <= c <= '\u9fff')
+    latin_words = len(re.findall(r'[a-zA-Z]+', content))
+    total_units = cjk_count + latin_words
+    return max(1, total_units // 300)
 
 
 def _slugify(text: str) -> str:
@@ -180,6 +367,16 @@ def generate():
         flash('没有可生成的内容。', 'error')
         return redirect(url_for('uploader.upload'))
 
+    # ── LLM skill rewriting ──────────────────────────────────
+    skill_prompt = STYLE_SKILL_MAP.get(style)
+    if skill_prompt:
+        rewritten = _call_llm_rewrite(content, title, skill_prompt)
+        if rewritten:
+            content = rewritten
+            flash(f'已使用 LLM 技能重写内容（风格：{style}）。', 'info')
+        else:
+            flash('LLM 重写失败，将使用原始内容。', 'warning')
+
     # Build Jekyll post
     date_str = datetime.now().strftime('%Y-%m-%d')
     slug = _slugify(title) or 'untitled'
@@ -195,6 +392,13 @@ tags: [{', '.join(tag_list)}]"""
 
     if description:
         front_matter += f'\ndescription: "{description}"'
+
+    # Generate summary
+    summary = _generate_summary(content)
+    if summary:
+        # Escape quotes in summary for YAML
+        safe_summary = summary.replace('"', '\\"')
+        front_matter += f'\nsummary: "{safe_summary}"'
 
     front_matter += '\n---\n\n'
 
@@ -259,7 +463,16 @@ def view_article(filename):
     # Render markdown to HTML
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{filename}'
-    return render_template('article_view.html', filename=filename, meta=meta, body_html=body_html, github_url=github_url)
+    pages_url = f'https://polarisw007.github.io/PolaZhenJing/'
+    read_time = _calc_read_time(body)
+    # Get style accent color
+    layout = meta.get('layout', 'deep-technical')
+    accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
+    return render_template('article_view.html',
+                           filename=filename, meta=meta,
+                           body_html=body_html, github_url=github_url,
+                           pages_url=pages_url, read_time=read_time,
+                           accent_color=accent_color)
 
 
 @uploader_bp.route('/articles/<filename>/delete', methods=['POST'])

@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from flask import Flask, g, redirect, url_for, session
+from flask import Flask, g, redirect, url_for, session, send_from_directory
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -57,6 +57,13 @@ def create_app():
     from .uploader import uploader_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(uploader_bp)
+
+    # Serve static assets (CSS, images, etc.) from project root /assets/
+    assets_dir = os.path.join(os.path.dirname(__file__), '..', 'assets')
+
+    @app.route('/assets/<path:filename>')
+    def serve_assets(filename):
+        return send_from_directory(assets_dir, filename)
 
     @app.route('/')
     @app.route('/admin/')

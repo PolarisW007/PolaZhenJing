@@ -2,7 +2,8 @@
 layout: friendly-explainer
 title: "故事是这样的。"
 date: 2026-04-11
-tags: []
+tags: [AI, Agent, Bitter Lesson]
+summary: "LangChain创始人Harrison Chase的一条推文，几行字背后藏着Rich Sutton写于2019年的「苦涩的教训」——人类精心设计的知识和规则，长期来看几乎总是会输给暴力计算和通用学习方法。这个规律正在AI Agent架构中重演。"
 ---
 
 故事是这样的。

@@ -12,19 +12,22 @@
 - [_includes/style-badge.html](file://_includes/style-badge.html)
 - [_layouts/default.html](file://_layouts/default.html)
 - [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
+- [_layouts/friendly-explainer.html](file://_layouts/friendly-explainer.html)
 - [assets/css/main.css](file://assets/css/main.css)
 - [assets/css/deep-technical.css](file://assets/css/deep-technical.css)
+- [assets/css/friendly-explainer.css](file://assets/css/friendly-explainer.css)
+- [_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md](file://_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md)
+- [_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md](file://_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md)
+- [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Updated from MkDocs-based static site generation to Jekyll-based system
-- Replaced MkDocs configuration with Jekyll configuration and plugins
-- Updated GitHub Actions workflow to deploy Jekyll site instead of MkDocs
-- Added comprehensive Jekyll layout system with six distinct article styles
-- Integrated automatic image optimization through Jekyll plugins
-- Updated asset management with Jekyll-specific CSS organization
-- Migrated from Material theme to custom premium design system
+- Added comprehensive analysis of Anthropic's Claude Mythos Preview model security implications
+- Documented AI agent architecture trends based on Rich Sutton's 'Bitter Lesson' principle
+- Updated content repository with three new blog posts covering security research and agent architecture
+- Enhanced friendly-explainer and deep-technical layout systems with specialized styling
+- Expanded content analysis to include security implications of advanced AI models
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -32,23 +35,26 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Content Analysis and New Blog Posts](#content-analysis-and-new-blog-posts)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
 This document explains PolaZhenJing's new static site generation system built on Jekyll. The system has migrated from MkDocs Material to a Jekyll-based architecture featuring automatic image optimization, six distinct article layouts, and enhanced SEO capabilities. It covers Jekyll configuration, theme customization, content processing, asset management, and the automated deployment pipeline to GitHub Pages. The system maintains the core concept of generating static content from dynamic sources while introducing modern Jekyll features for improved performance and maintainability.
+
+**Updated** Added comprehensive analysis of Anthropic's Claude Mythos Preview model security implications and AI agent architecture trends based on Rich Sutton's 'Bitter Lesson' principle.
 
 ## Project Structure
 The static site is now organized under the root directory with Jekyll-specific structure:
 - _config.yml: Jekyll configuration with plugins, pagination, and SEO settings
 - Gemfile: Ruby gem dependencies for Jekyll ecosystem
-- _posts/: Jekyll posts directory containing generated content
-- _layouts/: Template layouts for different article styles
+- _posts/: Jekyll posts directory containing generated content including new security-focused articles
+- _layouts/: Template layouts for different article styles including enhanced friendly-explainer and deep-technical layouts
 - _includes/: Shared HTML components (head, header, footer, style badges)
-- assets/css/: Style-specific CSS files for each article layout
+- assets/css/: Style-specific CSS files for each article layout with specialized styling for technical content
 - index.html: Landing page with pagination and article listing
 - .github/workflows/deploy.yml: GitHub Actions workflow for automated deployment
 
@@ -99,15 +105,18 @@ WF --> ASSETS
   - Six distinct layouts: deep-technical, academic-insight, industry-vision, friendly-explainer, creative-visual, default
   - Each layout has dedicated CSS styling and semantic markup
   - Automatic style badge generation based on layout type
+  - Enhanced styling for technical content with specialized code block formatting
 - **Theme and Styling**:
   - Premium dark gold color scheme with custom CSS variables
   - Responsive design with mobile-first approach
   - Glass-morphism effects and gradient accents
   - Comprehensive typography system with Chinese and Western font support
+  - Specialized styling for technical content with enhanced code block presentation
 - **Asset Management**:
   - Modular CSS architecture with shared base styles and layout-specific overrides
   - Automatic image optimization through Jekyll plugins
   - Font loading optimization with preconnect headers
+  - Enhanced CSS for technical content with monospace fonts and gradient accents
 - **Deployment Pipeline**:
   - GitHub Actions workflow for automated Jekyll builds
   - Ruby environment setup with Bundler dependency management
@@ -116,7 +125,10 @@ WF --> ASSETS
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
+- [_layouts/friendly-explainer.html:1-26](file://_layouts/friendly-explainer.html#L1-L26)
 - [assets/css/main.css:1-200](file://assets/css/main.css#L1-L200)
+- [assets/css/deep-technical.css:1-71](file://assets/css/deep-technical.css#L1-L71)
+- [assets/css/friendly-explainer.css:1-93](file://assets/css/friendly-explainer.css#L1-L93)
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 
 ## Architecture Overview
@@ -171,11 +183,18 @@ GH->>Pages : Deploy to GitHub Pages
   - Six distinct layouts: deep-technical, academic-insight, industry-vision, friendly-explainer, creative-visual, default
   - Each layout extends the default template with specific styling
   - Automatic style badge generation based on layout type
-- **Deep Technical Layout**:
+- **Enhanced Deep Technical Layout**:
   - Monospace font stack optimized for code-heavy content
-  - Enhanced code block styling with gradient accents
+  - Enhanced code block styling with gradient accents and numbered sections
   - Technical color scheme with blue and gray tones
   - Custom counter styles for numbered sections
+  - Specialized styling for technical content with enhanced code presentation
+- **Friendly Explainer Layout**:
+  - Warm, approachable styling inspired by Andrew Ng
+  - Golden color scheme with soft gradients and rounded elements
+  - TL;DR box for quick insights
+  - Enhanced typography with generous spacing
+  - Specialized styling for narrative content with insight callouts
 - **Style Integration**:
   - Dynamic CSS loading based on page.layout variable
   - Consistent meta information display across all layouts
@@ -183,7 +202,9 @@ GH->>Pages : Deploy to GitHub Pages
 
 **Section sources**
 - [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
+- [_layouts/friendly-explainer.html:1-26](file://_layouts/friendly-explainer.html#L1-L26)
 - [assets/css/deep-technical.css:1-71](file://assets/css/deep-technical.css#L1-L71)
+- [assets/css/friendly-explainer.css:1-93](file://assets/css/friendly-explainer.css#L1-L93)
 
 ### Theme System and Styling Architecture
 - **Design System**:
@@ -204,6 +225,7 @@ GH->>Pages : Deploy to GitHub Pages
   - Card components with glass-like appearance
   - Tag system with consistent styling
   - Pagination controls with hover effects
+  - Enhanced technical content styling with specialized code presentation
 
 **Section sources**
 - [assets/css/main.css:1-200](file://assets/css/main.css#L1-L200)
@@ -269,6 +291,53 @@ GH->>Pages : Deploy to GitHub Pages
 
 **Section sources**
 - [deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
+
+## Content Analysis and New Blog Posts
+
+### Anthropic's Claude Mythos Preview Security Analysis
+The new blog post titled "Anthropic的研究员Sam Bowman在公园里吃三明治的时候，收到了一封邮件。" provides comprehensive analysis of Anthropic's Claude Mythos Preview model security implications. This article explores the security implications of advanced AI models, focusing on:
+
+- **Security Research Findings**: Detailed analysis of Mythos Preview's ability to identify thousands of zero-day vulnerabilities across major operating systems and browsers
+- **Emergent Capabilities**: Discussion of how advanced AI models develop unexpected security research capabilities beyond their intended purpose
+- **Corporate Strategy**: Examination of Anthropic's decision to limit public release of Mythos Preview due to security concerns
+- **Industry Impact**: Analysis of how this development affects the broader AI security landscape and corporate power dynamics
+
+**Section sources**
+- [_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md:1-147](file://_posts/2026-04-11-anthropicde-yan-jiu-yuan-sam-bowmanzai-gong-yuan-li-chi-san.md#L1-L147)
+
+### AI Agent Architecture Trends Based on Rich Sutton's 'Bitter Lesson'
+The article "故事是这样的。" analyzes AI agent architecture trends through the lens of Rich Sutton's 'Bitter Lesson' principle. This content explores:
+
+- **Architectural Evolution**: How AI agent frameworks are evolving according to the principle that brute computation and general learning methods eventually outperform hand-designed solutions
+- **Planning Tools**: Discussion of how traditional planning tools and compression mechanisms may become obsolete as models gain stronger inherent capabilities
+- **Persistent Architectural Elements**: Analysis of what aspects of AI agent architecture will likely persist despite model improvements
+- **Technical Infrastructure**: Examination of essential components like sub-agents, skills, file system access, Bash, network search, and MCP (Model Context Protocol)
+
+**Section sources**
+- [_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md:1-152](file://_posts/2026-04-11-gu-shi-shi-zhe-yang-de.md#L1-L152)
+
+### Testing and Development Content
+The "测试上传修复" article serves as a practical example of the site's development workflow:
+
+- **Development Workflow**: Demonstrates the testing and validation process for content upload functionality
+- **Technical Implementation**: Details the session cookie size limitation fix and temporary file storage solution
+- **Quality Assurance**: Shows how the system validates critical functionality before deployment
+
+**Section sources**
+- [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md:1-14](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md#L1-L14)
+
+### Enhanced Layout Styling for Technical Content
+The new blog posts demonstrate the enhanced styling capabilities of the layout system:
+
+- **Friendly Explainer Style**: Warm, approachable styling with golden color scheme and TL;DR functionality for accessible content presentation
+- **Deep Technical Style**: Code-heavy styling with monospace fonts, enhanced code block formatting, and gradient accents for technical content
+- **Content Adaptation**: Both layouts automatically adapt to the content type while maintaining consistent design principles
+
+**Section sources**
+- [_layouts/friendly-explainer.html:1-26](file://_layouts/friendly-explainer.html#L1-L26)
+- [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
+- [assets/css/friendly-explainer.css:1-93](file://assets/css/friendly-explainer.css#L1-L93)
+- [assets/css/deep-technical.css:1-71](file://assets/css/deep-technical.css#L1-L71)
 
 ## Dependency Analysis
 The Jekyll-based system introduces new dependencies and relationships:
@@ -341,7 +410,11 @@ ASSETS --> STYLECSS["style-specific.css"]
 - [deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
 
 ## Conclusion
-PolaZhenJing's new Jekyll-based static site generation system represents a significant evolution from the previous MkDocs implementation. The new architecture leverages Jekyll's mature plugin ecosystem, enhanced SEO capabilities, and automatic image optimization while maintaining the premium design aesthetic. The six-layout system provides flexible content presentation options, and the modular CSS architecture ensures maintainable styling. With automated deployment through GitHub Actions and comprehensive performance optimizations, the system delivers a robust foundation for scalable content publishing.
+PolaZhenJing's new Jekyll-based static site generation system represents a significant evolution from the previous MkDocs implementation. The new architecture leverages Jekyll's mature plugin ecosystem, enhanced SEO capabilities, and automatic image optimization while maintaining the premium design aesthetic. The six-layout system provides flexible content presentation options, and the modular CSS architecture ensures maintainable styling. 
+
+**Updated** The addition of comprehensive security analysis and AI agent architecture content demonstrates the system's capability to handle diverse technical topics while maintaining consistent presentation standards. The enhanced layout styling for technical content and the integration of complex analytical content showcase the system's maturity and flexibility.
+
+With automated deployment through GitHub Actions and comprehensive performance optimizations, the system delivers a robust foundation for scalable content publishing.
 
 ## Appendices
 
@@ -352,7 +425,7 @@ PolaZhenJing's new Jekyll-based static site generation system represents a signi
   - Use `bundle exec jekyll serve` for local development server
 - **Content Creation**:
   - Place new posts in _posts/ directory with proper YAML front matter
-  - Select appropriate layout based on content type
+  - Select appropriate layout based on content type (friendly-explainer for narrative content, deep-technical for code-heavy content)
   - Test locally before pushing to main branch
 - **Deployment Process**:
   - Push to main branch to trigger automated deployment
@@ -362,6 +435,7 @@ PolaZhenJing's new Jekyll-based static site generation system represents a signi
   - Regular gem updates through Bundler
   - CSS architecture review for layout-specific styles
   - Plugin version updates with compatibility testing
+  - Content analysis and security research updates
 
 **Section sources**
 - [deploy.yml:7-18](file://.github/workflows/deploy.yml#L7-L18)

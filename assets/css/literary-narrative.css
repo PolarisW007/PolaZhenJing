@@ -1,0 +1,147 @@
+/* ── Literary Narrative Style (耕烟煮云) ──────────────────── */
+/* Inspired by Chen Chunsheng — poetic prose, imagery-driven   */
+
+.post-literary-narrative .post-header {
+  background: linear-gradient(180deg, rgba(92,107,115,0.08) 0%, var(--bg-deepest) 100%);
+  padding-bottom: 3rem;
+}
+
+.post-literary-narrative h1 {
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+/* Subtitle / description */
+.post-literary-narrative .post-meta {
+  font-style: italic;
+  color: #8a9ba8;
+}
+
+/* Content area */
+.post-literary-narrative .post-content {
+  font-size: 1.1rem;
+  line-height: 2;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+/* Headings in content */
+.post-literary-narrative .post-content h2 {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  color: #8a9ba8;
+  font-size: 1.5rem;
+  border-left: 3px solid #8a9ba8;
+  padding-left: 0.75rem;
+  margin-top: 2.5rem;
+  border-bottom: none;
+}
+
+.post-literary-narrative .post-content h3 {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  color: #8a9ba8;
+  font-size: 1.2rem;
+}
+
+/* Generous paragraph spacing for breathing room */
+.post-literary-narrative .post-content p {
+  margin-bottom: 1.5em;
+  text-indent: 0;
+}
+
+/* Drop-cap with ink-wash aesthetic */
+.post-literary-narrative .post-content > p:first-of-type::first-letter {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  float: left;
+  font-size: 3.5em;
+  line-height: 0.8;
+  margin: 0.05em 0.15em 0 0;
+  color: #8a9ba8;
+  text-shadow: 0 2px 8px rgba(138,155,168,0.3);
+}
+
+/* Blockquote as poetic aside */
+.post-literary-narrative blockquote {
+  border-left: 3px solid rgba(138,155,168,0.5);
+  background: rgba(138,155,168,0.04);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 1.25rem 1.75rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.post-literary-narrative blockquote::before {
+  content: '"';
+  position: absolute;
+  top: -0.2rem;
+  left: 0.5rem;
+  font-size: 3rem;
+  color: rgba(138,155,168,0.2);
+  font-family: 'Georgia', serif;
+  line-height: 1;
+}
+
+/* Soft inline code */
+.post-literary-narrative code {
+  background: rgba(138,155,168,0.1);
+  color: #8a9ba8;
+  border-radius: 4px;
+}
+
+.post-literary-narrative pre {
+  border-radius: var(--radius-lg);
+  border-color: rgba(138,155,168,0.15);
+  background: rgba(138,155,168,0.05);
+}
+
+/* Emphasis styling */
+.post-literary-narrative .post-content em {
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.post-literary-narrative .post-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Links */
+.post-literary-narrative .post-content a {
+  color: #8a9ba8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(138,155,168,0.4);
+}
+
+.post-literary-narrative .post-content a:hover {
+  color: var(--text-primary);
+  text-decoration-color: #8a9ba8;
+}
+
+/* Images with subtle frame */
+.post-literary-narrative .post-content img {
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Horizontal rule as section divider */
+.post-literary-narrative .post-content hr {
+  border: none;
+  text-align: center;
+  margin: 2.5rem 0;
+}
+
+.post-literary-narrative .post-content hr::after {
+  content: '· · ·';
+  color: #8a9ba8;
+  letter-spacing: 0.5em;
+  font-size: 1.2rem;
+}
+
+/* Table styling */
+.post-literary-narrative table th {
+  color: #8a9ba8;
+}
