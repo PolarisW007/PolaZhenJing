@@ -13,6 +13,8 @@
 - [app/templates/article_view.html](file://app/templates/article_view.html)
 - [app/templates/articles.html](file://app/templates/articles.html)
 - [app/templates/base.html](file://app/templates/base.html)
+- [app/templates/style_select.html](file://app/templates/style_select.html)
+- [app/templates/upload.html](file://app/templates/upload.html)
 - [index.html](file://index.html)
 - [_layouts/default.html](file://_layouts/default.html)
 - [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
@@ -24,16 +26,21 @@
 - [_includes/style-badge.html](file://_includes/style-badge.html)
 - [assets/css/literary-narrative.css](file://assets/css/literary-narrative.css)
 - [assets/css/main.css](file://assets/css/main.css)
+- [data/drafts/6aa833b7312e.json](file://data/drafts/6aa833b7312e.json)
+- [_posts/2026-04-11-test-article.md](file://_posts/2026-04-11-test-article.md)
+- [_posts/2026-04-10-regression-test-article.md](file://_posts/2026-04-10-regression-test-article.md)
+- [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md)
 - [PRD.md](file://PRD.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced article presentation system with literary narrative style layout and styling
-- Added new metadata fields including summary field generation and improved tags array handling
-- Expanded layout variants from 5 to 6 distinct blog styles including literary narrative
-- Improved article processing capabilities with enhanced frontmatter generation and LLM rewriting
-- Added comprehensive content creation workflow with style-specific metadata and automatic summary generation
+- Added comprehensive progress tracking and user feedback system for article generation with modal overlay and animated progress bar
+- Implemented browser navigation state management to handle page refreshes and back button navigation
+- Enhanced draft management system with temporary file storage for article content testing
+- Added new test articles for validation and regression testing
+- Implemented submission prevention mechanism to avoid duplicate form submissions
+- Enhanced user experience with real-time status updates and visual feedback during article generation
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -48,7 +55,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators and robust error handling. Recent enhancements include expanded layout variants with literary narrative styling, new metadata fields for enhanced article presentation, and improved content creation workflow with automatic summary generation.
+This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators, robust error handling, and sophisticated user feedback mechanisms. Recent enhancements include expanded layout variants with literary narrative styling, new metadata fields for enhanced article presentation, improved content creation workflow with automatic summary generation, and a comprehensive progress tracking system with modal overlay and animated progress bar for article generation.
 
 ## Project Structure
 The publishing pipeline has been streamlined to focus on Jekyll static site generation with automated deployment and enhanced content management:
@@ -59,6 +66,8 @@ The publishing pipeline has been streamlined to focus on Jekyll static site gene
 - Six distinct blog layouts with custom styling and responsive design, including the new literary narrative style
 - Integrated authentication system with QQ email verification for secure access
 - Robust flash messaging system for user feedback and error notifications
+- Draft management system with temporary file storage for article content testing
+- Comprehensive progress tracking system with modal overlay and animated progress bar
 
 ```mermaid
 graph TB
@@ -74,24 +83,28 @@ F["Flask App<br/>app/__init__.py"]
 G["Upload Interface<br/>templates/upload.html"]
 H["Articles Management<br/>templates/articles.html"]
 I["Article Preview<br/>templates/article_view.html"]
-J["Auth System<br/>app/auth.py"]
-K["File Converter<br/>app/converter.py"]
-L["Auto-Sync System<br/>app/uploader.py<br/>git add -A, commit, push -u origin main<br/>Timeout: 30s/120s"]
+J["Style Selection<br/>templates/style_select.html<br/>Modal Overlay<br/>Animated Progress Bar"]
+K["Auth System<br/>app/auth.py"]
+L["File Converter<br/>app/converter.py"]
+M["Auto-Sync System<br/>app/uploader.py<br/>git add -A, commit, push -u origin main<br/>Timeout: 30s/120s"]
+N["Draft Management<br/>data/drafts/<br/>Temporary File Storage"]
+O["Progress Tracking<br/>Submission Prevention<br/>Browser Navigation State"]
 end
 subgraph "GitHub Integration"
-M["Git Operations<br/>Automatic Sync<br/>Upstream Tracking"]
-N["GitHub Actions<br/>.github/workflows/deploy.yml<br/>Deploy to GitHub Pages<br/>Concurrency: cancel-in-progress"]
-O["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"]
+P["Git Operations<br/>Automatic Sync<br/>Upstream Tracking"]
+Q["GitHub Actions<br/>.github/workflows/deploy.yml<br/>Deploy to GitHub Pages<br/>Concurrency: cancel-in-progress"]
+R["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"]
 end
 subgraph "Email System"
-P["QQ Email SMTP<br/>app/mailer.py<br/>Verification Codes"]
+S["QQ Email SMTP<br/>app/mailer.py<br/>Verification Codes"]
 end
 subgraph "Dependencies"
-Q["Ruby Gems<br/>Gemfile<br/>jekyll, jekyll-feed, jekyll-seo-tag<br/>Ruby 3.2 + Bundler Cache"]
-R["Python Packages<br/>requirements.txt<br/>flask, PyMuPDF, mammoth, html2text"]
-S["Flash Messaging<br/>templates/base.html<br/>Success/Warning/Error/Info Categories"]
-T["CSS Framework<br/>assets/css/main.css<br/>6 Layout Variants<br/>Literary Narrative Style"]
-U["Style Badges<br/>_includes/style-badge.html<br/>Visual Indicators"]
+T["Ruby Gems<br/>Gemfile<br/>jekyll, jekyll-feed, jekyll-seo-tag<br/>Ruby 3.2 + Bundler Cache"]
+U["Python Packages<br/>requirements.txt<br/>flask, PyMuPDF, mammoth, html2text"]
+V["Flash Messaging<br/>templates/base.html<br/>Success/Warning/Error/Info Categories"]
+W["CSS Framework<br/>assets/css/main.css<br/>6 Layout Variants<br/>Literary Narrative Style"]
+X["Style Badges<br/>_includes/style-badge.html<br/>Visual Indicators"]
+Y["Test Articles<br/>_posts/2026-04-11-test-article.md<br/>_posts/2026-04-10-regression-test-article.md"]
 end
 A --> B
 A --> C
@@ -104,15 +117,19 @@ F --> I
 F --> J
 F --> K
 F --> L
-J --> P
-L --> M
-M --> N
-N --> O
-Q --> A
-R --> F
-S --> F
-T --> C
-U --> C
+F --> M
+F --> N
+F --> O
+J --> Y
+K --> S
+M --> P
+P --> Q
+Q --> R
+T --> A
+U --> F
+V --> F
+W --> C
+X --> C
 ```
 
 **Diagram sources**
@@ -128,6 +145,10 @@ U --> C
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
 - [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [data/drafts/6aa833b7312e.json:1-1](file://data/drafts/6aa833b7312e.json#L1-L1)
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -142,6 +163,10 @@ U --> C
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
 - [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [data/drafts/6aa833b7312e.json:1-1](file://data/drafts/6aa833b7312e.json#L1-L1)
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
 
 ## Core Components
 - **Jekyll Configuration**: Defines site metadata, build settings, pagination, plugins, and GitHub Pages URL configuration with proper baseurl for repository-based deployment
@@ -156,6 +181,10 @@ U --> C
 - **Six Distinct Blog Styles**: Enhanced layouts with unique styling, responsive design, and comprehensive content formatting including the new literary narrative style
 - **Enhanced Metadata System**: New summary field generation and improved tags array handling for better article presentation
 - **LLM Integration**: Optional content rewriting with style-specific prompts for enhanced article quality
+- **Progress Tracking System**: Modal overlay with animated progress bar, real-time status updates, and comprehensive user feedback during article generation
+- **Draft Management System**: Temporary file storage for article content testing with automatic cleanup and session management
+- **Submission Prevention**: JavaScript-based mechanism to prevent duplicate form submissions during article generation
+- **Browser Navigation State Management**: Handles page refreshes and back button navigation with proper state restoration
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -168,10 +197,12 @@ U --> C
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 
 ## Architecture Overview
-The new publishing pipeline follows a simplified file-based approach with enhanced deployment automation, comprehensive content management, and seamless GitHub integration:
-- Content creation through Flask management interface with integrated git functionality and file conversion
+The new publishing pipeline follows a simplified file-based approach with enhanced deployment automation, comprehensive content management, seamless GitHub integration, and sophisticated user experience features:
+- Content creation through Flask management interface with integrated git functionality, file conversion, and draft management
 - Automatic Jekyll processing of `_posts/` directory with proper URL configuration and six distinct blog layouts
 - GitHub Actions orchestration for build and deployment to GitHub Pages with concurrency control
 - Native GitHub Pages integration with custom domain support and baseurl configuration
@@ -182,20 +213,28 @@ The new publishing pipeline follows a simplified file-based approach with enhanc
 - Automatic synchronization mechanism that performs git operations with comprehensive error handling
 - Enhanced metadata processing with automatic summary generation and improved tags handling
 - Literary narrative style integration with specialized CSS styling and content formatting
+- Comprehensive progress tracking system with modal overlay and animated progress bar for article generation
+- Submission prevention mechanism to avoid duplicate form submissions
+- Browser navigation state management for proper page refresh handling
+- Draft management system with temporary file storage for article content testing
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant Flask as "Flask Management<br/>app/__init__.py"
 participant Converter as "File Converter<br/>app/converter.py"
+participant Draft as "Draft Manager<br/>data/drafts/"
 participant LLM as "LLM Rewriter<br/>Style-specific Prompts"
 participant Git as "Git Repository<br/>Automatic Sync<br/>git add -A, commit, push -u origin main<br/>Timeout : 30s/120s"
 participant Jekyll as "Jekyll Processor<br/>_config.yml + 6 Layouts"
 participant GH as "GitHub Actions<br/>.github/workflows/deploy.yml<br/>Concurrency : cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"
 participant Pages as "GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"
-User->>Flask : Create/Edit Post
+User->>Flask : Upload/Paste Content
 Flask->>Converter : Convert PDF/DOCX/HTML to Markdown
 Converter-->>Flask : Converted Content
+Flask->>Draft : Save to Temporary File
+Draft-->>Flask : Draft ID
+User->>Flask : Select Style
 Flask->>LLM : Optional style-specific rewriting
 LLM-->>Flask : Enhanced Content
 Flask->>Git : Automatic Sync : git add -A, git commit, git push -u origin main
@@ -205,6 +244,7 @@ GH->>GH : Run jekyll build with JEKYLL_ENV=production
 GH->>Pages : Deploy to GitHub Pages
 Pages-->>User : Live site with 6 layout variants
 Note over Git,Pages : Flash Messages : Success, Warning, Error, Info
+Note over User,Flask : Progress Modal : Animated Bar, Status Updates
 ```
 
 **Diagram sources**
@@ -215,6 +255,8 @@ Note over Git,Pages : Flash Messages : Success, Warning, Error, Info
 - [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/templates/style_select.html:55-75](file://app/templates/style_select.html#L55-L75)
 
 ## Detailed Component Analysis
 
@@ -263,7 +305,7 @@ The Jekyll configuration defines the complete publishing infrastructure with pro
 - [_config.yml:1-50](file://_config.yml#L1-L50)
 
 ### Flask Management Interface with Enhanced Git Integration
-The lightweight Flask application provides comprehensive content management capabilities with integrated deployment functionality:
+The lightweight Flask application provides comprehensive content management capabilities with integrated deployment functionality and sophisticated user experience features:
 - **Database Integration**: SQLite-based user authentication and session management
 - **Blueprint Registration**: Authentication, upload, and management functionality through blueprints
 - **Template System**: Jinja2 templates for management interface with comprehensive styling
@@ -277,8 +319,12 @@ The lightweight Flask application provides comprehensive content management capa
 - **Status Indicators**: Real-time status indicators for published/local-only articles
 - **Enhanced Metadata Processing**: Automatic summary generation and improved tags array handling
 - **LLM Integration**: Optional content rewriting with style-specific prompts for enhanced article quality
+- **Draft Management**: Temporary file storage for article content with automatic cleanup and session management
+- **Progress Tracking**: Modal overlay with animated progress bar and real-time status updates
+- **Submission Prevention**: JavaScript-based mechanism to prevent duplicate form submissions
+- **Browser Navigation State**: Handles page refreshes and back button navigation with proper state restoration
 
-**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability. Added comprehensive flash messaging system for user feedback and error notifications. Enhanced metadata processing with automatic summary generation and improved tags handling.
+**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability. Added comprehensive flash messaging system for user feedback and error notifications. Enhanced metadata processing with automatic summary generation and improved tags handling. Implemented comprehensive progress tracking system with modal overlay and animated progress bar. Added draft management system with temporary file storage for article content testing. Implemented submission prevention mechanism and browser navigation state management.
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
@@ -287,6 +333,9 @@ The lightweight Flask application provides comprehensive content management capa
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/templates/style_select.html:55-75](file://app/templates/style_select.html#L55-L75)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 
 ### Automatic GitHub Synchronization System
 The comprehensive auto-sync mechanism provides seamless integration between local content creation and GitHub deployment:
@@ -417,11 +466,61 @@ The comprehensive flash messaging system provides clear user feedback and error 
 - [app/uploader.py:218-223](file://app/uploader.py#L218-L223)
 - [app/uploader.py:290-295](file://app/uploader.py#L290-L295)
 
+### Comprehensive Progress Tracking and User Feedback System
+The sophisticated progress tracking system provides comprehensive user feedback during article generation with modal overlay and animated progress bar:
+- **Modal Overlay**: Fixed-position overlay with dark background covering entire viewport during article generation
+- **Animated Progress Bar**: Linear gradient progress bar with smooth width transitions and percentage display
+- **Real-time Status Updates**: Dynamic status text showing current phase of article generation process
+- **Fake but Reassuring Animation**: Progressive speed reduction as completion approaches 95% for realistic feel
+- **Submission Prevention**: JavaScript-based mechanism preventing duplicate form submissions during generation
+- **Browser Navigation State**: Handles page refreshes and back button navigation with proper state restoration
+- **User Experience Enhancement**: Provides clear visual feedback and prevents user confusion during long operations
+- **Integration Points**: Seamlessly integrated into style selection workflow with automatic activation on form submission
+
+**Updated** Added comprehensive progress tracking system with modal overlay containing animated progress bar, real-time status updates, and sophisticated user feedback mechanisms. Implemented submission prevention to avoid duplicate form submissions and browser navigation state management for proper page refresh handling.
+
+**Section sources**
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/templates/style_select.html:55-75](file://app/templates/style_select.html#L55-L75)
+- [app/templates/style_select.html:77-129](file://app/templates/style_select.html#L77-L129)
+
+### Draft Management System for Article Content Testing
+The comprehensive draft management system provides temporary storage for article content with automatic cleanup and session management:
+- **Temporary File Storage**: JSON files stored in `data/drafts/` directory with unique MD5-based filenames
+- **Automatic Cleanup**: Draft files are automatically deleted after successful article generation
+- **Session Integration**: Draft ID stored in Flask session for seamless user experience
+- **Content Preservation**: Complete article content, title, tags, and description stored in structured format
+- **Size Limit Workaround**: Avoids session cookie size limitations by using temporary files
+- **Testing Infrastructure**: Supports validation and regression testing with persistent test content
+- **Integration Points**: Seamless integration with upload and style selection workflows
+
+**Updated** Added comprehensive draft management system with temporary file storage for article content testing, automatic cleanup, and session integration to avoid cookie size limitations.
+
+**Section sources**
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
+- [data/drafts/6aa833b7312e.json:1-1](file://data/drafts/6aa833b7312e.json#L1-L1)
+
+### Enhanced Test Articles for Validation and Regression Testing
+The system includes comprehensive test articles for validation and regression testing purposes:
+- **Test Article**: Simple test content with summary field for basic functionality validation
+- **Regression Test Article**: More complex content with tags and markdown formatting for comprehensive testing
+- **Upload Fix Test**: Technical content demonstrating upload process validation
+- **Validation Infrastructure**: Persistent test content for continuous integration and quality assurance
+- **Integration Testing**: Supports automated testing of article generation workflow
+- **Content Testing**: Validates metadata processing, summary generation, and content formatting
+
+**Updated** Added comprehensive test articles for validation and regression testing, including simple test content, complex regression test content, and technical upload fix validation.
+
+**Section sources**
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
+- [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md:1-14](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md#L1-L14)
+
 ## Dependency Analysis
-The new architecture maintains clean separation between components with enhanced deployment automation, comprehensive content management, and seamless GitHub integration:
+The new architecture maintains clean separation between components with enhanced deployment automation, comprehensive content management, seamless GitHub integration, and sophisticated user experience features:
 - **Configuration-Driven**: Jekyll configuration controls build process, site behavior, and GitHub Pages URL routing
 - **Automated Deployment**: GitHub Actions handles build and deployment without manual intervention, with enhanced concurrency control and error handling
-- **Comprehensive Management**: Flask provides full-featured content management with integrated git functionality, file conversion, and authentication
+- **Comprehensive Management**: Flask provides full-featured content management with integrated git functionality, file conversion, authentication, and progress tracking
 - **Automatic Synchronization**: Seamless integration between content creation and GitHub deployment with comprehensive error handling
 - **File Conversion Pipeline**: Multiple document formats supported with intelligent content extraction and formatting
 - **GitHub Integration**: Seamless synchronization between local content and GitHub repository with automatic deployment triggers
@@ -431,6 +530,10 @@ The new architecture maintains clean separation between components with enhanced
 - **Git Integration**: Enhanced git operations with upstream tracking and timeout protection for reliable deployment automation
 - **Enhanced Layout System**: Six distinct blog styles with specialized CSS for different content types and presentation needs
 - **Metadata Processing**: Advanced metadata handling with automatic summary generation and improved tags management
+- **Progress Tracking System**: Sophisticated user feedback mechanisms with modal overlay and animated progress bar
+- **Draft Management**: Temporary file storage system for article content testing and validation
+- **Submission Prevention**: JavaScript-based mechanism preventing duplicate form submissions
+- **Browser Navigation State**: Handles page refreshes and back button navigation with proper state restoration
 
 ```mermaid
 graph TB
@@ -442,8 +545,12 @@ FLSK --> AUTH["Authentication<br/>QQ Email Verification"]
 FLSK --> CONV["File Conversion<br/>PDF/DOCX/HTML/MD"]
 FLSK --> FLASH["Flash Messaging<br/>Success/Warning/Error/Info"]
 FLSK --> META["Metadata Processing<br/>Summary Generation<br/>Tags Arrays<br/>LLM Rewriting"]
+FLSK --> DRAFT["Draft Management<br/>Temporary File Storage<br/>data/drafts/"]
+FLSK --> PROGRESS["Progress Tracking<br/>Modal Overlay<br/>Animated Progress Bar<br/>Submission Prevention<br/>Browser Navigation State"]
 POSTS --> JKY
 META --> JKY
+DRAFT --> POSTS
+PROGRESS --> POSTS
 GIT --> ACT["GitHub Actions<br/>Concurrency: cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"]
 ACT --> CFG
 ACT --> JKY
@@ -453,6 +560,7 @@ FLASH --> UI["User Interface<br/>templates/base.html"]
 PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site"]
 LAYOUTS["6 Layout Variants<br/>Literary Narrative Style"] --> JKY
 CSS["Enhanced CSS Framework<br/>assets/css/main.css<br/>assets/css/literary-narrative.css"] --> LAYOUTS
+TEST["Test Articles<br/>_posts/2026-04-11-test-article.md<br/>_posts/2026-04-10-regression-test-article.md"] --> POSTS
 ```
 
 **Diagram sources**
@@ -466,9 +574,13 @@ CSS["Enhanced CSS Framework<br/>assets/css/main.css<br/>assets/css/literary-narr
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -481,9 +593,13 @@ CSS["Enhanced CSS Framework<br/>assets/css/main.css<br/>assets/css/literary-narr
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
 
 ## Performance Considerations
 - **Build Speed**: Jekyll builds are typically faster than complex backend systems, with typical completion under 10 seconds for small to medium sites
@@ -502,6 +618,10 @@ CSS["Enhanced CSS Framework<br/>assets/css/main.css<br/>assets/css/literary-narr
 - **Enhanced Layout Rendering**: Six distinct layouts with specialized CSS may increase initial load time but provide better user experience
 - **Metadata Processing**: Automatic summary generation adds processing overhead but enhances article presentation quality
 - **LLM Integration**: Optional content rewriting may add latency but improves content quality
+- **Progress Tracking**: Modal overlay and animated progress bar have minimal performance impact with smooth CSS transitions
+- **Draft Management**: Temporary file storage has negligible performance impact compared to session cookie limitations
+- **Submission Prevention**: JavaScript-based mechanism has minimal client-side performance impact
+- **Browser Navigation State**: Event listeners have minimal memory footprint and efficient cleanup
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -522,6 +642,10 @@ Common issues and resolutions:
 - **Layout Rendering Issues**: Verify CSS files are properly loaded; check layout names match available variants; ensure proper style badge rendering
 - **Metadata Processing Errors**: Check YAML frontmatter syntax; verify summary field escaping; ensure tags arrays are properly formatted
 - **LLM Integration Failures**: Verify API access and prompt configuration; check for rate limiting; ensure content rewriting is optional
+- **Progress Tracking Issues**: Verify modal overlay CSS is properly loaded; check JavaScript event listeners; ensure animation timing is correct
+- **Draft Management Problems**: Check temporary file permissions; verify draft cleanup after article generation; ensure session integration works
+- **Submission Prevention Failures**: Verify JavaScript prevents duplicate form submissions; check event listener cleanup; ensure proper state management
+- **Browser Navigation State Issues**: Check pageshow event handling; verify state restoration on refresh; ensure proper cleanup of DOM modifications
 
 Operational checks:
 - **Health Verification**: Access site URL (`polarisw007.github.io/PolaZhenJing`) to confirm GitHub Pages deployment success
@@ -539,6 +663,10 @@ Operational checks:
 - **Layout Testing**: Verify all six layout variants render correctly with proper styling
 - **Metadata Testing**: Test automatic summary generation and tags array processing
 - **LLM Integration Testing**: Verify optional content rewriting functionality works correctly
+- **Progress Tracking Testing**: Verify modal overlay displays correctly; check animated progress bar functionality
+- **Draft Management Testing**: Verify temporary file storage and cleanup; check session integration
+- **Submission Prevention Testing**: Verify duplicate form submission prevention; check event listener cleanup
+- **Browser Navigation Testing**: Verify state restoration on page refresh; check proper cleanup of DOM modifications
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
@@ -550,9 +678,11 @@ Operational checks:
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 
 ## Conclusion
-The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation and comprehensive content management capabilities. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the six distinct blog layouts offer flexible content presentation including the new literary narrative style. Most importantly, the new automatic synchronization system provides seamless integration between content creation and GitHub deployment with comprehensive error handling and flash message feedback, significantly improving the user experience and operational reliability. The enhanced metadata processing system with automatic summary generation and improved tags handling provides richer article presentation capabilities. The optional LLM integration offers content enhancement with style-consistent improvements. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, and seamless GitHub integration for efficient content management and deployment.
+The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation, comprehensive content management capabilities, and sophisticated user experience features. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the six distinct blog layouts offer flexible content presentation including the new literary narrative style. Most importantly, the new automatic synchronization system provides seamless integration between content creation and GitHub deployment with comprehensive error handling and flash message feedback, significantly improving the user experience and operational reliability. The enhanced metadata processing system with automatic summary generation and improved tags handling provides richer article presentation capabilities. The optional LLM integration offers content enhancement with style-consistent improvements. The comprehensive progress tracking system with modal overlay and animated progress bar provides sophisticated user feedback during article generation, while the draft management system with temporary file storage addresses session cookie size limitations and supports content testing. The submission prevention mechanism and browser navigation state management ensure robust user experience even during page refreshes and back button navigation. The new test articles provide comprehensive validation and regression testing infrastructure. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, seamless GitHub integration for efficient content management and deployment, and sophisticated user experience features that enhance both usability and reliability.
 
 ## Appendices
 
@@ -576,7 +706,7 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Pagination**: 10 posts per page with pagination path
 - **Plugins**: jekyll-feed (0.17), jekyll-seo-tag (2.8), jekyll-paginate (1.1)
 - **Defaults**: Automatic layout assignment for posts
-- **Exclusions**: Development and cache files excluded from build
+- **Exclusions**: development and cache files excluded from build
 - **GitHub Pages Integration**: Proper URL configuration for repository-based deployment
 
 **Section sources**
@@ -604,6 +734,10 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Flash Messaging**: Comprehensive notification system with categorized feedback
 - **Enhanced Metadata Processing**: Automatic summary generation and improved tags array handling
 - **LLM Integration**: Optional content rewriting with style-specific prompts
+- **Progress Tracking**: Modal overlay with animated progress bar and real-time status updates
+- **Draft Management**: Temporary file storage for article content testing
+- **Submission Prevention**: JavaScript-based mechanism preventing duplicate form submissions
+- **Browser Navigation State**: Handles page refreshes and back button navigation with proper state restoration
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
@@ -612,6 +746,8 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
 
 ### Enhanced Git Push Functionality
 - **Upstream Tracking**: Git push with `-u` flag establishes upstream relationship for improved deployment automation
@@ -729,6 +865,53 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 - [assets/css/main.css:401-417](file://assets/css/main.css#L401-L417)
 
+### Comprehensive Progress Tracking System Features
+- **Modal Overlay**: Fixed-position overlay with dark background and centered content
+- **Animated Progress Bar**: Linear gradient bar with smooth width transitions and percentage display
+- **Real-time Status Updates**: Dynamic status text showing current phase of article generation
+- **Fake but Reassuring Animation**: Progressive speed reduction approaching completion
+- **Submission Prevention**: JavaScript-based mechanism preventing duplicate form submissions
+- **Browser Navigation State**: Handles page refreshes and back button navigation with proper state restoration
+- **Integration Points**: Seamless integration with style selection workflow
+- **User Experience Enhancement**: Provides clear visual feedback during long operations
+
+**Updated** Added comprehensive progress tracking system with modal overlay containing animated progress bar, real-time status updates, and sophisticated user feedback mechanisms.
+
+**Section sources**
+- [app/templates/style_select.html:31-41](file://app/templates/style_select.html#L31-L41)
+- [app/templates/style_select.html:55-75](file://app/templates/style_select.html#L55-L75)
+- [app/templates/style_select.html:77-129](file://app/templates/style_select.html#L77-L129)
+
+### Draft Management System Features
+- **Temporary File Storage**: JSON files with unique MD5-based filenames in data/drafts/
+- **Automatic Cleanup**: Files deleted after successful article generation
+- **Session Integration**: Draft ID stored in Flask session for seamless experience
+- **Content Preservation**: Complete article content, title, tags, and description
+- **Size Limit Workaround**: Avoids session cookie size limitations
+- **Testing Infrastructure**: Supports validation and regression testing
+- **Integration Points**: Seamless integration with upload and style selection workflows
+
+**Updated** Added comprehensive draft management system with temporary file storage for article content testing, automatic cleanup, and session integration.
+
+**Section sources**
+- [app/uploader.py:245-266](file://app/uploader.py#L245-L266)
+- [data/drafts/6aa833b7312e.json:1-1](file://data/drafts/6aa833b7312e.json#L1-L1)
+
+### Enhanced Test Articles Features
+- **Test Article**: Simple content with summary field for basic validation
+- **Regression Test Article**: Complex content with tags and markdown formatting
+- **Upload Fix Test**: Technical content for upload process validation
+- **Validation Infrastructure**: Persistent test content for continuous integration
+- **Integration Testing**: Supports automated testing of article generation workflow
+- **Content Testing**: Validates metadata processing and formatting
+
+**Updated** Added comprehensive test articles for validation and regression testing, including simple test content, complex regression test content, and technical upload fix validation.
+
+**Section sources**
+- [_posts/2026-04-11-test-article.md:1-11](file://_posts/2026-04-11-test-article.md#L1-L11)
+- [_posts/2026-04-10-regression-test-article.md:1-15](file://_posts/2026-04-10-regression-test-article.md#L1-L15)
+- [_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md:1-14](file://_posts/2026-04-11-ce-shi-shang-chuan-xiu-fu.md#L1-L14)
+
 ### Concurrency Control and Performance Optimization
 - **Group-Based Concurrency**: All deployments grouped under "pages" for consistent resource management
 - **Cancel In-Progress**: Latest build cancels conflicting deployments to optimize resource utilization
@@ -739,6 +922,10 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Enhanced Layout Rendering**: Six distinct layouts with specialized CSS may increase initial load time but provide better user experience
 - **Metadata Processing**: Automatic summary generation adds processing overhead but enhances article presentation quality
 - **LLM Integration**: Optional content rewriting may add latency but improves content quality
+- **Progress Tracking Performance**: Modal overlay and animations have minimal performance impact
+- **Draft Management Performance**: Temporary file storage has negligible performance impact
+- **Submission Prevention Performance**: JavaScript mechanism has minimal client-side impact
+- **Browser Navigation Performance**: Event listeners have minimal memory footprint
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)

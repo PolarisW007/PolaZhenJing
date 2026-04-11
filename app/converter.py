@@ -39,6 +39,22 @@ def convert_pdf(file_path: str) -> str:
     return '\n'.join(text_parts)
 
 
+def _clean_markdown_formatting(text: str) -> str:
+    """Strip excessive bold/italic wrappers from converted markdown.
+
+    mammoth + html2text often produces **_text_** or ** _text_** patterns
+    when the source Word doc uses bold+italic styling throughout.
+    """
+    import re
+    # Strip patterns like **_text_** or ** _text_ ** (bold+italic wrappers)
+    text = re.sub(r'\*\*\s*_([^_]+?)_\s*\*\*', r'\1', text)
+    # Strip standalone bold wrappers **text**
+    text = re.sub(r'\*\*([^*]+?)\*\*', r'\1', text)
+    # Clean up leftover double-spaces
+    text = re.sub(r'  +', ' ', text)
+    return text
+
+
 def convert_docx(file_path: str) -> str:
     """Convert DOCX to Markdown via mammoth → html2text."""
     try:
@@ -55,7 +71,9 @@ def convert_docx(file_path: str) -> str:
     h.body_width = 0
     h.ignore_links = False
     h.ignore_images = False
-    return h.handle(html)
+    md = h.handle(html)
+    # Clean bold/italic formatting artifacts from Word docs
+    return _clean_markdown_formatting(md)
 
 
 def convert_html(file_path: str) -> str:
@@ -92,14 +110,34 @@ def detect_and_convert(file_path: str, ext: str) -> str:
 
 
 def extract_title(markdown_text: str) -> str:
-    """Auto-detect title from first # heading or first line."""
+    """Auto-detect title from first # heading or first line.
+
+    Strips markdown formatting and caps at 20 CJK chars / 40 latin chars.
+    """
+    import re
+    raw = ''
     for line in markdown_text.split('\n'):
         line = line.strip()
         if line.startswith('# '):
-            return line[2:].strip()
+            raw = line[2:].strip()
+            break
         elif line and not line.startswith('#'):
-            return line[:80]
-    return 'Untitled'
+            raw = line
+            break
+    if not raw:
+        return 'Untitled'
+    # Strip markdown formatting: **bold**, _italic_, *bold*, __bold__
+    raw = re.sub(r'\*\*\s*_?|_?\s*\*\*', '', raw)
+    raw = re.sub(r'__|[*_]', '', raw)
+    raw = raw.strip()
+    # Truncate at first sentence boundary within 20 chars
+    if len(raw) > 20:
+        for punct in ['，', '。', '、', '；', ',', '.', ' ']:
+            idx = raw.find(punct, 8)  # at least 8 chars
+            if 0 < idx <= 20:
+                return raw[:idx]
+        return raw[:20]
+    return raw or 'Untitled'
 
 
 def _fallback_read(file_path: str, fmt: str) -> str:

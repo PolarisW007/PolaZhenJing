@@ -128,6 +128,26 @@ STYLE_SKILL_MAP = {
     'friendly-explainer': _KHAZIX_WRITER_PROMPT,
 }
 
+# Generic LLM rewrite prompt for styles without a dedicated writer skill.
+# Cleans up formatting, adds section headings, and restructures content.
+_GENERIC_REWRITE_PROMPT = """你是一个专业的内容编辑。请对以下素材进行整理和优化：
+
+1. 给文章加上清晰的段落标题（用 ## 标记），使结构一目了然
+2. 清理格式问题（多余的加粗、斜体、空行等）
+3. 保持原文的核心观点和数据不变，不要添加新内容
+4. 语言流畅自然，段落之间过渡顺畅
+5. 如果内容是技术类，保留代码示例和技术细节
+6. 文章开头用一段引人入胜的导语概括全文
+
+输出纯 Markdown 格式，不要输出任何解释说明。"""
+
+def _get_style_prompt(style: str) -> str | None:
+    """Get the LLM prompt for a given style.
+
+    Returns dedicated writer prompt if available, otherwise generic prompt.
+    """
+    return STYLE_SKILL_MAP.get(style, _GENERIC_REWRITE_PROMPT)
+
 MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
 MINIMAX_MODEL = 'MiniMax-M2.7'
 
@@ -376,7 +396,7 @@ def generate():
         return redirect(url_for('uploader.upload'))
 
     # ── LLM skill rewriting ──────────────────────────────────
-    skill_prompt = STYLE_SKILL_MAP.get(style)
+    skill_prompt = _get_style_prompt(style)
     if skill_prompt:
         rewritten = _call_llm_rewrite(content, title, skill_prompt)
         if rewritten:
