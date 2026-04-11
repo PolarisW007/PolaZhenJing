@@ -23,10 +23,22 @@
   </div>
 
   <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-    <a href="{{ url_for('uploader.upload') }}" class="btn-ghost">← 返回</a>
-    <button type="submit" class="btn-gold btn-sm">生成文章 →</button>
+    <a href="{{ url_for('uploader.upload') }}" class="btn-ghost" id="back-btn">← 返回</a>
+    <button type="submit" class="btn-gold btn-sm" id="generate-btn">生成文章 →</button>
   </div>
 </form>
+
+<!-- Progress overlay -->
+<div id="progress-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem;">
+  <div style="text-align:center;">
+    <div style="font-size:1.1rem; color:#e8e0d4; margin-bottom:0.5rem;" id="progress-status">正在生成文章…</div>
+    <div style="font-size:0.8rem; color:var(--text-muted);">包含 LLM 重写时可能需要 30-60 秒，请耐心等待</div>
+  </div>
+  <div style="width:320px; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden;">
+    <div id="progress-bar" style="height:100%; width:0%; border-radius:3px; background:linear-gradient(90deg, #f4a261, #e8c547); transition:width 0.4s ease;"></div>
+  </div>
+  <div style="font-size:0.75rem; color:var(--text-muted);" id="progress-pct">0%</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -36,5 +48,84 @@ function selectStyle(el, style) {
   el.classList.add('selected');
   document.getElementById('selected-style').value = style;
 }
+
+(function() {
+  var submitted = false;
+
+  // Reset state if user navigates back via browser history
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+      submitted = false;
+      var btn = document.getElementById('generate-btn');
+      btn.disabled = false;
+      btn.textContent = '\u751f\u6210\u6587\u7ae0 \u2192';
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      document.getElementById('back-btn').style.pointerEvents = '';
+      document.getElementById('back-btn').style.opacity = '';
+      document.querySelectorAll('.style-card').forEach(function(c) {
+        c.style.pointerEvents = '';
+        c.style.opacity = '';
+      });
+      document.getElementById('progress-overlay').style.display = 'none';
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('progress-pct').textContent = '0%';
+      document.getElementById('progress-status').textContent = '\u6b63\u5728\u751f\u6210\u6587\u7ae0\u2026';
+    }
+  });
+
+  document.getElementById('style-form').addEventListener('submit', function(e) {
+    if (submitted) { e.preventDefault(); return; }
+    submitted = true;
+
+    // Disable buttons
+    var btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.textContent = '生成中…';
+    btn.style.opacity = '0.6';
+    btn.style.cursor = 'not-allowed';
+    document.getElementById('back-btn').style.pointerEvents = 'none';
+    document.getElementById('back-btn').style.opacity = '0.4';
+
+    // Disable style cards
+    document.querySelectorAll('.style-card').forEach(function(c) {
+      c.style.pointerEvents = 'none';
+      c.style.opacity = '0.6';
+    });
+
+    // Show progress overlay
+    var overlay = document.getElementById('progress-overlay');
+    overlay.style.display = 'flex';
+
+    // Animate progress bar (fake but reassuring)
+    var bar = document.getElementById('progress-bar');
+    var pct = document.getElementById('progress-pct');
+    var status = document.getElementById('progress-status');
+    var progress = 0;
+    var stages = [
+      {at: 10, text: '正在加载草稿内容…'},
+      {at: 25, text: '正在调用 LLM 重写…'},
+      {at: 50, text: 'LLM 正在生成中…'},
+      {at: 70, text: '正在构建文章…'},
+      {at: 85, text: '正在同步到 GitHub…'},
+      {at: 95, text: '即将完成…'}
+    ];
+    var stageIdx = 0;
+
+    var timer = setInterval(function() {
+      // Slow down as we approach 95%
+      var increment = progress < 30 ? 2 : progress < 60 ? 1 : progress < 90 ? 0.5 : 0.1;
+      progress = Math.min(progress + increment, 95);
+      bar.style.width = progress + '%';
+      pct.textContent = Math.round(progress) + '%';
+
+      // Update status text at milestones
+      if (stageIdx < stages.length && progress >= stages[stageIdx].at) {
+        status.textContent = stages[stageIdx].text;
+        stageIdx++;
+      }
+    }, 300);
+  });
+})();
 </script>
 {% endblock %}
