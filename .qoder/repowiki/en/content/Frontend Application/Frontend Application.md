@@ -9,13 +9,14 @@
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/templates/base.html](file://app/templates/base.html)
+- [app/templates/article_view.html](file://app/templates/article_view.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
 - [app/templates/upload.html](file://app/templates/upload.html)
 - [app/templates/style_select.html](file://app/templates/style_select.html)
 - [app/templates/login.html](file://app/templates/login.html)
 - [app/templates/register.html](file://app/templates/register.html)
 - [app/templates/verify.html](file://app/templates/verify.html)
 - [app/templates/password.html](file://app/templates/password.html)
-- [app/templates/articles.html](file://app/templates/articles.html)
 - [_layouts/default.html](file://_layouts/default.html)
 - [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
 - [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
@@ -29,13 +30,11 @@
 
 ## Update Summary
 **Changes Made**
-- Complete architectural replacement from React/TypeScript to Flask/Jinja2 templating
-- Replaced client-side routing with server-side Flask blueprints
-- Removed all React components, hooks, and Zustand stores
-- Implemented premium dark gold aesthetic with glass-morphism effects
-- Integrated static Jekyll processing for blog generation
-- Added Flask authentication system with session-based security
-- Created comprehensive Jinja2 template system with base templates and style variants
+- Comprehensive Chinese localization added throughout frontend templates and UI elements
+- All template content, labels, and user-facing text now presented in Chinese (Simplified)
+- Navigation elements, form fields, and flash messages localized for Chinese-speaking users
+- Layout files updated with Chinese language attributes and content
+- Authentication flows, upload interfaces, and article management fully localized
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -52,15 +51,16 @@
 12. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the frontend application built with Flask and Jinja2 templating, replacing the previous React/TypeScript architecture. The system now follows a premium dark gold aesthetic with glass-morphism effects, utilizing Flask blueprints for routing, session-based authentication, and static Jekyll processing for blog generation. The application maintains administrative functionality for content upload, style selection, and article management while leveraging Jinja2 templates for dynamic content rendering.
+This document describes the frontend application built with Flask and Jinja2 templating, featuring comprehensive Chinese localization throughout all user interfaces. The system follows a premium dark gold aesthetic with glass-morphism effects, utilizing Flask blueprints for routing, session-based authentication, and static Jekyll processing for blog generation. All administrative interfaces, authentication flows, and content management systems are now fully localized in Chinese, providing an optimal experience for Chinese-speaking users while maintaining the sophisticated design language established in the previous architecture.
 
 ## Project Structure
-The application is organized around Flask blueprints and Jinja2 templates:
+The application is organized around Flask blueprints and Jinja2 templates with complete Chinese localization:
 - Flask application factory creates the WSGI application with configured blueprints
-- Authentication blueprint handles login, registration, verification, and password management
-- Uploader blueprint manages file uploads, content conversion, style selection, and article generation
-- Template system provides base templates with style variants and reusable components
-- Jekyll integration processes generated content into static blog posts
+- Authentication blueprint handles Chinese-localized login, registration, verification, and password management
+- Uploader blueprint manages file uploads, content conversion, style selection, and article generation with Chinese interfaces
+- Template system provides base templates with Chinese language support and style variants
+- Jekyll integration processes generated content into static blog posts with Chinese metadata
+- All UI elements, navigation, and user feedback messages are presented in Chinese
 
 ```mermaid
 graph TB
@@ -68,26 +68,26 @@ subgraph "Flask Application"
 APP["app/__init__.py<br/>create_app()"] --> AUTH["auth.py<br/>Authentication Blueprint"]
 APP --> UP["uploader.py<br/>Uploader Blueprint"]
 end
-subgraph "Templates"
-BASE["base.html<br/>Base Template"] --> UPLOAD["upload.html<br/>Upload Interface"]
-BASE --> STYLE["style_select.html<br/>Style Selection"]
-BASE --> LOGIN["login.html<br/>Login Form"]
-BASE --> REGISTER["register.html<br/>Registration Form"]
-BASE --> VERIFY["verify.html<br/>Email Verification"]
-BASE --> PASSWORD["password.html<br/>Password Change"]
-BASE --> ARTICLES["articles.html<br/>Articles List"]
+subgraph "Chinese Localized Templates"
+BASE["base.html<br/>Base Template (zh-CN)"] --> UPLOAD["upload.html<br/>Upload Interface (Chinese)"]
+BASE --> STYLE["style_select.html<br/>Style Selection (Chinese)"]
+BASE --> LOGIN["login.html<br/>Login Form (Chinese)"]
+BASE --> REGISTER["register.html<br/>Registration Form (Chinese)"]
+BASE --> VERIFY["verify.html<br/>Email Verification (Chinese)"]
+BASE --> PASSWORD["password.html<br/>Password Change (Chinese)"]
+BASE --> ARTICLES["articles.html<br/>Articles List (Chinese)"]
+BASE --> ARTICLE_VIEW["article_view.html<br/>Article View (Chinese)"]
 END
-subgraph "Layouts"
-DEFAULT["_layouts/default.html<br/>Default Layout"] --> DT["_layouts/deep-technical.html<br/>Technical Layout"]
-DEFAULT --> AI["_layouts/academic-insight.html<br/>Academic Layout"]
-DEFAULT --> IV["_layouts/industry-vision.html<br/>Industry Layout"]
-DEFAULT --> FE["_layouts/friendly-explainer.html<br/>Explainer Layout"]
-DEFAULT --> CV["_layouts/creative-visual.html<br/>Creative Layout"]
+subgraph "Chinese Layouts"
+DEFAULT["_layouts/default.html<br/>Default Layout (zh-CN)"] --> DT["_layouts/deep-technical.html<br/>Technical Layout (Chinese)"]
+DEFAULT --> AI["_layouts/academic-insight.html<br/>Academic Layout (Chinese)"]
+DEFAULT --> IV["_layouts/industry-vision.html<br/>Industry Layout (Chinese)"]
+DEFAULT --> FE["_layouts/friendly-explainer.html<br/>Explainer Layout (Chinese)"]
+DEFAULT --> CV["_layouts/creative-visual.html<br/>Creative Layout (Chinese)"]
 END
 subgraph "Static Processing"
 CONV["converter.py<br/>Content Conversion"] --> JEKYLL["Jekyll<br/>Static Generation"]
 MAILER["mailer.py<br/>Email Verification"] --> AUTH
-END
 AUTH --> BASE
 UP --> BASE
 UPLOAD --> DT
@@ -112,18 +112,18 @@ UPLOAD --> CV
 
 ## Core Components
 - **Flask Application Factory**: Creates the WSGI application with database initialization, secret key configuration, and blueprint registration
-- **Authentication Blueprint**: Handles user authentication, registration with email verification, password management, and session-based security
-- **Uploader Blueprint**: Manages file uploads, content conversion, style selection, article generation, and Git deployment
-- **Template System**: Base templates with dark gold aesthetic, glass-morphism effects, and style variants for different content types
-- **Content Converter**: Processes PDF, DOCX, HTML, and Markdown files into standardized content format
-- **Jekyll Integration**: Generates static blog posts with proper front matter and metadata
+- **Authentication Blueprint**: Handles Chinese-localized user authentication, registration with QQ email requirement and verification code system, password management, and session-based security
+- **Uploader Blueprint**: Manages file uploads, content conversion, style selection, article generation, and Git deployment with fully localized interfaces
+- **Template System**: Base templates with dark gold aesthetic, glass-morphism effects, and comprehensive Chinese language support for all UI elements
+- **Content Converter**: Processes PDF, DOCX, HTML, and Markdown files into standardized content format with Chinese metadata
+- **Jekyll Integration**: Generates static blog posts with proper front matter and Chinese metadata
 
 Key implementation patterns:
-- Session-based authentication with login decorators for route protection
-- Modular blueprint architecture for clean separation of concerns
-- Jinja2 template inheritance for consistent styling across pages
-- Static file processing pipeline for content transformation
-- Git automation for seamless deployment workflow
+- Session-based authentication with login decorators for route protection and Chinese flash messages
+- Modular blueprint architecture for clean separation of concerns with localized error handling
+- Jinja2 template inheritance for consistent Chinese styling across pages
+- Static file processing pipeline for content transformation with language-aware metadata
+- Git automation for seamless deployment workflow with Chinese commit messages
 
 **Section sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
@@ -133,16 +133,16 @@ Key implementation patterns:
 - [app/converter.py:58-88](file://app/converter.py#L58-L88)
 
 ## Architecture Overview
-The application follows a server-side rendered architecture with Flask and Jinja2:
-- **Presentation Layer**: Jinja2 templates with base layouts and style variants
-- **Business Logic**: Flask blueprints handling authentication and content management
+The application follows a server-side rendered architecture with Flask and Jinja2, featuring comprehensive Chinese localization:
+- **Presentation Layer**: Jinja2 templates with base layouts and style variants, all localized in Chinese
+- **Business Logic**: Flask blueprints handling authentication and content management with Chinese error messages
 - **Data Access**: SQLite database with SQLAlchemy-like interface through Flask g object
-- **Static Generation**: Jekyll processing for blog post creation and deployment
-- **Security**: Session-based authentication with CSRF protection and secure password hashing
+- **Static Generation**: Jekyll processing for blog post creation and deployment with Chinese metadata
+- **Security**: Session-based authentication with CSRF protection, secure password hashing, and Chinese flash notifications
 
 ```mermaid
 graph TB
-UI["Jinja2 Templates<br/>base.html + variants"] --> BP["Flask Blueprints<br/>auth + uploader"]
+UI["Jinja2 Templates<br/>base.html + Chinese variants"] --> BP["Flask Blueprints<br/>auth + uploader"]
 BP --> DB["SQLite Database<br/>users table"]
 BP --> FS["File System<br/>_posts + uploads"]
 BP --> CONV["Content Converter<br/>PDF/DOCX/HTML → Markdown"]
@@ -151,9 +151,11 @@ JEKYLL --> GH["GitHub Pages<br/>Deployment"]
 subgraph "Authentication"
 SESSION["Session Management<br/>user_id + username"]
 LOGIN["Login Decorator<br/>@login_required"]
+FLASH["Flash Messages<br/>Chinese Error/Success"]
 END
 BP --> SESSION
 SESSION --> LOGIN
+SESSION --> FLASH
 ```
 
 **Diagram sources**
@@ -193,12 +195,12 @@ CF-->>CF : "return Flask app"
 - [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
 
 ### Authentication Blueprint
-Handles user authentication lifecycle:
-- Login with username/password validation and session establishment
-- Registration with QQ email requirement and verification code system
-- Email verification with 5-minute expiry and session-based flow
-- Password change functionality with current password verification
-- Logout with session cleanup and redirect
+Handles Chinese-localized user authentication lifecycle:
+- Login with username/password validation and session establishment, displaying Chinese error messages
+- Registration with QQ email requirement and verification code system, fully localized interface
+- Email verification with 5-minute expiry and session-based flow, Chinese flash notifications
+- Password change functionality with current password verification, Chinese form labels
+- Logout with session cleanup and redirect, Chinese success messages
 
 ```mermaid
 sequenceDiagram
@@ -214,7 +216,7 @@ alt "Valid credentials"
 L->>S : "Store user_id + username"
 L-->>U : "Redirect to upload"
 else "Invalid credentials"
-L-->>U : "Flash error + render login"
+L-->>U : "Flash Chinese error + render login"
 end
 ```
 
@@ -226,12 +228,12 @@ end
 - [app/auth.py:1-168](file://app/auth.py#L1-L168)
 
 ### Uploader Blueprint
-Manages content upload and article generation:
-- File upload handling with drag-and-drop support and size limits
-- Content conversion pipeline for various document formats
-- Style selection with five distinct visual themes
-- Article generation with proper Jekyll front matter
-- Git automation for deployment workflow
+Manages content upload and article generation with comprehensive Chinese localization:
+- File upload handling with drag-and-drop support and size limits, Chinese interface elements
+- Content conversion pipeline for various document formats with Chinese metadata
+- Style selection with five distinct visual themes, fully localized descriptions
+- Article generation with proper Jekyll front matter and Chinese titles
+- Git automation for deployment workflow with Chinese commit messages
 
 ```mermaid
 flowchart TD
@@ -246,7 +248,7 @@ Store --> Style["Redirect to style_select"]
 Style --> Select["User selects style"]
 Select --> Generate["Generate Jekyll post"]
 Generate --> Write["Write to _posts/"]
-Write --> Success["Flash success + redirect"]
+Write --> Success["Flash Chinese success + redirect"]
 ```
 
 **Diagram sources**
@@ -259,19 +261,19 @@ Write --> Success["Flash success + redirect"]
 - [app/converter.py:1-88](file://app/converter.py#L1-L88)
 
 ## Template System
-The Jinja2 template system provides a flexible foundation for consistent UI:
-- **Base Template**: Comprehensive dark gold aesthetic with glass-morphism effects
-- **Navigation**: Session-aware navigation with conditional rendering
-- **Form Components**: Consistent styling for inputs, buttons, and validation states
-- **Layout Variants**: Five distinct content layouts for different writing styles
-- **Responsive Design**: Mobile-first approach with breakpoint-specific adjustments
+The Jinja2 template system provides a comprehensive Chinese localization foundation for consistent UI:
+- **Base Template**: Complete Chinese localization with dark gold aesthetic and glass-morphism effects
+- **Navigation**: Session-aware navigation with Chinese labels and conditional rendering
+- **Form Components**: Consistent styling for inputs, buttons, and validation states in Chinese
+- **Layout Variants**: Five distinct content layouts for different writing styles, all fully localized
+- **Responsive Design**: Mobile-first approach with breakpoint-specific adjustments and Chinese text
 
 Key template features:
-- CSS custom properties for theme consistency
-- Glass-morphism card containers with backdrop blur
-- Dark gold color scheme with gradient accents
-- Interactive elements with hover states and transitions
-- Flash messaging system for user feedback
+- CSS custom properties for theme consistency with Chinese color naming
+- Glass-morphism card containers with backdrop blur and Chinese labels
+- Dark gold color scheme with gradient accents and Chinese terminology
+- Interactive elements with hover states and transitions, Chinese tooltips
+- Flash messaging system for Chinese user feedback and error reporting
 
 **Section sources**
 - [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
@@ -279,12 +281,12 @@ Key template features:
 - [app/templates/style_select.html:1-41](file://app/templates/style_select.html#L1-L41)
 
 ## Authentication Flow
-The authentication system implements session-based security:
-- Login decorator protects routes requiring authentication
-- Session storage for user identity and preferences
-- Flash messaging for error and success states
-- Secure password hashing with Werkzeug utilities
-- Email verification workflow for registration
+The authentication system implements session-based security with comprehensive Chinese localization:
+- Login decorator protects routes requiring authentication with Chinese error messages
+- Session storage for user identity and preferences, Chinese flash notifications
+- Flash messaging for Chinese error and success states
+- Secure password hashing with Werkzeug utilities and Chinese logging
+- Email verification workflow for registration with Chinese interface elements
 
 ```mermaid
 sequenceDiagram
@@ -300,7 +302,7 @@ R->>V : "Redirect to verify"
 U->>V : "POST verification code"
 V->>V : "Validate code + expiry"
 V->>DB : "Update user email_verified"
-V-->>U : "Flash success + redirect to login"
+V-->>U : "Flash Chinese success + redirect to login"
 ```
 
 **Diagram sources**
@@ -311,20 +313,20 @@ V-->>U : "Flash success + redirect to login"
 - [app/auth.py:1-168](file://app/auth.py#L1-L168)
 
 ## Content Management
-The content management system handles multiple document formats:
-- **Supported Formats**: PDF, DOCX, DOC, HTML, MD, MARKDOWN, TXT
-- **Conversion Pipeline**: Specialized converters with fallback mechanisms
-- **Title Extraction**: Automatic detection from headings or content
-- **Style Selection**: Five distinct visual themes with color coding
-- **Front Matter Generation**: Proper Jekyll metadata for blog posts
+The content management system handles multiple document formats with complete Chinese localization:
+- **Supported Formats**: PDF, DOCX, DOC, HTML, MD, MARKDOWN, TXT with Chinese metadata
+- **Conversion Pipeline**: Specialized converters with fallback mechanisms and Chinese logging
+- **Title Extraction**: Automatic detection from headings or content with Chinese fallbacks
+- **Style Selection**: Five distinct visual themes with Chinese color coding and descriptions
+- **Front Matter Generation**: Proper Jekyll metadata for blog posts with Chinese titles
 
 Content processing workflow:
-1. File upload or paste content submission
-2. Format detection and conversion
-3. Title extraction and metadata collection
-4. Style selection interface
-5. Jekyll post generation with front matter
-6. Static file writing to `_posts/` directory
+1. File upload or paste content submission with Chinese interface
+2. Format detection and conversion with Chinese progress indicators
+3. Title extraction and metadata collection with Chinese fallbacks
+4. Style selection interface with Chinese descriptions
+5. Jekyll post generation with Chinese front matter
+6. Static file writing to `_posts/` directory with Chinese commit messages
 
 **Section sources**
 - [app/uploader.py:29-47](file://app/uploader.py#L29-L47)
@@ -332,19 +334,19 @@ Content processing workflow:
 - [app/uploader.py:143-168](file://app/uploader.py#L143-L168)
 
 ## Styling and Design System
-The premium dark gold aesthetic implements glass-morphism effects:
-- **Color Palette**: Deep blacks (#050508), dark gold (#E4BF7A), and warm accents
-- **Glass Effects**: Backdrop blur with translucent backgrounds
-- **Typography**: Noto Serif SC for headings, system fonts for body text
-- **Interactive States**: Smooth transitions with cubic-bezier easing
-- **Component Library**: Cards, forms, buttons, and navigation elements
+The premium dark gold aesthetic implements glass-morphism effects with comprehensive Chinese localization:
+- **Color Palette**: Deep blacks (#050508), dark gold (#E4BF7A), and warm accents with Chinese naming
+- **Glass Effects**: Backdrop blur with translucent backgrounds and Chinese terminology
+- **Typography**: Noto Serif SC for headings, system fonts for body text with Chinese font fallbacks
+- **Interactive States**: Smooth transitions with cubic-bezier easing and Chinese hover text
+- **Component Library**: Cards, forms, buttons, and navigation elements with Chinese labels
 
 Design system features:
-- CSS custom properties for theme variables
-- Responsive grid layouts for style cards
-- Hover animations with transform and shadow effects
-- Gradient button styling with gold accents
-- Consistent spacing and typography scales
+- CSS custom properties for theme variables with Chinese naming conventions
+- Responsive grid layouts for style cards with Chinese descriptions
+- Hover animations with transform and shadow effects, Chinese tooltips
+- Gradient button styling with gold accents and Chinese labels
+- Consistent spacing and typography scales with Chinese measurement units
 
 **Section sources**
 - [app/templates/base.html:10-191](file://app/templates/base.html#L10-L191)
@@ -352,42 +354,44 @@ Design system features:
 - [app/templates/style_select.html:13-29](file://app/templates/style_select.html#L13-L29)
 
 ## Deployment and Static Generation
-The system integrates with Jekyll for static site generation:
-- **Configuration**: Jekyll settings in `_config.yml` with pagination and plugins
-- **Post Processing**: Generated Markdown files with proper front matter
-- **Layout Selection**: Automatic layout assignment based on content style
-- **Git Automation**: One-click deployment through Git commands
-- **GitHub Pages**: Seamless integration with GitHub hosting
+The system integrates with Jekyll for static site generation with Chinese localization:
+- **Configuration**: Jekyll settings in `_config.yml` with pagination and plugins, Chinese comments
+- **Post Processing**: Generated Markdown files with proper front matter and Chinese metadata
+- **Layout Selection**: Automatic layout assignment based on content style with Chinese labels
+- **Git Automation**: One-click deployment through Git commands with Chinese commit messages
+- **GitHub Pages**: Seamless integration with GitHub hosting and Chinese documentation
 
 Deployment workflow:
-1. Article generation with Jekyll-compatible front matter
-2. Git staging and commit with timestamp messages
-3. Push to remote repository for GitHub Pages deployment
-4. Automatic site regeneration through GitHub Actions
+1. Article generation with Jekyll-compatible front matter and Chinese titles
+2. Git staging and commit with timestamp messages in Chinese
+3. Push to remote repository for GitHub Pages deployment with Chinese logs
+4. Automatic site regeneration through GitHub Actions with Chinese notifications
 
 **Section sources**
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
 ## Migration Impact
-The migration from React/TypeScript to Flask/Jinja2 brings significant changes:
-- **Architectural Shift**: Client-side JavaScript replaced with server-side rendering
-- **State Management**: Global state replaced with Flask sessions and database persistence
-- **Routing**: Dynamic client-side routing replaced with server-side Flask routes
-- **Styling**: TailwindCSS replaced with custom CSS-in-JS approach
-- **Build Process**: Single-page application replaced with static site generation
-- **Performance**: Reduced client-side complexity, increased server-side processing
+The migration from React/TypeScript to Flask/Jinja2 brings significant changes, including comprehensive Chinese localization:
+- **Architectural Shift**: Client-side JavaScript replaced with server-side rendering and Chinese templates
+- **State Management**: Global state replaced with Flask sessions and database persistence with Chinese flash messages
+- **Routing**: Dynamic client-side routing replaced with server-side Flask routes and Chinese URL patterns
+- **Styling**: TailwindCSS replaced with custom CSS-in-JS approach with Chinese color naming
+- **Build Process**: Single-page application replaced with static site generation and Chinese content
+- **Performance**: Reduced client-side complexity, increased server-side processing with Chinese optimizations
+- **Localization**: Complete Chinese interface implementation throughout all user-facing elements
 
-Benefits of the new architecture:
-- Simplified deployment with static site generation
-- Improved SEO through server-side rendering
-- Enhanced security through server-side authentication
-- Reduced client-side dependencies and bundle size
-- Better integration with GitHub Pages workflow
+Benefits of the new architecture with Chinese localization:
+- Simplified deployment with static site generation and Chinese content
+- Improved SEO through server-side rendering with Chinese language attributes
+- Enhanced security through server-side authentication with Chinese error reporting
+- Reduced client-side dependencies and bundle size with Chinese interface
+- Better integration with GitHub Pages workflow and Chinese documentation
+- Optimal user experience for Chinese-speaking administrators and content creators
 
 **Section sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/templates/base.html:10-191](file://app/templates/base.html#L10-L191)
 
 ## Conclusion
-The application successfully migrated from a React/TypeScript architecture to a Flask/Jinja2-based system, implementing a premium dark gold aesthetic with glass-morphism effects. The new architecture leverages server-side rendering, session-based authentication, and static Jekyll processing for content generation. The template system provides consistent styling across all administrative interfaces, while the blueprint architecture maintains clean separation of concerns. This migration improves deployment simplicity, enhances security through server-side processing, and provides better integration with static hosting platforms.
+The application successfully migrated from a React/TypeScript architecture to a Flask/Jinja2-based system, implementing comprehensive Chinese localization throughout all user interfaces. The new architecture leverages server-side rendering, session-based authentication, and static Jekyll processing for content generation, with all administrative interfaces, authentication flows, and content management systems fully localized in Chinese. The template system provides consistent styling across all Chinese interfaces, while the blueprint architecture maintains clean separation of concerns. This migration improves deployment simplicity, enhances security through server-side processing, provides better integration with static hosting platforms, and delivers an optimal user experience for Chinese-speaking administrators and content creators.

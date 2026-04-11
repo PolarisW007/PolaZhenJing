@@ -204,7 +204,23 @@ tags: [{', '.join(tag_list)}]"""
     with open(post_path, 'w', encoding='utf-8') as f:
         f.write(front_matter + content)
 
-    flash(f'文章「{title}」已以 {style} 风格创建。', 'success')
+    # Auto-sync to GitHub after generating
+    try:
+        project_root = os.path.join(os.path.dirname(__file__), '..')
+        subprocess.run(['git', 'add', '-A'], cwd=project_root,
+                       capture_output=True, timeout=30)
+        commit_msg = f'Add article: {title} - {date_str}'
+        subprocess.run(['git', 'commit', '-m', commit_msg], cwd=project_root,
+                       capture_output=True, timeout=30)
+        push_result = subprocess.run(
+            ['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
+            capture_output=True, timeout=120, text=True)
+        if push_result.returncode == 0:
+            flash(f'文章「{title}」已以 {style} 风格创建，并已同步到 GitHub。', 'success')
+        else:
+            flash(f'文章「{title}」已创建，但推送失败：{push_result.stderr}', 'warning')
+    except Exception as e:
+        flash(f'文章「{title}」已创建，但同步出错：{e}', 'warning')
     return redirect(url_for('uploader.articles'))
 
 

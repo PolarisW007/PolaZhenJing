@@ -16,23 +16,22 @@
 
 ## Update Summary
 **Changes Made**
-- Updated architecture documentation to reflect the complete removal of the FastAPI backend infrastructure
-- Documented the new Flask-based management interface with simplified authentication
-- Added comprehensive coverage of the file upload and conversion pipeline
-- Updated deployment workflow to reflect Jekyll static site generation
-- Revised security model from JWT to Flask session-based authentication
-- Added CLI tool documentation for power-user operations
+- Updated PDF conversion section to reflect enhanced structure detection capabilities with font size analysis
+- Added documentation for improved error handling in conversion pipeline
+- Enhanced file upload and conversion pipeline documentation with new PDF processing features
+- Updated troubleshooting guide to include specific PDF conversion error scenarios
+- Added new section on PDF structure detection algorithms and fallback mechanisms
 
 ## Table of Contents
 1. [Introduction](#introduction)
-2. [Project Structure](#project-structure)
-3. [Core Components](#core-components)
-4. [Architecture Overview](#architecture-overview)
-5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Deployment and Operations](#deployment-and-operations)
-7. [Security Considerations](#security-considerations)
-8. [Migration from Previous Architecture](#migration-from-previous-architecture)
-9. [Troubleshooting Guide](#troubleshooting-guide)
+2. [Project Structure](#project_structure)
+3. [Core Components](#core_components)
+4. [Architecture Overview](#architecture_overview)
+5. [Detailed Component Analysis](#detailed_component_analysis)
+6. [Deployment and Operations](#deployment_and_operations)
+7. [Security Considerations](#security_considerations)
+8. [Migration from Previous Architecture](#migration_from_previous_architecture)
+9. [Troubleshooting Guide](#troubleshooting_guide)
 10. [Conclusion](#conclusion)
 
 ## Introduction
@@ -49,7 +48,7 @@ subgraph "Flask Application Factory"
 APP["__init__.py<br/>create_app(), get_db(), init_db()"]
 AUTH["auth.py<br/>Authentication routes<br/>Login/Register/Verify"]
 UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation"]
-CONV["converter.py<br/>Format detection + conversion<br/>PDF/DOCX/HTML → Markdown"]
+CONV["converter.py<br/>Enhanced PDF structure detection<br/>PDF/DOCX/HTML → Markdown"]
 MAIL["mailer.py<br/>QQ email SMTP verification"]
 CLI["wiki.py<br/>CLI management tool<br/>Serve/Build/Admin/New/List/Deploy"]
 end
@@ -89,7 +88,7 @@ CLI --> ASSETS
 - **Application factory pattern**: Flask app created with template configuration and registers teardown handlers for database connections
 - **Database integration**: SQLite-based user storage with automatic table creation and connection management using Flask's g object pattern
 - **Authentication system**: Single-user authentication with QQ email verification using Flask sessions and secure cookies
-- **File upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with automatic conversion to blog-ready Markdown
+- **Enhanced file upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with advanced PDF structure detection and automatic conversion to blog-ready Markdown
 - **Template rendering**: Jinja2-based server-side rendering for all management interfaces
 - **Email verification**: QQ Email SMTP integration for 6-digit verification codes with 5-minute expiration
 - **Static site generation**: Jekyll integration for blog post generation with five predefined styles
@@ -105,7 +104,7 @@ CLI --> ASSETS
 ## Architecture Overview
 The backend follows a simplified layered architecture focused on content management and static site generation:
 - **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface and Jekyll templates for public site
-- **Business logic layer**: Authentication flows, file processing, content management operations, and CLI command handling
+- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection, content management operations, and CLI command handling
 - **Persistence layer**: SQLite database with user management and session-based authentication
 - **Integration layer**: QQ Email SMTP for verification and Jekyll static site generation for publishing
 
@@ -115,7 +114,7 @@ CLIENT["Admin Browser"]
 FLASK["Flask App Factory"]
 AUTH["Auth Blueprint<br/>Login/Register/Verify"]
 UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage"]
-CONV["Converter Module<br/>Format Detection"]
+CONV["Converter Module<br/>Enhanced PDF Structure Detection"]
 MAIL["Mailer Module<br/>QQ SMTP Verification"]
 DB["SQLite Database<br/>wiki.db"]
 TEMPLATES["Jinja2 Templates<br/>Server-side Rendering"]
@@ -237,9 +236,47 @@ Auth-->>User : Redirect to /admin/login
 - [app/auth.py:99-133](file://app/auth.py#L99-L133)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 
+### Enhanced PDF Conversion Pipeline
+**Updated** The PDF conversion pipeline now features advanced structure detection capabilities with sophisticated font analysis and intelligent heading identification.
+
+- **Advanced PDF structure detection**: PyMuPDF-based text extraction with font size analysis for automatic heading detection
+- **Intelligent heading classification**: Multi-level heading detection using font size thresholds (≥18px: H1, ≥14px: H2, ≥12px: H3)
+- **Bold text detection**: Sub-heading identification through font weight analysis for enhanced document structure
+- **Robust error handling**: Graceful fallback mechanisms when conversion libraries are unavailable
+- **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
+- **Title detection**: Automatic title extraction from first heading or content
+- **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
+
+```mermaid
+flowchart TD
+A["PDF Upload"] --> B{"PyMuPDF Analysis"}
+B --> C["Extract Text Blocks"]
+C --> D["Font Size Analysis"]
+D --> E{"Heading Detection"}
+E --> |"Font ≥ 18px"| F["# H1 Heading"]
+E --> |"Font ≥ 14px"| G["## H2 Heading"]
+E --> |"Font ≥ 12px"| H["### H3 Heading"]
+E --> |"Other"| I["Regular Paragraph"]
+F --> J["Extract Images"]
+G --> J
+H --> J
+I --> J
+J --> K["Store in Session"]
+K --> L["Style Selection"]
+L --> M["Generate Jekyll Post"]
+```
+
+**Diagram sources**
+- [app/converter.py:7-39](file://app/converter.py#L7-L39)
+- [app/uploader.py:123-128](file://app/uploader.py#L123-L128)
+
+**Section sources**
+- [app/converter.py:1-108](file://app/converter.py#L1-L108)
+- [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
+
 ### File Upload and Conversion Pipeline
 - **Multi-format support**: PDF, DOCX, HTML, Markdown, and TXT with automatic format detection
-- **Conversion library integration**: PyMuPDF for PDF, mammoth for DOCX, html2text for HTML
+- **Conversion library integration**: PyMuPDF for PDF (with enhanced structure detection), mammoth for DOCX, html2text for HTML
 - **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
 - **Title detection**: Automatic title extraction from first heading or content
 - **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
@@ -247,7 +284,7 @@ Auth-->>User : Redirect to /admin/login
 ```mermaid
 flowchart TD
 A["File Upload"] --> B{"Format Detection"}
-B --> |PDF| C["PyMuPDF extraction"]
+B --> |PDF| C["Enhanced PyMuPDF extraction<br/>with structure detection"]
 B --> |DOCX| D["Mammoth + html2text"]
 B --> |HTML| E["html2text conversion"]
 B --> |MD/TXT| F["Direct read"]
@@ -261,12 +298,12 @@ I --> J["Generate Jekyll post"]
 ```
 
 **Diagram sources**
-- [app/converter.py:58-88](file://app/converter.py#L58-L88)
-- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/converter.py:78-91](file://app/converter.py#L78-L91)
+- [app/uploader.py:123-128](file://app/uploader.py#L123-L128)
 
 **Section sources**
-- [app/converter.py:1-88](file://app/converter.py#L1-L88)
-- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
+- [app/converter.py:1-108](file://app/converter.py#L1-L108)
+- [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
 
 ### Content Management Interface
 - **Article listing**: Scans `_posts/` directory for Markdown files with YAML front matter parsing
@@ -275,7 +312,7 @@ I --> J["Generate Jekyll post"]
 - **Template system**: Jinja2-based templates for consistent admin interface design
 
 **Section sources**
-- [app/uploader.py:49-73](file://app/uploader.py#L49-L73)
+- [app/uploader.py:211-215](file://app/uploader.py#L211-L215)
 - [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 
@@ -326,7 +363,7 @@ GitHub-->>Dev : Live website available
 **Section sources**
 - [app/__init__.py:46-47](file://app/__init__.py#L46-L47)
 - [app/auth.py:64-67](file://app/auth.py#L64-L67)
-- [app/uploader.py:31-31](file://app/uploader.py#L31-L31)
+- [app/uploader.py:36-36](file://app/uploader.py#L36-L36)
 
 ## Migration from Previous Architecture
 The system has undergone complete architectural transformation from the previous FastAPI-based multi-module system to a simplified Flask-based solution:
@@ -349,7 +386,7 @@ The system has undergone complete architectural transformation from the previous
 - Simplified Jinja2 templates
 - Jekyll static site generator
 - Single-user authentication
-- File-based conversion pipeline
+- Enhanced file-based conversion pipeline with PDF structure detection
 - GitHub Actions deployment
 - CLI management tool
 
@@ -357,9 +394,15 @@ The system has undergone complete architectural transformation from the previous
 - [PRD.md:160-180](file://PRD.md#L160-L180)
 
 ## Troubleshooting Guide
+**Updated** Enhanced troubleshooting guidance for the new PDF conversion capabilities and structure detection features.
+
 - **Database issues**: Check `data/wiki.db` file permissions and SQLite availability
 - **Email verification**: Verify QQ email credentials and SMTP_SSL configuration
-- **File conversion**: Install optional libraries (PyMuPDF, mammoth, html2text) for enhanced format support
+- **PDF conversion errors**: Install PyMuPDF library (`pip install PyMuPDF`) for enhanced PDF structure detection
+- **DOCX conversion issues**: Install mammoth library (`pip install mammoth`) for DOCX processing
+- **HTML conversion problems**: Install html2text library (`pip install html2text`) for HTML to Markdown conversion
+- **Missing conversion libraries**: The system provides clear error messages indicating which libraries need to be installed
+- **PDF structure detection failures**: Font size analysis may fail on documents with unusual typography or embedded fonts
 - **Session problems**: Ensure Flask secret key is properly configured in environment
 - **Upload failures**: Check file size limits and supported format extensions
 - **Jekyll build errors**: Verify Ruby environment and gem dependencies
@@ -369,8 +412,11 @@ The system has undergone complete architectural transformation from the previous
 **Section sources**
 - [app/__init__.py:12-17](file://app/__init__.py#L12-L17)
 - [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
-- [app/converter.py:85-88](file://app/converter.py#L85-L88)
+- [app/converter.py:105-108](file://app/converter.py#L105-L108)
+- [app/converter.py:7-39](file://app/converter.py#L7-L39)
 - [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Conclusion
-PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.
+PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation. 
+
+**Updated** The enhanced PDF conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.
