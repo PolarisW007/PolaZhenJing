@@ -129,7 +129,7 @@ STYLE_SKILL_MAP = {
 }
 
 MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
-MINIMAX_MODEL = 'MiniMax-Text-01'
+MINIMAX_MODEL = 'MiniMax-M2.7'
 
 
 def _get_minimax_api_key() -> str | None:
@@ -176,9 +176,17 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | Non
     try:
         with urlopen(req, timeout=300) as resp:
             data = json.loads(resp.read().decode('utf-8'))
-        return data['choices'][0]['message']['content']
+        raw = data['choices'][0]['message']['content']
+        # Strip <think>...</think> reasoning tokens from reasoning models
+        cleaned = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
+        return cleaned or raw
     except Exception as e:
         logger.error('LLM rewrite failed: %s', e)
+        if hasattr(e, 'read'):
+            try:
+                logger.error('Error body: %s', e.read().decode('utf-8')[:500])
+            except Exception:
+                pass
         return None
 
 
