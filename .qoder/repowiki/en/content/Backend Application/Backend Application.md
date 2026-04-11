@@ -7,6 +7,9 @@
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/uploader.py](file://app/uploader.py)
+- [app/templates/style_select.html](file://app/templates/style_select.html)
+- [app/templates/upload.html](file://app/templates/upload.html)
+- [assets/css/literary-narrative.css](file://assets/css/literary-narrative.css)
 - [wiki.py](file://wiki.py)
 - [PRD.md](file://PRD.md)
 - [_config.yml](file://_config.yml)
@@ -16,11 +19,12 @@
 
 ## Update Summary
 **Changes Made**
-- Updated PDF conversion section to reflect enhanced structure detection capabilities with font size analysis
-- Added documentation for improved error handling in conversion pipeline
-- Enhanced file upload and conversion pipeline documentation with new PDF processing features
-- Updated troubleshooting guide to include specific PDF conversion error scenarios
-- Added new section on PDF structure detection algorithms and fallback mechanisms
+- Updated literary narrative style section to reflect the new "耕烟煮云" style with enhanced CSS styling and LLM integration
+- Added documentation for MiniMax API integration and LLM-based content rewriting capabilities
+- Enhanced metadata processing section with improved summary generation and reading time estimation
+- Updated error handling documentation to include LLM API integration and enhanced fallback mechanisms
+- Added new asset management integration documentation for improved file handling
+- Updated troubleshooting guide to include MiniMax API configuration and LLM-related issues
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -37,17 +41,17 @@
 ## Introduction
 This document describes the backend application for PolaZhenJing v2, a lightweight Flask-based management interface for a personal knowledge wiki and blogging platform. The system has been completely redesigned from the previous complex FastAPI architecture to a simplified Flask-based solution with single-user authentication, file upload capabilities, and automatic conversion pipeline. The new architecture focuses on simplicity with integrated SQLite database storage, QQ email verification, and seamless Jekyll static site generation for GitHub Pages deployment.
 
-**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture.
+**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture. The system now features enhanced literary narrative style support with MiniMax API integration for content rewriting.
 
 ## Project Structure
-The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with four main components: authentication, file upload/conversion, content management, and CLI operations.
+The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with six main components: authentication, file upload/conversion, content management, LLM integration, literary styling, and CLI operations.
 
 ```mermaid
 graph TB
 subgraph "Flask Application Factory"
 APP["__init__.py<br/>create_app(), get_db(), init_db()"]
 AUTH["auth.py<br/>Authentication routes<br/>Login/Register/Verify"]
-UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation"]
+UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation<br/>LLM integration + asset management"]
 CONV["converter.py<br/>Enhanced PDF structure detection<br/>PDF/DOCX/HTML → Markdown"]
 MAIL["mailer.py<br/>QQ email SMTP verification"]
 CLI["wiki.py<br/>CLI management tool<br/>Serve/Build/Admin/New/List/Deploy"]
@@ -58,9 +62,12 @@ USERS["users table<br/>username, email, password_hash,<br/>email_verified, creat
 end
 subgraph "Static Site Generation"
 JEKYLL["_config.yml<br/>Jekyll configuration<br/>Layouts, plugins, pagination"]
-LAYOUTS["_layouts/<br/>5 blog style layouts<br/>deep-technical, academic-insight,<br/>industry-vision, friendly-explainer,<br/>creative-visual"]
+LAYOUTS["_layouts/<br/>6 blog style layouts<br/>deep-technical, academic-insight,<br/>industry-vision, friendly-explainer,<br/>creative-visual, literary-narrative"]
 INCLUDES["_includes/<br/>Shared components<br/>head.html, header.html,<br/>footer.html, style-badge.html"]
-ASSETS["assets/<br/>CSS + images<br/>main.css + style-specific CSS"]
+ASSETS["assets/<br/>CSS + images<br/>main.css + style-specific CSS<br/>literary-narrative.css"]
+end
+subgraph "LLM Integration"
+MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts"]
 end
 AUTH --> SQLITE
 UP --> SQLITE
@@ -70,14 +77,16 @@ CLI --> JEKYLL
 CLI --> LAYOUTS
 CLI --> INCLUDES
 CLI --> ASSETS
+UP --> MINIMAX
 ```
 
 **Diagram sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
-- [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
+- [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
 - [app/converter.py:1-88](file://app/converter.py#L1-L88)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 
 **Section sources**
@@ -91,7 +100,8 @@ CLI --> ASSETS
 - **Enhanced file upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with advanced PDF structure detection and automatic conversion to blog-ready Markdown
 - **Template rendering**: Jinja2-based server-side rendering for all management interfaces
 - **Email verification**: QQ Email SMTP integration for 6-digit verification codes with 5-minute expiration
-- **Static site generation**: Jekyll integration for blog post generation with five predefined styles
+- **Static site generation**: Jekyll integration for blog post generation with six predefined styles including literary narrative
+- **LLM integration**: MiniMax API integration for content rewriting with style-specific prompts and literary narrative enhancement
 - **CLI operations**: Comprehensive command-line interface for development, deployment, and content management
 
 **Section sources**
@@ -99,33 +109,36 @@ CLI --> ASSETS
 - [app/auth.py:16-24](file://app/auth.py#L16-L24)
 - [app/converter.py:58-88](file://app/converter.py#L58-L88)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
+- [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
 - [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Architecture Overview
 The backend follows a simplified layered architecture focused on content management and static site generation:
 - **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface and Jekyll templates for public site
-- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection, content management operations, and CLI command handling
+- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection, content management operations, LLM-based content rewriting, and CLI command handling
 - **Persistence layer**: SQLite database with user management and session-based authentication
-- **Integration layer**: QQ Email SMTP for verification and Jekyll static site generation for publishing
+- **Integration layer**: QQ Email SMTP for verification, MiniMax API for content rewriting, and Jekyll static site generation for publishing
 
 ```mermaid
 graph TB
 CLIENT["Admin Browser"]
 FLASK["Flask App Factory"]
 AUTH["Auth Blueprint<br/>Login/Register/Verify"]
-UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage"]
+UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage<br/>Style selection + LLM integration"]
 CONV["Converter Module<br/>Enhanced PDF Structure Detection"]
 MAIL["Mailer Module<br/>QQ SMTP Verification"]
 DB["SQLite Database<br/>wiki.db"]
 TEMPLATES["Jinja2 Templates<br/>Server-side Rendering"]
 CLI["CLI Tool<br/>wiki.py<br/>Serve/Build/Admin/New/List/Deploy"]
 JEKYLL["Jekyll Static Site Generator<br/>_config.yml + layouts"]
+MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts"]
 CLIENT --> FLASK
 FLASK --> AUTH
 FLASK --> UPLOAD
 AUTH --> DB
 UPLOAD --> DB
 UPLOAD --> CONV
+UPLOAD --> MINIMAX
 AUTH --> MAIL
 UPLOAD --> TEMPLATES
 AUTH --> TEMPLATES
@@ -136,7 +149,7 @@ CLI --> DB
 **Diagram sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
-- [app/uploader.py:14-210](file://app/uploader.py#L14-L210)
+- [app/uploader.py:126-129](file://app/uploader.py#L126-L129)
 - [app/converter.py:1-88](file://app/converter.py#L1-L88)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
 - [wiki.py:1-165](file://wiki.py#L1-L165)
@@ -148,6 +161,7 @@ CLI --> DB
 - **Database initialization**: Automatic SQLite table creation for user management during app startup
 - **Session management**: Flask secret key configuration for secure cookie-based sessions
 - **File upload limits**: 16MB maximum content length for document uploads
+- **Asset serving**: Dynamic asset serving from project root assets directory
 
 ```mermaid
 sequenceDiagram
@@ -305,11 +319,46 @@ I --> J["Generate Jekyll post"]
 - [app/converter.py:1-108](file://app/converter.py#L1-L108)
 - [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
 
+### Literary Narrative Style and LLM Integration
+**Updated** The system now features a sophisticated literary narrative style with MiniMax API integration for content rewriting.
+
+- **Literary narrative style**: New "耕烟煮云" (Literary Narrative) style with poetic prose and imagery-driven content
+- **MiniMax API integration**: Content rewriting powered by MiniMax LLM with custom prompts for literary enhancement
+- **Style-specific prompts**: Custom writing prompts for each style, including literary narrative with Chen Chunsheng inspiration
+- **Content rewriting workflow**: Optional LLM-based content enhancement with fallback to original content
+- **Enhanced metadata processing**: Improved summary generation and reading time estimation
+- **CSS styling**: Dedicated literary narrative CSS with traditional Chinese typography and poetic aesthetics
+
+```mermaid
+flowchart TD
+A["Content + Style Selection"] --> B{"Style requires LLM?"}
+B --> |Yes| C["MiniMax API Call<br/>with style-specific prompt"]
+B --> |No| D["Direct content generation"]
+C --> E{"LLM Success?"}
+E --> |Yes| F["Rewritten content"]
+E --> |No| G["Fallback to original content"]
+F --> H["Enhanced content"]
+G --> H
+H --> I["Generate Jekyll post<br/>with literary styling"]
+```
+
+**Diagram sources**
+- [app/uploader.py:126-129](file://app/uploader.py#L126-L129)
+- [app/uploader.py:378-387](file://app/uploader.py#L378-L387)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+
+**Section sources**
+- [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
+- [app/uploader.py:126-129](file://app/uploader.py#L126-L129)
+- [app/uploader.py:378-387](file://app/uploader.py#L378-L387)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+
 ### Content Management Interface
 - **Article listing**: Scans `_posts/` directory for Markdown files with YAML front matter parsing
-- **Style management**: Five predefined blog styles with color-coded badges and preview functionality
+- **Style management**: Six predefined blog styles with color-coded badges and preview functionality
 - **Git integration**: One-click synchronization to GitHub with commit/push automation
 - **Template system**: Jinja2-based templates for consistent admin interface design
+- **Enhanced metadata**: Automatic summary generation and reading time calculation
 
 **Section sources**
 - [app/uploader.py:211-215](file://app/uploader.py#L211-L215)
@@ -359,11 +408,13 @@ GitHub-->>Dev : Live website available
 - **Email verification**: QQ email requirement adds an extra authentication layer
 - **Database security**: SQLite file permissions and connection isolation
 - **Environment configuration**: Separate configuration for production vs development
+- **LLM API security**: API keys stored in environment variables with fallback to shell sourcing
 
 **Section sources**
 - [app/__init__.py:46-47](file://app/__init__.py#L46-L47)
 - [app/auth.py:64-67](file://app/auth.py#L64-L67)
 - [app/uploader.py:36-36](file://app/uploader.py#L36-L36)
+- [app/uploader.py:135-147](file://app/uploader.py#L135-L147)
 
 ## Migration from Previous Architecture
 The system has undergone complete architectural transformation from the previous FastAPI-based multi-module system to a simplified Flask-based solution:
@@ -387,6 +438,7 @@ The system has undergone complete architectural transformation from the previous
 - Jekyll static site generator
 - Single-user authentication
 - Enhanced file-based conversion pipeline with PDF structure detection
+- Literary narrative style with MiniMax API integration
 - GitHub Actions deployment
 - CLI management tool
 
@@ -394,7 +446,7 @@ The system has undergone complete architectural transformation from the previous
 - [PRD.md:160-180](file://PRD.md#L160-L180)
 
 ## Troubleshooting Guide
-**Updated** Enhanced troubleshooting guidance for the new PDF conversion capabilities and structure detection features.
+**Updated** Enhanced troubleshooting guidance for the new PDF conversion capabilities, literary narrative style, and MiniMax API integration.
 
 - **Database issues**: Check `data/wiki.db` file permissions and SQLite availability
 - **Email verification**: Verify QQ email credentials and SMTP_SSL configuration
@@ -408,15 +460,20 @@ The system has undergone complete architectural transformation from the previous
 - **Jekyll build errors**: Verify Ruby environment and gem dependencies
 - **GitHub deployment**: Check Git configuration and remote repository setup
 - **CLI operations**: Ensure proper Python virtual environment activation
+- **MiniMax API issues**: Configure `MINIMAX_TOKEN_PLAN_API_KEY` environment variable or source from shell profile
+- **LLM rewriting failures**: Check API connectivity and token validity, fallback to original content
+- **Literary narrative style issues**: Verify CSS file loading and style selection in templates
 
 **Section sources**
 - [app/__init__.py:12-17](file://app/__init__.py#L12-L17)
 - [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
 - [app/converter.py:105-108](file://app/converter.py#L105-L108)
 - [app/converter.py:7-39](file://app/converter.py#L7-L39)
+- [app/uploader.py:135-147](file://app/uploader.py#L135-L147)
+- [app/uploader.py:150-191](file://app/uploader.py#L150-L191)
 - [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Conclusion
-PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation. 
+PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation.
 
-**Updated** The enhanced PDF conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.
+**Updated** The enhanced PDF conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. The addition of literary narrative style with MiniMax API integration provides powerful content rewriting capabilities with style-specific prompts, enabling poetic and imagery-driven content generation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.

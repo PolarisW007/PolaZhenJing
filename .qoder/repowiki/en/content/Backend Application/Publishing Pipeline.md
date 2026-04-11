@@ -15,18 +15,25 @@
 - [app/templates/base.html](file://app/templates/base.html)
 - [index.html](file://index.html)
 - [_layouts/default.html](file://_layouts/default.html)
+- [_layouts/academic-insight.html](file://_layouts/academic-insight.html)
+- [_layouts/creative-visual.html](file://_layouts/creative-visual.html)
+- [_layouts/deep-technical.html](file://_layouts/deep-technical.html)
+- [_layouts/friendly-explainer.html](file://_layouts/friendly-explainer.html)
+- [_layouts/industry-vision.html](file://_layouts/industry-vision.html)
 - [_includes/footer.html](file://_includes/footer.html)
+- [_includes/style-badge.html](file://_includes/style-badge.html)
+- [assets/css/literary-narrative.css](file://assets/css/literary-narrative.css)
+- [assets/css/main.css](file://assets/css/main.css)
 - [PRD.md](file://PRD.md)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced uploader functionality with comprehensive auto-sync mechanism for automatic GitHub synchronization
-- Added robust git operations including staging, committing, and pushing to remote origin with timeout protection
-- Implemented comprehensive error handling and flash message feedback system for user notifications
-- Integrated automatic GitHub synchronization into the article generation workflow
-- Added dedicated `/sync` endpoint for manual GitHub synchronization with upstream tracking
-- Enhanced flash messaging system with categorized notifications (success, warning, error, info)
+- Enhanced article presentation system with literary narrative style layout and styling
+- Added new metadata fields including summary field generation and improved tags array handling
+- Expanded layout variants from 5 to 6 distinct blog styles including literary narrative
+- Improved article processing capabilities with enhanced frontmatter generation and LLM rewriting
+- Added comprehensive content creation workflow with style-specific metadata and automatic summary generation
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -41,7 +48,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators and robust error handling.
+This document explains the publishing pipeline for PolaZhenJing v2, which has been completely redesigned to use Jekyll instead of the previous complex FastAPI-based system. The new pipeline focuses on file-based content generation, automated GitHub Actions deployment, and simplified content management through a lightweight Flask backend. Content is now managed through Jekyll's native `_posts/` directory structure with automatic GitHub Pages deployment and enhanced URL configuration for proper site routing. The system now includes a comprehensive article preview system, GitHub integration for seamless synchronization, and a modern management interface with real-time status indicators and robust error handling. Recent enhancements include expanded layout variants with literary narrative styling, new metadata fields for enhanced article presentation, and improved content creation workflow with automatic summary generation.
 
 ## Project Structure
 The publishing pipeline has been streamlined to focus on Jekyll static site generation with automated deployment and enhanced content management:
@@ -49,7 +56,7 @@ The publishing pipeline has been streamlined to focus on Jekyll static site gene
 - GitHub Actions workflow automates the complete build and deployment process to GitHub Pages with enhanced concurrency control
 - Flask backend provides comprehensive management interface for content creation, preview, and GitHub synchronization with automatic deployment triggers
 - File-based content storage in `_posts/` directory with YAML frontmatter and automatic deployment triggers
-- Five distinct blog layouts with custom styling and responsive design
+- Six distinct blog layouts with custom styling and responsive design, including the new literary narrative style
 - Integrated authentication system with QQ email verification for secure access
 - Robust flash messaging system for user feedback and error notifications
 
@@ -83,6 +90,8 @@ subgraph "Dependencies"
 Q["Ruby Gems<br/>Gemfile<br/>jekyll, jekyll-feed, jekyll-seo-tag<br/>Ruby 3.2 + Bundler Cache"]
 R["Python Packages<br/>requirements.txt<br/>flask, PyMuPDF, mammoth, html2text"]
 S["Flash Messaging<br/>templates/base.html<br/>Success/Warning/Error/Info Categories"]
+T["CSS Framework<br/>assets/css/main.css<br/>6 Layout Variants<br/>Literary Narrative Style"]
+U["Style Badges<br/>_includes/style-badge.html<br/>Visual Indicators"]
 end
 A --> B
 A --> C
@@ -102,6 +111,8 @@ N --> O
 Q --> A
 R --> F
 S --> F
+T --> C
+U --> C
 ```
 
 **Diagram sources**
@@ -115,6 +126,8 @@ S --> F
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
+- [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -127,6 +140,8 @@ S --> F
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
+- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
+- [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
 
 ## Core Components
 - **Jekyll Configuration**: Defines site metadata, build settings, pagination, plugins, and GitHub Pages URL configuration with proper baseurl for repository-based deployment
@@ -138,7 +153,9 @@ S --> F
 - **Authentication System**: Secure access control with QQ email verification and session management
 - **Robust Flash Messaging**: Comprehensive notification system with categorized feedback (success, warning, error, info) for user experience
 - **Ruby Gem Dependencies**: Manages Jekyll ecosystem including jekyll-feed, jekyll-seo-tag, and jekyll-paginate for comprehensive site functionality
-- **Five Distinct Blog Styles**: Custom layouts with unique styling, responsive design, and comprehensive content formatting
+- **Six Distinct Blog Styles**: Enhanced layouts with unique styling, responsive design, and comprehensive content formatting including the new literary narrative style
+- **Enhanced Metadata System**: New summary field generation and improved tags array handling for better article presentation
+- **LLM Integration**: Optional content rewriting with style-specific prompts for enhanced article quality
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -150,11 +167,12 @@ S --> F
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 - [Gemfile:1-7](file://Gemfile#L1-L7)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 
 ## Architecture Overview
 The new publishing pipeline follows a simplified file-based approach with enhanced deployment automation, comprehensive content management, and seamless GitHub integration:
 - Content creation through Flask management interface with integrated git functionality and file conversion
-- Automatic Jekyll processing of `_posts/` directory with proper URL configuration and five distinct blog layouts
+- Automatic Jekyll processing of `_posts/` directory with proper URL configuration and six distinct blog layouts
 - GitHub Actions orchestration for build and deployment to GitHub Pages with concurrency control
 - Native GitHub Pages integration with custom domain support and baseurl configuration
 - Enhanced git push functionality with upstream tracking and timeout protection for improved deployment reliability
@@ -162,31 +180,37 @@ The new publishing pipeline follows a simplified file-based approach with enhanc
 - Comprehensive authentication system with QQ email verification for secure access
 - Robust flash messaging system for user feedback and error notifications
 - Automatic synchronization mechanism that performs git operations with comprehensive error handling
+- Enhanced metadata processing with automatic summary generation and improved tags handling
+- Literary narrative style integration with specialized CSS styling and content formatting
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant Flask as "Flask Management<br/>app/__init__.py"
 participant Converter as "File Converter<br/>app/converter.py"
+participant LLM as "LLM Rewriter<br/>Style-specific Prompts"
 participant Git as "Git Repository<br/>Automatic Sync<br/>git add -A, commit, push -u origin main<br/>Timeout : 30s/120s"
-participant Jekyll as "Jekyll Processor<br/>_config.yml"
+participant Jekyll as "Jekyll Processor<br/>_config.yml + 6 Layouts"
 participant GH as "GitHub Actions<br/>.github/workflows/deploy.yml<br/>Concurrency : cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"
 participant Pages as "GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"
 User->>Flask : Create/Edit Post
 Flask->>Converter : Convert PDF/DOCX/HTML to Markdown
 Converter-->>Flask : Converted Content
+Flask->>LLM : Optional style-specific rewriting
+LLM-->>Flask : Enhanced Content
 Flask->>Git : Automatic Sync : git add -A, git commit, git push -u origin main
 Git->>GH : Trigger build on push
 GH->>GH : Setup Ruby 3.2 with bundler-cache
 GH->>GH : Run jekyll build with JEKYLL_ENV=production
 GH->>Pages : Deploy to GitHub Pages
-Pages-->>User : Live site at polarisw007.github.io/PolaZhenJing
+Pages-->>User : Live site with 6 layout variants
 Note over Git,Pages : Flash Messages : Success, Warning, Error, Info
 ```
 
 **Diagram sources**
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
 - [app/uploader.py:207-224](file://app/uploader.py#L207-L224)
 - [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -251,8 +275,10 @@ The lightweight Flask application provides comprehensive content management capa
 - **Authentication System**: Secure access control with QQ email verification and session management
 - **Article Preview**: Dedicated endpoint for previewing individual articles with GitHub integration
 - **Status Indicators**: Real-time status indicators for published/local-only articles
+- **Enhanced Metadata Processing**: Automatic summary generation and improved tags array handling
+- **LLM Integration**: Optional content rewriting with style-specific prompts for enhanced article quality
 
-**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability. Added comprehensive flash messaging system for user feedback and error notifications.
+**Updated** Enhanced git push functionality with upstream tracking (`-u` flag) and 120-second timeout for improved deployment automation and reliability. Added comprehensive flash messaging system for user feedback and error notifications. Enhanced metadata processing with automatic summary generation and improved tags handling.
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
@@ -260,6 +286,7 @@ The lightweight Flask application provides comprehensive content management capa
 - [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
 
 ### Automatic GitHub Synchronization System
 The comprehensive auto-sync mechanism provides seamless integration between local content creation and GitHub deployment:
@@ -313,27 +340,39 @@ The comprehensive article management system provides real-time preview and GitHu
 - **Action Controls**: Delete functionality with confirmation prompts
 - **Metadata Display**: Title, date, style badge, tags, and description in preview interface
 - **Responsive Design**: Mobile-friendly interface with comprehensive styling system
+- **Enhanced Metadata Display**: Summary field and improved tags array visualization
 
 **Section sources**
 - [app/uploader.py:238-262](file://app/uploader.py#L238-L262)
 - [app/templates/articles.html:1-64](file://app/templates/articles.html#L1-L64)
-- [app/templates/article_view.html:1-67](file://app/templates/article_view.html#L1-L67)
+- [app/templates/article_view.html:1-46](file://app/templates/article_view.html#L1-L46)
 
-### Content Display and Layout System
-The Jekyll layout system provides flexible content presentation with proper URL handling and five distinct blog styles:
+### Enhanced Content Display and Layout System
+The Jekyll layout system provides flexible content presentation with proper URL handling and six distinct blog styles:
 - **Default Layout**: Base HTML structure with header, main content, and footer includes
-- **Five Distinct Styles**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual
+- **Six Distinct Styles**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual, Literary Narrative
 - **Index Template**: Dynamic content listing with pagination and styling using configured base URL
 - **Footer Includes**: Social links and RSS feed integration with proper URL resolution
 - **Liquid Templating**: Powerful template engine for dynamic content rendering with GitHub Pages compatibility
 - **Style Badges**: Visual indicators for article styles with custom colors and formatting
 - **Responsive Design**: Mobile-first approach with comprehensive styling system
+- **Literary Narrative Style**: Specialized CSS styling with poetic prose, imagery-driven aesthetics, and traditional Chinese typography
+- **Enhanced Metadata Display**: Improved handling of summary fields and tags arrays across all layouts
+
+**Updated** Expanded from 5 to 6 distinct blog styles with the addition of literary narrative style featuring specialized CSS for poetic content presentation.
 
 **Section sources**
 - [_layouts/default.html:1-12](file://_layouts/default.html#L1-L12)
+- [_layouts/academic-insight.html:1-27](file://_layouts/academic-insight.html#L1-L27)
+- [_layouts/creative-visual.html:1-20](file://_layouts/creative-visual.html#L1-L20)
+- [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
+- [_layouts/friendly-explainer.html:1-26](file://_layouts/friendly-explainer.html#L1-L26)
+- [_layouts/industry-vision.html:1-20](file://_layouts/industry-vision.html#L1-L20)
 - [index.html:1-70](file://index.html#L1-L70)
 - [_includes/footer.html:1-9](file://_includes/footer.html#L1-L9)
-- [app/uploader.py:20-31](file://app/uploader.py#L20-L31)
+- [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [assets/css/main.css:401-417](file://assets/css/main.css#L401-L417)
 
 ### Ruby Gem Dependencies
 The Ruby gem ecosystem provides essential Jekyll functionality with proper version constraints:
@@ -345,6 +384,22 @@ The Ruby gem ecosystem provides essential Jekyll functionality with proper versi
 
 **Section sources**
 - [Gemfile:1-7](file://Gemfile#L1-L7)
+
+### Enhanced Metadata and Article Processing System
+The comprehensive metadata system provides rich article presentation capabilities:
+- **Frontmatter Generation**: Automatic YAML frontmatter creation with layout, title, date, tags, and description fields
+- **Summary Field**: Automatic summary generation from article content with proper YAML escaping
+- **Tags Array Handling**: Improved parsing and formatting of tag arrays for better article categorization
+- **Style-Specific Processing**: Enhanced content rewriting with LLM integration for style-consistent improvements
+- **Filename Generation**: Automatic slug-based filename creation from article titles
+- **Content Enhancement**: Optional LLM rewriting with style-specific prompts for improved article quality
+- **Metadata Validation**: Comprehensive validation and sanitization of all metadata fields
+
+**Updated** Enhanced metadata processing with automatic summary generation, improved tags array handling, and optional LLM content rewriting for style-consistent improvements.
+
+**Section sources**
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [PRD.md:587-609](file://PRD.md#L587-L609)
 
 ### Flash Messaging and User Feedback System
 The comprehensive flash messaging system provides clear user feedback and error notifications:
@@ -374,6 +429,8 @@ The new architecture maintains clean separation between components with enhanced
 - **Flash Messaging System**: Comprehensive notification system providing user feedback across all operations
 - **Ruby Ecosystem**: Gems manage site functionality and plugins independently with version constraints and bundler cache optimization
 - **Git Integration**: Enhanced git operations with upstream tracking and timeout protection for reliable deployment automation
+- **Enhanced Layout System**: Six distinct blog styles with specialized CSS for different content types and presentation needs
+- **Metadata Processing**: Advanced metadata handling with automatic summary generation and improved tags management
 
 ```mermaid
 graph TB
@@ -384,7 +441,9 @@ FLSK --> GIT["Git Operations<br/>Automatic Sync<br/>git add -A, commit, push -u 
 FLSK --> AUTH["Authentication<br/>QQ Email Verification"]
 FLSK --> CONV["File Conversion<br/>PDF/DOCX/HTML/MD"]
 FLSK --> FLASH["Flash Messaging<br/>Success/Warning/Error/Info"]
+FLSK --> META["Metadata Processing<br/>Summary Generation<br/>Tags Arrays<br/>LLM Rewriting"]
 POSTS --> JKY
+META --> JKY
 GIT --> ACT["GitHub Actions<br/>Concurrency: cancel-in-progress<br/>Ruby 3.2 + Bundler Cache"]
 ACT --> CFG
 ACT --> JKY
@@ -392,6 +451,8 @@ GEM["Gemfile"] --> PLG
 AUTH --> MAIL["QQ Email SMTP"]
 FLASH --> UI["User Interface<br/>templates/base.html"]
 PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site"]
+LAYOUTS["6 Layout Variants<br/>Literary Narrative Style"] --> JKY
+CSS["Enhanced CSS Framework<br/>assets/css/main.css<br/>assets/css/literary-narrative.css"] --> LAYOUTS
 ```
 
 **Diagram sources**
@@ -404,7 +465,10 @@ PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
+- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 
 **Section sources**
 - [_config.yml:1-50](file://_config.yml#L1-L50)
@@ -416,7 +480,10 @@ PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
+- [assets/css/main.css:1-522](file://assets/css/main.css#L1-L522)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 
 ## Performance Considerations
 - **Build Speed**: Jekyll builds are typically faster than complex backend systems, with typical completion under 10 seconds for small to medium sites
@@ -432,6 +499,9 @@ PAGES["GitHub Pages<br/>polarisw007.github.io/PolaZhenJing"] --> LIVE["Live Site
 - **Authentication**: Session-based authentication reduces database overhead and improves response times
 - **Flash Messaging**: Lightweight notification system with minimal performance impact
 - **Automatic Synchronization**: Background git operations with timeout protection prevent blocking user interactions
+- **Enhanced Layout Rendering**: Six distinct layouts with specialized CSS may increase initial load time but provide better user experience
+- **Metadata Processing**: Automatic summary generation adds processing overhead but enhances article presentation quality
+- **LLM Integration**: Optional content rewriting may add latency but improves content quality
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -449,6 +519,9 @@ Common issues and resolutions:
 - **Article Preview Problems**: Verify article exists in `_posts/` directory; check frontmatter format; ensure proper markdown rendering
 - **Flash Message Issues**: Verify flash messaging system is properly configured in base template; check message categories and styling
 - **Automatic Sync Failures**: Check git credentials and remote repository access; verify timeout limits are appropriate; review flash message feedback
+- **Layout Rendering Issues**: Verify CSS files are properly loaded; check layout names match available variants; ensure proper style badge rendering
+- **Metadata Processing Errors**: Check YAML frontmatter syntax; verify summary field escaping; ensure tags arrays are properly formatted
+- **LLM Integration Failures**: Verify API access and prompt configuration; check for rate limiting; ensure content rewriting is optional
 
 Operational checks:
 - **Health Verification**: Access site URL (`polarisw007.github.io/PolaZhenJing`) to confirm GitHub Pages deployment success
@@ -463,6 +536,9 @@ Operational checks:
 - **GitHub Integration**: Verify synchronization between local content and GitHub repository
 - **Flash Message Testing**: Verify proper display of success, warning, error, and info notifications
 - **Automatic Sync Testing**: Test automatic synchronization after article creation and manual sync endpoint
+- **Layout Testing**: Verify all six layout variants render correctly with proper styling
+- **Metadata Testing**: Test automatic summary generation and tags array processing
+- **LLM Integration Testing**: Verify optional content rewriting functionality works correctly
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
@@ -473,9 +549,10 @@ Operational checks:
 - [app/converter.py:78-92](file://app/converter.py#L78-L92)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 
 ## Conclusion
-The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation and comprehensive content management capabilities. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the five distinct blog layouts offer flexible content presentation. Most importantly, the new automatic synchronization system provides seamless integration between content creation and GitHub deployment with comprehensive error handling and flash message feedback, significantly improving the user experience and operational reliability. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, and seamless GitHub integration for efficient content management and deployment.
+The PolaZhenJing publishing pipeline has been successfully simplified from a complex FastAPI-based system to a streamlined Jekyll workflow with significantly enhanced deployment automation and comprehensive content management capabilities. The new architecture leverages GitHub Actions for automated deployment with improved concurrency control, Ruby 3.2/Bundler caching for better performance, and comprehensive error handling. The lightweight Flask interface provides full-featured content management with integrated git functionality featuring timeout protection and upstream tracking, while the new article preview system offers seamless GitHub integration and real-time content validation. The enhanced GitHub Pages URL configuration ensures proper routing for repository-based deployment, while the improved git push functionality with timeout limits provides reliable deployment automation. The comprehensive file conversion pipeline supports multiple document formats, the authentication system provides secure access control with QQ email verification, and the six distinct blog layouts offer flexible content presentation including the new literary narrative style. Most importantly, the new automatic synchronization system provides seamless integration between content creation and GitHub deployment with comprehensive error handling and flash message feedback, significantly improving the user experience and operational reliability. The enhanced metadata processing system with automatic summary generation and improved tags handling provides richer article presentation capabilities. The optional LLM integration offers content enhancement with style-consistent improvements. This redesign significantly reduces complexity while maintaining powerful blogging capabilities with automatic GitHub Pages hosting, comprehensive error handling, optimized build performance through bundler cache utilization, and seamless GitHub integration for efficient content management and deployment.
 
 ## Appendices
 
@@ -525,6 +602,8 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Status Indicators**: Real-time visual indicators for article publication status
 - **Action Controls**: Delete functionality with confirmation prompts
 - **Flash Messaging**: Comprehensive notification system with categorized feedback
+- **Enhanced Metadata Processing**: Automatic summary generation and improved tags array handling
+- **LLM Integration**: Optional content rewriting with style-specific prompts
 
 **Section sources**
 - [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
@@ -532,6 +611,7 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - [app/uploader.py:277-296](file://app/uploader.py#L277-L296)
 - [app/auth.py:26-48](file://app/auth.py#L26-L48)
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
 
 ### Enhanced Git Push Functionality
 - **Upstream Tracking**: Git push with `-u` flag establishes upstream relationship for improved deployment automation
@@ -585,7 +665,7 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - [app/auth.py:26-168](file://app/auth.py#L26-L168)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 
-### Article Preview and Management System Features
+### Enhanced Article Preview and Management System Features
 - **Real-time Listing**: Dynamic management interface showing all posts with metadata and status indicators
 - **Individual Preview**: Dedicated endpoint for previewing articles with GitHub integration and markdown rendering
 - **GitHub Integration**: Direct links to GitHub for editing and viewing article source
@@ -593,11 +673,27 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Action Controls**: Delete functionality with confirmation prompts
 - **Metadata Display**: Title, date, style badge, tags, and description in preview interface
 - **Responsive Design**: Mobile-friendly interface with comprehensive styling system
+- **Enhanced Metadata Display**: Summary field and improved tags array visualization
 
 **Section sources**
 - [app/uploader.py:238-262](file://app/uploader.py#L238-L262)
 - [app/templates/articles.html:1-64](file://app/templates/articles.html#L1-L64)
-- [app/templates/article_view.html:1-67](file://app/templates/article_view.html#L1-L67)
+- [app/templates/article_view.html:1-46](file://app/templates/article_view.html#L1-L46)
+
+### Enhanced Metadata and Article Processing Features
+- **Frontmatter Generation**: Automatic YAML frontmatter creation with layout, title, date, tags, and description fields
+- **Summary Field**: Automatic summary generation from article content with proper YAML escaping
+- **Tags Array Handling**: Improved parsing and formatting of tag arrays for better article categorization
+- **Style-Specific Processing**: Enhanced content rewriting with LLM integration for style-consistent improvements
+- **Filename Generation**: Automatic slug-based filename creation from article titles
+- **Content Enhancement**: Optional LLM rewriting with style-specific prompts for improved article quality
+- **Metadata Validation**: Comprehensive validation and sanitization of all metadata fields
+
+**Updated** Enhanced metadata processing with automatic summary generation, improved tags array handling, and optional LLM content rewriting for style-consistent improvements.
+
+**Section sources**
+- [app/uploader.py:374-411](file://app/uploader.py#L374-L411)
+- [PRD.md:587-609](file://PRD.md#L587-L609)
 
 ### Flash Messaging System Features
 - **Message Categories**: Success (green), Warning (orange), Error (red), Info (blue) notifications
@@ -612,6 +708,27 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 **Section sources**
 - [app/templates/base.html:126-131](file://app/templates/base.html#L126-L131)
 
+### Enhanced Layout System and Styling Features
+- **Six Distinct Layouts**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual, Literary Narrative
+- **Specialized CSS**: Each layout has dedicated CSS styling with unique design elements
+- **Literary Narrative Style**: Poetic prose styling with traditional Chinese typography and imagery-driven aesthetics
+- **Responsive Design**: Mobile-first approach with comprehensive styling system across all layouts
+- **Style Badges**: Visual indicators for article styles with custom colors and formatting
+- **Typography Integration**: Specialized fonts and typography for different content types
+- **Content Formatting**: Enhanced content formatting with drop-caps, blockquotes, and specialized styling elements
+
+**Updated** Expanded from 5 to 6 distinct blog styles with the addition of literary narrative style featuring specialized CSS for poetic content presentation.
+
+**Section sources**
+- [_layouts/academic-insight.html:1-27](file://_layouts/academic-insight.html#L1-L27)
+- [_layouts/creative-visual.html:1-20](file://_layouts/creative-visual.html#L1-L20)
+- [_layouts/deep-technical.html:1-22](file://_layouts/deep-technical.html#L1-L22)
+- [_layouts/friendly-explainer.html:1-26](file://_layouts/friendly-explainer.html#L1-L26)
+- [_layouts/industry-vision.html:1-20](file://_layouts/industry-vision.html#L1-L20)
+- [_includes/style-badge.html:1-4](file://_includes/style-badge.html#L1-L4)
+- [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
+- [assets/css/main.css:401-417](file://assets/css/main.css#L401-L417)
+
 ### Concurrency Control and Performance Optimization
 - **Group-Based Concurrency**: All deployments grouped under "pages" for consistent resource management
 - **Cancel In-Progress**: Latest build cancels conflicting deployments to optimize resource utilization
@@ -619,6 +736,9 @@ The PolaZhenJing publishing pipeline has been successfully simplified from a com
 - **Production Environment**: JEKYLL_ENV set to production for optimized build performance
 - **Timeout Limits**: Strategic timeout configuration prevents system hangs and improves reliability
 - **Automatic Synchronization**: Background git operations with timeout protection prevent blocking user interactions
+- **Enhanced Layout Rendering**: Six distinct layouts with specialized CSS may increase initial load time but provide better user experience
+- **Metadata Processing**: Automatic summary generation adds processing overhead but enhances article presentation quality
+- **LLM Integration**: Optional content rewriting may add latency but improves content quality
 
 **Section sources**
 - [.github/workflows/deploy.yml:25-62](file://.github/workflows/deploy.yml#L25-L62)
