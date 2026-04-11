@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00f0ff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#b68efc;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f4a261;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#e63946;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="960" height="540" fill="#0f0f1a"/>
+  <rect width="960" height="540" fill="url(#neonGrad)" opacity="0.03"/>
+  <!-- Grid lines -->
+  <g stroke="#1a1a2e" stroke-width="0.5" opacity="0.5">
+    <line x1="0" y1="60" x2="960" y2="60"/><line x1="0" y1="120" x2="960" y2="120"/>
+    <line x1="0" y1="180" x2="960" y2="180"/><line x1="0" y1="240" x2="960" y2="240"/>
+    <line x1="0" y1="300" x2="960" y2="300"/><line x1="0" y1="360" x2="960" y2="360"/>
+    <line x1="0" y1="420" x2="960" y2="420"/><line x1="0" y1="480" x2="960" y2="480"/>
+  </g>
+  <!-- Title -->
+  <text x="480" y="42" fill="#00f0ff" font-family="SF Mono, Fira Code, monospace" font-size="16" text-anchor="middle" filter="url(#glow)" letter-spacing="2">单镜头思维 vs 叙事思维</text>
+  <line x1="160" y1="55" x2="800" y2="55" stroke="url(#neonGrad)" stroke-width="1" opacity="0.4"/>
+
+  <!-- LEFT SIDE: Scattered Pearls -->
+  <text x="240" y="90" fill="#f4a261" font-family="SF Mono, Fira Code, monospace" font-size="14" text-anchor="middle" opacity="0.8">❌ 散落的珍珠</text>
+
+  <!-- Scattered circles (pearls) -->
+  <circle cx="120" cy="160" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="120" y="164" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 A</text>
+  <circle cx="260" cy="140" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="260" y="144" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 B</text>
+  <circle cx="190" cy="230" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="190" y="234" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 C</text>
+  <circle cx="350" cy="190" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="350" y="194" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 D</text>
+  <circle cx="100" cy="310" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="100" y="314" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 E</text>
+  <circle cx="300" cy="290" r="28" fill="none" stroke="#f4a261" stroke-width="2" opacity="0.7"/>
+  <text x="300" y="294" fill="#f4a261" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">镜头 F</text>
+  <!-- X marks between them -->
+  <text x="185" y="155" fill="#e63946" font-family="monospace" font-size="18" opacity="0.6">✕</text>
+  <text x="225" y="195" fill="#e63946" font-family="monospace" font-size="18" opacity="0.6">✕</text>
+  <text x="145" y="270" fill="#e63946" font-family="monospace" font-size="18" opacity="0.6">✕</text>
+
+  <!-- Problem labels below left -->
+  <rect x="60" y="365" width="150" height="36" rx="6" fill="#e63946" opacity="0.15" stroke="#e63946" stroke-width="1"/>
+  <text x="135" y="387" fill="#e63946" font-family="SF Mono, monospace" font-size="11" text-anchor="middle">👤 人物不一致</text>
+  <rect x="230" y="365" width="150" height="36" rx="6" fill="#e63946" opacity="0.15" stroke="#e63946" stroke-width="1"/>
+  <text x="305" y="387" fill="#e63946" font-family="SF Mono, monospace" font-size="11" text-anchor="middle">🏠 空间逻辑断裂</text>
+  <rect x="145" y="415" width="150" height="36" rx="6" fill="#e63946" opacity="0.15" stroke="#e63946" stroke-width="1"/>
+  <text x="220" y="437" fill="#e63946" font-family="SF Mono, monospace" font-size="11" text-anchor="middle">⏱ 节奏失控</text>
+
+  <!-- Divider -->
+  <line x1="480" y1="80" x2="480" y2="480" stroke="#2a2a3e" stroke-width="2" stroke-dasharray="8,6"/>
+  <text x="480" y="505" fill="#666" font-family="SF Mono, monospace" font-size="12" text-anchor="middle">VS</text>
+
+  <!-- RIGHT SIDE: Chain (Narrative) -->
+  <text x="720" y="90" fill="#00f0ff" font-family="SF Mono, Fira Code, monospace" font-size="14" text-anchor="middle" opacity="0.8">✓ 叙事项链</text>
+
+  <!-- Connected chain of pearls -->
+  <circle cx="560" cy="155" r="28" fill="none" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="560" y="159" fill="#00f0ff" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">开场</text>
+  <line x1="588" y1="155" x2="642" y2="200" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+  
+  <circle cx="670" cy="200" r="28" fill="none" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="670" y="204" fill="#00f0ff" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">铺垫</text>
+  <line x1="698" y1="200" x2="742" y2="250" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+  
+  <circle cx="770" cy="250" r="28" fill="none" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="770" y="254" fill="#00f0ff" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">转折</text>
+  <line x1="770" y1="278" x2="720" y2="320" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+  
+  <circle cx="690" cy="320" r="28" fill="none" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="690" y="324" fill="#00f0ff" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">高潮</text>
+  <line x1="662" y1="320" x2="612" y2="370" stroke="#00f0ff" stroke-width="1.5" opacity="0.6"/>
+  
+  <circle cx="590" cy="380" r="28" fill="none" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="590" y="384" fill="#00f0ff" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">结尾</text>
+
+  <!-- Narrative thread label -->
+  <rect x="810" y="235" width="120" height="36" rx="6" fill="#00f0ff" opacity="0.1" stroke="#00f0ff" stroke-width="1"/>
+  <text x="870" y="257" fill="#00f0ff" font-family="SF Mono, monospace" font-size="11" text-anchor="middle">叙事逻辑线</text>
+
+  <!-- Right-side feature labels -->
+  <rect x="540" y="430" width="120" height="30" rx="6" fill="#52b788" opacity="0.15" stroke="#52b788" stroke-width="1"/>
+  <text x="600" y="449" fill="#52b788" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">角色一致</text>
+  <rect x="680" y="430" width="120" height="30" rx="6" fill="#52b788" opacity="0.15" stroke="#52b788" stroke-width="1"/>
+  <text x="740" y="449" fill="#52b788" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">空间连贯</text>
+  <rect x="820" y="430" width="100" height="30" rx="6" fill="#52b788" opacity="0.15" stroke="#52b788" stroke-width="1"/>
+  <text x="870" y="449" fill="#52b788" font-family="SF Mono, monospace" font-size="10" text-anchor="middle">节奏把控</text>
+
+  <!-- Bottom label -->
+  <text x="240" y="490" fill="#f4a261" font-family="SF Mono, monospace" font-size="13" text-anchor="middle" opacity="0.7">模型解决 30%</text>
+  <text x="720" y="490" fill="#00f0ff" font-family="SF Mono, monospace" font-size="13" text-anchor="middle" filter="url(#glow)">叙事引擎解决 70%</text>
+</svg>
