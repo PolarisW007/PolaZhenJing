@@ -489,6 +489,8 @@ def view_article(filename):
                     meta[k.strip()] = v.strip().strip('"').strip("'")
             body = parts[2].strip()
     # Render markdown to HTML
+    # Strip Jekyll Liquid tags (e.g. {{ site.baseurl }}) for local preview
+    body = body.replace('{{ site.baseurl }}', '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{filename}'
     pages_url = f'https://polarisw007.github.io/PolaZhenJing/'
