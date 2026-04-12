@@ -12,6 +12,11 @@
   <!-- Base CSS -->
   <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
 
+  <!-- Theme CSS (overrides base variables per article's baked-in theme) -->
+  {% if page.theme and page.theme != 'wukong' %}
+  <link rel="stylesheet" href="{{ '/assets/css/theme-' | append: page.theme | append: '.css' | relative_url }}">
+  {% endif %}
+
   <!-- Style-specific CSS -->
   {% if page.layout and page.layout != 'default' %}
   <link rel="stylesheet" href="{{ '/assets/css/' | append: page.layout | append: '.css' | relative_url }}">

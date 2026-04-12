@@ -1,0 +1,67 @@
+/* theme-claude.css — Harness Books 暖色书卷 override for Jekyll articles */
+/* Overrides the wukong dark-gold variables in main.css */
+
+:root {
+  /* Background layers */
+  --bg-deepest:     #FFFCF5;
+  --bg-nav:         rgba(245,240,230,0.95);
+  --bg-card:        rgba(135,89,50,0.04);
+  --bg-card-hover:  rgba(135,89,50,0.08);
+  --bg-gold-subtle: rgba(135,89,50,0.06);
+  --bg-gold-light:  rgba(135,89,50,0.10);
+
+  /* Brown palette (replaces gold) */
+  --gold-primary:   #875932;
+  --gold-dark:      #5E5245;
+  --gold-light:     #A07850;
+  --gold-pale:      #E8E0D4;
+  --gold-brown:     #FFFCF5;
+  --gold-brown-deep:#F5F0E6;
+
+  /* Text hierarchy */
+  --text-primary:   #211912;
+  --text-secondary: #5E5245;
+  --text-body:      #756756;
+  --text-muted:     #9A8E80;
+  --text-disabled:  #C0B8AD;
+  --text-ghost:     rgba(53,41,27,0.12);
+
+  /* Gradients */
+  --gradient-gold-btn: linear-gradient(135deg, #875932, #5E5245);
+  --gradient-gold-badge: linear-gradient(135deg, #E8E0D4, #875932);
+  --gradient-gold-card: linear-gradient(135deg, rgba(135,89,50,0.08), rgba(135,89,50,0.04));
+
+  /* Shadows */
+  --shadow-glass: 0 2px 12px rgba(135,89,50,0.08);
+  --shadow-glass-hover: 0 4px 20px rgba(135,89,50,0.12);
+  --shadow-badge: 0 2px 8px rgba(135,89,50,0.10);
+  --shadow-btn-hover: 0 4px 16px rgba(135,89,50,0.15);
+  --shadow-btn-lg-hover: 0 8px 24px rgba(135,89,50,0.18);
+}
+
+/* Typography override — serif for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Iowan Old Style", "Palatino Linotype",
+               "Noto Serif SC", "Source Han Serif SC",
+               "Songti SC", Georgia, serif;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, "Avenir Next",
+               "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+               Arial, sans-serif;
+}
+
+a { color: #875932; }
+a:hover { color: #5E5245; }
+
+/* Navigation */
+.site-nav {
+  background: rgba(245,240,230,0.95);
+  border-bottom-color: #E0D8CC;
+}
+.site-nav a { color: #5D5042; }
+.site-nav a:hover { color: #875932; }
+
+/* Style badge override */
+.style-badge-wrap .style-badge { border-color: rgba(135,89,50,0.2); }

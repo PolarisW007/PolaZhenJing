@@ -37,10 +37,44 @@ STYLES = [
      'desc': '文学叙事，诗意笔法。灵感来源：陈春成。'},
 ]
 
+THEMES = [
+    {'id': 'wukong', 'name': '黑金', 'color': '#E4BF7A',
+     'desc': '暗色背景 + 金色点缀，高端大气。'},
+    {'id': 'claude', 'name': '书卷', 'color': '#875932',
+     'desc': '暖色米底 + 棕色文字，古典书卷。'},
+    {'id': 'pmframe', 'name': '科技', 'color': '#1a7a4a',
+     'desc': '极简暖白 + 分类色彩，现代科技。'},
+]
+
 POSTS_DIR = os.path.join(os.path.dirname(__file__), '..', '_posts')
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'uploads')
 DRAFT_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'drafts')
+THEME_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'theme.json')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
+
+
+def _get_theme() -> str:
+    """Read current UI theme from data/theme.json. Default: wukong."""
+    try:
+        if os.path.isfile(THEME_FILE):
+            with open(THEME_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f).get('theme', 'wukong')
+    except Exception:
+        pass
+    return 'wukong'
+
+
+def _set_theme(theme_id: str):
+    """Persist selected UI theme to data/theme.json."""
+    os.makedirs(os.path.dirname(THEME_FILE), exist_ok=True)
+    with open(THEME_FILE, 'w', encoding='utf-8') as f:
+        json.dump({'theme': theme_id}, f)
+
+
+@uploader_bp.app_context_processor
+def inject_theme():
+    """Make current_theme available to all templates."""
+    return {'current_theme': _get_theme()}
 
 # Style accent colors for summary box theming
 STYLE_ACCENTS = {
@@ -412,8 +446,10 @@ def generate():
 
     # Front matter
     tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
+    theme = _get_theme()
     front_matter = f"""---
 layout: {style}
+theme: {theme}
 title: "{title}"
 date: {date_str}
 tags: [{', '.join(tag_list)}]"""
@@ -537,3 +573,21 @@ def sync():
     except Exception as e:
         flash(f'同步错误：{e}', 'error')
     return redirect(url_for('uploader.articles'))
+
+
+@uploader_bp.route('/theme', methods=['GET', 'POST'])
+@login_required
+def theme_select_page():
+    """UI theme switcher — wukong / claude / pmframe."""
+    if request.method == 'POST':
+        theme_id = request.form.get('theme', 'wukong')
+        valid_ids = {t['id'] for t in THEMES}
+        if theme_id in valid_ids:
+            _set_theme(theme_id)
+            theme_name = next(t['name'] for t in THEMES if t['id'] == theme_id)
+            flash(f'UI 主题已切换为「{theme_name}」。', 'success')
+        else:
+            flash('无效的主题。', 'error')
+        return redirect(url_for('uploader.theme_select_page'))
+    return render_template('theme_select.html', themes=THEMES,
+                           current_theme=_get_theme())

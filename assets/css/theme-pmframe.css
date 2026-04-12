@@ -1,0 +1,65 @@
+/* theme-pmframe.css — PMFrame 极简暖白科技 override for Jekyll articles */
+/* Overrides the wukong dark-gold variables in main.css */
+
+:root {
+  /* Background layers */
+  --bg-deepest:     #ffffff;
+  --bg-nav:         rgba(255,255,255,0.95);
+  --bg-card:        rgba(248,247,244,0.6);
+  --bg-card-hover:  rgba(240,237,232,0.8);
+  --bg-gold-subtle: rgba(26,122,74,0.04);
+  --bg-gold-light:  rgba(26,122,74,0.08);
+
+  /* Green palette (replaces gold) */
+  --gold-primary:   #1a7a4a;
+  --gold-dark:      #156b3e;
+  --gold-light:     #2a9d5c;
+  --gold-pale:      #e8f5ee;
+  --gold-brown:     #ffffff;
+  --gold-brown-deep:#f8f7f4;
+
+  /* Text hierarchy */
+  --text-primary:   #1a1916;
+  --text-secondary: #6b6660;
+  --text-body:      #6b6660;
+  --text-muted:     #9b9590;
+  --text-disabled:  #d4cfc8;
+  --text-ghost:     #e8e4de;
+
+  /* Gradients */
+  --gradient-gold-btn: linear-gradient(135deg, #1a1916, #3a3930);
+  --gradient-gold-badge: linear-gradient(135deg, #e8f5ee, #1a7a4a);
+  --gradient-gold-card: linear-gradient(135deg, rgba(26,122,74,0.06), rgba(26,122,74,0.02));
+
+  /* Shadows */
+  --shadow-glass: 0 1px 8px rgba(0,0,0,0.06);
+  --shadow-glass-hover: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-badge: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-btn-hover: 0 4px 16px rgba(26,25,22,0.12);
+  --shadow-btn-lg-hover: 0 8px 24px rgba(26,25,22,0.15);
+}
+
+/* Typography override — DM Serif Display + DM Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "DM Serif Display", "Noto Serif SC",
+               "Source Han Serif SC", Georgia, serif;
+}
+
+body {
+  font-family: "DM Sans", -apple-system, "PingFang SC",
+               "Noto Sans CJK SC", "Helvetica Neue", sans-serif;
+}
+
+a { color: #1a7a4a; }
+a:hover { color: #156b3e; }
+
+/* Navigation */
+.site-nav {
+  background: rgba(255,255,255,0.95);
+  border-bottom-color: #e8e4de;
+}
+.site-nav a { color: #6b6660; }
+.site-nav a:hover { color: #1a7a4a; }
+
+/* Style badge override */
+.style-badge-wrap .style-badge { border-color: #e8e4de; }

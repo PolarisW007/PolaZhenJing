@@ -189,15 +189,81 @@
       .card { padding: 1.5rem; }
       .style-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Claude / 书卷 theme ── */
+    body[data-theme="claude"] {
+      --bg-deepest: #FFFCF5;
+      --bg-card: rgba(135,89,50,0.04);
+      --bg-card-hover: rgba(135,89,50,0.08);
+      --gold-primary: #875932;
+      --gold-dark: #5E5245;
+      --gold-light: #A07850;
+      --gold-brown: #FFFCF5;
+      --text-primary: #211912;
+      --text-secondary: #5E5245;
+      --text-body: #756756;
+      --text-muted: #9A8E80;
+      --text-ghost: rgba(53,41,27,0.12);
+      --gradient-gold-btn: linear-gradient(135deg, #875932, #5E5245);
+      --shadow-glass: 0 2px 12px rgba(135,89,50,0.08);
+    }
+    body[data-theme="claude"] .admin-nav {
+      background: rgba(245,240,230,0.95);
+      border-bottom-color: #E0D8CC;
+    }
+    body[data-theme="claude"] .admin-nav-logo { color: #211912; }
+    body[data-theme="claude"] .admin-nav-links a { color: #5D5042; }
+    body[data-theme="claude"] .admin-nav-links a:hover { color: #875932; }
+    body[data-theme="claude"] a { color: #875932; }
+    body[data-theme="claude"] a:hover { color: #5E5245; }
+    body[data-theme="claude"] .btn-gold { color: #FFFCF5; }
+    body[data-theme="claude"] .btn-danger { color: #B85450; border-color: rgba(184,84,80,0.3); }
+    body[data-theme="claude"] .admin-footer { color: #9A8E80; border-top-color: #E0D8CC; }
+    body[data-theme="claude"] th { color: #875932; }
+
+    /* ── PMFrame / 科技 theme ── */
+    body[data-theme="pmframe"] {
+      --bg-deepest: #ffffff;
+      --bg-card: rgba(248,247,244,0.6);
+      --bg-card-hover: rgba(240,237,232,0.8);
+      --gold-primary: #1a7a4a;
+      --gold-dark: #156b3e;
+      --gold-light: #2a9d5c;
+      --gold-brown: #ffffff;
+      --text-primary: #1a1916;
+      --text-secondary: #6b6660;
+      --text-body: #6b6660;
+      --text-muted: #9b9590;
+      --text-ghost: #e8e4de;
+      --gradient-gold-btn: linear-gradient(135deg, #1a1916, #3a3930);
+      --shadow-glass: 0 1px 8px rgba(0,0,0,0.06);
+    }
+    body[data-theme="pmframe"] .admin-nav {
+      background: rgba(255,255,255,0.95);
+      border-bottom-color: #e8e4de;
+    }
+    body[data-theme="pmframe"] .admin-nav-logo { color: #1a1916; }
+    body[data-theme="pmframe"] .admin-nav-links a { color: #6b6660; }
+    body[data-theme="pmframe"] .admin-nav-links a:hover { color: #1a7a4a; }
+    body[data-theme="pmframe"] a { color: #1a7a4a; }
+    body[data-theme="pmframe"] a:hover { color: #156b3e; }
+    body[data-theme="pmframe"] .btn-gold { color: #ffffff; }
+    body[data-theme="pmframe"] .btn-danger { color: #7a1a1a; border-color: rgba(122,26,26,0.3); }
+    body[data-theme="pmframe"] .admin-footer { color: #9b9590; border-top-color: #e8e4de; }
+    body[data-theme="pmframe"] th { color: #1a7a4a; }
+    body[data-theme="pmframe"] .card { border-color: #e8e4de; }
+    body[data-theme="pmframe"] .form-input { border-color: #d4cfc8; background: rgba(248,247,244,0.4); }
+    body[data-theme="pmframe"] .form-input:focus { border-color: #1a1916; }
   </style>
 </head>
-<body>
+<body data-theme="{{ current_theme or 'wukong' }}">
   <nav class="admin-nav">
     <a href="/admin/" class="admin-nav-logo">PolaZhenjing 管理后台</a>
     <ul class="admin-nav-links">
       {% if session.get('user_id') %}
       <li><a href="{{ url_for('uploader.upload') }}">上传</a></li>
       <li><a href="{{ url_for('uploader.articles') }}">文章</a></li>
+      <li><a href="{{ url_for('uploader.theme_select_page') }}">主题</a></li>
       <li><a href="{{ url_for('auth.change_password') }}">密码</a></li>
       <li><a href="{{ url_for('auth.logout') }}">退出</a></li>
       {% endif %}

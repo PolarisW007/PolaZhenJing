@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}切换主题{% endblock %}
+{% block card_class %}card-wide{% endblock %}
+{% block content %}
+<h2>切换 UI 主题</h2>
+<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
+  当前主题：<strong style="color: var(--gold-primary);">{{ current_theme }}</strong>
+  · 主题将影响管理界面和新生成文章的外观
+</p>
+
+<form method="POST" action="{{ url_for('uploader.theme_select_page') }}">
+  <input type="hidden" name="theme" id="selected-theme" value="{{ current_theme }}">
+
+  <div class="style-grid">
+    {% for t in themes %}
+    <div class="style-card {% if t.id == current_theme %}selected{% endif %}"
+         data-theme="{{ t.id }}"
+         onclick="selectTheme(this, '{{ t.id }}')">
+      <div class="style-card-color" style="background: {{ t.color }};"></div>
+      <h4>{{ t.name }}</h4>
+      <p>{{ t.desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+    <a href="{{ url_for('uploader.articles') }}" class="btn-ghost">← 返回</a>
+    <button type="submit" class="btn-gold btn-sm">应用主题 →</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectTheme(el, theme) {
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('selected-theme').value = theme;
+}
+</script>
+{% endblock %}
