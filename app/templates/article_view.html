@@ -51,9 +51,9 @@
     <div class="summary-label">TL;DR</div>
     <p class="summary-text">{{ summary }}</p>
     <div class="share-row">
-      <button class="share-btn" onclick="copyArticleLink()" title="复制链接">
+      <button class="share-btn" id="copy-link-btn" onclick="copyArticleLink()" title="复制链接" disabled style="opacity:0.4; cursor:wait;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-        复制链接
+        <span id="copy-link-label">检查链接中…</span>
       </button>
       <a class="share-btn" href="https://twitter.com/intent/tweet?text={{ (title + ' ' + (summary[:200] if summary else ''))| urlencode }}&url={{ pages_url | urlencode }}" target="_blank" rel="noopener" title="分享到 Twitter">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -320,10 +320,57 @@
 </style>
 
 <script>
+const PAGES_URL = '{{ pages_url }}';
+const CHECK_API = '{{ url_for("uploader.check_pages_url") }}';
+
+// On load, check if the GitHub Pages article is live
+(function checkPagesLive() {
+  const btn = document.getElementById('copy-link-btn');
+  const label = document.getElementById('copy-link-label');
+  let attempts = 0;
+  const maxAttempts = 6;   // retry up to 6 times
+  const interval = 5000;   // 5 seconds between retries
+
+  function probe() {
+    attempts++;
+    fetch(CHECK_API + '?url=' + encodeURIComponent(PAGES_URL))
+      .then(r => r.json())
+      .then(data => {
+        if (data.live) {
+          btn.disabled = false;
+          btn.style.opacity = '';
+          btn.style.cursor = '';
+          label.textContent = '复制链接';
+        } else if (attempts < maxAttempts) {
+          label.textContent = '页面生成中… (' + attempts + '/' + maxAttempts + ')';
+          setTimeout(probe, interval);
+        } else {
+          // Give up waiting but still allow copy
+          btn.disabled = false;
+          btn.style.opacity = '';
+          btn.style.cursor = '';
+          label.textContent = '复制链接';
+          btn.title = '页面可能尚未生成，链接已就绪';
+        }
+      })
+      .catch(() => {
+        // Network error — still enable after max attempts
+        if (attempts < maxAttempts) {
+          setTimeout(probe, interval);
+        } else {
+          btn.disabled = false;
+          btn.style.opacity = '';
+          btn.style.cursor = '';
+          label.textContent = '复制链接';
+        }
+      });
+  }
+  probe();
+})();
+
 function copyArticleLink() {
-  const url = '{{ pages_url }}';
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = event.currentTarget;
+  navigator.clipboard.writeText(PAGES_URL).then(() => {
+    const btn = document.getElementById('copy-link-btn');
     const orig = btn.innerHTML;
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 已复制';
     btn.style.color = '#52b788';

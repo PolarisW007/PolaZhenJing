@@ -12,7 +12,7 @@ from urllib.error import URLError
 
 import markdown as md_lib
 
-from flask import (Blueprint, flash, redirect, render_template,
+from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, session, url_for, current_app)
 
 from .auth import login_required
@@ -501,6 +501,35 @@ def articles():
 
 GITHUB_REPO = 'PolarisW007/PolaZhenJing'
 GITHUB_BRANCH = 'main'
+GITHUB_PAGES_BASE = 'https://polarisw007.github.io/PolaZhenJing'
+
+import re as _re
+
+def _build_pages_url(filename):
+    """Build GitHub Pages article URL from Jekyll post filename.
+    Filename format: YYYY-MM-DD-slug.md  →  /YYYY/MM/DD/slug/
+    """
+    m = _re.match(r'^(\d{4})-(\d{2})-(\d{2})-(.+)\.md$', filename)
+    if m:
+        year, month, day, slug = m.groups()
+        return f'{GITHUB_PAGES_BASE}/{year}/{month}/{day}/{slug}/'
+    return GITHUB_PAGES_BASE + '/'
+
+
+@uploader_bp.route('/api/check-pages-url')
+@login_required
+def check_pages_url():
+    """Check if a GitHub Pages URL is live (returns 200)."""
+    import requests as _requests
+    url = request.args.get('url', '')
+    if not url.startswith(GITHUB_PAGES_BASE):
+        return jsonify({'live': False, 'url': url})
+    try:
+        resp = _requests.head(url, timeout=8, allow_redirects=True)
+        live = resp.status_code == 200
+    except Exception:
+        live = False
+    return jsonify({'live': live, 'url': url})
 
 
 @uploader_bp.route('/articles/<filename>')
@@ -529,7 +558,8 @@ def view_article(filename):
     body = body.replace('{{ site.baseurl }}', '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{filename}'
-    pages_url = f'https://polarisw007.github.io/PolaZhenJing/'
+    # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
+    pages_url = _build_pages_url(filename)
     read_time = _calc_read_time(body)
     # Get style accent color
     layout = meta.get('layout', 'deep-technical')
