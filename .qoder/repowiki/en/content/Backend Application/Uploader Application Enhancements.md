@@ -12,13 +12,22 @@
 - [app/templates/upload.html](file://app/templates/upload.html)
 - [app/templates/style_select.html](file://app/templates/style_select.html)
 - [app/templates/articles.html](file://app/templates/articles.html)
+- [app/templates/article_view.html](file://app/templates/article_view.html)
 - [assets/css/main.css](file://assets/css/main.css)
 - [assets/css/theme-claude.css](file://assets/css/theme-claude.css)
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
 - [data/theme.json](file://data/theme.json)
 - [data/drafts/6aa833b7312e.json](file://data/drafts/6aa833b7312e.json)
 - [_posts/2025-01-15-understanding-transformer-attention.md](file://_posts/2025-01-15-understanding-transformer-attention.md)
+- [_posts/2026-04-10-da-mo-xing-xun-lian-fang-fa-jie-xi.md](file://_posts/2026-04-10-da-mo-xing-xun-lian-fang-fa-jie-xi.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added new API endpoint `/api/check-pages-url` for GitHub Pages URL validation
+- Enhanced article viewing with URL building functionality using `_build_pages_url()`
+- Improved error handling for network failures in article sharing functionality
+- Added real-time URL checking with retry mechanism for GitHub Pages deployment status
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -37,6 +46,8 @@
 The Uploader Application Enhancements project represents a sophisticated content management system designed for AI-focused technical blogging. Built on Flask, this application provides authors with a streamlined workflow for converting various document formats into polished blog posts with AI-powered writing assistance. The system supports multiple content input methods, automated conversion pipelines, and intelligent content styling through Large Language Model (LLM) integration.
 
 The application serves as a comprehensive solution for technical writers, researchers, and content creators who need to transform research papers, technical documents, and various digital content into publishable blog posts with professional styling and seamless GitHub integration for automated deployment.
+
+**Updated** Added new API endpoint for GitHub Pages URL validation and enhanced article viewing functionality with improved error handling for network failures.
 
 ## Project Structure
 
@@ -64,6 +75,8 @@ subgraph "External Integrations"
 K[LLM API]
 L[GitHub API]
 M[SMTP Service]
+N[GitHub Pages]
+O[Network Validation]
 end
 A --> B
 B --> D
@@ -75,6 +88,8 @@ D --> I
 D --> J
 D --> K
 D --> L
+D --> N
+D --> O
 E --> M
 ```
 
@@ -82,6 +97,7 @@ E --> M
 - [app/__init__.py:43-76](file://app/__init__.py#L43-L76)
 - [app/uploader.py:23-24](file://app/uploader.py#L23-L24)
 - [app/auth.py:13](file://app/auth.py#L13)
+- [app/uploader.py:502-532](file://app/uploader.py#L502-L532)
 
 The application is organized into several key directories:
 
@@ -126,10 +142,20 @@ The converter engine handles multiple document formats through specialized proce
 - HTML to Markdown conversion with formatting preservation
 - TXT and MD direct processing with title extraction
 
+### GitHub Pages Integration
+
+**New** The application now includes comprehensive GitHub Pages integration with URL validation and real-time status checking:
+
+- **URL Building**: Automatic generation of GitHub Pages URLs from Jekyll post filenames using `_build_pages_url()` function
+- **Validation Endpoint**: `/api/check-pages-url` endpoint for validating GitHub Pages URL availability
+- **Real-time Checking**: JavaScript-based URL validation with retry mechanism for deployment status monitoring
+- **Error Handling**: Graceful fallback for network failures and deployment delays
+
 **Section sources**
 - [app/__init__.py:9-24](file://app/__init__.py#L9-L24)
 - [app/auth.py:26-49](file://app/auth.py#L26-L49)
 - [app/converter.py:96-110](file://app/converter.py#L96-L110)
+- [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
 
 ## Architecture Overview
 
@@ -142,41 +168,51 @@ A[Upload Interface]
 B[Style Selection]
 C[Article Management]
 D[Theme Selection]
+E[Article Viewer]
 end
 subgraph "Business Logic Layer"
-E[Content Processing]
-F[LLM Integration]
-G[Draft Management]
-H[Git Operations]
+F[Content Processing]
+G[LLM Integration]
+H[Draft Management]
+I[Git Operations]
+J[URL Validation]
 end
 subgraph "Data Layer"
-I[SQLite Database]
-J[File System]
-K[Draft Storage]
+K[SQLite Database]
+L[File System]
+M[Draft Storage]
+N[GitHub Pages Cache]
 end
 subgraph "External Services"
-L[MiniMax API]
-M[GitHub API]
-N[SMTP Service]
+O[MiniMax API]
+P[GitHub API]
+Q[SMTP Service]
+R[GitHub Pages]
+S[Network Validation]
 end
-A --> E
-B --> F
-C --> H
-D --> G
+A --> F
+B --> G
+C --> I
+D --> H
 E --> J
 F --> L
-G --> K
+G --> O
 H --> M
-I --> E
-J --> E
+I --> P
+J --> R
+J --> S
 K --> E
-N --> I
+L --> E
+M --> E
+N --> E
+Q --> K
 ```
 
 **Diagram sources**
 - [app/uploader.py:353-396](file://app/uploader.py#L353-L396)
 - [app/uploader.py:413-492](file://app/uploader.py#L413-L492)
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
+- [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
 
 The architecture supports horizontal scalability through stateless service design and provides robust error handling mechanisms throughout the content processing pipeline.
 
@@ -235,6 +271,33 @@ H --> I[Save to Draft]
 - [app/uploader.py:204-245](file://app/uploader.py#L204-L245)
 
 The system maintains distinct writing prompts for different content styles, enabling authors to achieve specific narrative voices and technical precision levels.
+
+### GitHub Pages URL Validation System
+
+**New** The application now includes a comprehensive GitHub Pages URL validation system:
+
+```mermaid
+flowchart TD
+A[Article Published] --> B[Build Pages URL]
+B --> C[Initial Check Request]
+C --> D{URL Valid?}
+D --> |Yes| E[Enable Copy Button]
+D --> |No| F[Start Retry Loop]
+F --> G[Wait 5 Seconds]
+G --> H[Check Again]
+H --> I{Max Attempts?}
+I --> |No| F
+I --> |Yes| J[Enable Button Anyway]
+E --> K[User Copies Link]
+J --> K
+```
+
+**Diagram sources**
+- [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
+- [app/uploader.py:535-571](file://app/uploader.py#L535-L571)
+- [app/templates/article_view.html:322-369](file://app/templates/article_view.html#L322-L369)
+
+The system automatically validates GitHub Pages URLs with a 6-attempt retry mechanism, providing graceful fallback when deployment is still in progress.
 
 ### Theme Management System
 
@@ -299,6 +362,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 3. **Image Optimization**: Integrate automatic image compression and responsive image generation for improved page load times.
 
+4. **URL Validation Caching**: Cache GitHub Pages URL validation results to reduce network requests for frequently checked articles.
+
 ### Security Enhancements
 
 1. **Rate Limiting**: Implement rate limiting for LLM API calls and file uploads to prevent abuse and ensure fair resource distribution.
@@ -306,6 +371,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 2. **Content Sanitization**: Add comprehensive content sanitization for user-generated content to prevent XSS attacks and malformed HTML injection.
 
 3. **Audit Logging**: Implement detailed audit trails for all content modifications, user actions, and system events for compliance and debugging purposes.
+
+4. **API Security**: Add authentication and rate limiting for the new `/api/check-pages-url` endpoint to prevent abuse.
 
 ### User Experience Improvements
 
@@ -315,6 +382,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 3. **Collaboration Features**: Implement multi-user editing capabilities with conflict resolution and version history.
 
+4. **Deployment Status Dashboard**: Create a visual dashboard showing article deployment status across all published content.
+
 ### Integration Extensions
 
 1. **Cloud Storage**: Add support for cloud storage providers (AWS S3, Google Cloud Storage) for scalable media hosting.
@@ -322,6 +391,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 2. **Analytics Integration**: Implement comprehensive analytics tracking for content performance and reader engagement metrics.
 
 3. **Social Media Integration**: Add automated social media posting capabilities for LinkedIn, Twitter, and other platforms.
+
+4. **Multi-Platform Deployment**: Extend GitHub Pages integration to support other static hosting platforms.
 
 ## Integration Points
 
@@ -372,9 +443,33 @@ H --> |No| J[Log Error & Retry]
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 - [app/auth.py:77-90](file://app/auth.py#L77-L90)
 
+### GitHub Pages URL Validation Integration
+
+**New** The application integrates with GitHub Pages for real-time URL validation:
+
+```mermaid
+sequenceDiagram
+participant V as Article Viewer
+participant A as API Endpoint
+participant R as Requests Library
+participant G as GitHub Pages
+V->>A : GET /api/check-pages-url?url=...
+A->>R : HEAD request with timeout
+R->>G : Check URL availability
+G-->>R : HTTP 200/404 response
+R-->>A : Status code
+A-->>V : JSON {live : boolean}
+Note over V : Retry up to 6 times with 5-second intervals
+```
+
+**Diagram sources**
+- [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
+- [app/templates/article_view.html:322-369](file://app/templates/article_view.html#L322-L369)
+
 **Section sources**
 - [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
+- [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
 
 ## Performance Considerations
 
@@ -401,6 +496,19 @@ Key performance indicators to track:
 - File upload processing duration
 - Database query performance metrics
 - User session management efficiency
+- **New** GitHub Pages URL validation response times and error rates
+
+### Network Failure Handling
+
+**Updated** Enhanced error handling for network failures:
+- Timeout configuration (8-second timeout for URL checks)
+- Graceful fallback when GitHub Pages is unavailable
+- Retry mechanism with exponential backoff
+- User-friendly error messaging for network issues
+
+**Section sources**
+- [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
+- [app/templates/article_view.html:356-366](file://app/templates/article_view.html#L356-L366)
 
 ## Troubleshooting Guide
 
@@ -426,6 +534,17 @@ Key performance indicators to track:
 - Verify CSS file paths for theme overrides
 - Check browser cache clearing for theme changes
 
+**GitHub Pages URL Validation Issues**
+- **New** Verify GitHub Pages is enabled for the repository
+- Check that the article filename follows the correct Jekyll format (YYYY-MM-DD-slug.md)
+- Ensure the URL validation endpoint is accessible
+- Monitor network connectivity to GitHub Pages
+
+**Network Failure Handling**
+- **New** Check timeout settings for URL validation requests
+- Verify proper error handling in client-side JavaScript
+- Monitor retry mechanisms for deployment status checking
+
 ### Debug Configuration
 
 Enable debug mode for development:
@@ -437,6 +556,7 @@ Enable debug mode for development:
 - [app/uploader.py:189-201](file://app/uploader.py#L189-L201)
 - [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
 - [data/theme.json:1](file://data/theme.json#L1)
+- [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
 
 ## Conclusion
 
@@ -448,6 +568,10 @@ Key strengths of the implementation include:
 - Flexible theming system with professional design aesthetics
 - Automated deployment workflow for seamless publishing
 - Comprehensive security measures and user management
+- **New** Real-time GitHub Pages URL validation with graceful error handling
+- **New** Enhanced article viewing experience with deployment status monitoring
+
+Recent enhancements significantly improve the user experience by providing real-time feedback on article deployment status and robust error handling for network failures. The new URL validation system ensures users can confidently share links even when GitHub Pages deployment is still in progress.
 
 Future enhancements should focus on performance optimization, expanded integration capabilities, and enhanced user experience features while maintaining the system's reliability and security standards.
 
