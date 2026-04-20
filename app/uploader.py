@@ -187,18 +187,8 @@ MINIMAX_MODEL = 'MiniMax-M2.7'
 
 
 def _get_minimax_api_key() -> str | None:
-    """Read MINIMAX_TOKEN_PLAN_API_KEY from environment."""
-    key = os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY')
-    if not key:
-        # Try sourcing from ~/.zshrc
-        try:
-            result = subprocess.run(
-                ['zsh', '-c', 'source ~/.zshrc 2>/dev/null && echo $MINIMAX_TOKEN_PLAN_API_KEY'],
-                capture_output=True, text=True, timeout=10)
-            key = result.stdout.strip()
-        except Exception:
-            pass
-    return key or None
+    """Read MINIMAX_TOKEN_PLAN_API_KEY from environment (.env or system env)."""
+    return os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY') or None
 
 
 def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | None:
