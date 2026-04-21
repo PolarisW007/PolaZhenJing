@@ -16,17 +16,16 @@
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
 - [PRD.md](file://PRD.md)
 - [requirements.txt](file://requirements.txt)
+- [wiki.py](file://wiki.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Updated to reflect the complete migration from FastAPI REST API to Flask-based management interface
-- Removed all REST API documentation sections as they no longer exist
-- Added comprehensive documentation for Flask-based authentication system
-- Documented file upload and conversion interface with supported formats
-- Added blog style management documentation with 5 distinct layouts
-- Updated deployment workflow to GitHub Actions with Jekyll static site generation
-- Revised architecture to show server-rendered HTML interface instead of REST endpoints
+- Updated to reflect enhanced file upload and processing capabilities with improved API key handling
+- Added documentation for new MiniMax API integration for LLM rewriting
+- Documented expanded dependency support including markdown, requests, and gunicorn libraries
+- Enhanced file conversion pipeline with better text processing capabilities
+- Updated deployment workflow with improved GitHub Actions configuration
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -35,13 +34,14 @@
 4. [File Upload and Conversion Interface](#file-upload-and-conversion-interface)
 5. [Blog Style Management](#blog-style-management)
 6. [Article Management](#article-management)
-7. [Deployment and Publishing](#deployment-and-publishing)
-8. [Configuration](#configuration)
-9. [Migration from REST API](#migration-from-rest-api)
-10. [Troubleshooting Guide](#troubleshooting-guide)
+7. [AI Integration and LLM Rewriting](#ai-integration-and-llm-rewriting)
+8. [Deployment and Publishing](#deployment-and-publishing)
+9. [Configuration](#configuration)
+10. [Migration from REST API](#migration-from-rest-api)
+11. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaced the previous FastAPI RESTful API. The system now operates as a lightweight Flask application with server-rendered HTML templates, integrated with Jekyll for static site generation and GitHub Actions for automated deployment.
+This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaced the previous FastAPI RESTful API. The system now operates as a lightweight Flask application with server-rendered HTML templates, integrated with Jekyll for static site generation and GitHub Actions for automated deployment. The latest enhancements include improved file upload processing capabilities, enhanced API key handling for AI integrations, and expanded dependency support for better text processing and deployment options.
 
 **Key Changes from Previous REST API:**
 - Complete removal of all REST endpoints and FastAPI backend
@@ -49,9 +49,11 @@ This document provides comprehensive documentation for PolaZhenJing's new Flask-
 - Implementation of file conversion pipeline for multiple document formats
 - Replacement of dynamic API calls with static site generation
 - Integration with GitHub Actions for automated deployment to GitHub Pages
+- Enhanced AI integration with MiniMax API for content rewriting
+- Improved file processing with markdown, requests, and gunicorn libraries
 
 ## System Architecture
-The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication.
+The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication. The system now includes enhanced AI integration capabilities and improved deployment options.
 
 ```mermaid
 graph TB
@@ -62,9 +64,17 @@ FlaskApp --> Mailer["Email Verification<br/>app/mailer.py"]
 AuthBP --> Templates["Jinja2 Templates<br/>app/templates/"]
 UploadBP --> Templates
 UploadBP --> Converter
+UploadBP --> MiniMax["MiniMax API Integration<br/>LLM Rewriting"]
+UploadBP --> RequestsLib["HTTP Communication<br/>requests library"]
+UploadBP --> MarkdownLib["Text Processing<br/>markdown library"]
+UploadBP --> Gunicorn["Production Deployment<br/>gunicorn server"]
 UploadBP --> Jekyll["Jekyll Static Generator<br/>_config.yml"]
 Templates --> HTML["Generated HTML Pages"]
 Converter --> Posts["_posts/ Directory<br/>Markdown Articles"]
+MiniMax --> Posts
+RequestsLib --> Posts
+MarkdownLib --> Posts
+Gunicorn --> Production["Production Environment"]
 Posts --> Jekyll
 Jekyll --> Site["_site/ Directory<br/>Static Website"]
 Site --> GitHubPages["GitHub Pages Deployment<br/>.github/workflows/deploy.yml"]
@@ -126,7 +136,7 @@ Auth-->>User : Set Flask session + redirect
 - [PRD.md:258-280](file://PRD.md#L258-L280)
 
 ## File Upload and Conversion Interface
-The upload interface supports multiple document formats with automatic conversion to Markdown and style selection.
+The upload interface supports multiple document formats with automatic conversion to Markdown and style selection. The system now includes enhanced processing capabilities with improved text handling and better error management.
 
 ### Upload Endpoints
 - **GET /admin/upload** - Upload form with file upload and paste content options
@@ -137,10 +147,10 @@ The upload interface supports multiple document formats with automatic conversio
 ### Supported File Formats
 | Format | Extension | Processing Method |
 |--------|-----------|-------------------|
-| Markdown | `.md` | Direct passthrough |
+| Markdown | `.md` | Direct passthrough with markdown library processing |
 | PDF | `.pdf` | PyMuPDF text extraction + image extraction |
 | Word | `.docx`, `.doc` | Mammoth HTML conversion + html2text |
-| HTML | `.html`, `.htm` | Direct HTML to Markdown conversion |
+| HTML | `.html`, `.htm` | Direct HTML to Markdown conversion using requests library |
 
 ### Upload Process Flow
 ```mermaid
@@ -155,6 +165,9 @@ F --> G[Title Extraction]
 G --> H[Style Selection]
 H --> I[Final Generation]
 I --> J[Markdown Output]
+J --> K[LLM Enhancement]
+K --> L[Final Processing]
+L --> M[GitHub Pages URL Check]
 ```
 
 **Diagram sources**
@@ -167,7 +180,7 @@ I --> J[Markdown Output]
 - [PRD.md:40-62](file://PRD.md#L40-L62)
 
 ## Blog Style Management
-The system supports 5 distinct blog styles with custom layouts and CSS.
+The system supports 5 distinct blog styles with custom layouts and CSS. The style selection interface now includes enhanced preview capabilities and better integration with the markdown processing pipeline.
 
 ### Available Styles
 1. **Deep Technical** - Code-heavy, dark-mode optimized
@@ -175,6 +188,7 @@ The system supports 5 distinct blog styles with custom layouts and CSS.
 3. **Industry Vision** - Bold headlines, modern layout
 4. **Friendly Explainer** - Warm storytelling, beginner-friendly
 5. **Creative Visual** - Image-first, gallery presentation
+6. **Literary Narrative** - Enhanced with MiniMax AI rewriting capabilities
 
 ### Style Selection Interface
 The style selection page displays 5 cards with:
@@ -183,18 +197,20 @@ The style selection page displays 5 cards with:
 - Brief description
 - "Best for" recommendations
 - Live content preview
+- LLM enhancement capability indicator
 
 **Section sources**
 - [app/uploader.py:16-27](file://app/uploader.py#L16-L27)
 - [PRD.md:64-99](file://PRD.md#L64-L99)
 
 ## Article Management
-The management interface provides CRUD operations for blog posts.
+The management interface provides CRUD operations for blog posts with enhanced preview capabilities and GitHub Pages integration.
 
 ### Article Management Endpoints
-- **GET /admin/articles** - List all articles with metadata
+- **GET /admin/articles** - List all articles with metadata and preview capabilities
 - **POST /admin/articles/<filename>/delete** - Delete specific article
 - **POST /admin/sync** - Sync to GitHub for deployment
+- **GET /admin/api/check-pages-url** - Check GitHub Pages URL availability
 
 ### Article Metadata
 Each article includes:
@@ -204,6 +220,8 @@ Each article includes:
 - Description (optional)
 - Style (selected during generation)
 - Author (current user)
+- GitHub Pages URL (auto-generated)
+- Preview capability (local and live)
 
 ### Article List Features
 - Chronological ordering (newest first)
@@ -211,14 +229,54 @@ Each article includes:
 - Tag-based filtering
 - Action buttons (preview, edit, delete)
 - Status indicators (published/local only)
+- Live URL validation
+- Reading time estimation
 
 **Section sources**
 - [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
 - [PRD.md:428-470](file://PRD.md#L428-L470)
 
+## AI Integration and LLM Rewriting
+The system now includes advanced AI integration capabilities with MiniMax API for content enhancement and style-specific rewriting.
+
+### AI Integration Features
+- **MiniMax API Integration** - Enhanced content rewriting with style-specific prompts
+- **Style-based LLM Rewriting** - Dedicated prompts for literary and friendly styles
+- **API Key Management** - Secure environment-based API key handling
+- **HTTP Communication** - Robust requests library integration for API calls
+- **Error Handling** - Comprehensive fallback mechanisms for AI failures
+
+### Supported AI Providers
+- **MiniMax** - Primary provider for content rewriting and enhancement
+- **Style-specific Prompts** - Custom prompts for different writing styles
+- **Fallback Processing** - Graceful degradation when AI services are unavailable
+
+### LLM Rewriting Process
+```mermaid
+flowchart TD
+A[Raw Content] --> B{Style Requires LLM?}
+B --> |Yes| C[Load Style Prompt]
+B --> |No| D[Generic Rewrite Prompt]
+C --> E[Call MiniMax API]
+D --> E
+E --> F{API Success?}
+F --> |Yes| G[Process Response]
+F --> |No| H[Fallback to Original Content]
+G --> I[Clean Response]
+H --> I
+I --> J[Return Enhanced Content]
+```
+
+**Diagram sources**
+- [app/uploader.py:185-235](file://app/uploader.py#L185-L235)
+
+**Section sources**
+- [app/uploader.py:185-235](file://app/uploader.py#L185-L235)
+- [PRD.md:40-62](file://PRD.md#L40-L62)
+
 ## Deployment and Publishing
-The system integrates with GitHub Actions for automated deployment to GitHub Pages.
+The system integrates with GitHub Actions for automated deployment to GitHub Pages with enhanced build processes and improved error handling.
 
 ### Deployment Workflow
 ```mermaid
@@ -231,9 +289,11 @@ Dev->>Git : Push to main branch
 Git->>GH : Trigger workflow
 GH->>GH : Checkout repository
 GH->>GH : Setup Ruby + Jekyll
-GH->>GH : bundle exec jekyll build
+GH->>GH : Bundle install with caching
+GH->>GH : Build Jekyll site with production env
+GH->>GH : Upload artifact to Pages
 GH->>JP : Deploy to gh-pages branch
-JP->>JP : Serve static site
+JP->>JP : Serve static site with GitHub Pages
 ```
 
 **Diagram sources**
@@ -242,19 +302,22 @@ JP->>JP : Serve static site
 ### Deployment Endpoints
 - **POST /admin/sync** - Manual synchronization to GitHub
 - Automatic deployment on pushes to main branch
+- GitHub Pages URL validation endpoint
 
 ### GitHub Actions Features
 - Auto-build on push to main branch
-- Strict build validation
+- Strict build validation with error reporting
 - Artifact upload and deployment
 - Environment configuration for GitHub Pages
+- Enhanced caching for faster builds
+- Production environment optimization
 
 **Section sources**
 - [.github/workflows/deploy.yml:1-62](file://.github/workflows/deploy.yml#L1-L62)
 - [PRD.md:628-681](file://PRD.md#L628-L681)
 
 ## Configuration
-The system uses environment variables and configuration files for customization.
+The system uses environment variables and configuration files for customization with enhanced dependency management.
 
 ### Environment Variables
 - `SECRET_KEY` - Flask application secret key
@@ -262,11 +325,23 @@ The system uses environment variables and configuration files for customization.
 - `SMTP_PORT` - SMTP server port (SSL: 465)
 - `SMTP_USERNAME` - QQ email address
 - `SMTP_PASSWORD` - QQ email authorization code
+- `MINIMAX_TOKEN_PLAN_API_KEY` - MiniMax API key for LLM integration
 
 ### Configuration Files
 - `_config.yml` - Jekyll configuration with plugins and defaults
 - `Gemfile` - Ruby dependencies for Jekyll
-- `requirements.txt` - Python dependencies for Flask app
+- `requirements.txt` - Python dependencies for Flask app with enhanced libraries
+
+### Enhanced Dependencies
+The system now includes several key libraries for improved functionality:
+- **markdown==3.7** - Enhanced text processing and Markdown rendering
+- **requests==2.32.3** - Robust HTTP communication for API integrations
+- **gunicorn==23.0.0** - Production-ready WSGI HTTP server
+- **flask==3.1.0** - Latest Flask framework with improved security
+- **flask-login==0.6.3** - Enhanced session management
+- **PyMuPDF==1.25.3** - Advanced PDF processing capabilities
+- **mammoth==1.8.0** - Improved Word document conversion
+- **html2text==2024.2.26** - Enhanced HTML to Markdown conversion
 
 ### Jekyll Configuration
 Key settings include:
@@ -282,7 +357,7 @@ Key settings include:
 - [PRD.md:281-307](file://PRD.md#L281-L307)
 
 ## Migration from REST API
-The system has been completely migrated from the previous FastAPI RESTful architecture to a Flask-based management interface.
+The system has been completely migrated from the previous FastAPI RESTful architecture to a Flask-based management interface with enhanced capabilities.
 
 ### Removed Components
 - FastAPI backend with 7 modules (auth, thoughts, tags, research, ai, publish, sharing)
@@ -298,12 +373,17 @@ The system has been completely migrated from the previous FastAPI RESTful archit
 - **Fast**: Static site generation instead of dynamic API calls
 - **Reliable**: GitHub Actions for automated deployment
 - **Lightweight**: Single Flask application with Jekyll
+- **Enhanced**: AI integration with MiniMax API
+- **Robust**: Improved error handling and fallback mechanisms
+- **Production-ready**: Gunicorn deployment support
 
 ### Migration Impact
 - **Authentication**: Changed from JWT to Flask sessions
 - **Content Management**: From REST endpoints to file-based Markdown
 - **Publishing**: From manual export to automated GitHub Pages
 - **Development**: Simplified local setup without Docker/PostgreSQL
+- **AI Integration**: Enhanced with MiniMax API capabilities
+- **Deployment**: Improved with production-ready server options
 
 **Section sources**
 - [PRD.md:160-180](file://PRD.md#L160-L180)
@@ -331,10 +411,23 @@ The system has been completely migrated from the previous FastAPI RESTful archit
   - **Solution**: Install required dependencies (PyMuPDF, mammoth, html2text)
   - **Check**: Library availability in environment
 
+- **Problem**: "LLM rewrite failed"
+  - **Solution**: Check MiniMax API key configuration and network connectivity
+  - **Check**: Environment variable MINIMAX_TOKEN_PLAN_API_KEY
+
 #### Style Selection Issues
 - **Problem**: No style preview available
   - **Solution**: Ensure Jekyll layouts are properly configured
   - **Check**: CSS files in assets/css/ directory
+
+#### AI Integration Issues
+- **Problem**: "MINIMAX_TOKEN_PLAN_API_KEY not found"
+  - **Solution**: Configure environment variable with valid API key
+  - **Check**: .env file or system environment variables
+
+- **Problem**: "API request timeout"
+  - **Solution**: Check network connectivity and API service status
+  - **Check**: Timeout settings and retry logic
 
 #### Deployment Issues
 - **Problem**: "Push failed: Permission denied"
@@ -345,7 +438,13 @@ The system has been completely migrated from the previous FastAPI RESTful archit
   - **Solution**: Check GitHub Actions logs for build errors
   - **Check**: Jekyll configuration and dependencies
 
+- **Problem**: "Gunicorn server startup failed"
+  - **Solution**: Verify Python dependencies and port availability
+  - **Check**: requirements.txt installation and port configuration
+
 **Section sources**
 - [app/auth.py:34-48](file://app/auth.py#L34-L48)
 - [app/uploader.py:84-100](file://app/uploader.py#L84-L100)
 - [app/uploader.py:195-209](file://app/uploader.py#L195-L209)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+- [app/uploader.py:220-234](file://app/uploader.py#L220-L234)

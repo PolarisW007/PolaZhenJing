@@ -6,6 +6,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+class ReverseProxied:
+    """WSGI middleware that handles SCRIPT_NAME from reverse proxy.
+
+    When deployed behind Nginx at a sub-path (e.g. /PolaZhenjing/),
+    Nginx sends X-Script-Name header so Flask's url_for() generates
+    correct URLs with the prefix.
+    """
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        if script_name:
+            environ['SCRIPT_NAME'] = script_name
+        return self.app(environ, start_response)
+
+
 def get_db():
     """Get database connection for current request."""
     if 'db' not in g:
@@ -45,6 +62,9 @@ def create_app():
 
     app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-change-me')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB upload limit
+
+    # Apply reverse proxy middleware for sub-path deployment
+    app.wsgi_app = ReverseProxied(app.wsgi_app)
 
     # Register teardown
     app.teardown_appcontext(close_db)

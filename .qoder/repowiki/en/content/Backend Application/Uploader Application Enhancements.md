@@ -24,10 +24,10 @@
 
 ## Update Summary
 **Changes Made**
-- Added new API endpoint `/api/check-pages-url` for GitHub Pages URL validation
-- Enhanced article viewing with URL building functionality using `_build_pages_url()`
-- Improved error handling for network failures in article sharing functionality
-- Added real-time URL checking with retry mechanism for GitHub Pages deployment status
+- Enhanced API key management system with direct environment variable access
+- Improved reliability by eliminating complex shell-based sourcing mechanism
+- Eliminated potential timeout issues in API key retrieval
+- Streamlined configuration management for MiniMax API credentials
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -47,7 +47,7 @@ The Uploader Application Enhancements project represents a sophisticated content
 
 The application serves as a comprehensive solution for technical writers, researchers, and content creators who need to transform research papers, technical documents, and various digital content into publishable blog posts with professional styling and seamless GitHub integration for automated deployment.
 
-**Updated** Added new API endpoint for GitHub Pages URL validation and enhanced article viewing functionality with improved error handling for network failures.
+**Updated** Enhanced API key management system with direct environment variable access, improving reliability and eliminating potential timeout issues in API credential retrieval.
 
 ## Project Structure
 
@@ -151,11 +151,21 @@ The converter engine handles multiple document formats through specialized proce
 - **Real-time Checking**: JavaScript-based URL validation with retry mechanism for deployment status monitoring
 - **Error Handling**: Graceful fallback for network failures and deployment delays
 
+### Enhanced API Key Management System
+
+**Updated** The application now features a streamlined API key management system that uses direct environment variable access:
+
+- **Direct Access**: Uses `os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY')` for immediate API key retrieval
+- **Eliminated Complexity**: Removed shell-based sourcing mechanism that previously caused timeout issues
+- **Improved Reliability**: Direct environment variable access provides faster and more reliable API key retrieval
+- **Configuration Flexibility**: Supports both system environment variables and .env file loading through Flask application initialization
+
 **Section sources**
 - [app/__init__.py:9-24](file://app/__init__.py#L9-L24)
 - [app/auth.py:26-49](file://app/auth.py#L26-L49)
 - [app/converter.py:96-110](file://app/converter.py#L96-L110)
 - [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
 ## Architecture Overview
 
@@ -272,6 +282,33 @@ H --> I[Save to Draft]
 
 The system maintains distinct writing prompts for different content styles, enabling authors to achieve specific narrative voices and technical precision levels.
 
+### Enhanced API Key Management
+
+**Updated** The application now features a streamlined API key management system:
+
+```mermaid
+flowchart TD
+A[Application Startup] --> B{Environment Loaded?}
+B --> |Yes| C[Load .env file via python-dotenv]
+B --> |No| D[Use System Environment Variables]
+C --> E[Direct Environment Access]
+D --> E
+E --> F[MINIMAX_TOKEN_PLAN_API_KEY]
+F --> G[API Call Success]
+F --> H[API Call Failure - Log Warning]
+```
+
+**Diagram sources**
+- [app/__init__.py:4-6](file://app/__init__.py#L4-L6)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+- [app/uploader.py:200-202](file://app/uploader.py#L200-L202)
+
+The system now uses direct environment variable access (`os.environ.get()`) instead of complex shell-based mechanisms, providing:
+- Faster API key retrieval
+- Elimination of timeout issues
+- Simplified configuration management
+- Improved reliability in production environments
+
 ### GitHub Pages URL Validation System
 
 **New** The application now includes a comprehensive GitHub Pages URL validation system:
@@ -364,6 +401,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 4. **URL Validation Caching**: Cache GitHub Pages URL validation results to reduce network requests for frequently checked articles.
 
+5. **API Key Caching**: Implement caching mechanism for API keys to reduce repeated environment variable lookups.
+
 ### Security Enhancements
 
 1. **Rate Limiting**: Implement rate limiting for LLM API calls and file uploads to prevent abuse and ensure fair resource distribution.
@@ -373,6 +412,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 3. **Audit Logging**: Implement detailed audit trails for all content modifications, user actions, and system events for compliance and debugging purposes.
 
 4. **API Security**: Add authentication and rate limiting for the new `/api/check-pages-url` endpoint to prevent abuse.
+
+5. **Environment Variable Validation**: Add validation for API keys to ensure they meet expected format requirements before use.
 
 ### User Experience Improvements
 
@@ -466,10 +507,33 @@ Note over V : Retry up to 6 times with 5-second intervals
 - [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
 - [app/templates/article_view.html:322-369](file://app/templates/article_view.html#L322-L369)
 
+### Enhanced API Key Management Integration
+
+**Updated** The application integrates with environment variable management for secure API key handling:
+
+```mermaid
+sequenceDiagram
+participant A as Application
+participant D as Dotenv Loader
+participant E as Environment
+participant L as LLM Service
+A->>D : Load .env file
+D->>E : Set environment variables
+A->>L : Request API key
+L->>E : os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY')
+E-->>L : Return API key
+L-->>A : API key available
+```
+
+**Diagram sources**
+- [app/__init__.py:4-6](file://app/__init__.py#L4-L6)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+
 **Section sources**
 - [.github/workflows/deploy.yml:29-62](file://.github/workflows/deploy.yml#L29-L62)
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 - [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
 ## Performance Considerations
 
@@ -497,6 +561,7 @@ Key performance indicators to track:
 - Database query performance metrics
 - User session management efficiency
 - **New** GitHub Pages URL validation response times and error rates
+- **New** API key retrieval performance metrics
 
 ### Network Failure Handling
 
@@ -505,10 +570,12 @@ Key performance indicators to track:
 - Graceful fallback when GitHub Pages is unavailable
 - Retry mechanism with exponential backoff
 - User-friendly error messaging for network issues
+- **New** Improved API key retrieval with direct environment variable access reduces potential timeout issues
 
 **Section sources**
 - [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
 - [app/templates/article_view.html:356-366](file://app/templates/article_view.html#L356-L366)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
 ## Troubleshooting Guide
 
@@ -520,9 +587,10 @@ Key performance indicators to track:
 - Ensure proper file permissions for upload directory
 
 **LLM Integration Problems**
-- Confirm MINIMAX_TOKEN_PLAN_API_KEY environment variable
+- Confirm MINIMAX_TOKEN_PLAN_API_KEY environment variable is set
 - Verify network connectivity to MiniMax API endpoint
 - Check API quota limits and billing status
+- **New** Verify environment variable access is working correctly
 
 **Database Connection Errors**
 - Verify SQLite database file permissions
@@ -544,6 +612,7 @@ Key performance indicators to track:
 - **New** Check timeout settings for URL validation requests
 - Verify proper error handling in client-side JavaScript
 - Monitor retry mechanisms for deployment status checking
+- **New** Verify API key environment variable is accessible via `os.environ.get()`
 
 ### Debug Configuration
 
@@ -557,6 +626,7 @@ Enable debug mode for development:
 - [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
 - [data/theme.json:1](file://data/theme.json#L1)
 - [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
+- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
 ## Conclusion
 
@@ -570,8 +640,9 @@ Key strengths of the implementation include:
 - Comprehensive security measures and user management
 - **New** Real-time GitHub Pages URL validation with graceful error handling
 - **New** Enhanced article viewing experience with deployment status monitoring
+- **Updated** Streamlined API key management system with direct environment variable access, improving reliability and eliminating potential timeout issues
 
-Recent enhancements significantly improve the user experience by providing real-time feedback on article deployment status and robust error handling for network failures. The new URL validation system ensures users can confidently share links even when GitHub Pages deployment is still in progress.
+Recent enhancements significantly improve the user experience by providing real-time feedback on article deployment status and robust error handling for network failures. The new URL validation system ensures users can confidently share links even when GitHub Pages deployment is still in progress. The enhanced API key management system provides more reliable access to external services while maintaining security best practices.
 
 Future enhancements should focus on performance optimization, expanded integration capabilities, and enhanced user experience features while maintaining the system's reliability and security standards.
 
