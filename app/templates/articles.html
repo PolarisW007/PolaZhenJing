@@ -43,7 +43,10 @@
           {% endif %}
         </td>
         <td style="white-space: nowrap;">
-          <a href="https://github.com/PolarisW007/PolaZhenJing/blob/main/_posts/{{ post.filename }}" target="_blank" rel="noopener" title="在 GitHub 查看" style="color: var(--gold-primary); text-decoration: none; font-size: 0.8rem; margin-right: 0.5rem;">GitHub ↗</a>
+          {% set fn = post.filename %}
+                    {% set parts = fn.replace('.md','').split('-', 3) %}
+                    {% set pages_url = 'https://polarisw007.github.io/PolaZhenJing/' ~ parts[0] ~ '/' ~ parts[1] ~ '/' ~ parts[2] ~ '/' ~ parts[3] ~ '/' %}
+                    <a href="{{ pages_url }}" target="_blank" rel="noopener" title="在 GitHub Pages 查看" style="color: var(--gold-primary); text-decoration: none; font-size: 0.8rem; margin-right: 0.5rem;">查看 ↗</a>
           <form method="POST" action="{{ url_for('uploader.delete_article', filename=post.filename) }}"
                 style="display: inline;"
                 onsubmit="return confirm('确定删除这篇文章吗？')">

@@ -18,7 +18,7 @@
 <div class="article-topbar">
   <a href="{{ url_for('uploader.articles') }}" class="btn-ghost" style="font-size: 0.8rem;">← 返回文章列表</a>
   <div class="article-topbar-right">
-    <a href="{{ github_url }}" target="_blank" rel="noopener" class="btn-ghost" style="font-size: 0.8rem; color: var(--gold-primary);">GitHub ↗</a>
+    <a href="{{ pages_url }}" target="_blank" rel="noopener" class="btn-ghost" style="font-size: 0.8rem; color: var(--gold-primary);">查看 ↗</a>
   </div>
 </div>
 
@@ -87,7 +87,7 @@
   {# ── Bottom Action Bar ── #}
   <div class="article-divider"></div>
   <div class="article-bottom-bar">
-    <a href="{{ github_url }}" target="_blank" rel="noopener" class="btn-gold btn-sm" style="font-size: 0.8rem;">在 GitHub 查看 ↗</a>
+    <a href="{{ pages_url }}" target="_blank" rel="noopener" class="btn-gold btn-sm" style="font-size: 0.8rem;">查看文章页 ↗</a>
     <form method="POST" action="{{ url_for('uploader.delete_article', filename=filename) }}" style="display: inline;" onsubmit="return confirm('确定删除这篇文章吗？')">
       <button type="submit" class="btn-danger" style="font-size: 0.8rem;">删除文章</button>
     </form>
