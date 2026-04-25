@@ -35,6 +35,7 @@
 ## Update Summary
 **Changes Made**
 - Enhanced article viewing with sophisticated JavaScript-based page loading detection and polling mechanism
+- Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability and user experience
 - Added URL validation for GitHub Pages article availability checking with retry logic
 - Improved sharing functionality with enhanced copy-to-clipboard experience
 - Implemented polling mechanism for GitHub Pages article availability checking with user feedback
@@ -58,7 +59,7 @@
 ## Introduction
 The Article Presentation System is a lightweight personal blog wiki designed to streamline content creation and publishing. It supports multi-format article input (Markdown, PDF, Word, HTML), automatic conversion to blog-ready Markdown, flexible blog style selection (six distinct layouts), and seamless GitHub Pages publishing. The system combines a Flask-based management server for authentication, uploads, and conversions with a Jekyll-powered static site generator for blog rendering and publishing.
 
-**Updated** Enhanced with sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality. Added polling mechanism for GitHub Pages article availability checking with retry logic and user feedback to address GitHub Pages DNS delays and improve user experience during article publication.
+**Updated** Enhanced with sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality. Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability and user experience. Added polling mechanism for GitHub Pages article availability checking with retry logic and user feedback to address GitHub Pages DNS delays and improve user experience during article publication.
 
 ## Project Structure
 The project is organized into two primary layers:
@@ -476,6 +477,7 @@ The system implements a dedicated Flask route for validating GitHub Pages articl
 #### URL Building Logic
 - **Filename Parsing**: Extracts date and slug from Jekyll post filename format
 - **URL Construction**: Builds proper GitHub Pages URL structure with year/month/day hierarchy
+- **Migration from Blob URLs**: **Updated** Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability
 - **Fallback Handling**: Graceful fallback to base URL if filename parsing fails
 
 #### Security and Validation
@@ -485,8 +487,8 @@ The system implements a dedicated Flask route for validating GitHub Pages articl
 - **Redirect Following**: Automatic handling of URL redirects
 
 **Section sources**
-- [app/uploader.py:508-517](file://app/uploader.py#L508-L517)
-- [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
+- [app/uploader.py:492-507](file://app/uploader.py#L492-L507)
+- [app/uploader.py:509-522](file://app/uploader.py#L509-L522)
 
 ### Article Management Interface Enhancements
 
@@ -547,7 +549,7 @@ The system now supports six distinct blog styles, each designed for different co
 #### Deep Technical Style
 - **Purpose**: Code-intensive technical content
 - **Inspiration**: Andrej Karpathy's technical writing
-- **Features**: Code highlighting, technical depth, developer-focused layout
+- **Features**: code highlighting, technical depth, developer-focused layout
 - **Best for**: Programming tutorials, technical specifications, code examples
 
 ### Literary Narrative Layout Format
@@ -825,6 +827,7 @@ A_view --> A_up
 - **Updated** JavaScript polling mechanism uses efficient HEAD requests to minimize bandwidth usage.
 - **Updated** URL validation service implements timeout handling to prevent hanging requests.
 - **Updated** Copy-to-clipboard functionality provides immediate user feedback without blocking UI.
+- **Updated** GitHub Pages URL migration improves reliability and reduces DNS-related issues.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -859,6 +862,7 @@ Common issues and resolutions:
   - Polling not working: Verify JavaScript is enabled and CORS policies allow API access.
   - URL validation failures: Ensure GitHub Pages URL format matches expected pattern.
   - DNS delay messages: Wait for GitHub Pages propagation (typically 30-60 seconds).
+  - **Updated** GitHub Pages URL migration issues: Verify migration from blob URLs to Pages URLs completed successfully.
 - **Updated** JavaScript Polling Issues
   - Infinite retries: Check console for JavaScript errors preventing retry logic.
   - Incorrect status messages: Verify PAGES_URL variable is properly set in template.
@@ -877,7 +881,7 @@ Common issues and resolutions:
 ## Conclusion
 The Article Presentation System offers a streamlined workflow for creating, styling, and publishing blog articles with enhanced visual content creation capabilities and improved user experience. By combining Flask for management, Jekyll for rendering, and LLM integration for content enhancement, it achieves simplicity, flexibility, and efficient publishing to GitHub Pages. The six blog styles enable diverse presentation while maintaining a cohesive design system, supporting everything from academic research to literary narratives, technical documentation, and enhanced visual storytelling.
 
-**Updated** The addition of sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality significantly enhances the user experience during article publication. The polling mechanism for GitHub Pages article availability checking with retry logic and user feedback addresses common DNS delay issues, while the enhanced copy-to-clipboard functionality provides immediate user feedback and social sharing capabilities.
+**Updated** The addition of sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality significantly enhances the user experience during article publication. The polling mechanism for GitHub Pages article availability checking with retry logic and user feedback addresses common DNS delay issues, while the enhanced copy-to-clipboard functionality provides immediate user feedback and social sharing capabilities. The migration from GitHub blob URLs to GitHub Pages URLs improves reliability and reduces DNS-related issues, providing a more robust publishing experience.
 
 ## Appendices
 
@@ -937,3 +941,14 @@ The article viewing interface now provides sophisticated user experience with Ja
 **Section sources**
 - [app/uploader.py:151-167](file://app/uploader.py#L151-L167)
 - [app/uploader.py:126-149](file://app/uploader.py#L126-L149)
+
+### GitHub Pages URL Migration
+- **Migration Benefits**: Improved reliability and reduced DNS-related issues
+- **URL Format**: YYYY/MM/DD/slug/ structure for better organization
+- **Validation Service**: Dedicated Flask route for URL checking with security restrictions
+- **Polling Mechanism**: 6 attempts with 5-second intervals for availability checking
+
+**Section sources**
+- [app/uploader.py:492-507](file://app/uploader.py#L492-L507)
+- [app/uploader.py:509-522](file://app/uploader.py#L509-L522)
+- [app/templates/article_view.html:322-381](file://app/templates/article_view.html#L322-L381)
