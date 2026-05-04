@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     status          TEXT NOT NULL,
     stage           TEXT,
     progress        INTEGER DEFAULT 0,
+    title           TEXT,
     result_filename TEXT,
     error           TEXT,
     messages        TEXT,
@@ -51,6 +52,10 @@ def init_schema():
     conn = sqlite3.connect(_DB_PATH)
     try:
         conn.executescript(_SCHEMA)
+        # Idempotent migration: add `title` column if the table predates it.
+        cols = {r[1] for r in conn.execute('PRAGMA table_info(jobs)')}
+        if 'title' not in cols:
+            conn.execute('ALTER TABLE jobs ADD COLUMN title TEXT')
         conn.commit()
     finally:
         conn.close()
@@ -64,15 +69,15 @@ def _connect():
     return conn
 
 
-def create_job(kind: str, user_id: int | None = None) -> str:
+def create_job(kind: str, user_id: int | None = None, title: str | None = None) -> str:
     """Insert a new pending job, return job_id."""
     job_id = uuid.uuid4().hex[:16]
     conn = _connect()
     try:
         conn.execute(
-            'INSERT INTO jobs (id, user_id, kind, status, stage, progress, messages) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (job_id, user_id, kind, PENDING, '排队中…', 0, '[]'),
+            'INSERT INTO jobs (id, user_id, kind, status, stage, progress, messages, title) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            (job_id, user_id, kind, PENDING, '排队中…', 0, '[]', title),
         )
         conn.commit()
     finally:
@@ -82,10 +87,10 @@ def create_job(kind: str, user_id: int | None = None) -> str:
 
 def update_job(job_id: str, **fields):
     """Update mutable fields on a job row. Accepts status/stage/progress/
-    result_filename/error. Also bumps updated_at."""
+    result_filename/error/messages/title. Also bumps updated_at."""
     if not fields:
         return
-    allowed = {'status', 'stage', 'progress', 'result_filename', 'error', 'messages'}
+    allowed = {'status', 'stage', 'progress', 'result_filename', 'error', 'messages', 'title'}
     cols = [k for k in fields if k in allowed]
     if not cols:
         return
@@ -123,6 +128,29 @@ def append_message(job_id: str, level: str, text: str):
     msgs = job.get('messages') or []
     msgs.append({'level': level, 'text': text})
     update_job(job_id, messages=json.dumps(msgs, ensure_ascii=False))
+
+
+def list_active_jobs(kind: str | None = None, limit: int = 50) -> list[dict]:
+    """Return non-done jobs (pending/running/failed) for status display on
+    the articles list page. Most recent first. Also include very recent
+    failed jobs so users can see what went wrong.
+    """
+    conn = _connect()
+    try:
+        sql = (
+            "SELECT * FROM jobs WHERE status IN (?, ?, ?) "
+            "AND datetime(updated_at) > datetime('now', '-1 day') "
+        )
+        params: list = [PENDING, RUNNING, FAILED]
+        if kind:
+            sql += 'AND kind=? '
+            params.append(kind)
+        sql += 'ORDER BY datetime(created_at) DESC LIMIT ?'
+        params.append(limit)
+        rows = conn.execute(sql, params).fetchall()
+    finally:
+        conn.close()
+    return [dict(r) for r in rows]
 
 
 def submit(target, *args, **kwargs) -> None:

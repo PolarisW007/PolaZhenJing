@@ -186,6 +186,22 @@ def _get_style_prompt(style: str) -> str | None:
 MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
 MINIMAX_MODEL = 'MiniMax-M2.7'
 
+# ── MiniMax Text-to-Image (Ghibli-style illustrations) ──────────────
+# Official T2I endpoint (separate host from chat). Override via env if needed.
+MINIMAX_IMAGE_URL = os.environ.get(
+    'MINIMAX_IMAGE_URL', 'https://api.minimaxi.chat/v1/image_generation'
+)
+MINIMAX_IMAGE_MODEL = os.environ.get('MINIMAX_IMAGE_MODEL', 'image-01')
+
+# Locked global illustration style: Studio Ghibli. Applied to every article.
+GHIBLI_STYLE_PROMPT = (
+    'Studio Ghibli animation style, Hayao Miyazaki aesthetic, '
+    'hand-drawn watercolor textures, soft natural lighting, '
+    'dreamy pastoral atmosphere, warm color palette, '
+    'delicate linework, cinematic composition, highly detailed, '
+    'no text, no watermark, no logo'
+)
+
 
 def _get_minimax_api_key() -> str | None:
     """Read MINIMAX_TOKEN_PLAN_API_KEY from environment (.env or system env)."""
@@ -233,6 +249,147 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | Non
             except Exception:
                 pass
         return None
+
+
+def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
+    """Call MiniMax text-to-image API and return image bytes, or None on failure.
+
+    Uses response_format='url' then downloads the image. Ghibli style is baked
+    into the prompt by the caller.
+    """
+    api_key = _get_minimax_api_key()
+    if not api_key:
+        logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping illustration')
+        return None
+
+    payload = json.dumps({
+        'model': MINIMAX_IMAGE_MODEL,
+        'prompt': prompt,
+        'aspect_ratio': aspect_ratio,
+        'response_format': 'url',
+        'n': 1,
+        'prompt_optimizer': True,
+    }, ensure_ascii=False).encode('utf-8')
+
+    req = Request(MINIMAX_IMAGE_URL, data=payload, method='POST')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('Authorization', f'Bearer {api_key}')
+
+    try:
+        with urlopen(req, timeout=180) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        logger.error('MiniMax T2I request failed: %s', e)
+        if hasattr(e, 'read'):
+            try:
+                logger.error('Error body: %s', e.read().decode('utf-8')[:500])
+            except Exception:
+                pass
+        return None
+
+    # MiniMax returns { "data": { "image_urls": [ "https://..." ] }, ... }
+    urls: list = []
+    try:
+        d = data.get('data') or {}
+        urls = d.get('image_urls') or d.get('urls') or []
+        if not urls and isinstance(data.get('images'), list):
+            urls = [x.get('url') for x in data['images'] if x.get('url')]
+    except Exception:
+        urls = []
+    if not urls:
+        logger.error('MiniMax T2I returned no image_urls: %s', str(data)[:500])
+        return None
+
+    try:
+        with urlopen(urls[0], timeout=60) as img_resp:
+            return img_resp.read()
+    except Exception as e:
+        logger.error('Failed to download generated image: %s', e)
+        return None
+
+
+def _generate_illustrations(title: str, content: str, slug: str, project_root: str) -> list[dict]:
+    """Generate 2 Ghibli-style illustrations for an article: a cover + one scene.
+
+    Saves PNG files under ``assets/images/generated/<slug>/`` and returns a list
+    of dicts ``[{'role': 'cover'|'scene', 'relpath': 'assets/images/…', 'alt': …}]``.
+    On any failure (no API key, network error) returns an empty list — the
+    article is then written without images.
+    """
+    # Build subject hints. Keep prompts in English for model stability.
+    cover_prompt = (
+        f'A cinematic cover illustration evoking the essence of the article titled '
+        f'"{title}". Wide landscape composition, soft clouds, atmospheric. '
+        f'{GHIBLI_STYLE_PROMPT}'
+    )
+    scene_prompt = (
+        f'A quiet in-text scene illustration related to "{title}". '
+        f'Focus on a small human or object moment, tranquil mood. '
+        f'{GHIBLI_STYLE_PROMPT}'
+    )
+
+    out_dir_rel = os.path.join('assets', 'images', 'generated', slug)
+    out_dir_abs = os.path.join(project_root, out_dir_rel)
+    os.makedirs(out_dir_abs, exist_ok=True)
+
+    jobs_spec = [
+        ('cover', cover_prompt, '16:9', 'cover.png'),
+        ('scene', scene_prompt, '4:3', 'scene-1.png'),
+    ]
+
+    results: list[dict] = []
+    for role, prompt, aspect, fname in jobs_spec:
+        img_bytes = _call_minimax_t2i(prompt, aspect_ratio=aspect)
+        if not img_bytes:
+            continue
+        fpath = os.path.join(out_dir_abs, fname)
+        try:
+            with open(fpath, 'wb') as f:
+                f.write(img_bytes)
+        except Exception as e:
+            logger.error('Failed to save illustration %s: %s', fpath, e)
+            continue
+        results.append({
+            'role': role,
+            'relpath': os.path.join(out_dir_rel, fname).replace(os.sep, '/'),
+            'alt': f'{title} — {role}',
+        })
+    return results
+
+
+def _inject_illustrations(content: str, images: list[dict]) -> str:
+    """Prepend cover image and insert a scene image near the middle of content.
+
+    Markdown image URLs use the Jekyll ``{{ site.baseurl }}`` prefix so that
+    they work under the ``/PolaZhenjing/`` sub-path on aipd.me.
+    """
+    if not images:
+        return content
+
+    def _md(img: dict) -> str:
+        return f'![{img["alt"]}]({{{{ site.baseurl }}}}/{img["relpath"]})'
+
+    cover = next((i for i in images if i['role'] == 'cover'), None)
+    scenes = [i for i in images if i['role'] != 'cover']
+
+    body = content.strip()
+    if cover:
+        body = _md(cover) + '\n\n' + body
+
+    if scenes:
+        # Insert scene image after the first major section (~40% of length).
+        lines = body.split('\n')
+        inject_at = max(1, int(len(lines) * 0.4))
+        # Snap to the next blank line after the target index for cleaner placement.
+        for i in range(inject_at, min(inject_at + 30, len(lines))):
+            if not lines[i].strip():
+                inject_at = i
+                break
+        scene_md = '\n' + _md(scenes[0]) + '\n'
+        lines.insert(inject_at, scene_md)
+        body = '\n'.join(lines)
+
+    return body
 
 
 def _generate_summary(content: str, max_chars: int = 200) -> str:
@@ -434,7 +591,7 @@ def generate():
         'project_root': project_root,
     }
 
-    job_id = jobs.create_job(kind='generate', user_id=session.get('user_id'))
+    job_id = jobs.create_job(kind='generate', user_id=session.get('user_id'), title=title)
     jobs.submit(_run_generate_job, job_id, payload)
 
     return redirect(url_for('uploader.generate_status', job_id=job_id))
@@ -467,11 +624,28 @@ def _run_generate_job(job_id: str, p: dict):
         else:
             jobs.append_message(job_id, 'warning', 'LLM 重写失败，将使用原始内容。')
 
+    # ── Ghibli-style illustrations ───────────────────────────
+    # Derive slug early so illustration files and post file share the same name.
+    date_str = datetime.now().strftime('%Y-%m-%d')
+    slug = _slugify(title) or 'untitled'
+
+    jobs.update_job(job_id, stage='正在生成吉卜力风格插画…', progress=45)
+    try:
+        images = _generate_illustrations(title, content, slug, project_root)
+    except Exception as e:
+        logger.exception('Illustration generation crashed')
+        images = []
+    if images:
+        content = _inject_illustrations(content, images)
+        jobs.append_message(job_id, 'success',
+                            f'已生成 {len(images)} 张吉卜力风格插画。')
+    else:
+        jobs.append_message(job_id, 'warning',
+                            '未生成插画（API 密钥缺失或调用失败），文章将无插图。')
+
     jobs.update_job(job_id, stage='正在构建 Jekyll 文章…', progress=70)
 
     # Build Jekyll post
-    date_str = datetime.now().strftime('%Y-%m-%d')
-    slug = _slugify(title) or 'untitled'
     filename = f'{date_str}-{slug}.md'
 
     # Front matter
@@ -559,7 +733,17 @@ def generate_progress(job_id):
 @login_required
 def articles():
     posts = _scan_posts()
-    return render_template('articles.html', posts=posts, styles=STYLES)
+    # Load in-flight generation jobs so users see a "生成中" placeholder
+    # in the list immediately after submission.
+    pending_jobs = jobs.list_active_jobs(kind='generate', limit=20)
+    # Parse messages JSON for template-side rendering (optional).
+    for j in pending_jobs:
+        try:
+            j['messages'] = json.loads(j.get('messages') or '[]')
+        except Exception:
+            j['messages'] = []
+    return render_template('articles.html', posts=posts, styles=STYLES,
+                           pending_jobs=pending_jobs)
 
 
 GITHUB_REPO = 'PolarisW007/PolaZhenJing'

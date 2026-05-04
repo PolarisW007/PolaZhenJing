@@ -2,6 +2,9 @@
 {% block title %}文章管理{% endblock %}
 {% block card_class %}card-full{% endblock %}
 {% block content %}
+{% if pending_jobs %}
+<script>setTimeout(function(){ window.location.reload(); }, 10000);</script>
+{% endif %}
 <h2>文章管理</h2>
 
 <div class="action-bar">
@@ -13,7 +16,7 @@
   </div>
 </div>
 
-{% if posts %}
+{% if posts or pending_jobs %}
 <div class="table-wrap">
   <table>
     <thead>
@@ -25,6 +28,39 @@
       </tr>
     </thead>
     <tbody>
+      {% for job in pending_jobs or [] %}
+      <tr style="background: rgba(228,191,122,0.04);">
+        <td>
+          <a href="{{ url_for('uploader.generate_status', job_id=job.id) }}"
+             style="color: var(--text-primary); text-decoration: none; border-bottom: 1px dashed rgba(228,191,122,0.3);">
+            {{ job.title or '（未命名草稿）' }}
+          </a>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+            {{ job.stage or '排队中…' }}
+          </div>
+        </td>
+        <td style="white-space: nowrap; color: var(--text-muted); font-size: 0.8rem;">
+          {{ (job.created_at or '')[:16] }}
+        </td>
+        <td>
+          {% if job.status == 'failed' %}
+          <span class="style-badge" style="background: rgba(230,57,70,0.12); color: #e63946; border: 1px solid rgba(230,57,70,0.3);">
+            失败
+          </span>
+          {% else %}
+          <span class="style-badge" style="background: rgba(228,191,122,0.1); color: var(--gold-primary); border: 1px solid rgba(228,191,122,0.2);">
+            文章生成中 {{ job.progress or 0 }}%
+          </span>
+          {% endif %}
+        </td>
+        <td style="white-space: nowrap;">
+          <a href="{{ url_for('uploader.generate_status', job_id=job.id) }}"
+             style="color: var(--gold-primary); text-decoration: none; font-size: 0.8rem;">
+            查看进度 →
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
       {% for post in posts %}
       <tr>
         <td>
