@@ -17,6 +17,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
 
 from .auth import login_required
 from .converter import detect_and_convert, extract_title
+from . import jobs
 
 logger = logging.getLogger(__name__)
 
@@ -403,6 +404,7 @@ def style_select():
 @uploader_bp.route('/generate', methods=['POST'])
 @login_required
 def generate():
+    """Submit an async generation job and redirect to the status page."""
     draft_id = session.pop('draft_id', '')
     draft = _load_draft(draft_id)
     if not draft:
@@ -419,15 +421,53 @@ def generate():
         flash('没有可生成的内容。', 'error')
         return redirect(url_for('uploader.upload'))
 
+    # Capture data needed by the background thread (no Flask context in thread)
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    theme = _get_theme()
+    payload = {
+        'content': content,
+        'title': title,
+        'tags': tags,
+        'description': description,
+        'style': style,
+        'theme': theme,
+        'project_root': project_root,
+    }
+
+    job_id = jobs.create_job(kind='generate', user_id=session.get('user_id'))
+    jobs.submit(_run_generate_job, job_id, payload)
+
+    return redirect(url_for('uploader.generate_status', job_id=job_id))
+
+
+def _run_generate_job(job_id: str, p: dict):
+    """Background worker: LLM rewrite → build post → write file → git push.
+
+    Runs in a daemon thread, owns no Flask context, updates job state via
+    the `jobs` module for the polling UI.
+    """
+    content = p['content']
+    title = p['title']
+    tags = p['tags']
+    description = p['description']
+    style = p['style']
+    theme = p['theme']
+    project_root = p['project_root']
+
+    jobs.update_job(job_id, status=jobs.RUNNING, stage='加载草稿内容…', progress=5)
+
     # ── LLM skill rewriting ──────────────────────────────────
     skill_prompt = _get_style_prompt(style)
     if skill_prompt:
+        jobs.update_job(job_id, stage=f'LLM 正在以「{style}」风格重写…', progress=15)
         rewritten = _call_llm_rewrite(content, title, skill_prompt)
         if rewritten:
             content = rewritten
-            flash(f'已使用 LLM 技能重写内容（风格：{style}）。', 'info')
+            jobs.append_message(job_id, 'info', f'已使用 LLM 技能重写内容（风格：{style}）。')
         else:
-            flash('LLM 重写失败，将使用原始内容。', 'warning')
+            jobs.append_message(job_id, 'warning', 'LLM 重写失败，将使用原始内容。')
+
+    jobs.update_job(job_id, stage='正在构建 Jekyll 文章…', progress=70)
 
     # Build Jekyll post
     date_str = datetime.now().strftime('%Y-%m-%d')
@@ -436,7 +476,6 @@ def generate():
 
     # Front matter
     tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
-    theme = _get_theme()
     front_matter = f"""---
 layout: {style}
 theme: {theme}
@@ -450,21 +489,21 @@ tags: [{', '.join(tag_list)}]"""
     # Generate summary
     summary = _generate_summary(content)
     if summary:
-        # Escape quotes in summary for YAML
         safe_summary = summary.replace('"', '\\"')
         front_matter += f'\nsummary: "{safe_summary}"'
 
     front_matter += '\n---\n\n'
 
     # Write to _posts/
-    os.makedirs(POSTS_DIR, exist_ok=True)
-    post_path = os.path.join(POSTS_DIR, filename)
+    posts_dir = os.path.join(project_root, '_posts')
+    os.makedirs(posts_dir, exist_ok=True)
+    post_path = os.path.join(posts_dir, filename)
     with open(post_path, 'w', encoding='utf-8') as f:
         f.write(front_matter + content)
 
-    # Auto-sync to GitHub after generating
+    # Auto-sync to GitHub
+    jobs.update_job(job_id, stage='正在同步到 GitHub…', progress=85)
     try:
-        project_root = os.path.join(os.path.dirname(__file__), '..')
         subprocess.run(['git', 'add', '-A'], cwd=project_root,
                        capture_output=True, timeout=30)
         commit_msg = f'Add article: {title} - {date_str}'
@@ -474,12 +513,46 @@ tags: [{', '.join(tag_list)}]"""
             ['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
             capture_output=True, timeout=120, text=True)
         if push_result.returncode == 0:
-            flash(f'文章「{title}」已以 {style} 风格创建，并已同步到 GitHub。', 'success')
+            jobs.append_message(job_id, 'success',
+                                f'文章「{title}」已以 {style} 风格创建，并已同步到 GitHub。')
         else:
-            flash(f'文章「{title}」已创建，但推送失败：{push_result.stderr}', 'warning')
+            jobs.append_message(job_id, 'warning',
+                                f'文章「{title}」已创建，但推送失败：{push_result.stderr}')
     except Exception as e:
-        flash(f'文章「{title}」已创建，但同步出错：{e}', 'warning')
-    return redirect(url_for('uploader.articles'))
+        jobs.append_message(job_id, 'warning', f'文章「{title}」已创建，但同步出错：{e}')
+
+    jobs.update_job(job_id, status=jobs.DONE, stage='已完成', progress=100,
+                    result_filename=filename)
+
+
+@uploader_bp.route('/generate/status/<job_id>')
+@login_required
+def generate_status(job_id):
+    """Render the HTML status page that polls for progress."""
+    job = jobs.get_job(job_id)
+    if not job:
+        flash('任务不存在或已过期。', 'error')
+        return redirect(url_for('uploader.articles'))
+    return render_template('status.html', job=job, job_id=job_id)
+
+
+@uploader_bp.route('/generate/progress/<job_id>')
+@login_required
+def generate_progress(job_id):
+    """JSON endpoint polled by the status page. Messages are shown inline on
+    the status page itself (not flashed) to avoid duplication across polls."""
+    job = jobs.get_job(job_id)
+    if not job:
+        return jsonify({'status': 'not_found'}), 404
+
+    return jsonify({
+        'status': job['status'],
+        'stage': job.get('stage') or '',
+        'progress': job.get('progress') or 0,
+        'error': job.get('error'),
+        'messages': job.get('messages') or [],
+        'articles_url': url_for('uploader.articles'),
+    })
 
 
 @uploader_bp.route('/articles')

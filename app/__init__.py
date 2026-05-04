@@ -72,6 +72,10 @@ def create_app():
     # Initialize database
     init_db(app)
 
+    # Initialize async jobs table
+    from . import jobs
+    jobs.init_schema()
+
     # Register blueprints
     from .auth import auth_bp
     from .uploader import uploader_bp

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}生成中{% endblock %}
+{% block card_class %}card-wide{% endblock %}
+{% block content %}
+<h2 id="page-title">正在生成文章</h2>
+
+<div id="status-panel">
+  <p style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+    任务号：<span style="color:var(--gold-primary); font-family:monospace;">{{ job_id }}</span>
+  </p>
+
+  <div style="font-size:1rem; color:var(--text-secondary); margin-bottom:0.75rem; text-align:center;" id="stage-text">
+    {{ job.stage or '排队中…' }}
+  </div>
+
+  <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin-bottom:0.5rem;">
+    <div id="progress-bar" style="height:100%; width:{{ job.progress or 0 }}%; background:linear-gradient(90deg, #f4a261, #e8c547); transition:width 0.6s ease; border-radius:4px;"></div>
+  </div>
+  <div style="text-align:right; font-size:0.75rem; color:var(--text-muted);" id="progress-pct">{{ job.progress or 0 }}%</div>
+
+  <div style="margin-top:1rem; font-size:0.8rem; color:var(--text-muted); text-align:center;" id="elapsed">
+    已耗时 <span id="elapsed-sec">0</span> 秒
+  </div>
+
+  <!-- Inline messages (populated as job progresses) -->
+  <div id="messages" style="margin-top:1.5rem;"></div>
+
+  <!-- Action buttons (shown on done/failed) -->
+  <div id="actions" style="margin-top:1.5rem; display:none; justify-content:center; gap:0.75rem;">
+    <a href="{{ url_for('uploader.articles') }}" class="btn-gold btn-sm" id="view-articles-btn">查看文章列表 →</a>
+    <a href="{{ url_for('uploader.upload') }}" class="btn-ghost" id="retry-btn" style="display:none;">重新上传</a>
+  </div>
+</div>
+
+<p style="margin-top:2rem; font-size:0.75rem; color:var(--text-muted); text-align:center;">
+  页面每 2 秒自动刷新进度。即便关闭浏览器，后台任务仍会继续执行。
+</p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var jobId = {{ job_id|tojson }};
+  var progressUrl = {{ url_for('uploader.generate_progress', job_id=job_id)|tojson }};
+  var startTs = Date.now();
+
+  var $bar = document.getElementById('progress-bar');
+  var $pct = document.getElementById('progress-pct');
+  var $stage = document.getElementById('stage-text');
+  var $title = document.getElementById('page-title');
+  var $msgs = document.getElementById('messages');
+  var $actions = document.getElementById('actions');
+  var $retry = document.getElementById('retry-btn');
+  var $elapsed = document.getElementById('elapsed-sec');
+
+  var pollTimer = null;
+  var elapsedTimer = setInterval(function() {
+    $elapsed.textContent = Math.floor((Date.now() - startTs) / 1000);
+  }, 1000);
+
+  function renderMessages(msgs) {
+    $msgs.innerHTML = '';
+    (msgs || []).forEach(function(m) {
+      var div = document.createElement('div');
+      div.className = 'flash flash-' + (m.level || 'info');
+      div.textContent = m.text;
+      $msgs.appendChild(div);
+    });
+  }
+
+  function finish(kind, data) {
+    clearInterval(elapsedTimer);
+    if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+    $actions.style.display = 'flex';
+    if (kind === 'done') {
+      $title.textContent = '文章生成完成';
+      $bar.style.width = '100%';
+      $pct.textContent = '100%';
+      $stage.textContent = '已完成 ✓';
+      // Auto-redirect after 2.5s so user can read success messages
+      setTimeout(function() {
+        window.location.href = data.articles_url;
+      }, 2500);
+    } else if (kind === 'failed') {
+      $title.textContent = '任务失败';
+      $stage.style.color = '#ff6b6b';
+      $stage.textContent = data.error || '未知错误';
+      $bar.style.background = '#e63946';
+      $retry.style.display = 'inline-block';
+    }
+  }
+
+  function poll() {
+    fetch(progressUrl, {credentials: 'same-origin'})
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.status === 'not_found') {
+          $stage.textContent = '任务不存在或已过期';
+          clearInterval(elapsedTimer);
+          return;
+        }
+        // Update progress bar & stage
+        if (typeof data.progress === 'number') {
+          $bar.style.width = data.progress + '%';
+          $pct.textContent = data.progress + '%';
+        }
+        if (data.stage) $stage.textContent = data.stage;
+        renderMessages(data.messages);
+
+        if (data.status === 'done') { finish('done', data); return; }
+        if (data.status === 'failed') { finish('failed', data); return; }
+
+        // Keep polling
+        pollTimer = setTimeout(poll, 2000);
+      })
+      .catch(function(err) {
+        // Transient network error — retry with backoff
+        pollTimer = setTimeout(poll, 4000);
+      });
+  }
+
+  // Kick off immediately so the first tick happens fast
+  poll();
+})();
+</script>
+{% endblock %}
