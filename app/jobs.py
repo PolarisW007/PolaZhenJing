@@ -48,14 +48,21 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 
 def init_schema():
-    """Create jobs table if missing. Safe to call multiple times."""
+    """Create jobs table if missing. Safe to call multiple times, and safe to
+    call concurrently from multiple gunicorn workers (ALTER TABLE race is
+    swallowed with an OperationalError guard)."""
     conn = sqlite3.connect(_DB_PATH)
     try:
         conn.executescript(_SCHEMA)
         # Idempotent migration: add `title` column if the table predates it.
         cols = {r[1] for r in conn.execute('PRAGMA table_info(jobs)')}
         if 'title' not in cols:
-            conn.execute('ALTER TABLE jobs ADD COLUMN title TEXT')
+            try:
+                conn.execute('ALTER TABLE jobs ADD COLUMN title TEXT')
+            except sqlite3.OperationalError as e:
+                # Another worker won the race; ignore "duplicate column" errors.
+                if 'duplicate column' not in str(e).lower():
+                    raise
         conn.commit()
     finally:
         conn.close()
