@@ -5,9 +5,9 @@
 <h2>上传文章</h2>
 
 <div class="tab-bar">
-  <div class="tab active" onclick="switchTab('upload')">上传文件</div>
-  <div class="tab" onclick="switchTab('paste')">粘贴内容</div>
-  <div class="tab" onclick="switchTab('url')">输入URL</div>
+  <div class="tab active" onclick="switchTab(event, 'upload')">上传文件</div>
+  <div class="tab" onclick="switchTab(event, 'paste')">粘贴内容</div>
+  <div class="tab" onclick="switchTab(event, 'url')">输入URL</div>
 </div>
 
 <!-- Upload Tab -->
@@ -65,7 +65,7 @@
     <div class="form-group">
       <label for="url">文章 URL</label>
       <input type="url" id="url" name="url" class="form-input" placeholder="https://example.com/article" required>
-      <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem;">粘贴任意公开网页链接，系统将自动抓取并转换为 Markdown。</div>
+      <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem;">支持掘金、知乎专栏、博客等公开网页。微信公众号/需登录的页面抓不到，请使用「粘贴内容」。</div>
     </div>
     <div class="form-group">
       <label for="title3">标题（可选，留空自动识别）</label>
@@ -86,12 +86,12 @@
 
 {% block scripts %}
 <script>
-function switchTab(tab) {
+function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-upload').style.display = tab === 'upload' ? 'block' : 'none';
   document.getElementById('tab-paste').style.display = tab === 'paste' ? 'block' : 'none';
   document.getElementById('tab-url').style.display = tab === 'url' ? 'block' : 'none';
-  event.target.classList.add('active');
+  (ev && ev.currentTarget ? ev.currentTarget : ev.target).classList.add('active');
 }
 
 // Drag & drop

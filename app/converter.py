@@ -93,12 +93,170 @@ def convert_html(file_path: str) -> str:
     return h.handle(html)
 
 
-def convert_html_string(html: str) -> str:
+# ── Site-specific content selectors (priority order) ──────────────
+# Blogs that wrap the markdown body in a well-known class should be matched
+# first; pure <article> is last-resort because it often includes header,
+# author bio, comments, and "related articles" side cards.
+_MAIN_SELECTORS = [
+    '.markdown-body',              # juejin, github, knowledge-base sites
+    'article .article-content',    # juejin outer wrapper
+    '.article-content',            # generic
+    '.post-content',               # wordpress / ghost
+    '.entry-content',              # wordpress
+    '[class*="RichText"]',         # zhihu
+    '[class*="article-body"]',
+    '[class*="post-body"]',
+    'main article',
+    'article',
+    'main',
+]
+
+_NOISE_ATTR_RE = re.compile(
+    r'comment|recommend|sidebar|related|share|toolbar|'
+    r'subscribe|signup|author-box|tag-list|nav-|breadcrumb|'
+    r'footer|advert|banner|social',
+    re.I,
+)
+
+# Station-name suffixes to strip from <title>: 'Title - Site' / 'Title | Site'.
+_TITLE_SEPARATORS = [' - ', ' — ', ' – ', ' | ', '_', ' · ']
+
+
+def _clean_title_suffix(title: str) -> str:
+    """Strip trailing site-name suffixes like ' - 掘金' / ' | CSDN博客'."""
+    title = title.strip()
+    for sep in _TITLE_SEPARATORS:
+        if sep in title:
+            left, right = title.rsplit(sep, 1)
+            # Only strip when suffix looks like a site name (short, no sentence).
+            if left and 0 < len(right) <= 20 and len(left) >= 4:
+                title = left.strip()
+    return title
+
+
+def _extract_title(soup) -> str:
+    """Best-effort page title extraction.
+
+    Priority: og:title → twitter:title → JSON-LD headline →
+    h1.article-title → article h1 → cleaned <title>. Returns '' when nothing
+    meaningful is found so the caller can fall back to ``extract_title(md)``.
+    """
+    # 1. OpenGraph
+    og = soup.find('meta', attrs={'property': 'og:title'})
+    if not og:
+        og = soup.find('meta', attrs={'name': 'og:title'})
+    if og and og.get('content'):
+        return og['content'].strip()
+
+    # 2. Twitter card
+    tw = (soup.find('meta', attrs={'name': 'twitter:title'})
+          or soup.find('meta', attrs={'property': 'twitter:title'}))
+    if tw and tw.get('content'):
+        return tw['content'].strip()
+
+    # 3. JSON-LD schema.org Article headline (used by juejin, many CMS)
+    import json as _json
+    for s in soup.find_all('script', type='application/ld+json'):
+        raw = (s.string or '').strip()
+        if not raw:
+            continue
+        try:
+            data = _json.loads(raw)
+        except Exception:
+            continue
+        candidates = data if isinstance(data, list) else [data]
+        for it in candidates:
+            if isinstance(it, dict):
+                headline = it.get('headline') or it.get('name')
+                if headline and isinstance(headline, str):
+                    return headline.strip()
+
+    # 4. Article-title h1 by class hint
+    h1 = soup.find('h1', class_=re.compile(r'(article|post|entry)[-_ ]?title', re.I))
+    if h1 and h1.get_text(strip=True):
+        return h1.get_text(strip=True)
+
+    # 5. First h1 inside <article>
+    article_tag = soup.find('article')
+    if article_tag:
+        h = article_tag.find('h1')
+        if h and h.get_text(strip=True):
+            return h.get_text(strip=True)
+
+    # 6. <title> with site-suffix cleanup
+    if soup.title and soup.title.string:
+        return _clean_title_suffix(soup.title.string)
+
+    return ''
+
+
+def _absolutize_urls(node, base_url: str):
+    """Rewrite relative href/src to absolute URLs so Markdown links survive.
+
+    Also promotes common lazy-load attributes (``data-src`` / ``data-original``)
+    to ``src`` and tags external images with ``referrerpolicy="no-referrer"``
+    to defeat hotlink-protected CDNs (e.g. juejin/csdn/zhihu image CDNs).
+    """
+    from urllib.parse import urljoin
+    for a in node.find_all('a', href=True):
+        try:
+            a['href'] = urljoin(base_url, a['href'])
+        except Exception:
+            pass
+    for img in node.find_all('img'):
+        src = (img.get('src') or img.get('data-src')
+               or img.get('data-original') or img.get('data-lazy-src'))
+        if src:
+            try:
+                img['src'] = urljoin(base_url, src)
+            except Exception:
+                img['src'] = src
+        # Strip lazy placeholders so html2text emits the real URL
+        for k in ('data-src', 'data-original', 'data-lazy-src', 'data-lazy', 'srcset'):
+            if k in img.attrs:
+                del img.attrs[k]
+        # Referrer policy to dodge CDN hotlink protection
+        img['referrerpolicy'] = 'no-referrer'
+
+
+def _extract_main_html(soup, base_url: str) -> str:
+    """Return the HTML of the best-guess main content region.
+
+    Strips scripts/styles/nav/footer/comment/recommendation blocks, iterates
+    through priority selectors, and picks the first candidate with enough
+    textual content (>200 chars) to be a real article.
+    """
+    # Remove structural noise
+    for tag in soup(['script', 'style', 'noscript', 'nav', 'footer', 'header',
+                     'aside', 'form', 'iframe', 'button', 'svg']):
+        tag.decompose()
+    # Remove noise by class/id naming convention
+    for tag in list(soup.find_all(attrs={'class': _NOISE_ATTR_RE})):
+        tag.decompose()
+    for tag in list(soup.find_all(attrs={'id': _NOISE_ATTR_RE})):
+        tag.decompose()
+
+    for sel in _MAIN_SELECTORS:
+        try:
+            node = soup.select_one(sel)
+        except Exception:
+            continue
+        if node and len(node.get_text(strip=True)) > 200:
+            _absolutize_urls(node, base_url)
+            return str(node)
+
+    # Fallback: whole body
+    body = soup.body or soup
+    _absolutize_urls(body, base_url)
+    return str(body)
+
+
+def convert_html_string(html: str, base_url: str = '') -> str:
     """Convert an in-memory HTML string to Markdown.
 
-    Tries to extract the main <article>/<main> body first (strips nav, footer,
-    scripts, styles). Falls back to full-page conversion when no main region
-    is detected.
+    Uses site-specific content selectors to isolate the article body. When
+    ``base_url`` is supplied, relative links/images are rewritten to absolute
+    URLs so the resulting Markdown renders correctly outside the origin.
     """
     try:
         import html2text
@@ -109,10 +267,7 @@ def convert_html_string(html: str) -> str:
     try:
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html, 'html.parser')
-        for tag in soup(['script', 'style', 'noscript', 'nav', 'footer', 'header', 'aside', 'form']):
-            tag.decompose()
-        main = soup.find('article') or soup.find('main') or soup.body or soup
-        cleaned = str(main)
+        cleaned = _extract_main_html(soup, base_url)
     except Exception:
         pass
 
@@ -120,49 +275,58 @@ def convert_html_string(html: str) -> str:
     h.body_width = 0
     h.ignore_links = False
     h.ignore_images = False
-    return h.handle(cleaned)
+    md = h.handle(cleaned)
+    # Collapse runs of 3+ blank lines that html2text sometimes emits.
+    md = re.sub(r'\n{3,}', '\n\n', md).strip()
+    return md
 
 
 def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
     """Fetch a URL and convert the HTML body to Markdown.
 
-    Returns ``(markdown, title)``. Raises on network / parse failure so the
-    caller can surface a friendly flash message.
+    Returns ``(markdown, title)``. Uses ``requests`` (gzip/brotli, redirects,
+    charset auto-detect) so it handles more real-world pages than the old
+    urllib-based implementation.
     """
-    from urllib.request import Request, urlopen
+    try:
+        import requests
+    except ImportError:
+        raise ImportError('URL 抓取需要 requests，请执行: pip install requests')
+
     headers = {
         'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                        'AppleWebKit/537.36 (KHTML, like Gecko) '
                        'Chrome/124.0 Safari/537.36'),
-        'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+        'Accept': ('text/html,application/xhtml+xml,application/xml;q=0.9,'
+                   'image/avif,image/webp,*/*;q=0.8'),
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Referer': url,
     }
-    req = Request(url, headers=headers)
-    with urlopen(req, timeout=timeout) as resp:
-        raw = resp.read()
-        charset = resp.headers.get_content_charset() or 'utf-8'
-    try:
-        html = raw.decode(charset, errors='replace')
-    except LookupError:
-        html = raw.decode('utf-8', errors='replace')
+    resp = requests.get(url, headers=headers, timeout=timeout,
+                        allow_redirects=True)
+    resp.raise_for_status()
+    # Let requests infer from Content-Type / apparent_encoding
+    if not resp.encoding or resp.encoding.lower() == 'iso-8859-1':
+        resp.encoding = resp.apparent_encoding or 'utf-8'
+    html = resp.text
+    final_url = resp.url or url
 
-    # Extract <title> before stripping
     page_title = ''
     try:
         from bs4 import BeautifulSoup
+        # Parse once for title; _extract_main_html below mutates its own soup.
         soup = BeautifulSoup(html, 'html.parser')
-        if soup.title and soup.title.string:
-            page_title = soup.title.string.strip()
-        # Prefer og:title if present
-        og = soup.find('meta', property='og:title')
-        if og and og.get('content'):
-            page_title = og['content'].strip()
+        page_title = _extract_title(soup)
     except Exception:
         pass
 
-    md = convert_html_string(html)
+    md = convert_html_string(html, base_url=final_url)
     if not page_title:
         page_title = extract_title(md)
+    # Final safety: strip site suffix if we fell back to <title>
+    page_title = _clean_title_suffix(page_title) if page_title else page_title
     return md, page_title
 
 

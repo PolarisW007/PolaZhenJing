@@ -187,13 +187,15 @@ MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
 MINIMAX_MODEL = 'MiniMax-M2.7'
 
 # ── MiniMax Text-to-Image (Ghibli-style illustrations) ──────────────
-# T2I endpoint. Must match the domain the MINIMAX_TOKEN_PLAN_API_KEY
-# was registered under: keys from the mainland portal (api.minimax.chat)
-# are rejected by api.minimaxi.chat with "invalid api key" and vice versa.
-# Default to the mainland domain since that's where the existing chat key
-# is registered; override with MINIMAX_IMAGE_URL for the international key.
+# T2I endpoint. The API key domain must match this URL:
+#   - Mainland (official, recommended): https://api.minimaxi.com/v1/image_generation
+#   - International:                    https://api.minimax.io/v1/image_generation
+# The legacy https://api.minimax.chat/... endpoint no longer exposes
+# image_generation and was silently returning failures, which is why every
+# recent article ended up without illustrations. Override via MINIMAX_IMAGE_URL
+# if the key was registered on a different portal.
 MINIMAX_IMAGE_URL = os.environ.get(
-    'MINIMAX_IMAGE_URL', 'https://api.minimax.chat/v1/image_generation'
+    'MINIMAX_IMAGE_URL', 'https://api.minimaxi.com/v1/image_generation'
 )
 MINIMAX_IMAGE_MODEL = os.environ.get('MINIMAX_IMAGE_MODEL', 'image-01')
 
@@ -222,7 +224,12 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | Non
         logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping LLM rewrite')
         return None
 
-    user_msg = f'请根据以下素材，以你的风格写一篇公众号长文。标题是「{title}」。\n\n素材内容：\n{content}'
+    user_msg = (
+        f'请根据以下素材，以你的风格写一篇公众号长文。必须严格围绕素材的实际论点与主题展开，'
+        f'不要自行替换主题、混入无关个人经历或凭空构造事实。如果素材是个人博客/技术解读，'
+        f'保留原文的代码例子、术语和数据。标题是「{title}」，保持标题与正文语义一致。\n\n'
+        f'素材内容：\n{content}'
+    )
 
     payload = json.dumps({
         'model': MINIMAX_MODEL,
@@ -258,8 +265,10 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | Non
 def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
     """Call MiniMax text-to-image API and return image bytes, or None on failure.
 
-    Uses response_format='url' then downloads the image. Ghibli style is baked
-    into the prompt by the caller.
+    Uses ``response_format='base64'`` per the official example so the bytes are
+    returned inline and we avoid a second network hop that can fail (temporary
+    URLs expire in 24h and are sometimes blocked by corporate networks).
+    Falls back to the ``image_urls`` path for backward compatibility.
     """
     api_key = _get_minimax_api_key()
     if not api_key:
@@ -270,7 +279,7 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
         'model': MINIMAX_IMAGE_MODEL,
         'prompt': prompt,
         'aspect_ratio': aspect_ratio,
-        'response_format': 'url',
+        'response_format': 'base64',
         'n': 1,
         'prompt_optimizer': True,
     }, ensure_ascii=False).encode('utf-8')
@@ -283,32 +292,37 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
         with urlopen(req, timeout=180) as resp:
             data = json.loads(resp.read().decode('utf-8'))
     except Exception as e:
-        logger.error('MiniMax T2I request failed: %s', e)
+        logger.error('MiniMax T2I request failed (%s): %s', MINIMAX_IMAGE_URL, e)
         if hasattr(e, 'read'):
             try:
-                logger.error('Error body: %s', e.read().decode('utf-8')[:500])
+                logger.error('Error body: %s', e.read().decode('utf-8')[:800])
             except Exception:
                 pass
         return None
 
-    # MiniMax returns { "data": { "image_urls": [ "https://..." ] }, ... }
-    urls: list = []
-    try:
-        d = data.get('data') or {}
-        urls = d.get('image_urls') or d.get('urls') or []
-        if not urls and isinstance(data.get('images'), list):
-            urls = [x.get('url') for x in data['images'] if x.get('url')]
-    except Exception:
-        urls = []
-    if not urls:
-        logger.error('MiniMax T2I returned no image_urls: %s', str(data)[:500])
-        return None
+    d = data.get('data') or {}
 
+    # Preferred: base64-encoded image bytes straight from the API
+    base64_list = d.get('image_base64') or []
+    if isinstance(base64_list, list) and base64_list:
+        try:
+            import base64
+            return base64.b64decode(base64_list[0])
+        except Exception as e:
+            logger.error('Failed to decode base64 image: %s', e)
+
+    # Fallback: signed URL (legacy response shape)
+    urls: list = d.get('image_urls') or d.get('urls') or []
+    if not urls and isinstance(data.get('images'), list):
+        urls = [x.get('url') for x in data['images'] if isinstance(x, dict) and x.get('url')]
+    if not urls:
+        logger.error('MiniMax T2I returned no image data: %s', str(data)[:800])
+        return None
     try:
         with urlopen(urls[0], timeout=60) as img_resp:
             return img_resp.read()
     except Exception as e:
-        logger.error('Failed to download generated image: %s', e)
+        logger.error('Failed to download generated image from %s: %s', urls[0], e)
         return None
 
 
@@ -845,8 +859,11 @@ def view_article(filename):
                     meta[k.strip()] = v.strip().strip('"').strip("'")
             body = parts[2].strip()
     # Render markdown to HTML
-    # Strip Jekyll Liquid tags (e.g. {{ site.baseurl }}) for local preview
-    body = body.replace('{{ site.baseurl }}', '')
+    # Replace Jekyll's {{ site.baseurl }} with the current Flask script root.
+    # In dev (root path) this is ''. Behind Nginx at /PolaZhenjing/ the
+    # ReverseProxied middleware exposes it as request.script_root so image
+    # URLs like /assets/images/generated/... still resolve.
+    body = body.replace('{{ site.baseurl }}', request.script_root or '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
