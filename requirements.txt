@@ -3,6 +3,7 @@ flask-login==0.6.3
 PyMuPDF==1.25.3
 mammoth==1.8.0
 html2text==2024.2.26
+beautifulsoup4==4.12.3
 python-dotenv==1.0.1
 python-slugify==8.0.4
 markdown==3.7

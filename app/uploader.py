@@ -16,7 +16,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, session, url_for, current_app)
 
 from .auth import login_required
-from .converter import detect_and_convert, extract_title
+from .converter import detect_and_convert, extract_title, fetch_url_as_markdown
 from . import jobs
 
 logger = logging.getLogger(__name__)
@@ -556,8 +556,25 @@ def upload():
             content = request.form['content'].strip()
             title = extract_title(content)
 
+        # Handle URL input
+        elif request.form.get('url', '').strip():
+            url = request.form['url'].strip()
+            if not (url.startswith('http://') or url.startswith('https://')):
+                flash('请输入以 http:// 或 https:// 开头的 URL。', 'error')
+                return render_template('upload.html')
+            try:
+                content, fetched_title = fetch_url_as_markdown(url)
+            except Exception as e:
+                logger.exception('URL fetch failed: %s', url)
+                flash(f'抓取 URL 失败：{e}', 'error')
+                return render_template('upload.html')
+            if not content.strip():
+                flash('未能从该 URL 提取到文章内容。', 'error')
+                return render_template('upload.html')
+            title = fetched_title or extract_title(content)
+
         else:
-            flash('请上传文件或粘贴内容。', 'error')
+            flash('请上传文件、粘贴内容或输入 URL。', 'error')
             return render_template('upload.html')
 
         # Store in temp file (avoid session cookie size limit)

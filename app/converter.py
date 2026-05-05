@@ -93,6 +93,79 @@ def convert_html(file_path: str) -> str:
     return h.handle(html)
 
 
+def convert_html_string(html: str) -> str:
+    """Convert an in-memory HTML string to Markdown.
+
+    Tries to extract the main <article>/<main> body first (strips nav, footer,
+    scripts, styles). Falls back to full-page conversion when no main region
+    is detected.
+    """
+    try:
+        import html2text
+    except ImportError:
+        raise ImportError('URL 抓取需要 html2text，请执行: pip install html2text')
+
+    cleaned = html
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, 'html.parser')
+        for tag in soup(['script', 'style', 'noscript', 'nav', 'footer', 'header', 'aside', 'form']):
+            tag.decompose()
+        main = soup.find('article') or soup.find('main') or soup.body or soup
+        cleaned = str(main)
+    except Exception:
+        pass
+
+    h = html2text.HTML2Text()
+    h.body_width = 0
+    h.ignore_links = False
+    h.ignore_images = False
+    return h.handle(cleaned)
+
+
+def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
+    """Fetch a URL and convert the HTML body to Markdown.
+
+    Returns ``(markdown, title)``. Raises on network / parse failure so the
+    caller can surface a friendly flash message.
+    """
+    from urllib.request import Request, urlopen
+    headers = {
+        'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                       'AppleWebKit/537.36 (KHTML, like Gecko) '
+                       'Chrome/124.0 Safari/537.36'),
+        'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    }
+    req = Request(url, headers=headers)
+    with urlopen(req, timeout=timeout) as resp:
+        raw = resp.read()
+        charset = resp.headers.get_content_charset() or 'utf-8'
+    try:
+        html = raw.decode(charset, errors='replace')
+    except LookupError:
+        html = raw.decode('utf-8', errors='replace')
+
+    # Extract <title> before stripping
+    page_title = ''
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, 'html.parser')
+        if soup.title and soup.title.string:
+            page_title = soup.title.string.strip()
+        # Prefer og:title if present
+        og = soup.find('meta', property='og:title')
+        if og and og.get('content'):
+            page_title = og['content'].strip()
+    except Exception:
+        pass
+
+    md = convert_html_string(html)
+    if not page_title:
+        page_title = extract_title(md)
+    return md, page_title
+
+
 def detect_and_convert(file_path: str, ext: str) -> str:
     """Route to correct converter based on file extension."""
     ext = ext.lower().lstrip('.')
