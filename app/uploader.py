@@ -187,9 +187,13 @@ MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
 MINIMAX_MODEL = 'MiniMax-M2.7'
 
 # ── MiniMax Text-to-Image (Ghibli-style illustrations) ──────────────
-# Official T2I endpoint (separate host from chat). Override via env if needed.
+# T2I endpoint. Must match the domain the MINIMAX_TOKEN_PLAN_API_KEY
+# was registered under: keys from the mainland portal (api.minimax.chat)
+# are rejected by api.minimaxi.chat with "invalid api key" and vice versa.
+# Default to the mainland domain since that's where the existing chat key
+# is registered; override with MINIMAX_IMAGE_URL for the international key.
 MINIMAX_IMAGE_URL = os.environ.get(
-    'MINIMAX_IMAGE_URL', 'https://api.minimaxi.chat/v1/image_generation'
+    'MINIMAX_IMAGE_URL', 'https://api.minimax.chat/v1/image_generation'
 )
 MINIMAX_IMAGE_MODEL = os.environ.get('MINIMAX_IMAGE_MODEL', 'image-01')
 
@@ -309,24 +313,38 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
 
 
 def _generate_illustrations(title: str, content: str, slug: str, project_root: str) -> list[dict]:
-    """Generate 2 Ghibli-style illustrations for an article: a cover + one scene.
+    """Generate 1 cover + 3 scene Ghibli-style illustrations for an article.
 
     Saves PNG files under ``assets/images/generated/<slug>/`` and returns a list
     of dicts ``[{'role': 'cover'|'scene', 'relpath': 'assets/images/…', 'alt': …}]``.
     On any failure (no API key, network error) returns an empty list — the
-    article is then written without images.
+    article is then written without images. Individual scene failures do not
+    abort the whole batch; the caller will inject whatever survived.
     """
-    # Build subject hints. Keep prompts in English for model stability.
+    # Keep prompts in English for model stability. Three scene prompts give
+    # varied framings so the article doesn't end up with three near-duplicates.
     cover_prompt = (
         f'A cinematic cover illustration evoking the essence of the article titled '
         f'"{title}". Wide landscape composition, soft clouds, atmospheric. '
         f'{GHIBLI_STYLE_PROMPT}'
     )
-    scene_prompt = (
-        f'A quiet in-text scene illustration related to "{title}". '
-        f'Focus on a small human or object moment, tranquil mood. '
-        f'{GHIBLI_STYLE_PROMPT}'
-    )
+    scene_prompts = [
+        (
+            f'An opening scene illustration for an article titled "{title}". '
+            f'A lone figure standing at the edge of a vast quiet landscape, '
+            f'contemplative mood, early morning light. {GHIBLI_STYLE_PROMPT}'
+        ),
+        (
+            f'A middle-chapter scene illustration for an article titled "{title}". '
+            f'An intimate close-up of hands interacting with an object or tool, '
+            f'textured surfaces, focused atmosphere. {GHIBLI_STYLE_PROMPT}'
+        ),
+        (
+            f'A closing scene illustration for an article titled "{title}". '
+            f'A small silhouette walking into a luminous horizon, hopeful mood, '
+            f'golden hour lighting. {GHIBLI_STYLE_PROMPT}'
+        ),
+    ]
 
     out_dir_rel = os.path.join('assets', 'images', 'generated', slug)
     out_dir_abs = os.path.join(project_root, out_dir_rel)
@@ -334,7 +352,9 @@ def _generate_illustrations(title: str, content: str, slug: str, project_root: s
 
     jobs_spec = [
         ('cover', cover_prompt, '16:9', 'cover.png'),
-        ('scene', scene_prompt, '4:3', 'scene-1.png'),
+        ('scene', scene_prompts[0], '4:3', 'scene-1.png'),
+        ('scene', scene_prompts[1], '4:3', 'scene-2.png'),
+        ('scene', scene_prompts[2], '4:3', 'scene-3.png'),
     ]
 
     results: list[dict] = []
@@ -358,10 +378,13 @@ def _generate_illustrations(title: str, content: str, slug: str, project_root: s
 
 
 def _inject_illustrations(content: str, images: list[dict]) -> str:
-    """Prepend cover image and insert a scene image near the middle of content.
+    """Prepend cover image and distribute scene images through the body.
 
-    Markdown image URLs use the Jekyll ``{{ site.baseurl }}`` prefix so that
-    they work under the ``/PolaZhenjing/`` sub-path on aipd.me.
+    Cover goes at the very top. Scene images are spread evenly across the
+    article (e.g. 3 scenes → roughly 25% / 50% / 75%), each snapped to the
+    next blank line for cleaner placement. Markdown image URLs use the
+    Jekyll ``{{ site.baseurl }}`` prefix so they work under the
+    ``/PolaZhenjing/`` sub-path on aipd.me.
     """
     if not images:
         return content
@@ -377,16 +400,20 @@ def _inject_illustrations(content: str, images: list[dict]) -> str:
         body = _md(cover) + '\n\n' + body
 
     if scenes:
-        # Insert scene image after the first major section (~40% of length).
         lines = body.split('\n')
-        inject_at = max(1, int(len(lines) * 0.4))
-        # Snap to the next blank line after the target index for cleaner placement.
-        for i in range(inject_at, min(inject_at + 30, len(lines))):
-            if not lines[i].strip():
-                inject_at = i
-                break
-        scene_md = '\n' + _md(scenes[0]) + '\n'
-        lines.insert(inject_at, scene_md)
+        n = len(scenes)
+        # Evenly-spaced anchor positions: 1/(n+1), 2/(n+1), ... n/(n+1).
+        # Insert from last to first so earlier indices stay valid.
+        for idx in range(n - 1, -1, -1):
+            frac = (idx + 1) / (n + 1)
+            anchor = max(1, int(len(lines) * frac))
+            # Snap to the next blank line after anchor for cleaner placement.
+            for i in range(anchor, min(anchor + 30, len(lines))):
+                if not lines[i].strip():
+                    anchor = i
+                    break
+            scene_md = '\n' + _md(scenes[idx]) + '\n'
+            lines.insert(anchor, scene_md)
         body = '\n'.join(lines)
 
     return body
