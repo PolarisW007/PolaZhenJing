@@ -281,13 +281,117 @@ def convert_html_string(html: str, base_url: str = '') -> str:
     return md
 
 
+class URLFetchBlocked(Exception):
+    """Raised when a URL can't be fetched via plain HTTP.
+
+    Either the domain is on our anti-bot blocklist (pre-check) or the
+    response body looks like a JS challenge / login wall (post-check).
+    The message is user-facing; the ``suggestion`` field tells the UI how
+    to work around it (typically: use baoyu-fetch locally then paste).
+    """
+    def __init__(self, message: str, suggestion: str = ''):
+        super().__init__(message)
+        self.suggestion = suggestion
+
+
+# ── Known anti-bot / login-walled domains ─────────────────────────
+# Pure HTTP fetches can't bypass these sites' JS fingerprinting,
+# Cloudflare challenges, or auth walls — fail fast with a clear reason
+# instead of burning LLM + image-gen credits on garbage HTML.
+# Matched against the URL host suffix (e.g. 'm.juejin.cn' → 'juejin.cn').
+_BLOCKED_HOSTS = {
+    'juejin.cn': '掘金（JS 反爬挑战，纯 HTTP 抓不到正文）',
+    'zhihu.com': '知乎（JS 挑战 + 登录墙）',
+    'zhuanlan.zhihu.com': '知乎专栏（JS 挑战 + 登录墙）',
+    'mp.weixin.qq.com': '微信公众号（环境指纹 + Referer 校验）',
+    'weixin.qq.com': '微信（需登录）',
+    'xiaohongshu.com': '小红书（登录墙）',
+    'x.com': 'X/Twitter（需登录，动态渲染）',
+    'twitter.com': 'X/Twitter（需登录，动态渲染）',
+    'weibo.com': '微博（登录墙）',
+    'douyin.com': '抖音（动态渲染）',
+    'bilibili.com': 'B站专栏（动态渲染 + 风控）',
+    'csdn.net': 'CSDN（JS 挑战）',
+    'jianshu.com': '简书（JS 挑战）',
+    'medium.com': 'Medium（付费墙 + JS 挑战）',
+}
+
+# Fingerprints of JS-challenge / login-wall responses.
+# If the final rendered markdown contains any of these (and is short),
+# treat the fetch as failed even if HTTP 200.
+_ANTIBOT_MARKERS = (
+    'please wait',
+    'please enable javascript',
+    'enable javascript to continue',
+    'just a moment',
+    'cf-browser-verification',
+    'checking your browser',
+    '环境异常',
+    '访问验证',
+    '滑动验证',
+    '请完成安全验证',
+)
+
+
+def _check_blocked_host(url: str) -> None:
+    """Pre-flight: raise ``URLFetchBlocked`` if URL is a known anti-bot host.
+
+    Runs BEFORE any network call so the caller can short-circuit the whole
+    LLM-rewrite + image-gen pipeline and show a friendly error immediately.
+    """
+    try:
+        from urllib.parse import urlparse
+        host = (urlparse(url).hostname or '').lower().lstrip('.')
+    except Exception:
+        return
+    if not host:
+        return
+    for blocked, reason in _BLOCKED_HOSTS.items():
+        # Suffix match so m.juejin.cn / api.juejin.cn both hit juejin.cn.
+        if host == blocked or host.endswith('.' + blocked):
+            raise URLFetchBlocked(
+                f'该站点暂不支持直接抓取：{reason}。',
+                suggestion=(
+                    '请改用「粘贴内容」标签页：在本机用浏览器打开该链接，'
+                    '复制正文后粘贴进来。或在本机终端运行 baoyu-fetch 抓成 '
+                    'Markdown 后粘贴。'
+                ),
+            )
+
+
+def _looks_like_antibot(md: str) -> bool:
+    """Post-flight: detect JS-challenge / login-wall markers in the output."""
+    if not md:
+        return True
+    compact = md.strip()
+    # Real articles are virtually never shorter than 200 chars.
+    if len(compact) < 200:
+        lower = compact.lower()
+        if any(m in lower for m in _ANTIBOT_MARKERS):
+            return True
+        # Extremely short response with no markers is also suspicious,
+        # but we don't want false positives on legit micro-posts.
+        if len(compact) < 40:
+            return True
+    return False
+
+
 def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
     """Fetch a URL and convert the HTML body to Markdown.
 
     Returns ``(markdown, title)``. Uses ``requests`` (gzip/brotli, redirects,
     charset auto-detect) so it handles more real-world pages than the old
     urllib-based implementation.
+
+    Raises ``URLFetchBlocked`` when the domain is a known anti-bot host
+    (pre-check, no network call) or when the response body looks like a
+    JS-challenge / login-wall page (post-check). Callers should catch
+    this to show a friendly error and skip the expensive LLM + image-gen
+    pipeline.
     """
+    # Pre-check: fail fast on known anti-bot sites before any network call.
+    _check_blocked_host(url)
+
     try:
         import requests
     except ImportError:
@@ -323,6 +427,17 @@ def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
         pass
 
     md = convert_html_string(html, base_url=final_url)
+
+    # Post-check: did the page serve us a JS challenge / login wall?
+    if _looks_like_antibot(md):
+        raise URLFetchBlocked(
+            '抓取到的内容疑似反爬挑战页或登录墙（正文过短/含 JS 校验标记）。',
+            suggestion=(
+                '请改用「粘贴内容」标签页：在本机浏览器打开链接复制正文后粘贴，'
+                '或用 baoyu-fetch 本地抓取后粘贴。'
+            ),
+        )
+
     if not page_title:
         page_title = extract_title(md)
     # Final safety: strip site suffix if we fell back to <title>

@@ -16,7 +16,8 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, session, url_for, current_app)
 
 from .auth import login_required
-from .converter import detect_and_convert, extract_title, fetch_url_as_markdown
+from .converter import (detect_and_convert, extract_title,
+                        fetch_url_as_markdown, URLFetchBlocked)
 from . import jobs
 
 logger = logging.getLogger(__name__)
@@ -578,12 +579,19 @@ def upload():
                 return render_template('upload.html')
             try:
                 content, fetched_title = fetch_url_as_markdown(url)
+            except URLFetchBlocked as e:
+                # Known anti-bot site OR response looked like a JS challenge.
+                # Fail fast here so we never burn LLM + image-gen credits
+                # on garbage HTML. Show the reason + actionable suggestion.
+                logger.info('URL blocked: %s (%s)', url, e)
+                flash(f'抓取失败：{e} {e.suggestion}'.strip(), 'error')
+                return render_template('upload.html')
             except Exception as e:
                 logger.exception('URL fetch failed: %s', url)
                 flash(f'抓取 URL 失败：{e}', 'error')
                 return render_template('upload.html')
             if not content.strip():
-                flash('未能从该 URL 提取到文章内容。', 'error')
+                flash('未能从该 URL 提取到文章内容。请改用「粘贴内容」。', 'error')
                 return render_template('upload.html')
             title = fetched_title or extract_title(content)
 
