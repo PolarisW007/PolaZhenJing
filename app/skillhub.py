@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from flask import (Blueprint, abort, flash, redirect, render_template, request,
-                   send_file, session, url_for)
+                   jsonify, send_file, session, url_for)
 from werkzeug.utils import secure_filename
 
 from .auth import login_required
@@ -235,6 +235,34 @@ def _github_zip_url(repo_url: str) -> tuple[str, str]:
     return f'https://api.github.com/repos/{owner}/{repo}/zipball', f'{owner}-{repo}'
 
 
+def _fetch_github_repo(repo_url: str, destination: Path) -> tuple[Path, str]:
+    """Download and extract a GitHub repository zipball into destination."""
+    zip_url, package_name = _github_zip_url(repo_url)
+    request_obj = Request(zip_url, headers={'User-Agent': 'PolaZhenjing-SkillHub'})
+    zip_path = destination / 'repo.zip'
+    with urlopen(request_obj, timeout=30) as response:
+        zip_path.write_bytes(response.read())
+    extract_dir = destination / 'extract'
+    _safe_extract_zip(zip_path, extract_dir)
+    children = [child for child in extract_dir.iterdir() if child.is_dir()]
+    source_dir = children[0] if len(children) == 1 else extract_dir
+    return source_dir, package_name
+
+
+def _preview_package(source_dir: Path) -> list[dict]:
+    """Return readonly skill metadata found in a package directory."""
+    preview = []
+    for skill_md in source_dir.rglob('SKILL.md'):
+        entry = _entry_from_skill_md(skill_md)
+        preview.append({
+            'name': entry['name'],
+            'description': entry['description'],
+            'category': entry['category'],
+            'path': str(skill_md.relative_to(source_dir)),
+        })
+    return sorted(preview, key=lambda item: item['name'].lower())
+
+
 @skillhub_bp.app_context_processor
 def inject_skillhub_admin():
     """Expose Skill Hub admin status to templates."""
@@ -318,17 +346,9 @@ def add_github():
     _require_skill_admin()
     repo_url = request.form.get('repo_url', '').strip()
     try:
-        zip_url, package_name = _github_zip_url(repo_url)
-        request_obj = Request(zip_url, headers={'User-Agent': 'PolaZhenjing-SkillHub'})
-        target_dir = SKILL_STORE_DIR / f'{_slugify(package_name)}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
         with tempfile.TemporaryDirectory() as tmp:
-            zip_path = Path(tmp) / 'repo.zip'
-            with urlopen(request_obj, timeout=30) as response:
-                zip_path.write_bytes(response.read())
-            extract_dir = Path(tmp) / 'extract'
-            _safe_extract_zip(zip_path, extract_dir)
-            children = [child for child in extract_dir.iterdir() if child.is_dir()]
-            source_dir = children[0] if len(children) == 1 else extract_dir
+            source_dir, package_name = _fetch_github_repo(repo_url, Path(tmp))
+            target_dir = SKILL_STORE_DIR / f'{_slugify(package_name)}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
             shutil.copytree(source_dir, target_dir)
         added = _register_package(target_dir, 'github', repo_url)
         flash(f'已从 GitHub 添加 {added} 个 skill。' if added else '仓库中未找到 SKILL.md。',
@@ -336,3 +356,24 @@ def add_github():
     except (ValueError, URLError, OSError, zipfile.BadZipFile) as exc:
         flash(f'添加失败：{exc}', 'error')
     return redirect(url_for('skillhub.index'))
+
+
+@skillhub_bp.route('/admin/github-preview', methods=['POST'])
+@login_required
+def github_preview():
+    """Preview a GitHub repo before importing it into Skill Hub."""
+    _require_skill_admin()
+    payload = request.get_json(silent=True) or {}
+    repo_url = payload.get('repo_url', '').strip()
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            source_dir, package_name = _fetch_github_repo(repo_url, Path(tmp))
+            skills = _preview_package(source_dir)
+        return jsonify({
+            'ok': True,
+            'package_name': package_name,
+            'skill_count': len(skills),
+            'skills': skills,
+        })
+    except (ValueError, URLError, OSError, zipfile.BadZipFile) as exc:
+        return jsonify({'ok': False, 'error': str(exc)}), 400
