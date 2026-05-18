@@ -79,8 +79,10 @@ def create_app():
     # Register blueprints
     from .auth import auth_bp
     from .uploader import uploader_bp
+    from .skillhub import skillhub_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(uploader_bp)
+    app.register_blueprint(skillhub_bp)
 
     # Serve static assets (CSS, images, etc.) from project root /assets/
     assets_dir = os.path.join(os.path.dirname(__file__), '..', 'assets')

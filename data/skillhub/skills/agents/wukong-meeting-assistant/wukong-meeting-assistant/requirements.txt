@@ -1,0 +1,3 @@
+# wukong-meeting-assistant
+# 纯标准库实现，无额外第三方依赖。
+# Python >= 3.9
