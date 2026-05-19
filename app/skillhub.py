@@ -42,11 +42,11 @@ DEFAULT_SKILL_ROOTS = [
 ]
 
 CATEGORY_KEYWORDS = {
+    '数据': ['data', 'dataset', 'research', 'chart', 'cluster', 'network', 'dingtalk', 'dws', 'keen', 'meeting', 'report'],
     '交付': ['delivery', 'pola-', 'deploy', 'ship', 'release', 'test', 'review'],
     '设计': ['design', 'ui', 'frontend', 'wukong'],
     '浏览器': ['browse', 'browser', 'chrome', 'scrape', 'qa'],
     '文档': ['document', 'pdf', 'presentation', 'spreadsheet', 'devlog'],
-    '数据': ['dingtalk', 'dws', 'keen', 'meeting', 'report'],
     '工程': ['codex', 'health', 'investigate', 'guard', 'careful'],
 }
 
@@ -290,6 +290,43 @@ def index():
         selected_category=category,
         query=request.args.get('q', '').strip(),
     )
+
+
+@skillhub_bp.route('/api/public')
+def public_skills():
+    """Return compact public skill metadata for the AIPD homepage."""
+    try:
+        limit = min(max(int(request.args.get('limit', 6)), 1), 24)
+    except ValueError:
+        limit = 6
+    skills = _all_skills()
+    featured = sorted(
+        skills,
+        key=lambda item: (
+            0 if item.get('id') in {
+                'deep-research-data-news',
+                'pola-a2a-usage',
+                'pola-agent-delivery-framework',
+                'wukong-keen-insight-v3',
+            } else 1,
+            item.get('name', '').lower(),
+        ),
+    )[:limit]
+    return jsonify({
+        'ok': True,
+        'skills': [
+            {
+                'id': item.get('id'),
+                'name': item.get('name'),
+                'description': item.get('description') or '',
+                'category': item.get('category') or '通用',
+                'source_type': item.get('source_type') or 'local',
+                'url': url_for('skillhub.index', q=item.get('name', '')),
+                'download_url': url_for('skillhub.download', skill_id=item.get('id')),
+            }
+            for item in featured
+        ],
+    })
 
 
 @skillhub_bp.route('/<skill_id>/download')

@@ -32,13 +32,20 @@
       <label for="description">描述（可选）</label>
       <input type="text" id="description" name="description" class="form-input" placeholder="简要摘要...">
     </div>
+    <div class="form-group">
+      <label for="illustrations1">插入配图（可选，可多选）</label>
+      <input type="file" id="illustrations1" name="illustrations" class="form-input" accept="image/png,image/jpeg,image/webp" multiple>
+      <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem; line-height: 1.55;">
+        支持 PNG / JPG / WebP。生成图文后会自动插入合适段落；若与 AI 生成图位置冲突，会优先使用上传配图。
+      </div>
+    </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
 
 <!-- Paste Tab -->
 <div id="tab-paste" style="display: none;">
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     <div class="form-group">
       <label for="content">Markdown 内容</label>
       <textarea id="content" name="content" class="form-input" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
@@ -55,13 +62,20 @@
       <label for="desc2">描述（可选）</label>
       <input type="text" id="desc2" name="description" class="form-input" placeholder="简要摘要...">
     </div>
+    <div class="form-group">
+      <label for="illustrations2">插入配图（可选，可多选）</label>
+      <input type="file" id="illustrations2" name="illustrations" class="form-input" accept="image/png,image/jpeg,image/webp" multiple>
+      <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem; line-height: 1.55;">
+        支持 PNG / JPG / WebP。系统会尽量保留原图细节，仅对疑似边角水印做局部清理。
+      </div>
+    </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
 
 <!-- URL Tab -->
 <div id="tab-url" style="display: none;">
-  <form method="POST">
+  <form method="POST" enctype="multipart/form-data">
     <div class="form-group">
       <label for="url">文章 URL</label>
       <input type="url" id="url" name="url" class="form-input" placeholder="https://example.com/article" required>
@@ -81,6 +95,13 @@
     <div class="form-group">
       <label for="desc3">描述（可选）</label>
       <input type="text" id="desc3" name="description" class="form-input" placeholder="简要摘要...">
+    </div>
+    <div class="form-group">
+      <label for="illustrations3">插入配图（可选，可多选）</label>
+      <input type="file" id="illustrations3" name="illustrations" class="form-input" accept="image/png,image/jpeg,image/webp" multiple>
+      <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem; line-height: 1.55;">
+        支持 PNG / JPG / WebP。上传配图会参与最终排版，并优先于相邻 AI 生成图。
+      </div>
     </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
