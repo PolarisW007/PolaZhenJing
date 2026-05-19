@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block title %}编辑文章{% endblock %}
+{% block card_class %}card-full editor-card{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="editor-topbar">
+  <a href="{{ url_for('uploader.view_article', filename=filename) }}" class="btn-ghost">← 返回预览</a>
+  <a href="{{ pages_url }}" target="_blank" rel="noopener" class="btn-ghost">查看发布页 ↗</a>
+</div>
+
+<h2>编辑文章</h2>
+
+<form method="POST" id="article-edit-form">
+  <div class="editor-meta-grid">
+    <div class="form-group">
+      <label for="title">标题</label>
+      <input class="form-input" id="title" name="title" value="{{ meta.get('title', '') }}" required>
+    </div>
+    <div class="form-group">
+      <label for="date">日期</label>
+      <input class="form-input" id="date" name="date" value="{{ meta.get('date', '') }}" placeholder="YYYY-MM-DD">
+    </div>
+    <div class="form-group">
+      <label for="layout">文章风格</label>
+      <select class="form-input" id="layout" name="layout">
+        {% for style in styles %}
+        <option value="{{ style.id }}" {% if meta.get('layout') == style.id %}selected{% endif %}>{{ style.name }} · {{ style.id }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="theme">主题</label>
+      <select class="form-input" id="theme" name="theme">
+        {% for theme in themes %}
+        <option value="{{ theme.id }}" {% if meta.get('theme') == theme.id %}selected{% endif %}>{{ theme.name }} · {{ theme.id }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="tags">标签（英文逗号分隔）</label>
+    <input class="form-input" id="tags" name="tags" value="{{ tag_value }}" placeholder="AI, research, product">
+  </div>
+
+  <div class="form-group">
+    <label for="summary">摘要 / TL;DR</label>
+    <textarea class="form-input compact-textarea" id="summary" name="summary" placeholder="用于文章卡片和 TL;DR 展示">{{ meta.get('summary', '') }}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="description">描述（可选）</label>
+    <input class="form-input" id="description" name="description" value="{{ meta.get('description', '') }}">
+  </div>
+
+  <details class="front-matter-details" {% if extra_front_matter %}open{% endif %}>
+    <summary>额外 front matter</summary>
+    <textarea class="form-input compact-textarea" name="extra_front_matter" placeholder="permalink: /custom/path/&#10;cover: /assets/cover.png">{{ extra_front_matter or '' }}</textarea>
+  </details>
+
+  <div class="editor-workspace">
+    <div class="editor-pane">
+      <div class="pane-head">
+        <span>Markdown 正文</span>
+        <small>保留 Jekyll 图片语法和 Markdown 原文</small>
+      </div>
+      <textarea id="body" name="body">{{ body }}</textarea>
+    </div>
+    <div class="preview-pane">
+      <div class="pane-head">
+        <span>渲染预览</span>
+        <button class="btn-ghost mini-btn" type="button" id="refresh-preview">刷新预览</button>
+      </div>
+      <div class="article-preview" id="article-preview"></div>
+    </div>
+  </div>
+
+  <div class="editor-actions">
+    <button class="btn-gold btn-sm" type="submit" name="save_mode" value="save">保存</button>
+    <button class="btn-ghost" type="submit" name="save_mode" value="sync">保存并同步 GitHub</button>
+  </div>
+</form>
+
+<style>
+  .editor-card { max-width: 1380px; }
+  .editor-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .editor-meta-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(140px, 0.8fr) minmax(180px, 1fr) minmax(160px, 1fr);
+    gap: 1rem;
+  }
+  .compact-textarea {
+    min-height: 88px !important;
+    font-family: inherit !important;
+  }
+  .front-matter-details {
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.025);
+    padding: 0.85rem 1rem;
+  }
+  .front-matter-details summary {
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
+  }
+  .editor-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+    gap: 1rem;
+    align-items: stretch;
+  }
+  .editor-pane,
+  .preview-pane {
+    min-width: 0;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.035);
+    overflow: hidden;
+  }
+  .pane-head {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--text-ghost);
+  }
+  .pane-head span {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .pane-head small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .mini-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+  .editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .EasyMDEContainer .CodeMirror {
+    min-height: 680px;
+    background: rgba(0,0,0,0.34);
+    color: var(--text-secondary);
+    border: 0;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.72;
+  }
+  .EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--gold-primary); }
+  .EasyMDEContainer .editor-toolbar {
+    border: 0;
+    border-bottom: 1px solid var(--text-ghost);
+    background: rgba(0,0,0,0.22);
+    opacity: 1;
+  }
+  .EasyMDEContainer .editor-toolbar button {
+    color: var(--text-muted) !important;
+  }
+  .EasyMDEContainer .editor-toolbar button:hover,
+  .EasyMDEContainer .editor-toolbar button.active {
+    background: rgba(228,191,122,0.1);
+    border-color: rgba(228,191,122,0.25);
+    color: var(--gold-primary) !important;
+  }
+  .EasyMDEContainer .editor-statusbar {
+    color: var(--text-muted);
+  }
+  .article-preview {
+    height: 742px;
+    overflow: auto;
+    padding: 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.9;
+  }
+  .article-preview h1,
+  .article-preview h2,
+  .article-preview h3 {
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin: 1.5rem 0 0.75rem;
+    font-family: "Noto Serif SC", serif;
+  }
+  .article-preview p { margin: 0 0 1.1rem; }
+  .article-preview img {
+    width: 100%;
+    border-radius: 12px;
+    margin: 1.25rem 0;
+    border: 1px solid var(--text-ghost);
+  }
+  .article-preview blockquote {
+    border-left: 3px solid var(--gold-primary);
+    background: rgba(228,191,122,0.05);
+    padding: 0.8rem 1rem;
+    margin: 1rem 0;
+  }
+  .article-preview code {
+    color: var(--gold-primary);
+    background: rgba(228,191,122,0.08);
+    padding: 0.12rem 0.35rem;
+    border-radius: 4px;
+  }
+  .article-preview pre {
+    overflow: auto;
+    border: 1px solid var(--text-ghost);
+    border-radius: 10px;
+    padding: 1rem;
+    background: rgba(0,0,0,0.4);
+  }
+
+  @media (max-width: 1080px) {
+    .editor-meta-grid,
+    .editor-workspace {
+      grid-template-columns: 1fr;
+    }
+    .article-preview,
+    .EasyMDEContainer .CodeMirror {
+      min-height: 460px;
+      height: 460px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+  const textarea = document.getElementById('body');
+  const preview = document.getElementById('article-preview');
+  const easyMDE = new EasyMDE({
+    element: textarea,
+    spellChecker: false,
+    autofocus: true,
+    autosave: {
+      enabled: true,
+      uniqueId: 'article-edit-{{ filename }}',
+      delay: 1200
+    },
+    status: ['autosave', 'lines', 'words'],
+    toolbar: [
+      'bold', 'italic', 'heading', '|',
+      'quote', 'unordered-list', 'ordered-list', '|',
+      'link', 'image', 'table', 'code', '|',
+      'side-by-side', 'fullscreen', '|',
+      'guide'
+    ]
+  });
+
+  async function refreshPreview() {
+    preview.innerHTML = '<p style="color: var(--text-muted);">预览生成中…</p>';
+    const formData = new FormData();
+    formData.append('body', easyMDE.value());
+    try {
+      const response = await fetch('{{ url_for("uploader.preview_article_markdown", filename=filename) }}', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      preview.innerHTML = data.ok ? data.html : '<p>预览失败。</p>';
+    } catch (error) {
+      preview.innerHTML = '<p>预览失败，请检查网络。</p>';
+    }
+  }
+
+  document.getElementById('refresh-preview').addEventListener('click', refreshPreview);
+  document.getElementById('article-edit-form').addEventListener('submit', function () {
+    easyMDE.toTextArea();
+  });
+  refreshPreview();
+</script>
+{% endblock %}

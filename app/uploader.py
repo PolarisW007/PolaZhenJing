@@ -1361,6 +1361,109 @@ def _build_pages_url(filename):
     return GITHUB_PAGES_BASE + '/'
 
 
+def _safe_post_path(filename: str) -> str | None:
+    """Return an absolute post path only for safe _posts markdown filenames."""
+    if not filename or '/' in filename or '\\' in filename or not filename.endswith('.md'):
+        return None
+    fpath = os.path.abspath(os.path.join(POSTS_DIR, filename))
+    posts_root = os.path.abspath(POSTS_DIR)
+    if not fpath.startswith(posts_root + os.sep):
+        return None
+    return fpath
+
+
+def _parse_post(raw: str) -> tuple[dict, list[str], str]:
+    """Parse the simple Jekyll front matter used by this project."""
+    meta: dict = {}
+    front_lines: list[str] = []
+    body = raw
+    if raw.startswith('---'):
+        parts = raw.split('---', 2)
+        if len(parts) >= 3:
+            front_lines = parts[1].strip().split('\n')
+            body = parts[2].strip()
+            for line in front_lines:
+                if ':' not in line:
+                    continue
+                key, value = line.split(':', 1)
+                meta[key.strip()] = value.strip().strip('"').strip("'")
+    return meta, front_lines, body
+
+
+def _yaml_quote(value: str) -> str:
+    """Quote a simple YAML string value for front matter."""
+    value = (value or '').replace('\\', '\\\\').replace('"', '\\"')
+    return f'"{value}"'
+
+
+def _tags_front_matter(raw_tags: str) -> str:
+    """Convert comma-separated tags to an inline YAML list."""
+    tags = [tag.strip() for tag in (raw_tags or '').split(',') if tag.strip()]
+    return '[' + ', '.join(json.dumps(tag, ensure_ascii=False) for tag in tags) + ']'
+
+
+def _tags_input_value(meta_tags: str) -> str:
+    """Convert existing inline tags to a friendly comma-separated input value."""
+    value = (meta_tags or '').strip()
+    if not value or value == '[]':
+        return ''
+    if value.startswith('[') and value.endswith(']'):
+        inner = value[1:-1].strip()
+        if not inner:
+            return ''
+        try:
+            parsed = json.loads(value.replace("'", '"'))
+            if isinstance(parsed, list):
+                return ', '.join(str(item) for item in parsed)
+        except Exception:
+            pass
+        return ', '.join(item.strip().strip('"').strip("'") for item in inner.split(',') if item.strip())
+    return value
+
+
+def _build_post_markdown(form) -> str:
+    """Build a Jekyll post from edit form fields."""
+    layout = form.get('layout', 'deep-technical').strip() or 'deep-technical'
+    theme = form.get('theme', _get_theme()).strip() or _get_theme()
+    title = form.get('title', '').strip() or '无标题'
+    date_value = form.get('date', '').strip() or datetime.now().strftime('%Y-%m-%d')
+    summary = form.get('summary', '').strip()
+    description = form.get('description', '').strip()
+    body = form.get('body', '').strip()
+
+    front = [
+        '---',
+        f'layout: {layout}',
+        f'theme: {theme}',
+        f'title: {_yaml_quote(title)}',
+        f'date: {date_value}',
+        f'tags: {_tags_front_matter(form.get("tags", ""))}',
+    ]
+    if description:
+        front.append(f'description: {_yaml_quote(description)}')
+    if summary:
+        front.append(f'summary: {_yaml_quote(summary)}')
+    extra_front_matter = form.get('extra_front_matter', '').strip()
+    if extra_front_matter:
+        front.extend(line for line in extra_front_matter.splitlines() if line.strip())
+    front.append('---')
+    return '\n'.join(front) + '\n\n' + body + '\n'
+
+
+def _sync_project_to_github(project_root: str, commit_msg: str) -> tuple[bool, str]:
+    """Commit and push current project changes."""
+    subprocess.run(['git', 'add', '-A'], cwd=project_root,
+                   capture_output=True, timeout=30)
+    commit_result = subprocess.run(['git', 'commit', '-m', commit_msg], cwd=project_root,
+                                   capture_output=True, timeout=30, text=True)
+    push_result = subprocess.run(['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
+                                 capture_output=True, timeout=120, text=True)
+    if push_result.returncode == 0:
+        return True, push_result.stdout
+    detail = push_result.stderr or commit_result.stderr or push_result.stdout
+    return False, detail
+
+
 @uploader_bp.route('/api/check-pages-url')
 @login_required
 def check_pages_url():
@@ -1381,23 +1484,13 @@ def check_pages_url():
 @login_required
 def view_article(filename):
     """Preview a single article."""
-    fpath = os.path.join(POSTS_DIR, filename)
-    if not os.path.isfile(fpath):
+    fpath = _safe_post_path(filename)
+    if not fpath or not os.path.isfile(fpath):
         flash('文章未找到。', 'error')
         return redirect(url_for('uploader.articles'))
     with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
         raw = f.read()
-    # Split front matter and body
-    body = raw
-    meta = {}
-    if raw.startswith('---'):
-        parts = raw.split('---', 2)
-        if len(parts) >= 3:
-            for line in parts[1].strip().split('\n'):
-                if ':' in line:
-                    k, v = line.split(':', 1)
-                    meta[k.strip()] = v.strip().strip('"').strip("'")
-            body = parts[2].strip()
+    meta, _, body = _parse_post(raw)
     # Render markdown to HTML
     # Replace Jekyll's {{ site.baseurl }} with the current Flask script root.
     # In dev (root path) this is ''. Behind Nginx at /PolaZhenjing/ the
@@ -1419,11 +1512,72 @@ def view_article(filename):
                            accent_color=accent_color)
 
 
+@uploader_bp.route('/articles/<filename>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_article(filename):
+    """Edit an existing Markdown/Jekyll article."""
+    fpath = _safe_post_path(filename)
+    if not fpath or not os.path.isfile(fpath):
+        flash('文章未找到。', 'error')
+        return redirect(url_for('uploader.articles'))
+
+    if request.method == 'POST':
+        post_markdown = _build_post_markdown(request.form)
+        with open(fpath, 'w', encoding='utf-8') as f:
+            f.write(post_markdown)
+        if request.form.get('save_mode') == 'sync':
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            ok, detail = _sync_project_to_github(
+                project_root,
+                f'Edit article: {request.form.get("title", filename).strip() or filename}',
+            )
+            if ok:
+                flash('文章已保存并同步到 GitHub。', 'success')
+            else:
+                flash(f'文章已保存，但同步失败：{detail}', 'warning')
+        else:
+            flash('文章已保存。', 'success')
+        return redirect(url_for('uploader.view_article', filename=filename))
+
+    with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
+        raw = f.read()
+    meta, front_lines, body = _parse_post(raw)
+    known_front_keys = {'layout', 'theme', 'title', 'date', 'tags', 'description', 'summary'}
+    extra_front_matter = '\n'.join(
+        line for line in front_lines
+        if (line.split(':', 1)[0].strip() if ':' in line else line.strip()) not in known_front_keys
+    )
+    return render_template(
+        'article_edit.html',
+        filename=filename,
+        meta=meta,
+        body=body,
+        tag_value=_tags_input_value(meta.get('tags', '')),
+        extra_front_matter=extra_front_matter,
+        styles=STYLES,
+        themes=THEMES,
+        pages_url=_build_pages_url(filename),
+    )
+
+
+@uploader_bp.route('/articles/<filename>/preview', methods=['POST'])
+@login_required
+def preview_article_markdown(filename):
+    """Render edited Markdown body for the split preview panel."""
+    fpath = _safe_post_path(filename)
+    if not fpath or not os.path.isfile(fpath):
+        return jsonify({'ok': False, 'error': '文章未找到。'}), 404
+    body = request.form.get('body', '')
+    body = body.replace('{{ site.baseurl }}', request.script_root or '')
+    body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
+    return jsonify({'ok': True, 'html': body_html})
+
+
 @uploader_bp.route('/articles/<filename>/delete', methods=['POST'])
 @login_required
 def delete_article(filename):
-    fpath = os.path.join(POSTS_DIR, filename)
-    if os.path.isfile(fpath):
+    fpath = _safe_post_path(filename)
+    if fpath and os.path.isfile(fpath):
         os.remove(fpath)
         flash(f'已删除 {filename}。', 'info')
     else:
