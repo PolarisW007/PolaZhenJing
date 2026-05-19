@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一位戴着眼镜的数字化学徒坐在工作站前，周围环绕着漂浮的业务文档、代码文件、流程图和团队规范，AI助手正在快速理解这些知识",
+    "prompt": "A young developer wearing glasses sits at a wooden workstation in a cozy workspace, digital fairy assistant floating beside them with glowing hands touching scattered papers, code files, flowcharts, business documents, and team guidelines floating in golden light around them, soft watercolor background with warm natural sunlight streaming through window, Studio Ghibli animation style, hand-painted texture, dreamlike atmosphere, detailed illustration"
+  },
+  "scenes": [
+    {
+      "block_index": 1,
+      "alt": "开发者反复向AI助手解释同样的业务逻辑，每次都要打开文档，疲惫地重复说明",
+      "prompt": "A tired developer at desk repeatedly explaining same business logic to a confused robot assistant, sticky notes and documents everywhere on desk and walls saying same things repeatedly, developer gesturing frustratedly while AI tilts head confused, warm office lighting, Stack of identical manuals and wikis scattered around, Studio Ghibli whimsical style, soft watercolor edges, natural daylight from window, expressive character animation"
+    },
+    {
+      "block_index": 30,
+      "alt": "新员工被成堆的文件手册淹没，吉卜力风格的混乱办公室场景",
+      "prompt": "A overwhelmed new employee sitting at desk buried under enormous pile of company documents, manuals, regulations, flowcharts, and operation handbooks stacked like mountains surrounding them, papers falling and scattered everywhere, confused expression on employee's face looking at the chaos, whimsical Ghibli-style office interior, warm watercolor palette, soft natural lighting from window, detailed illustration of paper textures and ink drawings"
+    },
+    {
+      "block_index": 145,
+      "alt": "一份精心设计的技能卡悬在空中，显示结构化的指令规范",
+      "prompt": "A floating magical skill card held by gentle light beam, showing organized structure: keywords glowing at top, usage instructions in elegant script, trigger phrases highlighted in amber, the card has ornate border with gear and star decorations, floating in front of open blueprint background, Studio Ghibli style illustration, soft watercolor washes, magical realism atmosphere, detailed craftsmanship aesthetic"
+    },
+    {
+      "block_index": 171,
+      "alt": "天平两边的对比场景，一边是沉重的MCP连接外部系统，一边是轻量的Skills本地工具",
+      "prompt": "A magical balance scale illustration, one side heavy platform with external cloud connections and remote APIs, another side light compact toolbox with local tools, gears and professional instruments, both sides glowing with different colors representing contrast between high context cost and progressive loading, whimsical Ghibli fantasy map style, watercolor texture, decorative compass and clock elements, warm natural lighting on old paper background"
+    },
+    {
+      "block_index": 231,
+      "alt": "一个小小的种子skill卡片在成长，周围有更多的技能卡片在萌芽",
+      "prompt": "A small simple skill seed card glowing gently on left side, connected by light trail to larger growing skill cards on right side progressively becoming more elaborate, a tiny sprout emerging from simple card, flowers blooming from mature cards, magical garden metaphor, Studio Ghibli heartwarming style, soft watercolor washes, morning sunlight, floating petals and light particles, encouraging growth atmosphere"
+    }
+  ]
+}
