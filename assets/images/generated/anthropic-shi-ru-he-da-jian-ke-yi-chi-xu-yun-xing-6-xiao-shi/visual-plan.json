@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "三个AI Agent在像素游戏场景中协作，Generator在编写代码，Evaluator在测试，Planner在规划，整体呈现吉卜力风格的团队合作画面",
+    "prompt": "Ghibli animation style, watercolor texture, natural lighting. A surreal scene showing three distinct AI agent figures working together on a retro pixel art game project in a mystical workshop. One agent with a coder's posture writing invisible code, another scrutinizing a floating game interface, third consulting a blueprint. The background features floating 8-bit pixel elements and a partially visible retro game castle being constructed. Warm natural light filtering through tall windows, soft shadows, hand-painted watercolor texture, Studio Ghibli aesthetic, cinematic composition, no text or logos."
+  },
+  "scenes": [
+    {
+      "block_index": 3,
+      "alt": "复古游戏制作器界面，54色调色板，8bit像素风格，AI关卡助手正在帮角色建造城堡",
+      "prompt": "Ghibli animation style, watercolor texture, natural lighting. Over the shoulder view of a creative workshop desk with a retro game editor interface. A 54-color palette floating like paint swatches, 8-bit pixel art elements scattered around, a playable game window showing a small character at a castle gate, an AI assistant figure sketching castle blueprints that come to life. Nostalgic gaming aesthetic with warm afternoon light, soft watercolor brush strokes, vibrant yet muted palette, Studio Ghibli attention to detail, no text or interface labels."
+    },
+    {
+      "block_index": 21,
+      "alt": "三个独立的气泡context window，分别代表PM、IC、QA三个角色，形成三角协作组织",
+      "prompt": "Ghibli animation style, watercolor texture, natural lighting. Three distinct translucent bubble-workspace environments floating in a cosmic void, each containing a different worker figure: a PM holding a planner flag, an IC wielding a coding tool, a QA inspector with a magnifying glass. They are connected by glowing threads of communication. The separation of contexts is visualized as physical distance between bubbles. Ethereal, dreamlike atmosphere, soft natural lighting, hand-painted watercolor edges, Studio Ghibli magical realism, no text or labels."
+    },
+    {
+      "block_index": 38,
+      "alt": "Harness填模型坑的循环进化图，旧的Harness模块被拆掉，模型变强",
+      "prompt": "Ghibli animation style, watercolor texture, natural lighting. A conveyor belt loop showing the evolution cycle: messy incomplete puzzle pieces labeled Harness feeding into a glowing AI brain, which transforms into a stronger model, then shedding unnecessary puzzle pieces that dissolve. The shed modules float away like autumn leaves. A gentle river of progress flows through a pastoral landscape. Metaphorical representation of model improvement through harness training. Warm colors, watercolor clouds, Studio Ghibli peaceful countryside aesthetic, no text or diagrams."
+    },
+    {
+      "block_index": 52,
+      "alt": "程序员坐在整洁的工作台前，面前是从混乱codebase切换到fresh context的对比",
+      "prompt": "Ghibli animation style, watercolor texture, natural lighting. A thoughtful programmer character sitting at a wooden desk, looking at two parallel scenes: on the left, a tangled messy pile of code blocks and broken digital fragments representing chaotic codebase; on the right, a clean fresh workspace with organized tools and a blank canvas ready to start. The character has a moment of realization, with a lightbulb metaphor floating above. Warm cozy workshop atmosphere, afternoon sunbeams, watercolor textures, Studio Ghibli character focus, no text or UI elements."
+    },
+    {
+      "block_index": 74,
+      "alt": "审视团队现有Agent工作流的画面，检查清单、工作流图和多个AI Agent脚本",
+      "prompt": "Ghibli animation style, watercolor texture, natural lighting. A grand library hall where a person is reviewing scrolls and blueprints representing existing agent scripts and workflows. Floating holographic checklists and workflow diagrams hover around them. Multiple small AI agent figures are visible in the background working on various tasks. The person is using a magnifying glass to examine the processes critically. Inspector's lens reveals hidden connections between the scripts. Warm natural library lighting, dust particles in sunbeams, watercolor texture on all elements, Studio Ghibli magical inspection scene, no text or labels."
+    }
+  ]
+}
