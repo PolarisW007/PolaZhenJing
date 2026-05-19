@@ -3,7 +3,7 @@ import random
 import string
 import time
 
-from flask import (Blueprint, flash, g, redirect, render_template,
+from flask import (Blueprint, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -11,6 +11,43 @@ from . import get_db
 from .mailer import send_verification_code
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/admin')
+
+
+def _safe_next(default_endpoint='uploader.upload'):
+    next_url = request.args.get('next') or request.form.get('next') or ''
+    if next_url.startswith('/') and not next_url.startswith('//'):
+        return next_url
+    return url_for(default_endpoint)
+
+
+def _is_admin_user(user):
+    role = user['role'] if 'role' in user.keys() else ''
+    if role == 'admin':
+        return True
+    email = (user['email'] or '').lower()
+    username = (user['username'] or '').lower()
+    return email == 'wsyxjer@gmail.com' or username in {'admin', 'sirius'}
+
+
+def user_payload(user):
+    display_name = (
+        (user['nickname'] if 'nickname' in user.keys() else '')
+        or user['username']
+        or user['email']
+    )
+    role = 'admin' if _is_admin_user(user) else (user['role'] if 'role' in user.keys() else 'user')
+    permissions = ['articles.read', 'skills.read', 'polaread.use', 'polanews.use']
+    if role == 'admin':
+        permissions.extend(['articles.manage', 'skills.manage', 'users.manage', 'projects.manage'])
+    return {
+        'id': user['id'],
+        'username': user['username'],
+        'email': user['email'],
+        'nickname': display_name,
+        'avatar_url': user['avatar_url'] if 'avatar_url' in user.keys() else '',
+        'role': role,
+        'permissions': permissions,
+    }
 
 
 def login_required(view):
@@ -31,10 +68,12 @@ def login():
         db = get_db()
         error = None
 
-        user = db.execute('SELECT * FROM users WHERE username = ?',
-                          (username,)).fetchone()
+        user = db.execute(
+            'SELECT * FROM users WHERE username = ? OR email = ?',
+            (username, username)
+        ).fetchone()
         if user is None:
-            error = '用户名不存在。'
+            error = '账号不存在。'
         elif not check_password_hash(user['password_hash'], password):
             error = '密码错误。'
 
@@ -43,10 +82,16 @@ def login():
             session['user_id'] = user['id']
             session['username'] = user['username']
             session['email'] = user['email']
-            return redirect(url_for('uploader.upload'))
+            session['nickname'] = (
+                (user['nickname'] if 'nickname' in user.keys() else '')
+                or user['username']
+            )
+            session['avatar_url'] = user['avatar_url'] if 'avatar_url' in user.keys() else ''
+            session['role'] = 'admin' if _is_admin_user(user) else (user['role'] if 'role' in user.keys() else 'user')
+            return redirect(_safe_next())
 
         flash(error, 'error')
-    return render_template('login.html')
+    return render_template('login.html', next_url=request.args.get('next', ''))
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -64,14 +109,11 @@ def register():
             error = '请输入邮箱。'
         elif not password or len(password) < 6:
             error = '密码至少6位。'
-        elif not email.endswith('@qq.com'):
-            error = '仅支持 QQ 邮箱（@qq.com）。'
-
         if error is None:
             try:
                 db.execute(
-                    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-                    (username, email, generate_password_hash(password))
+                    'INSERT INTO users (username, email, password_hash, nickname, role) VALUES (?, ?, ?, ?, ?)',
+                    (username, email, generate_password_hash(password), username, 'user')
                 )
                 db.commit()
 
@@ -81,6 +123,7 @@ def register():
                 session['verify_code_time'] = time.time()
                 session['verify_email'] = email
                 session['pending_user'] = username
+                session['verify_next'] = request.form.get('next', '')
 
                 sent = send_verification_code(email, code)
                 if sent:
@@ -88,13 +131,13 @@ def register():
                     return redirect(url_for('auth.verify'))
                 else:
                     flash('注册成功。邮件发送失败，请直接登录。', 'warning')
-                    return redirect(url_for('auth.login'))
+                    return redirect(url_for('auth.login', next=request.form.get('next', '')))
 
             except db.IntegrityError:
                 error = f'用户 {username} 或邮箱 {email} 已被注册。'
 
         flash(error, 'error')
-    return render_template('register.html')
+    return render_template('register.html', next_url=request.args.get('next', ''))
 
 
 @auth_bp.route('/verify', methods=['GET', 'POST'])
@@ -122,14 +165,17 @@ def verify():
         db.execute('UPDATE users SET email_verified = 1 WHERE email = ?', (email,))
         db.commit()
 
+        next_url = session.get('verify_next', '')
+
         # Clean up session
         session.pop('verify_code', None)
         session.pop('verify_code_time', None)
         session.pop('verify_email', None)
         session.pop('pending_user', None)
+        session.pop('verify_next', None)
 
         flash('邮箱验证成功！请登录。', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.login', next=next_url))
 
     return render_template('verify.html')
 
@@ -160,6 +206,47 @@ def change_password():
             return redirect(url_for('uploader.upload'))
 
     return render_template('password.html')
+
+
+@auth_bp.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if user is None:
+        session.clear()
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        nickname = request.form.get('nickname', '').strip()
+        avatar_url = request.form.get('avatar_url', '').strip()
+        db.execute(
+            'UPDATE users SET nickname = ?, avatar_url = ? WHERE id = ?',
+            (nickname or user['username'], avatar_url, user['id'])
+        )
+        db.commit()
+        session['nickname'] = nickname or user['username']
+        session['avatar_url'] = avatar_url
+        flash('账户信息已更新。', 'success')
+        return redirect(url_for('auth.account'))
+
+    return render_template('account.html', user=user, profile=user_payload(user))
+
+
+@auth_bp.route('/api/me')
+def api_me():
+    if 'user_id' not in session:
+        return jsonify({'authenticated': False, 'user': None, 'permissions': []}), 401
+    user = get_db().execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if user is None:
+        session.clear()
+        return jsonify({'authenticated': False, 'user': None, 'permissions': []}), 401
+    profile = user_payload(user)
+    return jsonify({
+        'authenticated': True,
+        'user': profile,
+        'permissions': profile['permissions'],
+    })
 
 
 @auth_bp.route('/logout')

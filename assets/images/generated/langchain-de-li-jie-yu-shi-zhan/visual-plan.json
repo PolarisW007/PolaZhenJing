@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "前端开发者从调包侠成长为AI应用架构师的转变之路",
+    "prompt": "Ghibli anime style, watercolor texture, natural lighting, a young frontend developer standing at a crossroads, on one side a tiny computer with npm install text glowing, on the other side a grand floating architecture made of code blocks, memory modules and AI neural networks connected by glowing chains, the developer looks amazed reaching toward the grand structure, warm golden sunlight, soft watercolor gradients, intricate details, cinematic composition"
+  },
+  "scenes": [
+    {
+      "block_index": 1,
+      "alt": "前端新手面对产品经理需求时的困境场景",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a panicked young developer with messy hair at a desk, product manager standing behind with arms crossed demanding 'build me a company document chatbot', scattered floating code snippets showing RAG retrieval errors, conversation bubbles exploding like balloons, one hand reaching helplessly toward a broken robot, warm indoor lighting with dramatic shadows, detailed expressive character art"
+    },
+    {
+      "block_index": 25,
+      "alt": "LCEL表达式语言让复杂的AI流程变得简洁清晰",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a magical glowing chain connecting floating code blocks like constellation, old style class-based API shown as tangled messy rope on the left dissolving into clean glowing pipeline on the right, a wise anime character demonstrates the transformation, sparkles and light particles, soft gradient background, elegant composition"
+    },
+    {
+      "block_index": 70,
+      "alt": "解决真实项目痛点的升级方案",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a hero developer standing tall on a workshop platform, surrounding by floating tools: retrieval system, memory banks, conversation flowcharts, error handling shields, rain falling from above turning into sparks of solutions, confident determined expression, detailed mechanical workshop environment, dramatic upward lighting"
+    },
+    {
+      "block_index": 109,
+      "alt": "ChatPromptTemplate构建消息模板的代码世界",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a magical scroll or blueprint unfurling, showing code structures transforming into flowing conversation rivers, MessagesPlaceholder as a glowing gateway for chat history, floating speech bubbles for system, human messages elegantly arranged, soft blue and amber colors, detailed anime illustration style"
+    },
+    {
+      "block_index": 138,
+      "alt": "JS/TS版本LangChain是前端开发者进入AI领域的入场券",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a young developer holding up a glowing key shaped like JS logo, opening a grand magical gateway decorated with React hooks, Next.js patterns, NestJS architecture, on the other side an infinite AI landscape with neural networks and intelligent applications, cherry blossoms and light rays, inspiring triumphant atmosphere, detailed fantasy environment"
+    }
+  ]
+}

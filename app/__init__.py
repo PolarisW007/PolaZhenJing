@@ -54,6 +54,15 @@ def init_db(app):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         ''')
+        columns = {
+            row['name'] for row in db.execute('PRAGMA table_info(users)').fetchall()
+        }
+        if 'nickname' not in columns:
+            db.execute('ALTER TABLE users ADD COLUMN nickname TEXT')
+        if 'avatar_url' not in columns:
+            db.execute('ALTER TABLE users ADD COLUMN avatar_url TEXT')
+        if 'role' not in columns:
+            db.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'")
         db.commit()
 
 
