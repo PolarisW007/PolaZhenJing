@@ -24,6 +24,7 @@ from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    jsonify, send_file, session, url_for)
 from werkzeug.utils import secure_filename
 
+from . import get_db
 from .auth import login_required
 
 skillhub_bp = Blueprint('skillhub', __name__, url_prefix='/skills')
@@ -180,11 +181,26 @@ def _all_skills() -> list[dict]:
 def _is_skill_admin() -> bool:
     """Return whether the current logged-in user can manage skills."""
     username = session.get('username')
-    if not username:
+    user_id = session.get('user_id')
+    email = session.get('email')
+    if user_id and not email:
+        try:
+            user = get_db().execute('SELECT email FROM users WHERE id = ?', (user_id,)).fetchone()
+            email = user['email'] if user else ''
+            if email:
+                session['email'] = email
+        except Exception:
+            email = ''
+    if not username and not email:
         return False
-    raw = os.environ.get('SKILL_ADMIN_USERS', 'admin,sirius')
-    admins = {item.strip() for item in raw.split(',') if item.strip()}
-    return username in admins
+    raw_users = os.environ.get('SKILL_ADMIN_USERS', 'admin,sirius,wsyxjer@gmail.com')
+    raw_emails = os.environ.get('SKILL_ADMIN_EMAILS', 'wsyxjer@gmail.com')
+    admin_users = {item.strip().lower() for item in raw_users.split(',') if item.strip()}
+    admin_emails = {item.strip().lower() for item in raw_emails.split(',') if item.strip()}
+    return (
+        bool(username and username.lower() in admin_users)
+        or bool(email and email.lower() in admin_emails)
+    )
 
 
 def _require_skill_admin() -> None:
