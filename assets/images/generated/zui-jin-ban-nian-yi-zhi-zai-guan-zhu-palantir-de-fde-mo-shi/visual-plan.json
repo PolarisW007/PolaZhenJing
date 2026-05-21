@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一位工程师站在企业核心位置，身后连接着数据平台的光芒，解决方案像光线一样从工程师位置向平台汇聚",
+    "prompt": "Ghibli anime style, watercolor texture, natural lighting. A young engineer stands at the center of a client's business environment, wearing a casual tech hoodie and backpack. Behind them, a massive glowing data platform rises like a lighthouse, with streams of light and data flowing from the engineer's solutions back into the platform core. The scene shows a corporate office transformed into a hybrid workshop, with holographic blueprints and 3D data visualizations connecting the engineer to the platform. Warm golden hour sunlight streams through windows, creating a magical atmosphere. Detailed, hand-painted aesthetic, soft edges, vibrant yet natural colors."
+  },
+  "scenes": [
+    {
+      "block_index": 1,
+      "alt": "2026年5月4日三大科技巨头同时布局FDE，OpenAI、Anthropic、Google的工程师们同时行动",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting. Three parallel scenes connected in one cinematic frame: Left side shows OpenAI engineers in modern tech campus setting, receiving a giant golden coin (40 billion investment) and heading toward industrial factory buildings. Center shows Anthropic engineers arriving at Wall Street-style financial district, with Blackstone and Goldman Sachs logos in background. Right side shows Google Cloud engineers with CEO Thomas Kurian giving instructions on LinkedIn hologram. A giant clock in the sky shows the date May 4, 2026. Magical realism, steam and data particles floating, warm sunset lighting. Detailed, hand-painted Ghibli aesthetic."
+    },
+    {
+      "block_index": 24,
+      "alt": "FDE按项目计费vs产品研发的区别，按计费工作的工程师被困在项目中",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting. Split scene of two paths: On the left, an FDE engineer with a stopwatch chained to a project box, working frantically but running in circles on a hamster wheel labeled 'billable hours'. On the right, an engineer standing on a lighthouse, their light beams reaching out to guide many ships in the harbor, the lighthouse growing taller with each ship guided. The left scene is dark and cramped, the right scene is expansive and hopeful. Clouds and sea mist separate the two worlds. Poetic metaphor, soft watercolor washes, golden morning light. Detailed Ghibli environmental storytelling."
+    },
+    {
+      "block_index": 43,
+      "alt": "碎石路变成铺好的路，客户现场的手工解决方案要转化为平台能力",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting. A magical transformation scene: In the foreground, a Palantir engineer in muddy boots and tool belt is carefully placing unique cobblestones into a path, each stone glowing with different client insights. In the background, a team of platform builders with magical tools is transforming these unique stones into smooth, illuminated highway tiles that extend into the horizon. The contrast between the rough, one-of-a-kind cobblestones and the smooth, standardized paved road. Cherry blossom trees along the new road, a train (platform) running smoothly on the paved road. Magical realism, dust particles in sunlight, warm spring palette. Hand-painted texture."
+    },
+    {
+      "block_index": 63,
+      "alt": "企业买AI像奶奶拿到iPhone需要人帮忙设置，implementation heavy是feature",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting. A heartwarming intergenerational scene: An elderly grandmother with kind eyes sits at a wooden table, holding a beautifully designed AI device (iPhone-like) that glows mysteriously. Her grandchild, a young engineer in a cozy sweater, patiently teaches her how to use it, showing glowing holographic guides. The grandmother's expression shifts from confusion to delight as she successfully uses the device. In the background, a massive Salesforce-style castle (representing 254 billion market cap) is being built, with tiny worker sprites working on its foundation. The scene captures the essence of platform shifts requiring human touch. Soft interior lighting, warm family atmosphere, magical device glows. Detailed Ghibli character work."
+    },
+    {
+      "block_index": 92,
+      "alt": "好东西最怕被滥用，当策略被奉为标准打法时的危险信号",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting. A cautionary fairy tale scene: A pristine mountain spring (representing pure FDE methodology) flows down through increasingly polluted tributaries as more companies and consulting firms divert the water into their own branded bottles. The once-clear spring becomes murky, with signs reading 'McKinsey FDE', 'EY FDE', 'Accenture FDE' hanging on contaminated collection points. In the foreground, a wise old farmer (the author) stands watching, pointing at the pollution with concern. The mountain peak still glows with pure light. Dark industrial shadows creeping in from the edges. Dramatic lighting contrast between pure source and diluted streams. Symbolic, detailed Ghibli environmental commentary."
+    }
+  ]
+}

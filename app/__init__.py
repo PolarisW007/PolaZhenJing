@@ -63,6 +63,40 @@ def init_db(app):
             db.execute('ALTER TABLE users ADD COLUMN avatar_url TEXT')
         if 'role' not in columns:
             db.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'")
+        db.executescript('''
+            CREATE TABLE IF NOT EXISTS user_preferences (
+                user_id INTEGER PRIMARY KEY,
+                theme TEXT DEFAULT 'dream-gold',
+                font_family TEXT DEFAULT 'system',
+                font_scale TEXT DEFAULT 'normal',
+                density TEXT DEFAULT 'comfortable',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            );
+            CREATE TABLE IF NOT EXISTS user_permissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                permission TEXT NOT NULL,
+                source TEXT DEFAULT 'manual',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, permission),
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            );
+            CREATE TABLE IF NOT EXISTS permission_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                app_id TEXT NOT NULL,
+                permission TEXT NOT NULL,
+                reason TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                reviewed_at TIMESTAMP,
+                reviewed_by INTEGER,
+                review_note TEXT,
+                UNIQUE(user_id, permission, status),
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            );
+        ''')
         db.commit()
 
 
@@ -89,9 +123,11 @@ def create_app():
     from .auth import auth_bp
     from .uploader import uploader_bp
     from .skillhub import skillhub_bp
+    from .agent import agent_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(uploader_bp)
     app.register_blueprint(skillhub_bp)
+    app.register_blueprint(agent_bp)
 
     # Serve static assets (CSS, images, etc.) from project root /assets/
     assets_dir = os.path.join(os.path.dirname(__file__), '..', 'assets')

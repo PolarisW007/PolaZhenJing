@@ -25,7 +25,7 @@ from flask import (Blueprint, abort, flash, redirect, render_template, request,
 from werkzeug.utils import secure_filename
 
 from . import get_db
-from .auth import login_required
+from .auth import login_required, user_payload
 
 skillhub_bp = Blueprint('skillhub', __name__, url_prefix='/skills')
 
@@ -183,6 +183,10 @@ def _is_skill_admin() -> bool:
     username = session.get('username')
     user_id = session.get('user_id')
     email = session.get('email')
+    if user_id:
+        user = get_db().execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+        if user and 'skills.manage' in user_payload(user).get('permissions', []):
+            return True
     if user_id and not email:
         try:
             user = get_db().execute('SELECT email FROM users WHERE id = ?', (user_id,)).fetchone()

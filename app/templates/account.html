@@ -2,7 +2,8 @@
 {% block title %}用户管理{% endblock %}
 {% block content %}
 <h2>用户管理</h2>
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="form_action" value="profile">
   <div class="form-group">
     <label>账户</label>
     <input type="text" class="form-input" value="{{ user['username'] }} / {{ user['email'] }}" disabled>
@@ -12,18 +13,442 @@
     <input type="text" id="nickname" name="nickname" class="form-input" value="{{ profile.nickname }}" required>
   </div>
   <div class="form-group">
-    <label for="avatar_url">头像 URL</label>
-    <input type="url" id="avatar_url" name="avatar_url" class="form-input" value="{{ profile.avatar_url }}" placeholder="https://...">
+    <label for="avatar">头像上传</label>
+    {% if profile.avatar_url %}
+      <div class="avatar-preview">
+        <img src="{{ profile.avatar_url }}" alt="{{ profile.nickname }} 的头像">
+      </div>
+    {% endif %}
+    <input type="file" id="avatar" name="avatar" class="form-input" accept="image/jpeg,image/png">
+    <input type="hidden" id="avatar_data" name="avatar_data">
+    <div class="avatar-cropper" data-avatar-cropper hidden>
+      <div class="avatar-crop-stage" data-crop-stage>
+        <img data-crop-image alt="">
+        <div class="avatar-crop-mask" aria-hidden="true"></div>
+      </div>
+      <div class="avatar-crop-controls">
+        <label for="avatar_zoom">缩放</label>
+        <input type="range" id="avatar_zoom" min="1" max="3" step="0.01" value="1" data-crop-zoom>
+      </div>
+      <p class="form-help">拖动图片调整取景，圆形区域会保存为 300px * 300px PNG 头像。</p>
+    </div>
+    <p class="form-help">支持 JPG / PNG 图片，上传时会自动裁剪成圆形 300px * 300px 头像并保存到服务器。</p>
   </div>
   <div class="form-group">
     <label>角色与权限</label>
     <input type="text" class="form-input" value="{{ profile.role }} · {{ profile.permissions | join(', ') }}" disabled>
   </div>
+  <div class="form-group">
+    <label>全站主题</label>
+    <select class="form-input" name="theme">
+      {% for item in theme_options %}
+      <option value="{{ item.id }}" {% if profile.preferences.theme == item.id %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+    <p class="form-help">主题会同步覆盖织梦空间、PolaZhenjing、PolaRead 和 PolaNews。</p>
+  </div>
+  <div class="form-group">
+    <label>全站字体</label>
+    <select class="form-input" name="font_family">
+      {% for item in font_options %}
+      <option value="{{ item.id }}" {% if profile.preferences.font_family == item.id %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-grid-2">
+    <div class="form-group">
+      <label>字号</label>
+      <select class="form-input" name="font_scale">
+        <option value="small" {% if profile.preferences.font_scale == 'small' %}selected{% endif %}>偏小</option>
+        <option value="normal" {% if profile.preferences.font_scale == 'normal' %}selected{% endif %}>标准</option>
+        <option value="large" {% if profile.preferences.font_scale == 'large' %}selected{% endif %}>偏大</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>显示密度</label>
+      <select class="form-input" name="density">
+        <option value="compact" {% if profile.preferences.density == 'compact' %}selected{% endif %}>紧凑</option>
+        <option value="comfortable" {% if profile.preferences.density == 'comfortable' %}selected{% endif %}>舒适</option>
+        <option value="spacious" {% if profile.preferences.density == 'spacious' %}selected{% endif %}>宽松</option>
+      </select>
+    </div>
+  </div>
   <button type="submit" class="btn-gold">保存</button>
 </form>
+<section class="account-section">
+  <h3>应用权限申请</h3>
+  <p class="form-help">如果某个应用暂时没有权限，可以在这里提交申请，管理员会在统一账号中心处理。</p>
+  <form class="inline-card" data-permission-request-form>
+    <select class="form-input" name="permission">
+      {% for permission, meta in permission_catalog.items() %}
+      <option value="{{ permission }}">{{ meta.app }} · {{ meta.name }}</option>
+      {% endfor %}
+    </select>
+    <input class="form-input" name="reason" placeholder="申请原因，可选">
+    <button class="btn-gold btn-sm" type="submit">提交申请</button>
+  </form>
+  <p class="form-help" data-permission-request-status></p>
+</section>
+
+{% if admin_context %}
+<section class="account-section admin-panel">
+  <h3>管理员授权</h3>
+  <div class="admin-list">
+    {% for item in admin_context.permission_requests %}
+    <article class="admin-row">
+      <div>
+        <strong>{{ item.nickname or item.username }}</strong>
+        <small>{{ item.email }} · {{ item.permission }} · {{ item.status }}</small>
+        {% if item.reason %}<p>{{ item.reason }}</p>{% endif %}
+      </div>
+      {% if item.status == 'pending' %}
+      <form method="POST" class="admin-actions">
+        <input type="hidden" name="form_action" value="review_permission">
+        <input type="hidden" name="request_id" value="{{ item.id }}">
+        <button class="btn-ghost" type="submit" name="review_action" value="reject">拒绝</button>
+        <button class="btn-gold btn-sm" type="submit" name="review_action" value="approve">通过</button>
+      </form>
+      {% endif %}
+    </article>
+    {% else %}
+    <p class="form-help">暂无权限申请。</p>
+    {% endfor %}
+  </div>
+  <h3>用户权限</h3>
+  <div class="admin-list">
+    {% for item in admin_context.users %}
+    <article class="admin-row">
+      <div>
+        <strong>{{ item.nickname or item.username }}</strong>
+        <small>{{ item.email }} · {{ item.role or 'user' }}</small>
+        <p>{{ admin_context.user_permissions.get(item.id, []) | join(', ') or '默认权限' }}</p>
+      </div>
+      <form method="POST" class="admin-actions">
+        <input type="hidden" name="form_action" value="grant_permission">
+        <input type="hidden" name="target_user_id" value="{{ item.id }}">
+        <select class="form-input" name="permission">
+          {% for permission, meta in admin_context.permission_catalog.items() %}
+          <option value="{{ permission }}">{{ meta.app }} · {{ meta.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn-gold btn-sm" type="submit">授权</button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 <div class="form-links">
   <a href="/">返回织梦空间</a>
   <a href="{{ url_for('auth.change_password') }}">修改密码</a>
   <a href="{{ url_for('auth.logout') }}">退出登录</a>
 </div>
+<style>
+  .avatar-cropper {
+    margin-top: 0.85rem;
+    padding: 1rem;
+    border: 1px solid rgba(228,191,122,0.22);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.035);
+  }
+  .avatar-crop-stage {
+    position: relative;
+    width: min(320px, 100%);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 18px;
+    background:
+      linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(255,255,255,0.04) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.04) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.04) 75%),
+      rgba(0,0,0,0.24);
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    background-size: 24px 24px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+  .avatar-crop-stage:active { cursor: grabbing; }
+  .avatar-crop-stage img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: none;
+    transform-origin: center;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .avatar-crop-mask {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    box-shadow: inset 0 0 0 999px rgba(0,0,0,0.48);
+    pointer-events: none;
+  }
+  .avatar-crop-mask::after {
+    position: absolute;
+    inset: 10%;
+    border: 2px solid rgba(228,191,122,0.88);
+    border-radius: 50%;
+    box-shadow: 0 0 22px rgba(228,191,122,0.22), inset 0 0 0 1px rgba(255,255,255,0.32);
+    content: "";
+  }
+  .avatar-crop-controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.85rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+  .avatar-crop-controls input {
+    accent-color: var(--gold-primary);
+  }
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .account-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .account-section h3 {
+    margin: 0 0 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+  .inline-card,
+  .admin-row {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(228,191,122,0.18);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.035);
+  }
+  .admin-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+  .admin-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .admin-row strong,
+  .admin-row small {
+    display: block;
+  }
+  .admin-row small,
+  .admin-row p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .admin-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .admin-actions .form-input {
+    min-width: 220px;
+  }
+  @media (max-width: 720px) {
+    .form-grid-2,
+    .admin-row {
+      grid-template-columns: 1fr;
+    }
+    .admin-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .admin-actions .form-input {
+      min-width: 0;
+    }
+  }
+</style>
+<script>
+  (() => {
+    const fileInput = document.querySelector("#avatar");
+    const dataInput = document.querySelector("#avatar_data");
+    const cropper = document.querySelector("[data-avatar-cropper]");
+    const stage = document.querySelector("[data-crop-stage]");
+    const image = document.querySelector("[data-crop-image]");
+    const zoomInput = document.querySelector("[data-crop-zoom]");
+    const form = fileInput?.closest("form");
+    if (!fileInput || !dataInput || !cropper || !stage || !image || !zoomInput || !form) return;
+
+    const state = {
+      naturalWidth: 0,
+      naturalHeight: 0,
+      baseScale: 1,
+      zoom: 1,
+      x: 0,
+      y: 0,
+      dragging: false,
+      startX: 0,
+      startY: 0,
+      startOffsetX: 0,
+      startOffsetY: 0,
+      objectUrl: "",
+    };
+
+    function cropRadius() {
+      return stage.clientWidth * 0.4;
+    }
+
+    function clampOffsets() {
+      const radius = cropRadius();
+      const displayWidth = state.naturalWidth * state.baseScale * state.zoom;
+      const displayHeight = state.naturalHeight * state.baseScale * state.zoom;
+      const maxX = Math.max(0, displayWidth / 2 - radius);
+      const maxY = Math.max(0, displayHeight / 2 - radius);
+      state.x = Math.max(-maxX, Math.min(maxX, state.x));
+      state.y = Math.max(-maxY, Math.min(maxY, state.y));
+    }
+
+    function renderCrop() {
+      clampOffsets();
+      const scale = state.baseScale * state.zoom;
+      image.style.width = `${state.naturalWidth}px`;
+      image.style.height = `${state.naturalHeight}px`;
+      image.style.transform = `translate(calc(-50% + ${state.x}px), calc(-50% + ${state.y}px)) scale(${scale})`;
+    }
+
+    function drawAvatarData() {
+      if (!state.naturalWidth || !state.naturalHeight) return "";
+      const canvas = document.createElement("canvas");
+      const size = 300;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      const radius = cropRadius();
+      const scale = state.baseScale * state.zoom;
+      const sourceSide = (radius * 2) / scale;
+      const sourceCenterX = state.naturalWidth / 2 - state.x / scale;
+      const sourceCenterY = state.naturalHeight / 2 - state.y / scale;
+      const sx = Math.max(0, Math.min(state.naturalWidth - sourceSide, sourceCenterX - sourceSide / 2));
+      const sy = Math.max(0, Math.min(state.naturalHeight - sourceSide, sourceCenterY - sourceSide / 2));
+
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(image, sx, sy, sourceSide, sourceSide, 0, 0, size, size);
+      ctx.restore();
+      return canvas.toDataURL("image/png");
+    }
+
+    function prepareImage() {
+      state.naturalWidth = image.naturalWidth;
+      state.naturalHeight = image.naturalHeight;
+      const radius = cropRadius();
+      state.baseScale = Math.max((radius * 2) / state.naturalWidth, (radius * 2) / state.naturalHeight);
+      state.zoom = 1;
+      state.x = 0;
+      state.y = 0;
+      zoomInput.value = "1";
+      cropper.hidden = false;
+      renderCrop();
+      dataInput.value = drawAvatarData();
+    }
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      dataInput.value = "";
+      if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+      if (!file) {
+        cropper.hidden = true;
+        return;
+      }
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        cropper.hidden = true;
+        return;
+      }
+      state.objectUrl = URL.createObjectURL(file);
+      image.onload = prepareImage;
+      image.src = state.objectUrl;
+    });
+
+    zoomInput.addEventListener("input", () => {
+      state.zoom = Number(zoomInput.value || 1);
+      renderCrop();
+      dataInput.value = drawAvatarData();
+    });
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (!state.naturalWidth) return;
+      state.dragging = true;
+      state.startX = event.clientX;
+      state.startY = event.clientY;
+      state.startOffsetX = state.x;
+      state.startOffsetY = state.y;
+      stage.setPointerCapture(event.pointerId);
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      if (!state.dragging) return;
+      state.x = state.startOffsetX + event.clientX - state.startX;
+      state.y = state.startOffsetY + event.clientY - state.startY;
+      renderCrop();
+      dataInput.value = drawAvatarData();
+    });
+
+    stage.addEventListener("pointerup", () => {
+      state.dragging = false;
+      dataInput.value = drawAvatarData();
+    });
+
+    stage.addEventListener("pointercancel", () => {
+      state.dragging = false;
+    });
+
+    window.addEventListener("resize", () => {
+      if (!state.naturalWidth || cropper.hidden) return;
+      prepareImage();
+    });
+
+    form.addEventListener("submit", () => {
+      if (fileInput.files && fileInput.files[0]) {
+        dataInput.value = drawAvatarData();
+      }
+    });
+  })();
+
+  (() => {
+    const form = document.querySelector("[data-permission-request-form]");
+    const status = document.querySelector("[data-permission-request-status]");
+    if (!form || !status) return;
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const button = form.querySelector("button");
+      button.disabled = true;
+      status.textContent = "正在提交申请...";
+      const data = new FormData(form);
+      try {
+        const response = await fetch("{{ url_for('auth.api_permission_request') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            permission: data.get("permission"),
+            reason: data.get("reason"),
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.error || "提交失败");
+        status.textContent = payload.status === "already_granted" ? "你已经拥有该权限。" : "申请已提交，等待管理员审批。";
+      } catch (error) {
+        status.textContent = error.message || "提交失败，请稍后重试。";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  })();
+</script>
 {% endblock %}

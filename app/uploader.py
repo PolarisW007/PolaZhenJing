@@ -995,8 +995,7 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
         summary = ''
     summary = summary or _generate_summary(body, max_chars=120)
     summary = re.sub(r'!\[[^\]]*(?:\]\([^)]+\))?', '', summary).strip()
-    parts = filename.replace('.md', '').split('-', 3)
-    pages_url = _build_pages_url(filename) if len(parts) >= 4 else url_for('uploader.articles')
+    local_url = url_for('uploader.view_article', filename=filename)
     return {
         'filename': filename,
         'title': title,
@@ -1005,8 +1004,8 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
         'layout': meta.get('layout', ''),
         'theme': meta.get('theme', ''),
         'cover': cover,
-        'url': pages_url,
-        'admin_url': url_for('uploader.view_article', filename=filename),
+        'url': local_url,
+        'admin_url': local_url,
     }
 
 
