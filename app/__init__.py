@@ -96,6 +96,15 @@ def init_db(app):
                 UNIQUE(user_id, permission, status),
                 FOREIGN KEY(user_id) REFERENCES users(id)
             );
+            CREATE TABLE IF NOT EXISTS app_user_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                app_id TEXT NOT NULL,
+                external_user_id TEXT,
+                linked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, app_id),
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            );
         ''')
         db.commit()
 

@@ -1,7 +1,7 @@
 ---
 layout: academic-insight
 theme: wukong
-title: "最近半年一直在关注 Palantir 的 FDE 模式"
+title: "FDE 模式 探索和研究"
 date: 2026-05-21
 tags: []
 summary: "2026年5月4日，OpenAI和Anthropic在同一天各自宣布了一件大事。OpenAI联合TPG等19家机构成立了Deployment Company，砸了40亿美元，专门往企业里派工程师帮他们把AI塞进核心业务流程。"

@@ -92,7 +92,7 @@
 
 {% if admin_context %}
 <section class="account-section admin-panel">
-  <h3>管理员授权</h3>
+  <h3>权限申请审批</h3>
   <div class="admin-list">
     {% for item in admin_context.permission_requests %}
     <article class="admin-row">
@@ -114,7 +114,7 @@
     <p class="form-help">暂无权限申请。</p>
     {% endfor %}
   </div>
-  <h3>用户权限</h3>
+  <h3>用户权限授权</h3>
   <div class="admin-list">
     {% for item in admin_context.users %}
     <article class="admin-row">

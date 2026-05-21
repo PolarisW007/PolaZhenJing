@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "程序员站在数字海浪前，身边环绕着多个专业分身：有人拿着文档、有人盯着数据、有人敲着代码",
+    "prompt": "A young programmer stands before a vast ocean of digital data, surrounded by multiple translucent AI assistant figures in different professional roles — one holding documents, one analyzing charts, one writing code. Soft natural sunlight streams through, watercolor style, Studio Ghibli aesthetic, warm lighting, dreamy atmosphere, delicate brushstrokes, no text"
+  },
+  "scenes": [
+    {
+      "block_index": 2,
+      "alt": "程序员面对无数个空的聊天窗口，每个窗口都显示初次见面的问候语",
+      "prompt": "A frustrated programmer sitting at a wooden desk surrounded by dozens of floating chat windows, each window showing a greeting like 'Hello, how can I help?' — creating a sense of repetition and disconnection. Outside the window, afternoon sunlight casts long shadows, watercolor style, Studio Ghibli aesthetic, soft natural light, melancholic yet hopeful mood, delicate brushwork, no text"
+    },
+    {
+      "block_index": 30,
+      "alt": "一个年轻女性伸手打断正在执行任务的AI机器人，在它撞墙前拉回方向",
+      "prompt": "A young woman reaching out to interrupt a small robot that is walking towards a wall while carrying files. The robot turns its head to listen attentively. Around them, a workshop filled with gears and blueprints, sunlight filtering through dusty windows creating light rays, Studio Ghibli animation style, watercolor texture, warm natural lighting, dynamic composition, no text"
+    },
+    {
+      "block_index": 57,
+      "alt": "AI助手化身小精灵，同时在处理Slack消息、Gmail邮件和各种待办事项",
+      "prompt": "A cute AI sprite with glowing particles sitting at a cluttered desk, one hand sorting through colorful Slack messages and Gmail envelopes that float in the air, the other hand writing priority lists on magical parchment. Stacks of unopened emails and chat bubbles surround it like a gentle storm. Soft studio light, Studio Ghibli style, watercolor aesthetic, cozy cluttered workspace, no text"
+    },
+    {
+      "block_index": 79,
+      "alt": "创作者站在工作台中央，周围漂浮着网页、UI组件、动画和数据图表各种成果",
+      "prompt": "A creative person stands at a craftsman's workbench, surrounded by floating creations — a mini HTML webpage hovering on the left, Storybook UI component cards floating above, animated video reels spinning on the right, data charts and slide presentations floating behind. Magical workshop with warm lamp light, tools scattered on wooden shelves, Studio Ghibli aesthetic, watercolor style, natural sunlight from window, whimsical atmosphere, no text"
+    },
+    {
+      "block_index": 98,
+      "alt": "一个人类在摇椅上悠闲地喝咖啡，Codex机器人完成了整个流水线：听指令→执行→产出→审查",
+      "prompt": "A relaxed person sitting in a comfortable wooden rocking chair enjoying coffee, watching a small Codex robot completing an entire assembly line: receiving voice instructions from a speech bubble, executing tasks with tools, producing files, and reviewing iterations. The robot works efficiently while the human relaxes. Cozy study room with afternoon sunlight streaming through windows, books on shelves, gentle dust particles in light rays, Studio Ghibli style, watercolor texture, peaceful productive atmosphere, no text"
+    }
+  ]
+}
