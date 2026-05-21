@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一个普通年轻人站在发光的数字屏幕前，屏幕上有网站、APP、代码等元素，背后飘浮着创意符号，整体呈现吉卜力风格的温暖自然光氛围",
+    "prompt": "Ghibli anime style, watercolor texture, natural lighting, a young ordinary person (not a programmer) standing in front of a giant glowing digital screen showing website layouts, app interfaces and colorful code snippets, creative symbols like stars and sparkles floating around, warm sunlight streaming through window, hopeful and inspiring atmosphere, hand-painted aesthetic, soft colors, cinematic composition"
+  },
+  "scenes": [
+    {
+      "block_index": 3,
+      "alt": "一个戴眼镜的年轻人坐在电脑前，表情惊喜好奇，周围散落着Cursor、Trae、Claude、Codex等工具的图标，桌上放着咖啡和笔记本",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a young person with glasses sitting at desk looking at computer screen with surprised and curious expression, colorful icons of Cursor, Trae, Claude Code, Codex floating around the monitor like friendly spirits, coffee cup and notebook on desk, warm afternoon sunlight through window, cozy room atmosphere, hand-painted watercolor aesthetic, soft pastel colors"
+    },
+    {
+      "block_index": 10,
+      "alt": "一个人站在巨大的对话框前，左边是自己说话的思维气泡，右边是AI生成的代码气泡和架构图，形成流畅的创意对话流",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a person standing in center gesturing while a giant conversation panel floats before them, thought bubbles on left showing simple ideas like website mockups and app designs, right side shows AI generating colorful code blocks, debug icons and architecture diagrams flowing out smoothly, magical creative energy connecting human and AI, warm natural light, dreamlike atmosphere, watercolor brush strokes"
+    },
+    {
+      "block_index": 19,
+      "alt": "一个人对着电脑屏幕眉头紧锁，屏幕上满是密密麻麻的代码完全看不懂，周围有疑惑的问号和绕成一团的线条，体现困境和挫折感",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a person scratching head looking confused at computer screen filled with dense code they cannot understand, question marks and tangled lines floating around representing confusion and frustration, dim lighting to show difficulty, character looks overwhelmed, scattered papers around, natural window light casting long shadows, emotional scene showing struggle, watercolor texture with muted colors"
+    },
+    {
+      "block_index": 28,
+      "alt": "一本打开的指南手册放在桌上，旁边是Codex的工具界面，一个认真学习的人专注地看着教程，窗外有阳光，氛围安静而认真",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, an open instruction guide book sitting on wooden desk with Codex tool interface visible beside it, a person concentrating while reading and learning, warm sunlight through window illuminating the scene, potted plant and cup on desk, quiet study atmosphere, detailed watercolor brushwork, soft warm tones, focus and determination in person's expression, cozy study room setting"
+    },
+    {
+      "block_index": 40,
+      "alt": "四个小窗口/场景依次排列展示：一个小齿轮代表从小处着手，一个问号气泡代表学会提问，一个笔记本代表保留记录，一个修补工具代表接受不完美，整体温馨有启发感",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, four connected small windows or scenes arranged in gentle arc showing: 1) small cogwheel starting from simple step, 2) question mark speech bubble representing learning to ask, 3) open notebook showing saved conversations as study notes, 4) wrench and adjust icon representing accepting imperfections, soft glow connecting each scene, warm inviting atmosphere, character figures in some windows, nature elements like grass and sky visible, watercolor aesthetic with flowing colors, inspirational and practical mood"
+    }
+  ]
+}
