@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}超级小王记忆工作台{% endblock %}
+{% block card_class %}card-full{% endblock %}
+
+{% block content %}
+<div class="memory-workbench">
+  <header class="workbench-header">
+    <div>
+      <p class="eyebrow">Super Xiaowang Memory</p>
+      <h2>超级小王记忆工作台</h2>
+      <p class="form-help">PostgreSQL 是事实源；JSON 仍作为 fallback。搜索结果和建议处理都会回到事实源复核。</p>
+    </div>
+    <a class="btn-ghost" href="/agent.html">打开对话页</a>
+  </header>
+
+  <section class="status-grid">
+    <article>
+      <strong>{{ status.store.backend }}</strong>
+      <span>记忆主存</span>
+    </article>
+    <article>
+      <strong>{{ "已启用" if status.store.enabled else "未启用" }}</strong>
+      <span>PostgreSQL</span>
+    </article>
+    <article>
+      <strong>{{ status.legacy_json.stats.chunks or 0 }}</strong>
+      <span>JSON chunks</span>
+    </article>
+    <article>
+      <strong>{{ actor.identity_scope }}</strong>
+      <span>当前身份</span>
+    </article>
+  </section>
+
+  <section class="toolbar">
+    <input class="form-input" data-memory-query placeholder="搜索记忆、来源或建议">
+    <select class="form-input" data-memory-status>
+      <option value="">全部状态</option>
+      <option value="active">active</option>
+      <option value="pinned">pinned</option>
+      <option value="candidate">candidate</option>
+      <option value="quarantined">quarantined</option>
+    </select>
+    <button class="btn-gold btn-sm" data-memory-search>搜索</button>
+  </section>
+
+  <div class="workbench-columns">
+    <section>
+      <h3>记忆结果</h3>
+      <div class="result-list" data-memory-results>
+        <p class="empty">输入关键词后搜索。</p>
+      </div>
+    </section>
+    <section>
+      <h3>访客建议</h3>
+      <div class="result-list" data-suggestion-results>
+        <p class="empty">加载中。</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+  .memory-workbench { max-width: 1120px; }
+  .workbench-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .workbench-header h2 { text-align: left; margin: 0.25rem 0 0.35rem; }
+  .eyebrow { color: var(--gold-primary); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .status-grid article {
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    padding: 0.85rem;
+    background: rgba(255,255,255,0.035);
+  }
+  .status-grid strong { display: block; color: var(--text-primary); font-size: 1rem; margin-bottom: 0.25rem; }
+  .status-grid span { color: var(--text-muted); font-size: 0.78rem; }
+  .toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 160px auto;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .workbench-columns { display: grid; grid-template-columns: 1.25fr 1fr; gap: 1rem; }
+  .workbench-columns h3 { color: var(--text-primary); font-size: 1rem; margin-bottom: 0.75rem; }
+  .result-list { display: grid; gap: 0.75rem; }
+  .result-card {
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    padding: 0.9rem;
+    background: rgba(255,255,255,0.035);
+  }
+  .result-card strong { display: block; color: var(--text-primary); margin-bottom: 0.35rem; }
+  .result-card p { color: var(--text-body); line-height: 1.55; font-size: 0.86rem; }
+  .result-meta { margin-top: 0.55rem; color: var(--text-muted); font-size: 0.72rem; }
+  .result-actions { display: flex; gap: 0.5rem; margin-top: 0.7rem; }
+  .empty { color: var(--text-muted); font-size: 0.86rem; }
+  @media (max-width: 820px) {
+    .workbench-header, .workbench-columns { display: block; }
+    .status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .toolbar { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const resultsEl = document.querySelector("[data-memory-results]");
+  const suggestionsEl = document.querySelector("[data-suggestion-results]");
+  const queryEl = document.querySelector("[data-memory-query]");
+  const statusEl = document.querySelector("[data-memory-status]");
+
+  function esc(value) {
+    return String(value || "").replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    }[ch]));
+  }
+
+  function renderCards(el, items, emptyText, options = {}) {
+    if (!items.length) {
+      el.innerHTML = `<p class="empty">${emptyText}</p>`;
+      return;
+    }
+    el.innerHTML = items.map((item) => `
+      <article class="result-card">
+        <strong>${esc(item.title || item.summary || item.suggested_memory_type || item.memory_type || "Memory")}</strong>
+        <p>${esc(item.excerpt || item.content || item.suggestion_text || "")}</p>
+        <div class="result-meta">${esc(item.status || "")} · ${esc(item.memory_type || item.visitor_subject_id || item.source || "")}</div>
+        ${options.suggestions ? `
+          <div class="result-actions">
+            <button class="btn-gold btn-sm" data-adopt="${esc(item.id)}">采纳</button>
+            <button class="btn-ghost btn-sm" data-discard="${esc(item.id)}">丢弃</button>
+          </div>
+        ` : ""}
+      </article>
+    `).join("");
+  }
+
+  async function searchMemories() {
+    const q = encodeURIComponent(queryEl.value || "");
+    const include = statusEl.value === "candidate" || statusEl.value === "quarantined";
+    const res = await fetch(`/PolaZhenjing/admin/api/agent/memory/search?q=${q}&include_candidates=${include ? "1" : "0"}`);
+    const data = await res.json();
+    renderCards(resultsEl, data.memories || [], "没有匹配的记忆。");
+  }
+
+  async function loadSuggestions() {
+    try {
+      const res = await fetch("/PolaZhenjing/admin/api/agent/memory/visitor-suggestions?status=pending");
+      const data = await res.json();
+      renderCards(suggestionsEl, data.suggestions || [], "暂无待处理访客建议。", { suggestions: true });
+    } catch (error) {
+      suggestionsEl.innerHTML = '<p class="empty">访客建议暂不可用。</p>';
+    }
+  }
+
+  document.querySelector("[data-memory-search]").addEventListener("click", searchMemories);
+  suggestionsEl.addEventListener("click", async (event) => {
+    const adoptId = event.target.getAttribute("data-adopt");
+    const discardId = event.target.getAttribute("data-discard");
+    if (!adoptId && !discardId) return;
+    const action = adoptId ? "adopt" : "discard";
+    const id = adoptId || discardId;
+    await fetch(`/PolaZhenjing/admin/api/agent/memory/visitor-suggestions/${encodeURIComponent(id)}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    loadSuggestions();
+  });
+  queryEl.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") searchMemories();
+  });
+  loadSuggestions();
+</script>
+{% endblock %}
