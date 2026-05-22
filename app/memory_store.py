@@ -30,6 +30,31 @@ def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex}"
 
 
+def sanitize_pg_text(value: Any) -> Any:
+    if isinstance(value, str):
+        return value.replace("\x00", "")
+    return value
+
+
+def sanitize_pg_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return sanitize_pg_text(value)
+    if isinstance(value, list):
+        return [sanitize_pg_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [sanitize_pg_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            str(sanitize_pg_text(key)): sanitize_pg_value(item)
+            for key, item in value.items()
+        }
+    return value
+
+
+def pg_jsonb(value: Any) -> Any:
+    return Jsonb(sanitize_pg_value(value))
+
+
 class MemoryStoreUnavailable(RuntimeError):
     """Raised when the optional PostgreSQL memory store is not usable."""
 
@@ -98,8 +123,9 @@ class MemoryStore:
             "ingested_at": data.get("ingested_at") or utc_now(),
             "trust_tier": data["trust_tier"],
             "privacy_scope": data.get("privacy_scope") or "project",
-            "risk_flags": Jsonb(data.get("risk_flags") or {}),
+            "risk_flags": pg_jsonb(data.get("risk_flags") or {}),
         }
+        payload = sanitize_pg_value(payload)
         with self.connect() as conn:
             conn.execute(
                 """
@@ -141,10 +167,11 @@ class MemoryStore:
             "updated_at": data.get("updated_at") or now,
             "created_by": data.get("created_by") or "",
             "version": int(data.get("version", 1)),
-            "evidence_event_ids": Jsonb(data.get("evidence_event_ids") or []),
+            "evidence_event_ids": pg_jsonb(data.get("evidence_event_ids") or []),
             "supersedes_id": data.get("supersedes_id"),
             "conflict_group_id": data.get("conflict_group_id"),
         }
+        payload = sanitize_pg_value(payload)
         with self.connect() as conn:
             conn.execute(
                 """
@@ -187,11 +214,12 @@ class MemoryStore:
             "suggestion_text": data["suggestion_text"],
             "suggested_memory_type": data.get("suggested_memory_type") or "",
             "summary": data.get("summary") or data["suggestion_text"][:240],
-            "risk_flags": Jsonb(data.get("risk_flags") or {}),
+            "risk_flags": pg_jsonb(data.get("risk_flags") or {}),
             "status": data.get("status") or "pending",
             "created_at": data.get("created_at") or now,
             "updated_at": data.get("updated_at") or now,
         }
+        payload = sanitize_pg_value(payload)
         with self.connect() as conn:
             conn.execute(
                 """
@@ -264,7 +292,7 @@ class MemoryStore:
                     "status": status,
                     "adopted_memory_id": adopted_memory_id,
                     "adopted_by_owner_id": adopted_by_owner_id,
-                    "discarded_reason": discarded_reason,
+                    "discarded_reason": sanitize_pg_text(discarded_reason),
                     "now": utc_now(),
                 },
             )
@@ -353,7 +381,7 @@ class MemoryStore:
         ):
             if value is not None:
                 fields.append(f"{name} = %({name})s")
-                params[name] = value
+                params[name] = sanitize_pg_value(value)
         if not fields:
             return before
         fields.append("updated_at = %(updated_at)s")
@@ -387,9 +415,9 @@ class MemoryStore:
                     actor_id,
                     "memory_item",
                     memory_id,
-                    Jsonb(before),
-                    Jsonb(after),
-                    reason,
+                    pg_jsonb(before),
+                    pg_jsonb(after),
+                    sanitize_pg_text(reason),
                 ),
             )
             self._enqueue_search_job(conn, "memory_item", memory_id, "upsert")
@@ -420,7 +448,7 @@ class MemoryStore:
                     updated_at = %s
                 WHERE id = %s
                 """,
-                (status, error[:1000], utc_now(), job_id),
+                (status, sanitize_pg_text(error[:1000]), utc_now(), job_id),
             )
             conn.commit()
 

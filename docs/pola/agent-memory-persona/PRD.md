@@ -2,6 +2,18 @@
 
 更新时间：2026-05-22
 
+## 0. 2026-05-22 实现状态
+
+Phase 1 已在 PolaZhenJing 落地并部署到 `https://aipd.me`：
+
+- 已上线 PostgreSQL typed ledger，生产 DSN 为本机 socket `postgresql:///polazj_memory`。
+- 已启用 `POLA_MEMORY_DB_ENABLED=true`、`POLA_MEMORY_WRITE_ENABLED=true`、`POLA_MEMORY_FALLBACK_JSON=true`。
+- 已导入 `data/agent_memory.json` 的 `4387` 条旧记忆为 candidate。
+- 已导入 `_posts/*.md` 的 `33` 篇文章记忆。
+- 已上线 Owner/visitor 区分、Owner 确认式写入、访客建议池、记忆工作台、搜索 API、投毒扫描、审计和 Meilisearch outbox。
+- 已保留 JSON fallback；Meilisearch 与 pgvector 暂为后续 Phase，不作为当前事实源。
+- 线上最新状态：`memory_items=4420`、`raw_events=4422`、`candidates=4411`、`visitor_suggestions=0`。
+
 ## 1. 背景
 
 当前 `超级小王` 已经具备在线对话页、Obsidian 记忆 JSON、关键词召回和 MiniMax 调用能力。现状适合作为 MVP，但还不能支撑一个持续成长的数字分身：

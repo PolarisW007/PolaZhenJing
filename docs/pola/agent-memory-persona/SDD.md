@@ -2,6 +2,17 @@
 
 更新时间：2026-05-22
 
+## 0. 2026-05-22 实施状态
+
+Phase 1 已完成并部署：
+
+- 代码入口：`app/memory_store.py`、`app/memory_service.py`、`app/memory_guard.py`、`app/owner_identity.py`、`app/search_projection.py`、`app/agent.py`。
+- 管理后台：`app/templates/memory_workbench.html`，路由为 `/PolaZhenjing/admin/agent/memory`。
+- 数据库：生产 PostgreSQL `polazj_memory` 已启用，`data/agent_memory.json` 仅作为 fallback。
+- 导入：旧 Obsidian JSON `4387` 条，文章 `_posts/*.md` `33` 条。
+- 安全：写入进入 raw_event/candidate/suggestion，active/pinned 仍需 Owner 管理；历史 NUL 字节在存储层统一清洗。
+- 验证：本地与远端 `pytest` 9 passed，`scripts/run_memory_harness.py` Pass，线上 `/memory/status`、`/memory/search`、`/agent.html`、`/agent/chat` 回归通过。
+
 ## 1. 背景和目标
 
 本 SDD 对应 `docs/pola/agent-memory-persona/PRD.md`，用于指导后续工程实现。

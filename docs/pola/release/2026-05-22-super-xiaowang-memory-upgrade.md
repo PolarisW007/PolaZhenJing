@@ -34,9 +34,10 @@ curl -k -L 'https://aipd.me/PolaZhenjing/admin/api/agent/memory/search?q=Agent'
 
 ## 安全部署策略
 
-- 如果生产未配置 `DATABASE_URL`，不强制启用 PostgreSQL；先部署代码和 JSON fallback。
-- `POLA_MEMORY_WRITE_ENABLED` 默认关闭，避免上线即自动写入。
-- 初始化 PostgreSQL schema 需要 Owner/admin 手动触发或运维命令执行。
+- PostgreSQL 使用服务器本机 socket DSN：`postgresql:///polazj_memory`，未引入明文数据库密码。
+- `data/agent_memory.json` 继续保留为 fallback，PostgreSQL 是正式记忆账本。
+- 旧记忆以 candidate 状态导入，避免一次性污染 active/pinned 人格记忆。
+- Meilisearch 服务当前未启用，搜索投影脚本保留，后续可重建。
 
 ## 回滚
 
@@ -66,12 +67,21 @@ systemctl restart polazj.service
 ## 实际发布记录
 
 - 本地提交：`73d46f9 feat: 升级超级小王记忆系统`。
+- 本地提交：`586edca docs: 记录超级小王部署验证`。
 - GitHub push 因远端 main 有更新被拒绝；为避免在脏工作区 rebase 影响用户未提交内容，本次采用 rsync 精确同步发布。
 - 远端备份目录：`/opt/backups/polazj-super-xiaowang-20260522232806`。
 - 远端依赖：通过清华 PyPI 镜像安装 `psycopg[binary]==3.3.4` 和 `pytest==8.3.4`。
+- 远端 PostgreSQL：
+  - `polazj_memory` 数据库已创建。
+  - `/PolaZhenjing/.env` 已启用 `POLA_MEMORY_DB_ENABLED=true`、`POLA_MEMORY_WRITE_ENABLED=true`、`POLA_MEMORY_FALLBACK_JSON=true`。
+  - 旧记忆导入 `4387` 条 candidate memory。
+  - 文章导入 `33` 条 article memory。
+- 远端补丁：
+  - `app/memory_store.py` 增加 PostgreSQL 文本/JSONB NUL 字节清洗。
+  - `tests/test_memory_store.py` 覆盖历史脏数据导入回归。
 - 远端服务：`polazj.service` 已重启并保持 active。
 - 线上验证：
-  - `https://aipd.me/PolaZhenjing/admin/api/agent/memory/status` -> 200。
+  - `https://aipd.me/PolaZhenjing/admin/api/agent/memory/status` -> 200，`backend=postgres`、`enabled=true`。
   - `https://aipd.me/PolaZhenjing/admin/api/agent/memory/search?q=Agent` -> 200。
   - `https://aipd.me/PolaZhenjing/admin/agent/memory` 未登录 -> 302 到登录页。
   - `https://aipd.me/agent.html` -> 200。
