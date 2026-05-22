@@ -62,3 +62,17 @@ systemctl restart polazj.service
 - `/memory/search` 返回 200。
 - `/agent.html` 页面可加载并正常调用 chat。
 - 未登录 `/admin/agent/memory` 进入登录页。
+
+## 实际发布记录
+
+- 本地提交：`73d46f9 feat: 升级超级小王记忆系统`。
+- GitHub push 因远端 main 有更新被拒绝；为避免在脏工作区 rebase 影响用户未提交内容，本次采用 rsync 精确同步发布。
+- 远端备份目录：`/opt/backups/polazj-super-xiaowang-20260522232806`。
+- 远端依赖：通过清华 PyPI 镜像安装 `psycopg[binary]==3.3.4` 和 `pytest==8.3.4`。
+- 远端服务：`polazj.service` 已重启并保持 active。
+- 线上验证：
+  - `https://aipd.me/PolaZhenjing/admin/api/agent/memory/status` -> 200。
+  - `https://aipd.me/PolaZhenjing/admin/api/agent/memory/search?q=Agent` -> 200。
+  - `https://aipd.me/PolaZhenjing/admin/agent/memory` 未登录 -> 302 到登录页。
+  - `https://aipd.me/agent.html` -> 200。
+  - `POST /PolaZhenjing/admin/api/agent/chat` -> 200，`ok=true`。

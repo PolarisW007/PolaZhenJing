@@ -38,3 +38,24 @@
 
 - 未连接真实 PostgreSQL 实例做端到端写入，因为本地环境未配置 `DATABASE_URL`。
 - 未连接真实 Meilisearch 实例，因为 projection 是可选层，生产是否启用需先确认服务状态。
+
+## 线上回归
+
+部署时间：2026-05-22 23:32 Asia/Shanghai
+
+| 路径/命令 | 结果 |
+| --- | --- |
+| 远端 `./.venv/bin/python -m pytest tests/test_owner_identity.py tests/test_memory_guard.py tests/test_search_projection.py` | 8 passed |
+| 远端 `scripts/run_memory_harness.py` | Pass |
+| `systemctl is-active polazj.service` | active |
+| `GET https://aipd.me/PolaZhenjing/admin/api/agent/memory/status` | 200，JSON fallback 可用，`store.enabled=false` |
+| `GET https://aipd.me/PolaZhenjing/admin/api/agent/memory/search?q=Agent` | 200，返回旧记忆结果 |
+| `GET https://aipd.me/PolaZhenjing/admin/agent/memory` 未登录 | 302 -> `/admin/login` |
+| `GET https://aipd.me/agent.html` | 200 |
+| `POST https://aipd.me/PolaZhenjing/admin/api/agent/chat` | 200，`ok=true`，`model=MiniMax-M2.7` |
+
+生产状态：
+
+- 服务器 PostgreSQL 服务存在且 active。
+- 当前 `/PolaZhenjing/.env` 未配置 `DATABASE_URL`，`POLA_MEMORY_DB_ENABLED` 未开启。
+- 因此本次线上以 JSON fallback 安全部署，未强行初始化生产记忆库。

@@ -12,6 +12,7 @@
 | 编码实现 | Done | `app/memory_*`、`app/owner_identity.py`、`app/search_projection.py`、`app/agent.py` |
 | 测试门禁 | Done | `docs/pola/test-reports/2026-05-22-super-xiaowang-memory-upgrade.md` |
 | 发布清单 | Done | `docs/pola/release/2026-05-22-super-xiaowang-memory-upgrade.md` |
+| 云端部署 | Done | rsync 到 `/PolaZhenjing`，重启 `polazj.service` |
 
 ## 决策记录
 
@@ -26,6 +27,8 @@
 - `pytest` 8 passed。
 - `scripts/run_memory_harness.py` Pass。
 - 本地 `/memory/status` 和 `/memory/search` HTTP 200。
+- 线上 `/memory/status`、`/memory/search`、`/agent.html`、`/agent/chat` 回归通过。
+- 远端备份目录：`/opt/backups/polazj-super-xiaowang-20260522232806`。
 
 ## 后续
 
