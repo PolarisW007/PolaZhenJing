@@ -1053,7 +1053,7 @@ def _article_short_slug(title: str, date_str: str, max_title_len: int = 32) -> s
     base = re.sub(r'-{2,}', '-', base)[:max_title_len].strip('-')
     if not base:
         base = 'article'
-    return f'{base}{compact_date}'
+    return f'{base}-{compact_date}'
 
 
 def _unique_post_filename(posts_dir: str, date_str: str, slug: str) -> str:
@@ -1067,6 +1067,34 @@ def _unique_post_filename(posts_dir: str, date_str: str, slug: str) -> str:
         if not os.path.exists(os.path.join(posts_dir, filename)):
             return filename
         idx += 1
+
+
+_POST_FILENAME_RE = re.compile(r'^(\d{4})-(\d{2})-(\d{2})-(.+)\.md$')
+
+
+def _article_admin_filename(filename: str) -> str:
+    """Return the short admin URL filename for a Jekyll post filename."""
+    match = _POST_FILENAME_RE.match(filename or '')
+    if not match:
+        return filename
+    return f'{match.group(4)}.md'
+
+
+def _resolve_post_filename(filename: str) -> str | None:
+    """Resolve either a real Jekyll filename or a short admin filename."""
+    if not filename or '/' in filename or '\\' in filename or not filename.endswith('.md'):
+        return None
+    direct = os.path.join(POSTS_DIR, filename)
+    if os.path.isfile(direct):
+        return filename
+
+    wanted = filename.strip()
+    for fname in os.listdir(POSTS_DIR) if os.path.isdir(POSTS_DIR) else []:
+        if not fname.endswith('.md'):
+            continue
+        if _article_admin_filename(fname) == wanted:
+            return fname
+    return None
 
 
 def _save_draft(content: str, title: str, tags: str, description: str,
@@ -1116,7 +1144,11 @@ def _scan_posts():
         if not fname.endswith('.md'):
             continue
         fpath = os.path.join(POSTS_DIR, fname)
-        meta = {'filename': fname, 'path': fpath}
+        meta = {
+            'filename': fname,
+            'admin_filename': _article_admin_filename(fname),
+            'path': fpath,
+        }
         # Parse front matter
         with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
@@ -1149,9 +1181,11 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
         summary = ''
     summary = summary or _generate_summary(body, max_chars=120)
     summary = re.sub(r'!\[[^\]]*(?:\]\([^)]+\))?', '', summary).strip()
-    local_url = url_for('uploader.view_article', filename=filename)
+    admin_filename = _article_admin_filename(filename)
+    local_url = url_for('uploader.view_article', filename=admin_filename)
     return {
         'filename': filename,
+        'admin_filename': admin_filename,
         'title': title,
         'date': date,
         'summary': summary,
@@ -1515,12 +1549,19 @@ def generate_progress(job_id):
     if not job:
         return jsonify({'status': 'not_found'}), 404
 
+    result_filename = job.get('result_filename') or ''
+    article_url = ''
+    if result_filename:
+        article_url = url_for('uploader.view_article',
+                              filename=_article_admin_filename(result_filename))
+
     return jsonify({
         'status': job['status'],
         'stage': job.get('stage') or '',
         'progress': job.get('progress') or 0,
         'error': job.get('error'),
         'messages': job.get('messages') or [],
+        'article_url': article_url,
         'articles_url': url_for('uploader.articles'),
     })
 
@@ -1561,9 +1602,10 @@ def _build_pages_url(filename):
 
 def _safe_post_path(filename: str) -> str | None:
     """Return an absolute post path only for safe _posts markdown filenames."""
-    if not filename or '/' in filename or '\\' in filename or not filename.endswith('.md'):
+    resolved = _resolve_post_filename(filename)
+    if not resolved:
         return None
-    fpath = os.path.abspath(os.path.join(POSTS_DIR, filename))
+    fpath = os.path.abspath(os.path.join(POSTS_DIR, resolved))
     posts_root = os.path.abspath(POSTS_DIR)
     if not fpath.startswith(posts_root + os.sep):
         return None
@@ -1686,6 +1728,8 @@ def view_article(filename):
     if not fpath or not os.path.isfile(fpath):
         flash('文章未找到。', 'error')
         return redirect(url_for('uploader.articles'))
+    actual_filename = os.path.basename(fpath)
+    admin_filename = _article_admin_filename(actual_filename)
     with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
         raw = f.read()
     meta, _, body = _parse_post(raw)
@@ -1696,15 +1740,17 @@ def view_article(filename):
     # URLs like /assets/images/generated/... still resolve.
     body = body.replace('{{ site.baseurl }}', request.script_root or '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
-    github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{filename}'
+    github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{actual_filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
-    pages_url = _build_pages_url(filename)
+    pages_url = _build_pages_url(actual_filename)
     read_time = _calc_read_time(body)
     # Get style accent color
     layout = meta.get('layout', 'deep-technical')
     accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
     return render_template('article_view.html',
                            filename=filename, meta=meta,
+                           admin_filename=admin_filename,
+                           actual_filename=actual_filename,
                            body_html=body_html, github_url=github_url,
                            pages_url=pages_url, read_time=read_time,
                            accent_color=accent_color)
@@ -1718,6 +1764,8 @@ def edit_article(filename):
     if not fpath or not os.path.isfile(fpath):
         flash('文章未找到。', 'error')
         return redirect(url_for('uploader.articles'))
+    actual_filename = os.path.basename(fpath)
+    admin_filename = _article_admin_filename(actual_filename)
 
     if request.method == 'POST':
         post_markdown = _build_post_markdown(request.form)
@@ -1735,7 +1783,7 @@ def edit_article(filename):
                 flash(f'文章已保存，但同步失败：{detail}', 'warning')
         else:
             flash('文章已保存。', 'success')
-        return redirect(url_for('uploader.view_article', filename=filename))
+        return redirect(url_for('uploader.view_article', filename=admin_filename))
 
     with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
         raw = f.read()
@@ -1747,14 +1795,15 @@ def edit_article(filename):
     )
     return render_template(
         'article_edit.html',
-        filename=filename,
+        filename=admin_filename,
+        actual_filename=actual_filename,
         meta=meta,
         body=body,
         tag_value=_tags_input_value(meta.get('tags', '')),
         extra_front_matter=extra_front_matter,
         styles=STYLES,
         themes=THEMES,
-        pages_url=_build_pages_url(filename),
+        pages_url=_build_pages_url(actual_filename),
     )
 
 
@@ -1776,8 +1825,9 @@ def preview_article_markdown(filename):
 def delete_article(filename):
     fpath = _safe_post_path(filename)
     if fpath and os.path.isfile(fpath):
+        actual_filename = os.path.basename(fpath)
         os.remove(fpath)
-        flash(f'已删除 {filename}。', 'info')
+        flash(f'已删除 {_article_admin_filename(actual_filename)}。', 'info')
     else:
         flash('文章未找到。', 'error')
     return redirect(url_for('uploader.articles'))

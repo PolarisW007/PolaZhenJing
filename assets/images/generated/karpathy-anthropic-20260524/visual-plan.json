@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一个人影从讲台/舞台的聚光灯下走出，穿过一道光幕，进入一个灯火通明的服务器机房实验室。象征从公众教育者回到技术研究现场。",
+    "prompt": "A silhouette of a young researcher stepping down from a spotlit podium, crossing through a threshold of light into a glowing server room laboratory, Ghibli animation style, watercolor texture, warm spotlight on stage fading into cool blue data center lights, cinematic composition, detailed industrial architecture of server racks, a sense of returning to the core, natural lighting from multiple sources, highly detailed, 8k"
+  },
+  "scenes": [
+    {
+      "block_index": 0,
+      "alt": "一个讲台和空荡荡的礼堂逐渐模糊，前方逐渐清晰出现服务器机房的蓝色光芒。象征 Karpathy 从教育者身份回到研究现场的转变。",
+      "prompt": "A fading lecture hall with empty chairs and a glowing podium gradually dissolving into a bright server room filled with blue lights and humming machines, a lone figure walking between two worlds, Ghibli animation style, watercolor texture, natural light transition from warm golden stage light to cool blue data glow, dramatic depth of field, ethereal atmosphere, highly detailed environment"
+    },
+    {
+      "block_index": 25,
+      "alt": "一个人站在巨大的预训练集群机器前，屏幕显示数据流和训练曲线，Claude 的抽象光球核心悬浮在中央，象征用 Claude 加速预训练研究。",
+      "prompt": "A researcher standing before massive pre-training computation clusters, multiple screens showing training curves and data streams, a glowing abstract core orb representing Claude floating in the center emitting light, the researcher examining neural network architecture diagrams, Ghibli animation style, watercolor texture, natural light from screen glows, highly detailed futuristic research lab, cinematic composition"
+    },
+    {
+      "block_index": 51,
+      "alt": "多个漂浮的全息界面围绕一个中央 AI 核心——代码编辑窗口、文档展示、协议连接图、配置面板、代理协调图，像星座一样排列在空中。",
+      "prompt": "Multiple floating holographic interfaces orbiting a central glowing AI core like a constellation - a code editor window, document display panel, protocol connection diagram, project configuration board, agent coordination map - arranged in a circular pattern in a dim research room, Ghibli animation style, watercolor texture, soft ethereal light emanating from each interface, hands of a researcher arranging these floating elements, magical realism atmosphere"
+    },
+    {
+      "block_index": 76,
+      "alt": "一个完整的科研循环可视化——研究员在实验室里分析实验日志、整理数据、提出假设、运行消融实验，流程像永动机一样不断循环。",
+      "prompt": "A complete research cycle visualized as a glowing loop - a researcher reading experiment logs, analyzing data on multiple screens, formulating hypotheses with neural diagrams, running ablation studies with cascading parameters, the cycle flowing like an eternal machine, Ghibli animation style, watercolor texture, natural laboratory lighting, warm and cool tones balanced, highly detailed scientific instruments and screens, contemplative atmosphere"
+    },
+    {
+      "block_index": 105,
+      "alt": "一个人站在远处，透过窗户/屏幕看着另一个人在操作台前工作，背景是数据流动和模型架构图。隐喻场外人想象自己的工作被模型读取和使用。",
+      "prompt": "A solitary figure standing at a distance looking through a window at another person working at a research console, data streams and model architecture diagrams flowing in the background, warm sunset light filtering through the scene, Ghibli animation style, watercolor texture, natural lighting creating a contemplative mood, the scene suggesting observation and reflection on being read and used by an AI, soft focus, highly detailed environment with subtle technology elements"
+    }
+  ]
+}
