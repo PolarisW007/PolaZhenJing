@@ -1,0 +1,17 @@
+﻿paper_id,issue_type,detail,action
+2401.02954,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2405.04434,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2406.11931,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2412.19437,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2412.19437,deduplicated_author,Shengfeng Ye,kept first occurrence only
+2412.19437,deduplicated_author,Yanhong Xu,kept first occurrence only
+2501.12948,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2501.12948,deduplicated_author,Shengfeng Ye,kept first occurrence only
+2501.12948,deduplicated_author,Yanhong Xu,kept first occurrence only
+2512.02556,excluded_team_name,DeepSeek-AI,excluded from personal author counts
+2512.02556,deduplicated_author,Yao Li,kept first occurrence only
+V4-PDF,deduplicated_author,Yao Li,kept first occurrence only
+2402.03300,manual_author_added,Haowei Zhang,HF API missing author; added from original author block
+2402.03300,manual_author_added,Xiao Bi,HF API missing author; added from original author block
+2403.05525,manual_author_added,Hao Yang,HF API missing author; added from original author block
+2512.24880,manual_author_added,Kuai Yu,HF API missing author; added from original author block

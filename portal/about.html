@@ -1,0 +1,132 @@
+<!--
+  模块名称：AIPD About Me 独立页
+  功能描述：展示炽驹 Polaris 的个人简介、关键经历和专业领域
+  创建日期：2026-05-19
+  作者：Codex
+  主要变更：2026-05-19 从首页拆出独立 About 页面
+  依赖模块：portal/assets/portal.css、portal/assets/portal-sections.css、portal/assets/portal.js
+-->
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="炽驹 Polaris，AI 探索者。产品、数据与企业服务生态的长期实践者。">
+    <meta name="theme-color" content="#050508">
+    <meta property="og:title" content="炽驹 Polaris | About Me">
+    <meta property="og:description" content="AI 探索者，产品、数据与企业服务生态的长期实践者。">
+    <link rel="icon" href="/assets/favicon.svg?v=20260519" type="image/svg+xml">
+    <link rel="alternate icon" href="/assets/favicon.png?v=20260519" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=20260519">
+    <title>炽驹 Polaris | About Me</title>
+    <link rel="stylesheet" href="assets/portal.css?v=202605211520">
+    <link rel="stylesheet" href="assets/portal-sections.css">
+  </head>
+  <body class="about-page">
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="/" aria-label="织梦空间首页">
+          <span class="brand-mark brand-logo" aria-hidden="true">
+            <img src="assets/dream-logo.svg" alt="">
+          </span>
+          <span class="brand-copy">
+            <strong>织梦空间</strong>
+          </span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          <a href="/#articles">AI文章</a>
+          <a href="/#skills">Skills</a>
+          <a href="/#projects">项目</a>
+          <a href="/#avatar">AI分身</a>
+          <a class="active" href="/about.html">About</a>
+        </nav>
+        <a class="header-cta auth-entry" href="/PolaZhenjing/admin/login?next=/about.html" data-auth-entry>
+          <span class="auth-avatar" aria-hidden="true">登</span>
+          <span data-auth-label>登录 / 注册</span>
+        </a>
+      </header>
+
+      <main>
+        <section class="about-section standalone-about" id="about" aria-labelledby="about-title">
+          <div class="section-heading" data-reveal>
+            <span class="section-index">00</span>
+            <div>
+              <p class="eyebrow">About Me</p>
+              <h1 id="about-title">炽驹 Polaris，AI 探索者。</h1>
+            </div>
+          </div>
+
+          <div class="about-layout">
+            <aside class="about-profile" data-reveal>
+              <div class="avatar-frame">
+                <img src="assets/polaris-avatar.png" alt="炽驹 Polaris 头像">
+              </div>
+              <div class="profile-copy">
+                <span class="profile-kicker">AI Explorer</span>
+                <h3>炽驹 Polaris</h3>
+                <p>产品、数据与企业服务生态的长期实践者。</p>
+              </div>
+              <div class="profile-tags" aria-label="身份标签">
+                <span>AI 探索者</span>
+                <span>产品架构</span>
+                <span>数据驱动</span>
+                <span>开放生态</span>
+              </div>
+            </aside>
+
+            <div class="about-story" data-reveal>
+              <article>
+                <span>个人简介</span>
+                <p>
+                  炽驹 Polaris 拥有浙江大学软件工程硕士背景，长期工作在互联网产品、数据技术、
+                  商业模式创新和企业服务生态的交汇处。经历过全球化交易、数据产品、新零售创业和
+                  开放平台建设，习惯把复杂业务拆解成可运行、可扩展、可被生态调用的系统。
+                </p>
+                <p>
+                  现在，他把 AI 当作新的产品基础设施来探索：用文章沉淀判断，用 Skills 封装方法，
+                  用 Agent 承接执行，把个人经验逐步蒸馏成一个持续进化的云端工作台。
+                </p>
+              </article>
+              <div class="about-metrics" aria-label="关键经历">
+                <div><strong>15+</strong><span>年产品与生态实践</span></div>
+                <div><strong>550万</strong><span>会员数字化运营经验</span></div>
+                <div><strong>15万+</strong><span>门店服务网络经验</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="domain-grid" aria-label="专业领域">
+            <article data-reveal>
+              <span>01</span>
+              <h3>数据产品与风控</h3>
+              <p>在跨境交易场景中建设数据标准、ETL 流程与实时风控指标，把复杂数据转成可操作的业务建议。</p>
+            </article>
+            <article data-reveal>
+              <span>02</span>
+              <h3>商业模式设计</h3>
+              <p>经历 B2B、B2C 与 S2B2C 多种模型，从需求洞察、商业设计到落地运营形成闭环。</p>
+            </article>
+            <article data-reveal>
+              <span>03</span>
+              <h3>企业服务生态</h3>
+              <p>推动低代码、API 标准化与行业解决方案，以开放平台能力支持企业级应用开发。</p>
+            </article>
+            <article data-reveal>
+              <span>04</span>
+              <h3>AI 工作流探索</h3>
+              <p>把内容生产、Skills、Agent 和长期记忆纳入同一套工作台，探索 AI Native 的个人生产系统。</p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>AIPD © <span id="year">2026</span></span>
+        <a href="/">首页</a>
+        <a href="/PolaRead/">PolaRead</a>
+        <a href="/polanews">PolaNews</a>
+      </footer>
+    </div>
+    <script src="assets/portal.js?v=202605211520" defer></script>
+  </body>
+</html>

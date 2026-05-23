@@ -1,0 +1,355 @@
+
+
+--- page 3 ---
+4.5.3 Batch-Wise Load Balance VS. Sequence-Wise Load Balance . . . . . . . . . 27
+5 Post-Training 28
+5.1 Supervised Fine-Tuning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+5.2 Reinforcement Learning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+5.2.1 Reward Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+5.2.2 Group Relative Policy Optimization . . . . . . . . . . . . . . . . . . . . . . 30
+5.3 Evaluations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+5.3.1 Evaluation Settings . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+5.3.2 Standard Evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+5.3.3 Open-Ended Evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+5.3.4 DeepSeek-V3 as a Generative Reward Model . . . . . . . . . . . . . . . . . 33
+5.4 Discussion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+5.4.1 Distillation from DeepSeek-R1 . . . . . . . . . . . . . . . . . . . . . . . . . 34
+5.4.2 Self-Rewarding . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+5.4.3 Multi-Token Prediction Evaluation . . . . . . . . . . . . . . . . . . . . . . . 35
+6 Conclusion, Limitations, and Future Directions 35
+A Contributions and Acknowledgments 45
+B Ablation Studies for Low-Precision Training 47
+B.1 FP8 v.s. BF16 Training . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+B.2 Discussion About Block-Wise Quantization . . . . . . . . . . . . . . . . . . . . . . 47
+C Expert Specialization Patterns of the 16B Aux-Loss-Based and Aux-Loss-Free Models 48
+--- page 4 ---
+1. Introduction
+In recent years, Large Language Models (LLMs) have been undergoing rapid iteration and
+evolution (Anthropic, 2024; Google, 2024; OpenAI, 2024a), progressively diminishing the gap to-
+wards Artificial General Intelligence (AGI). Beyond closed-source models, open-source models,
+including DeepSeek series (DeepSeek-AI, 2024a,b,c; Guo et al., 2024), LLaMA series (AI@Meta,
+2024a,b; Touvron et al., 2023a,b), Qwen series (Qwen, 2023, 2024a,b), and Mistral series (Jiang
+et al., 2023; Mistral, 2024), are also making significant strides, endeavoring to close the gap with
+their closed-source counterparts. To further push the boundaries of open-source model capa-
+bilities, we scale up our models and introduce DeepSeek-V3, a large Mixture-of-Experts (MoE)
+model with 671B parameters, of which 37B are activated for each token.
+With a forward-looking perspective, we consistently strive for strong model performance
+and economical costs. Therefore, in terms of architecture, DeepSeek-V3 still adopts Multi-head
+Latent Attention (MLA) (DeepSeek-AI, 2024c) for efficient inference and DeepSeekMoE (Dai
+et al., 2024) for cost-effective training. These two architectures have been validated in DeepSeek-
+V2 (DeepSeek-AI, 2024c), demonstrating their capability to maintain robust model performance
+while achieving efficient training and inference. Beyond the basic architecture, we implement
+two additional strategies to further enhance the model capabilities. Firstly, DeepSeek-V3 pi-
+oneers an auxiliary-loss-free strategy (Wang et al., 2024a) for load balancing, with the aim of
+minimizing the adverse impact on model performance that arises from the effort to encourage
+load balancing. Secondly, DeepSeek-V3 employs a multi-token prediction training objective,
+which we have observed to enhance the overall performance on evaluation benchmarks.
+In order to achieve efficient training, we support the FP8 mixed precision training and
+implement comprehensive optimizations for the training framework. Low-precision training
+has emerged as a promising solution for efficient training (Dettmers et al., 2022; Kalamkar et al.,
+2019; Narang et al., 2017; Peng et al., 2023b), its evolution being closely tied to advancements in
+hardware capabilities (Luo et al., 2024; Micikevicius et al., 2022; Rouhani et al., 2023a). In this
+work, we introduce an FP8 mixed precision training framework and, for the first time, validate
+its effectiveness on an extremely large-scale model. Through the support for FP8 computation
+and storage, we achieve both accelerated training and reduced GPU memory usage. As for
+the training framework, we design the DualPipe algorithm for efficient pipeline parallelism,
+which has fewer pipeline bubbles and hides most of the communication during training through
+computation-communication overlap. This overlap ensures that, as the model further scales up,
+as long as we maintain a constant computation-to-communication ratio, we can still employ
+fine-grained experts across nodes while achieving a near-zero all-to-all communication overhead.
+In addition, we also develop efficient cross-node all-to-all communication kernels to fully utilize
+InfiniBand (IB) and NVLink bandwidths. Furthermore, we meticulously optimize the memory
+footprint, making it possible to train DeepSeek-V3 without using costly tensor parallelism.
+Combining these efforts, we achieve high training efficiency.
+During pre-training, we train DeepSeek-V3 on 14.8T high-quality and diverse tokens. The
+pre-training process is remarkably stable. Throughout the entire training process, we did not
+encounter any irrecoverable loss spikes or have to roll back. Next, we conduct a two-stage
+context length extension for DeepSeek-V3. In the first stage, the maximum context length is
+extended to 32K, and in the second stage, it is further extended to 128K. Following this, we
+conduct post-training, including Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL)
+on the base model of DeepSeek-V3, to align it with human preferences and further unlock its
+potential. During the post-training stage, we distill the reasoning capability from the DeepSeek-
+R1 series of models, and meanwhile carefully maintain the balance between model accuracy
+--- page 5 ---
+Training Costs Pre-Training Context Extension Post-Training Total
+in H800 GPU Hours 2664K 119K 5K 2788K
+in USD $5.328M $0.238M $0.01M $5.576M
+Table 1 | Training costs of DeepSeek-V3, assuming the rental price of H800 is $2 per GPU hour.
+and generation length.
+We evaluate DeepSeek-V3 on a comprehensive array of benchmarks. Despite its economical
+training costs, comprehensive evaluations reveal that DeepSeek-V3-Base has emerged as the
+strongest open-source base model currently available, especially in code and math. Its chat
+version also outperforms other open-source models and achieves performance comparable to
+leading closed-source models, including GPT-4o and Claude-3.5-Sonnet, on a series of standard
+and open-ended benchmarks.
+Lastly, we emphasize again the economical training costs of DeepSeek-V3, summarized in
+Table 1, achieved through our optimized co-design of algorithms, frameworks, and hardware.
+During the pre-training stage, training DeepSeek-V3 on each trillion tokens requires only 180K
+H800 GPU hours, i.e., 3.7 days on our cluster with 2048 H800 GPUs. Consequently, our pre-
+training stage is completed in less than two months and costs 2664K GPU hours. Combined
+with 119K GPU hours for the context length extension and 5K GPU hours for post-training,
+DeepSeek-V3 costs only 2.788M GPU hours for its full training. Assuming the rental price of
+the H800 GPU is $2 per GPU hour, our total training costs amount to only $5.576M. Note that
+the aforementioned costs include only the official training of DeepSeek-V3, excluding the costs
+associated with prior research and ablation experiments on architectures, algorithms, or data.
+Our main contribution includes:
+Architecture: Innovative Load Balancing Strategy and Training Objective
+• On top of the efficient architecture of DeepSeek-V2, we pioneer an auxiliary-loss-free
+strategy for load balancing, which minimizes the performance degradation that arises
+from encouraging load balancing.
+• We investigate a Multi-Token Prediction (MTP) objective and prove it beneficial to model
+performance. It can also be used for speculative decoding for inference acceleration.
+Pre-Training: Towards Ultimate Training Efficiency
+• We design an FP8 mixed precision training framework and, for the first time, validate the
+feasibility and effectiveness of FP8 training on an extremely large-scale model.
+• Through the co-design of algorithms, frameworks, and hardware, we overcome the
+communication bottleneck in cross-node MoE training, achieving near-full computation-
+communication overlap. This significantly enhances our training efficiency and reduces the
+training costs, enabling us to further scale up the model size without additional overhead.
+• At an economical cost of only 2.664M H800 GPU hours, we complete the pre-training of
+DeepSeek-V3 on 14.8T tokens, producing the currently strongest open-source base model.
+The subsequent training stages after pre-training require only 0.1M GPU hours.
+Post-Training: Knowledge Distillation from DeepSeek-R1
+• We introduce an innovative methodology to distill reasoning capabilities from the long-
+Chain-of-Thought (CoT) model, specifically from one of the DeepSeek R1 series models,
+into standard LLMs, particularly DeepSeek-V3. Our pipeline elegantly incorporates the
+--- page 45 ---
+Appendix
+A. Contributions and Acknowledgments
+Research & Engineering
+Aixin Liu
+Bing Xue
+Bingxuan Wang
+Bochao Wu
+Chengda Lu
+Chenggang Zhao
+Chengqi Deng
+Chenyu Zhang*
+Chong Ruan
+Damai Dai
+Daya Guo
+Dejian Yang
+Deli Chen
+Erhang Li
+Fangyun Lin
+Fucong Dai
+Fuli Luo*
+Guangbo Hao
+Guanting Chen
+Guowei Li
+H. Zhang
+Han Bao*
+Hanwei Xu
+Haocheng Wang*
+Haowei Zhang
+Honghui Ding
+Huajian Xin*
+Huazuo Gao
+Hui Qu
+Jianzhong Guo
+Jiashi Li
+Jiawei Wang*
+Jingchang Chen
+Jingyang Yuan
+Junjie Qiu
+Junlong Li
+Junxiao Song
+Kai Dong
+Kai Hu*
+Kaige Gao
+Kang Guan
+Kexin Huang
+Kuai Yu
+Lean Wang
+Lecong Zhang
+Liang Zhao
+Litong Wang
+Liyue Zhang
+Mingchuan Zhang
+Minghua Zhang
+Minghui Tang
+Panpan Huang
+Peiyi Wang
+Qiancheng Wang
+Qihao Zhu
+Qinyu Chen
+Qiushi Du
+Ruiqi Ge
+Ruisong Zhang
+Ruizhe Pan
+Runji Wang
+Runxin Xu
+Ruoyu Zhang
+Shanghao Lu
+Shangyan Zhou
+Shanhuang Chen
+Shengfeng Ye
+Shirong Ma
+Shiyu Wang
+Shuiping Yu
+Shunfeng Zhou
+Shuting Pan
+Tao Yun
+Tian Pei
+Wangding Zeng
+Wanjia Zhao*
+Wen Liu
+Wenfeng Liang
+Wenjun Gao
+Wenqin Yu
+Wentao Zhang
+Xiao Bi
+Xiaodong Liu
+Xiaohan Wang
+Xiaokang Chen
+Xiaokang Zhang
+Xiaotao Nie
+Xin Cheng
+Xin Liu
+--- page 46 ---
+Xin Xie
+Xingchao Liu
+Xingkai Yu
+Xinyu Yang
+Xinyuan Li
+Xuecheng Su
+Xuheng Lin
+Y.K. Li
+Y.Q. Wang
+Y.X. Wei
+Yang Zhang
+Yanhong Xu
+Yao Li
+Yao Zhao
+Yaofeng Sun
+Yaohui Wang
+Yi Yu
+Yichao Zhang
+Yifan Shi
+Yiliang Xiong
+Ying He
+Yishi Piao
+Yisong Wang
+Yixuan Tan
+Yiyang Ma*
+Yiyuan Liu
+Yongqiang Guo
+Yu Wu
+Yuan Ou
+Yuduan Wang
+Yue Gong
+Yuheng Zou
+Yujia He
+Yunfan Xiong
+Yuxiang Luo
+Yuxiang You
+Yuxuan Liu
+Yuyang Zhou
+Z.F. Wu
+Z.Z. Ren
+Zehui Ren
+Zhangli Sha
+Zhe Fu
+Zhean Xu
+Zhenda Xie
+Zhengyan Zhang
+Zhewen Hao
+Zhibin Gou
+Zhicheng Ma
+Zhigang Yan
+Zhihong Shao
+Zhiyu Wu
+Zhuoshu Li
+Zihui Gu
+Zijia Zhu
+Zijun Liu*
+Zilin Li
+Ziwei Xie
+Ziyang Song
+Ziyi Gao
+Zizheng Pan
+Data Annotation
+Bei Feng
+Hui Li
+J.L. Cai
+Jiaqi Ni
+Lei Xu
+Meng Li
+Ning Tian
+R.J. Chen
+R.L. Jin
+Ruyi Chen
+S.S. Li
+Shuang Zhou
+Tianyu Sun
+X.Q. Li
+Xiangyue Jin
+Xiaojin Shen
+Xiaosha Chen
+Xiaowen Sun
+Xiaoxiang Wang
+Xinnan Song
+Xinyi Zhou
+Y.X. Zhu
+Yanhong Xu
+Yanping Huang
+Yaohui Li
+Yi Zheng
+Yuchen Zhu
+Yunxian Ma
+Zhen Huang
+Zhipeng Xu
+Zhongyu Zhang
+Business & Compliance
+Dongjie Ji
+--- page 47 ---
+Jian Liang
+Jin Chen
+Leyi Xia
+Miaojun Wang
+Mingming Li
+Peng Zhang
+Shaoqing Wu
+Shengfeng Ye
+T. Wang
+W.L. Xiao
+Wei An
+Xianzu Wang
+Xinxia Shan
+Ying Tang
+Yukun Zha
+Yuting Yan
+Zhen Zhang
+Within each role, authors are listed alphabetically by the first name. Names marked with *
+denote individuals who have departed from our team.
+B. Ablation Studies for Low-Precision Training
+Figure 10 | Loss curves comparison between BF16 and FP8 training. Results are smoothed by
+Exponential Moving Average (EMA) with a coefficient of 0.9.
+B.1. FP8 v.s. BF16 Training
+We validate our FP8 mixed precision framework with a comparison to BF16 training on top of
+two baseline models across different scales. At the small scale, we train a baseline MoE model
+comprising approximately 16B total parameters on 1.33T tokens. At the large scale, we train a
+baseline MoE model comprising approximately 230B total parameters on around 0.9T tokens.
+We show the training curves in Figure 10 and demonstrate that the relative error remains below
+0.25% with our high-precision accumulation and fine-grained quantization strategies.
+B.2. Discussion About Block-Wise Quantization
+Although our tile-wise fine-grained quantization effectively mitigates the error introduced
+by feature outliers, it requires different groupings for activation quantization, i.e., 1x128 in
+forward pass and 128x1 for backward pass. A similar process is also required for the activation
+gradient. A straightforward strategy is to apply block-wise quantization per 128x128 elements
+like the way we quantize the model weights. In this way, only transposition is required for
+backward. Therefore, we conduct an experiment where all tensors associated with Dgrad are
+quantized on a block-wise basis. The results reveal that the Dgrad operation which computes
+the activation gradients and back-propagates to shallow layers in a chain-like manner, is highly
+sensitive to precision. Specifically, block-wise quantization of activation gradients leads to
+--- page 48 ---
+model divergence on an MoE model comprising approximately 16B total parameters, trained for
+around 300B tokens. We hypothesize that this sensitivity arises because activation gradients are
+highly imbalanced among tokens, resulting in token-correlated outliers (Xi et al., 2023). These
+outliers cannot be effectively managed by a block-wise quantization approach.
+C. Expert Specialization Patterns of the 16B Aux-Loss-Based and Aux-Loss-
+Free Models
+We record the expert load of the 16B auxiliary-loss-based baseline and the auxiliary-loss-free
+model on the Pile test set. The auxiliary-loss-free model tends to have greater expert specializa-
+tion across all layers, as demonstrated in Figure 10.
+48

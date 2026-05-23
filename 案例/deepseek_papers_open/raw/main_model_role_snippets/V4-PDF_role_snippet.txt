@@ -1,0 +1,99 @@
+
+
+--- page 54 ---
+Appendix
+A. Author List and Acknowledgment
+A.1. Author List
+Authors are listed alphabetically by their first name. Names marked with * denote individuals
+who have departed from our team.
+Research & Engineering:Anyi Xu, Bangcai Lin, Bing Xue, Bingxuan Wang*, Bingzheng Xu,
+Bochao Wu, Bowei Zhang, Chaofan Lin, Chen Dong, Chengda Lu, Chenggang Zhao, Chengqi
+Deng, Chenhao Xu, Chenze Shao, Chong Ruan*, Conner Sun, Damai Dai, Daya Guo*, Dejian
+Yang, Deli Chen, Donghao Li, Erhang Li, Fangyun Lin, Fangzhou Yuan, Feiyu Xia, Fucong
+Dai, Guangbo Hao, Guanting Chen, Guoai Cao, Guolai Meng, Guowei Li, Han Yu, Han Zhang,
+Hanwei Xu, Hao Li, Haofen Liang, Haoling Zhang, Haoming Luo, Haoran Wei*, Haotian Yuan,
+Haowei Zhang*, Haowen Luo, Haoyu Chen, Haozhe Ji, Honghui Ding, Hongxuan Tang, Huanqi
+Cao, Huazuo Gao, Hui Qu, Hui Zeng, J. Yang, J.Q. Zhu, Jia Yu, Jialiang Huang, Jiasheng Ye,
+Jiashi Li, Jiaxin Xu, Jiewen Hu, Jin Yan, Jingchang Chen, Jingli Zhou, Jingting Xiang, Jingyang
+Yuan, Jingyuan Cheng, Jinhua Zhu, Jiping Yu, Joseph Sun, Jun Ran*, Junguang Jiang, Junjie Qiu,
+Junlong Li*, Junxiao Song, Kai Dong, Kaige Gao, Kang Guan, Kexing Zhou, Kezhao Huang*,
+Kuai Yu, Lean Wang, Lecong Zhang, Lei Wang, Li Zhang, Liang Zhao, Lihua Guo, Lingxiao
+Luo, Linwang Ma, Litong Wang, Liyu Cai, Liyue Zhang, Longhao Chen, M.S. Di, M.Y Xu,
+Max Mei, Mingchuan Zhang, Minghua Zhang, Minghui Tang, Mingxu Zhou, Panpan Huang,
+Peixin Cong, Peiyi Wang, Qiancheng Wang, Qihao Zhu, Qingyang Li, Qinyu Chen, Qiushi Du,
+Qiwei Jiang, Rui Tian, Ruifan Xu, Ruijie Lu, Ruiling Xu, Ruiqi Ge, Ruisong Zhang, Ruizhe Pan,
+Runji Wang, Runqian Chen, Runqiu Yin, Runxin Xu, Ruomeng Shen, Ruoyu Zhang, S.H. Liu,
+Shanghao Lu, Shangyan Zhou, Shanhuang Chen, Shaofei Cai, Shaoheng Nie, Shaoyuan Chen,
+Shengding Hu, Shengyu Liu, Shiqiang Hu, Shirong Ma, Shiyu Wang, Shuiping Yu, Shunfeng
+Zhou, Shuting Pan, Shuying Yu, Songyang Zhou, Tao Ni, Tao Yun, Tian Jin, Tian Pei, Tian Ye,
+Tianle Lin, Tianran Ji, Tianyi Cui, Tianyuan Yue, Tingting Yu, Tun Wang, W. Zhang, Wangding
+Zeng, Weilin Zhao, Wen Liu, Wenfeng Liang, Wenjie Pang, Wenjing Luo, Wenjing Yao, Wenjun
+Gao, Wenkai Yang, Wenlve Huang, Wentao Zhang, Wenting Ma, Xi Gao, Xiang He, Xiangwen
+Wang, Xiao Bi, Xiaodong Liu, Xiaohan Wang, Xiaokang Chen, Xiaokang Zhang, Xiaotao Nie,
+Xin Cheng, Xin Liu, Xin Xie, Xingchao Liu, Xingchen Liu, Xingkai Yu, Xingyou Li, Xinyu Yang,
+Xu Chen, Xuanyu Wang, Xuecheng Su, Xuheng Lin, Xuwei Fu, Y.C. Yan, Y.Q. Wang*, Y.W. Ma,
+Yanfeng Luo, Yang Zhang, Yanhong Xu, Yanru Ma, Yanwen Huang, Yao Li, Yao Li, Yao Zhao,
+Yaofeng Sun, Yaohui Wang, Yi Qian, Yi Yu, Yichao Zhang, Yifan Ding, Yifan Shi, Yijia Wu, Yiliang
+Xiong, Ying He, Ying Zhou, Yingjia Luo, Yinmin Zhong, Yishi Piao, Yisong Wang, Yixiang Zhang,
+Yixiao Chen, Yixuan Tan, Yixuan Wei, Yiyang Ma, Yiyuan Liu, Yonglun Yang, Yongqiang Guo,
+Yongtong Wu, Yu Wu, Yuan Cheng, Yuan Ou, Yuanfan Xu, Yuanhao Li, Yuduan Wang, Yuhan
+Wu, Yuhao Meng, Yuheng Zou, YuKun Li, Yunfan Xiong, Yupeng Chen, Yuqian Cao, Yuqian
+Wang, Yushun Zhang, Yutong Lin, Yuxian Gu, Yuxiang Luo, Yuxiang You, Yuxuan Liu, Yuxuan
+Zhou, Yuyang Zhou, Yuzhen Huang, Z.F. Wu, Zehao Wang, Zehua Zhao, Zehui Ren, Zhangli
+Sha, Zhe Fu, Zhean Xu, Zhenda Xie, Zhengyan Zhang, Zhewen Hao, Zhibin Gou, Zhicheng Ma,
+Zhigang Yan, Zhihong Shao, Zhixian Huang, Zhixuan Chen, Zhiyu Wu, Zhizhou Ren, Zhuoshu
+Li, Zhuping Zhang, Zian Xu, Zihao Wang, Zihui Gu, Zijia Zhu, Zilin Li, Zipeng Zhang*, Ziwei
+Xie, Ziyi Gao, Zizheng Pan, Zongqing Yao.
+Business & Compliance:Chenchen Ling, Chengyu Hou, Dongjie Ji, Fang Wei, Hengqing Zhang,
+Jia Luo, Jia Song, Jialu Cai, Jian Liang, Jiangting Zhou, Jieyu Yang, Jin Chen, Jingzi Zhou, Junmin
+Zheng, Leyi Xia, Linyan Zhu, Miaojun Wang, Mingming Li, Minmin Han, Ning Wang, Panpan
+--- page 55 ---
+Wang, Peng Zhang, Ruyi Chen, Shangmian Sun, Shaoqing Wu, W.L. Xiao, Wei An, Wenqing
+Hou, Xianzu Wang, Xiaowen Sun, Xiaoxiang Wang, Xinyu Zhang, Xueyin Chen, Yao Xu, Yi
+Shao, Yiling Ma, Ying Tang, Yuehan Yang, Yuer Xu, Yukun Zha, Yuping Lin, Yuting Yan, Zekai
+Zhang, Zhe Ju, Zheren Gao, Zhongyu Wu, Zihua Qu, Ziyi Wan.
+A.2. Acknowledgment
+We would like to thank Dolly Deng and other testers for their valuable suggestions and feedback
+regarding the capabilities of DeepSeek-V4 series models.
+B. Evaluation Details
+Table 9|Agentic Search vs. Retrieval Augmented Search for DeepSeek-V4-Pro.
+Difficulty Category # Agent Win RAG Win Tie Agent% RAG% Tie%
+Easy Objective Q&A (客观问答) 196 110 43 43 56.1 21.9 21.9
+Subjective Q&A (主观问答) 321 198 56 67 61.7 17.4 20.9
+Hard Objective Q&A (客观问答) 168 102 33 33 60.7 19.6 19.6
+Subjective Q&A (主观问答) 184 126 27 31 68.5 14.7 16.8
+Total (总计) 869 536 159 174 61.7 18.3 20.0
+Table 10 | Cost Comparison:Agentic Search vs. Retrieval Augmented Search (Mean) for
+DeepSeek-V4-Pro. Most of the tool calls are parallel for Agentic Search.
+Version Tool Calls Prefill (tokens) Output (tokens)
+V4 Agentic Search 16.2 13649 1526
+V4 Retrieval Augmented Search — 10453 1308
+Table 11 | Comparative Evaluation of DeepSeek-V4-Pro and DeepSeek-V3.2 on Search Q&A
+Tasks.
+Internal Evaluation (内部综合评估)
+Category Subcategory # V4 win V3.2 win tie V4% V3.2% tie%
+Objective
+Q&A
+(客观问答)
+Single-value Search (单值信息查找) 95 36 10 49 37.9 10.5 51.6
+Entity Search (实体信息查找) 99 24 7 68 24.2 7.1 68.7
+Enumerative Search (枚举型信息查找) 95 19 8 68 20.0 8.4 71.6
+Subtotal (小计) 289 79 25 185 27.3 8.7 64.0
+Subjective
+Q&A
+(主观问答)
+Causal Analysis (原因分析) 100 28 5 67 28.0 5.0 67.0
+Comparison (对比) 96 28 20 48 29.2 20.8 50.0
+Advice Seeking (寻求建议) 92 23 8 61 25.0 8.7 66.3
+Recommendation (推荐) 95 26 19 50 27.4 20.0 52.6
+Planning & Strategy (攻略计划) 92 32 11 49 34.8 12.0 53.3
+Opinion & Evaluation (评价看法) 96 30 8 58 31.2 8.3 60.4
+Trend Analysis (趋势分析) 96 23 3 70 24.0 3.1 72.9
+Subtotal (小计) 667 190 74 403 28.5 11.1 60.4
+TOTAL (总计) 956 269 99 588 28.1 10.4 61.5
+--- page 56 ---
+Figure 14 | Example output of a task that requires comparing two regular investment strategies
+for the NASDAQ.
+Figure 15 | Example output of a task which requires researching 2020-2025 Nobel Science Prizes
+and generating an analytical PDF report.
+56

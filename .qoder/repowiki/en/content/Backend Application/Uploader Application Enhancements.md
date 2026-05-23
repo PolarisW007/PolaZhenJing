@@ -7,6 +7,7 @@
 - [app/auth.py](file://app/auth.py)
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
+- [app/agent.py](file://app/agent.py)
 - [_config.yml](file://_config.yml)
 - [requirements.txt](file://requirements.txt)
 - [app/templates/upload.html](file://app/templates/upload.html)
@@ -24,10 +25,11 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced API key management system with direct environment variable access
-- Improved reliability by eliminating complex shell-based sourcing mechanism
-- Eliminated potential timeout issues in API key retrieval
-- Streamlined configuration management for MiniMax API credentials
+- Enhanced text-to-image generation with Studio Ghibli-style illustrations
+- Improved T2I API integration using mainland MiniMax domain (api.minimaxi.com)
+- Advanced content extraction with site-specific selectors for better URL fetching
+- Streamlined API key management system with direct environment variable access
+- Enhanced image processing with watermark cleanup and user-uploaded illustration support
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -43,11 +45,11 @@
 
 ## Introduction
 
-The Uploader Application Enhancements project represents a sophisticated content management system designed for AI-focused technical blogging. Built on Flask, this application provides authors with a streamlined workflow for converting various document formats into polished blog posts with AI-powered writing assistance. The system supports multiple content input methods, automated conversion pipelines, and intelligent content styling through Large Language Model (LLM) integration.
+The Uploader Application Enhancements project represents a sophisticated content management system designed for AI-focused technical blogging. Built on Flask, this application provides authors with a streamlined workflow for converting various document formats into polished blog posts with AI-powered writing assistance and enhanced visual storytelling. The system supports multiple content input methods, automated conversion pipelines, intelligent content styling through Large Language Model (LLM) integration, and advanced text-to-image generation with Studio Ghibli-style illustrations.
 
-The application serves as a comprehensive solution for technical writers, researchers, and content creators who need to transform research papers, technical documents, and various digital content into publishable blog posts with professional styling and seamless GitHub integration for automated deployment.
+The application serves as a comprehensive solution for technical writers, researchers, and content creators who need to transform research papers, technical documents, and various digital content into publishable blog posts with professional styling, seamless GitHub integration, and rich visual narratives.
 
-**Updated** Enhanced API key management system with direct environment variable access, improving reliability and eliminating potential timeout issues in API credential retrieval.
+**Updated** Enhanced text-to-image generation with Studio Ghibli-style illustrations, improved T2I API integration using mainland MiniMax domain, and advanced content extraction with site-specific selectors for better URL fetching capabilities.
 
 ## Project Structure
 
@@ -65,32 +67,40 @@ D[Uploader Service]
 E[Authentication]
 F[Converter Engine]
 G[Mail Service]
+H[Image Generation]
 end
 subgraph "Data Layer"
-H[SQLite Database]
-I[File Storage]
-J[Draft Management]
+I[SQLite Database]
+J[File Storage]
+K[Draft Management]
+L[Image Assets]
 end
 subgraph "External Integrations"
-K[LLM API]
-L[GitHub API]
-M[SMTP Service]
-N[GitHub Pages]
-O[Network Validation]
+M[MiniMax LLM API]
+N[MiniMax T2I API]
+O[GitHub API]
+P[SMTP Service]
+Q[GitHub Pages]
+R[Network Validation]
+S[Site-Specific Selectors]
 end
 A --> B
 B --> D
 B --> E
 D --> F
-E --> G
 D --> H
+E --> G
 D --> I
 D --> J
 D --> K
 D --> L
+D --> M
 D --> N
 D --> O
-E --> M
+D --> Q
+D --> R
+D --> S
+E --> P
 ```
 
 **Diagram sources**
@@ -98,19 +108,20 @@ E --> M
 - [app/uploader.py:23-24](file://app/uploader.py#L23-L24)
 - [app/auth.py:13](file://app/auth.py#L13)
 - [app/uploader.py:502-532](file://app/uploader.py#L502-L532)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
 
 The application is organized into several key directories:
 
 - **app/**: Core Flask application with blueprints and services
-- **assets/**: Static resources including CSS themes and images
+- **assets/**: Static resources including CSS themes and generated images
 - **data/**: Persistent storage for uploads, drafts, and configuration
-- **_posts/**: Generated Jekyll blog posts
+- **_posts/**: Generated Jekyll blog posts with visual assets
 - **_layouts/**, **_includes/**: Jekyll templating system
 - **.github/workflows/**: CI/CD automation for deployment
 
 **Section sources**
 - [app/__init__.py:43-76](file://app/__init__.py#L43-L76)
-- [requirements.txt:1-8](file://requirements.txt#L1-L8)
+- [requirements.txt:1-14](file://requirements.txt#L1-L14)
 
 ## Core Components
 
@@ -134,13 +145,36 @@ Security features include:
 - Session-based user state management
 - Login-required decorators for protected routes
 
-### Content Conversion Pipeline
+### Enhanced Content Conversion Pipeline
 
-The converter engine handles multiple document formats through specialized processors:
+The converter engine handles multiple document formats through specialized processors with advanced content extraction:
 - PDF conversion using PyMuPDF with intelligent structure detection
 - DOCX processing via Mammoth and HTML2Text transformations
 - HTML to Markdown conversion with formatting preservation
 - TXT and MD direct processing with title extraction
+- **New** Advanced site-specific content selectors for better URL fetching
+- **New** Enhanced URL validation with anti-bot detection
+
+### Text-to-Image Generation System
+
+**New** The application now features a comprehensive text-to-image generation system with Studio Ghibli-style illustrations:
+
+- **Global Style Lock**: All generated illustrations use Studio Ghibli-inspired classic Japanese hand-drawn animation atmosphere
+- **Dual API Support**: Supports both mainland (api.minimaxi.com) and international (api.minimax.io) MiniMax endpoints
+- **Base64 Integration**: Inline base64 image delivery to avoid temporary URL expiration issues
+- **Fallback Mechanisms**: Graceful fallback to signed URLs when base64 decoding fails
+- **Prompt Engineering**: Article-specific prompts combined with global Ghibli style requirements
+- **Aspect Ratio Control**: 16:9 for covers, 4:3 for paragraph scenes
+
+### Advanced Content Extraction
+
+**New** Enhanced content extraction system with site-specific selectors:
+
+- **Priority-Based Selection**: Matches well-known content containers first (markdown-body, article-content)
+- **Noise Removal**: Automatic stripping of comments, sidebars, navigation, and social elements
+- **URL Normalization**: Converts relative links to absolute URLs for proper Markdown rendering
+- **Anti-Bot Detection**: Identifies and blocks known anti-bot/anti-scraping sites
+- **Title Cleaning**: Removes site-specific suffixes from extracted titles
 
 ### GitHub Pages Integration
 
@@ -163,7 +197,10 @@ The converter engine handles multiple document formats through specialized proce
 **Section sources**
 - [app/__init__.py:9-24](file://app/__init__.py#L9-L24)
 - [app/auth.py:26-49](file://app/auth.py#L26-L49)
-- [app/converter.py:96-110](file://app/converter.py#L96-L110)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
+- [app/converter.py:222-251](file://app/converter.py#L222-L251)
+- [app/uploader.py:193-213](file://app/uploader.py#L193-L213)
+- [app/uploader.py:269-332](file://app/uploader.py#L269-L332)
 - [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
 - [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
@@ -183,39 +220,49 @@ end
 subgraph "Business Logic Layer"
 F[Content Processing]
 G[LLM Integration]
-H[Draft Management]
-I[Git Operations]
-J[URL Validation]
+H[Image Generation]
+I[Draft Management]
+J[Git Operations]
+K[URL Validation]
+L[Content Extraction]
 end
 subgraph "Data Layer"
-K[SQLite Database]
-L[File System]
-M[Draft Storage]
-N[GitHub Pages Cache]
+M[SQLite Database]
+N[File System]
+O[Draft Storage]
+P[GitHub Pages Cache]
+Q[Generated Images]
+R[Site Selectors]
 end
 subgraph "External Services"
-O[MiniMax API]
-P[GitHub API]
-Q[SMTP Service]
-R[GitHub Pages]
-S[Network Validation]
+S[MiniMax API]
+T[MiniMax T2I API]
+U[GitHub API]
+V[SMTP Service]
+W[GitHub Pages]
+X[Network Validation]
+Y[Site Anti-Bot Detection]
+Z[Requests Library]
 end
 A --> F
 B --> G
 C --> I
 D --> H
 E --> J
+F --> N
 F --> L
-G --> O
-H --> M
-I --> P
-J --> R
-J --> S
-K --> E
-L --> E
-M --> E
-N --> E
-Q --> K
+G --> S
+H --> T
+I --> O
+J --> U
+K --> W
+K --> X
+L --> Y
+L --> Z
+Q --> E
+R --> E
+S --> G
+T --> H
 ```
 
 **Diagram sources**
@@ -223,6 +270,8 @@ Q --> K
 - [app/uploader.py:413-492](file://app/uploader.py#L413-L492)
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 - [app/uploader.py:508-532](file://app/uploader.py#L508-L532)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
+- [app/converter.py:222-251](file://app/converter.py#L222-L251)
 
 The architecture supports horizontal scalability through stateless service design and provides robust error handling mechanisms throughout the content processing pipeline.
 
@@ -230,7 +279,7 @@ The architecture supports horizontal scalability through stateless service desig
 
 ### Upload and Content Processing Workflow
 
-The upload system implements a sophisticated multi-stage content processing pipeline:
+The upload system implements a sophisticated multi-stage content processing pipeline with enhanced URL fetching capabilities:
 
 ```mermaid
 sequenceDiagram
@@ -240,24 +289,28 @@ participant C as Converter Engine
 participant D as Draft Manager
 participant S as Style Selector
 participant L as LLM Service
+participant I as Image Generator
 participant G as Git System
-U->>A : Submit content (file or text)
-A->>C : Process file upload
-C->>C : Extract content and metadata
+U->>A : Submit content (file, text, or URL)
+A->>C : Process file upload or URL fetch
+C->>C : Extract content and metadata with site selectors
 A->>D : Save draft to temporary storage
 A->>S : Redirect to style selection
 S->>L : Apply LLM rewriting (optional)
 L-->>S : Return styled content
-S->>G : Generate Jekyll post
+S->>I : Generate Studio Ghibli illustrations
+I-->>S : Return generated images
+S->>G : Generate Jekyll post with images
 G-->>U : Confirm publication
 ```
 
 **Diagram sources**
 - [app/uploader.py:353-396](file://app/uploader.py#L353-L396)
 - [app/uploader.py:413-492](file://app/uploader.py#L413-L492)
-- [app/converter.py:96-110](file://app/converter.py#L96-L110)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
+- [app/converter.py:222-251](file://app/converter.py#L222-L251)
 
-The workflow supports both file-based and text-based content ingestion, with automatic metadata extraction and intelligent content structuring.
+The workflow supports both file-based and text-based content ingestion, with automatic metadata extraction and intelligent content structuring enhanced by advanced site-specific selectors.
 
 ### LLM Integration and Content Styling
 
@@ -281,6 +334,54 @@ H --> I[Save to Draft]
 - [app/uploader.py:204-245](file://app/uploader.py#L204-L245)
 
 The system maintains distinct writing prompts for different content styles, enabling authors to achieve specific narrative voices and technical precision levels.
+
+### Enhanced Text-to-Image Generation System
+
+**New** The application now features a comprehensive text-to-image generation system with Studio Ghibli-style illustrations:
+
+```mermaid
+flowchart TD
+A[Article Content] --> B[Extract Visual Blocks]
+B --> C[Generate Visual Plan]
+C --> D[Compose Ghibli Style Prompt]
+D --> E[Call MiniMax T2I API]
+E --> F{Response Format}
+F --> |Base64| G[Decode Base64 Image]
+F --> |Signed URL| H[Download from URL]
+G --> I[Save Generated Image]
+H --> I
+I --> J[Inject into Article]
+```
+
+**Diagram sources**
+- [app/uploader.py:514-590](file://app/uploader.py#L514-L590)
+- [app/uploader.py:269-332](file://app/uploader.py#L269-L332)
+- [app/uploader.py:207-213](file://app/uploader.py#L207-L213)
+
+The system generates 1 cover image plus 3-5 paragraph scenes with consistent Studio Ghibli styling applied globally to every article.
+
+### Advanced Content Extraction with Site-Specific Selectors
+
+**New** Enhanced content extraction system with priority-based site-specific selectors:
+
+```mermaid
+flowchart TD
+A[HTML Input] --> B[Parse with BeautifulSoup]
+B --> C[Remove Structural Noise]
+C --> D[Apply Site Selectors]
+E[Class/ID Filters] --> D
+F[Priority Order] --> D
+D --> G[Extract Main Content]
+G --> H[Normalize URLs]
+H --> I[Convert to Markdown]
+```
+
+**Diagram sources**
+- [app/converter.py:222-251](file://app/converter.py#L222-L251)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
+- [app/converter.py:193-220](file://app/converter.py#L193-L220)
+
+The system prioritizes content containers based on known site patterns and removes anti-social elements that clutter article content.
 
 ### Enhanced API Key Management
 
@@ -393,9 +494,9 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 ### Performance Optimizations
 
-1. **Async Processing Queue**: Implement Celery or similar async task processing for LLM operations to prevent blocking user interactions during content generation.
+1. **Async Processing Queue**: Implement Celery or similar async task processing for LLM operations and image generation to prevent blocking user interactions during content creation.
 
-2. **Content Caching**: Add Redis caching layer for frequently accessed content and processed drafts to reduce database load.
+2. **Content Caching**: Add Redis caching layer for frequently accessed content, processed drafts, and generated images to reduce database load.
 
 3. **Image Optimization**: Integrate automatic image compression and responsive image generation for improved page load times.
 
@@ -403,9 +504,11 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 5. **API Key Caching**: Implement caching mechanism for API keys to reduce repeated environment variable lookups.
 
+6. **Batch Image Generation**: Process multiple images concurrently with rate limiting to improve throughput.
+
 ### Security Enhancements
 
-1. **Rate Limiting**: Implement rate limiting for LLM API calls and file uploads to prevent abuse and ensure fair resource distribution.
+1. **Rate Limiting**: Implement rate limiting for LLM API calls, T2I API calls, and file uploads to prevent abuse and ensure fair resource distribution.
 
 2. **Content Sanitization**: Add comprehensive content sanitization for user-generated content to prevent XSS attacks and malformed HTML injection.
 
@@ -414,6 +517,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 4. **API Security**: Add authentication and rate limiting for the new `/api/check-pages-url` endpoint to prevent abuse.
 
 5. **Environment Variable Validation**: Add validation for API keys to ensure they meet expected format requirements before use.
+
+6. **Image Watermark Protection**: Implement automatic watermark detection and removal for user-uploaded images.
 
 ### User Experience Improvements
 
@@ -425,6 +530,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 
 4. **Deployment Status Dashboard**: Create a visual dashboard showing article deployment status across all published content.
 
+5. **Image Gallery Management**: Provide interface for managing and organizing generated images within articles.
+
 ### Integration Extensions
 
 1. **Cloud Storage**: Add support for cloud storage providers (AWS S3, Google Cloud Storage) for scalable media hosting.
@@ -434,6 +541,8 @@ Each theme maintains consistent design systems with appropriate color schemes, t
 3. **Social Media Integration**: Add automated social media posting capabilities for LinkedIn, Twitter, and other platforms.
 
 4. **Multi-Platform Deployment**: Extend GitHub Pages integration to support other static hosting platforms.
+
+5. **Advanced Image Processing**: Integrate with professional image processing APIs for additional effects and optimizations.
 
 ## Integration Points
 
@@ -484,6 +593,51 @@ H --> |No| J[Log Error & Retry]
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 - [app/auth.py:77-90](file://app/auth.py#L77-L90)
 
+### Enhanced Text-to-Image API Integration
+
+**New** The application integrates with MiniMax T2I API for studio-quality illustrations:
+
+```mermaid
+sequenceDiagram
+participant A as Article Generator
+participant T as T2I Service
+participant M as MiniMax API
+participant S as Storage
+A->>T : Request Ghibli-style illustration
+T->>M : POST image_generation request
+M-->>T : Base64 image data
+T->>S : Save PNG file
+T-->>A : Image metadata
+A->>A : Inject into article content
+```
+
+**Diagram sources**
+- [app/uploader.py:269-332](file://app/uploader.py#L269-L332)
+- [app/uploader.py:514-590](file://app/uploader.py#L514-L590)
+
+### Advanced Content Extraction Integration
+
+**New** The application integrates with sophisticated content extraction algorithms:
+
+```mermaid
+sequenceDiagram
+participant U as URL Fetcher
+participant C as Content Extractor
+participant S as Site Selectors
+participant V as Validator
+U->>C : HTML content
+C->>S : Apply selectors
+S-->>C : Main content region
+C->>V : Validate content quality
+V-->>C : Quality assessment
+C-->>U : Cleaned HTML
+U->>U : Convert to Markdown
+```
+
+**Diagram sources**
+- [app/converter.py:222-251](file://app/converter.py#L222-L251)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
+
 ### GitHub Pages URL Validation Integration
 
 **New** The application integrates with GitHub Pages for real-time URL validation:
@@ -526,7 +680,7 @@ L-->>A : API key available
 ```
 
 **Diagram sources**
-- [app/__init__.py:4-6](file://app/__init__.py#L4-L6)
+- [app/__init__.yml#L4-6:4-6](file://app/__init__.py#L4-L6)
 - [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
 
 **Section sources**
@@ -534,6 +688,7 @@ L-->>A : API key available
 - [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
 - [app/uploader.py:519-532](file://app/uploader.py#L519-L532)
 - [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
 
 ## Performance Considerations
 
@@ -544,6 +699,7 @@ The application implements several strategies to optimize memory usage:
 - Efficient content streaming for large files
 - Database connection pooling with proper lifecycle management
 - Session-based draft storage to avoid cookie size limitations
+- **New** Image generation with streaming base64 processing to reduce memory footprint
 
 ### Scalability Patterns
 
@@ -551,17 +707,20 @@ Horizontal scaling considerations include:
 - Stateless service design enabling load balancing
 - Database connection reuse through Flask's application context
 - File system storage with potential cloud migration paths
-- Async processing for CPU-intensive operations
+- Async processing for CPU-intensive operations like image generation
+- **New** Concurrent image processing with configurable worker pools
 
 ### Monitoring and Metrics
 
 Key performance indicators to track:
 - LLM API response times and error rates
+- T2I API response times and success rates
 - File upload processing duration
 - Database query performance metrics
 - User session management efficiency
 - **New** GitHub Pages URL validation response times and error rates
 - **New** API key retrieval performance metrics
+- **New** Image generation processing times and success rates
 
 ### Network Failure Handling
 
@@ -571,11 +730,14 @@ Key performance indicators to track:
 - Retry mechanism with exponential backoff
 - User-friendly error messaging for network issues
 - **New** Improved API key retrieval with direct environment variable access reduces potential timeout issues
+- **New** Base64 image processing eliminates temporary URL expiration problems
+- **New** Fallback mechanisms for T2I API failures with graceful degradation
 
 **Section sources**
 - [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
 - [app/templates/article_view.html:356-366](file://app/templates/article_view.html#L356-L366)
 - [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+- [app/uploader.py:297-307](file://app/uploader.py#L297-L307)
 
 ## Troubleshooting Guide
 
@@ -591,6 +753,23 @@ Key performance indicators to track:
 - Verify network connectivity to MiniMax API endpoint
 - Check API quota limits and billing status
 - **New** Verify environment variable access is working correctly
+- **New** Check MiniMax API endpoint accessibility (mainland vs international)
+
+**T2I API Integration Problems**
+- **New** Verify MINIMAX_IMAGE_URL environment variable points to correct domain
+- **New** Check MiniMax T2I API key registration on matching domain
+- **New** Verify base64 image processing is working correctly
+- **New** Check fallback URL download functionality
+
+**Image Generation Issues**
+- **New** Verify Studio Ghibli style prompt is properly formatted
+- **New** Check image aspect ratio configuration (16:9 for covers, 4:3 for scenes)
+- **New** Verify image file saving permissions in assets/images/generated/
+
+**Content Extraction Problems**
+- **New** Verify site-specific selectors match target website structure
+- **New** Check anti-bot detection is not blocking legitimate requests
+- **New** Verify URL normalization is working correctly
 
 **Database Connection Errors**
 - Verify SQLite database file permissions
@@ -610,9 +789,10 @@ Key performance indicators to track:
 
 **Network Failure Handling**
 - **New** Check timeout settings for URL validation requests
-- Verify proper error handling in client-side JavaScript
-- Monitor retry mechanisms for deployment status checking
+- **New** Verify proper error handling in client-side JavaScript
+- **New** Monitor retry mechanisms for deployment status checking
 - **New** Verify API key environment variable is accessible via `os.environ.get()`
+- **New** Check T2I API endpoint accessibility and response formats
 
 ### Debug Configuration
 
@@ -627,14 +807,18 @@ Enable debug mode for development:
 - [data/theme.json:1](file://data/theme.json#L1)
 - [app/uploader.py:527-532](file://app/uploader.py#L527-L532)
 - [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
+- [app/converter.py:96-112](file://app/converter.py#L96-L112)
 
 ## Conclusion
 
-The Uploader Application Enhancements represents a comprehensive solution for AI-focused technical content creation and publishing. The system successfully combines modern web technologies with advanced AI capabilities to provide authors with powerful tools for content transformation and publication.
+The Uploader Application Enhancements represents a comprehensive solution for AI-focused technical content creation and publishing with enhanced visual storytelling capabilities. The system successfully combines modern web technologies with advanced AI capabilities to provide authors with powerful tools for content transformation, publication, and rich visual narratives.
 
 Key strengths of the implementation include:
-- Robust content conversion pipeline supporting multiple formats
+- Robust content conversion pipeline supporting multiple formats with advanced site-specific extraction
 - Intelligent LLM integration for content enhancement
+- **New** Comprehensive text-to-image generation system with Studio Ghibli-style illustrations
+- **New** Dual API support for mainland and international MiniMax endpoints
+- **New** Advanced content extraction with priority-based site selectors
 - Flexible theming system with professional design aesthetics
 - Automated deployment workflow for seamless publishing
 - Comprehensive security measures and user management
@@ -642,8 +826,8 @@ Key strengths of the implementation include:
 - **New** Enhanced article viewing experience with deployment status monitoring
 - **Updated** Streamlined API key management system with direct environment variable access, improving reliability and eliminating potential timeout issues
 
-Recent enhancements significantly improve the user experience by providing real-time feedback on article deployment status and robust error handling for network failures. The new URL validation system ensures users can confidently share links even when GitHub Pages deployment is still in progress. The enhanced API key management system provides more reliable access to external services while maintaining security best practices.
+Recent enhancements significantly improve the user experience by providing rich visual narratives through AI-generated illustrations, better content extraction from various websites, and robust error handling for network failures. The new URL validation system ensures users can confidently share links even when GitHub Pages deployment is still in progress. The enhanced API key management system provides more reliable access to external services while maintaining security best practices.
 
-Future enhancements should focus on performance optimization, expanded integration capabilities, and enhanced user experience features while maintaining the system's reliability and security standards.
+The addition of Studio Ghibli-style illustrations creates a distinctive visual identity for all generated content, while the dual API support ensures reliable access regardless of geographic location or API endpoint availability. The advanced content extraction system improves the quality of URL-fetched content by intelligently identifying and extracting main article content while removing clutter and anti-social elements.
 
-The modular architecture and clear separation of concerns provide an excellent foundation for continued evolution and adaptation to emerging content creation and publishing requirements.
+Future enhancements should focus on performance optimization, expanded integration capabilities, and enhanced user experience features while maintaining the system's reliability and security standards. The modular architecture and clear separation of concerns provide an excellent foundation for continued evolution and adaptation to emerging content creation and publishing requirements.

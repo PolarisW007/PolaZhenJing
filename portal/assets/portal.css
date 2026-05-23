@@ -1,0 +1,477 @@
+/*
+  模块名称：AIPD 根入口首页基础样式
+  功能描述：定义黑金主题、导航、首屏背景和基础组件
+  创建日期：2026-05-17
+  作者：Codex
+  主要变更：2026-05-17 拆分主题层并强化 OneClub 黑金质感；2026-05-18 优化移动端首屏密度并替换静态电影海报背景
+  依赖模块：portal/index.html、portal/assets/portal-sections.css
+*/
+:root {
+  --bg-deepest: #050508;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --bg-card-hover: rgba(255, 255, 255, 0.12);
+  --gold-primary: #e4bf7a;
+  --gold-dark: #d4a050;
+  --gold-light: #f0d8a8;
+  --gold-pale: #f6e8c8;
+  --gold-brown: #6b4300;
+  --text-primary: #fff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-body: rgba(255, 255, 255, 0.66);
+  --text-muted: rgba(255, 255, 255, 0.46);
+  --line-soft: rgba(255, 255, 255, 0.1);
+  --line-gold: rgba(228, 191, 122, 0.38);
+  --container: 1160px;
+  --radius: 20px;
+  --shadow-gold: 0 18px 50px rgba(228, 191, 122, 0.18);
+  color-scheme: dark;
+}
+
+@font-face {
+  font-family: "MF YaYun";
+  src:
+    local("MFYaYunNoncommercial"),
+    local("造字工房雅韵体（非商用）"),
+    url("fonts/MFYaYun_Noncommercial-Regular.otf") format("opentype");
+  font-display: swap;
+  unicode-range: U+7EC7, U+68A6, U+7A7A, U+95F4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg-deepest);
+  color: var(--text-primary);
+  font-family: var(--user-font-family, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", sans-serif);
+  overflow-x: hidden;
+}
+
+html[data-aipd-font-scale="small"] body { font-size: 15px; }
+html[data-aipd-font-scale="large"] body { font-size: 17px; }
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  content: "";
+  background:
+    radial-gradient(circle at 50% 26%, rgba(228, 191, 122, 0.1), transparent 42%),
+    radial-gradient(circle at 14% 86%, rgba(212, 160, 80, 0.13), transparent 34%),
+    #050508;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.page-shell {
+  overflow: hidden;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: grid;
+  height: 64px;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 5, 8, 0.82);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(246, 213, 141, 0.54);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, rgba(255, 224, 137, 0.2), rgba(6, 7, 6, 0.92) 68%);
+  box-shadow: inset 0 1px 0 rgba(255, 244, 199, 0.28), 0 0 22px rgba(218, 166, 72, 0.26);
+  color: var(--gold-brown);
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.brand-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.brand-copy strong {
+  display: inline-block;
+  font-family: "MF YaYun", "MFYaYunNoncommercial", "造字工房雅韵体（非商用）", "Long Cang", "Songti SC", "Source Han Serif SC", STSong, serif;
+  font-size: 36px;
+  font-weight: 640;
+  letter-spacing: -0.04em;
+  color: transparent;
+  background: linear-gradient(180deg, #fff7db 0%, #efc66d 42%, #9f671e 72%, #f7df98 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: 0 0 22px rgba(226, 179, 92, 0.22);
+  transform: scaleY(1.3);
+  transform-origin: center;
+}
+
+.brand-copy small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.main-nav {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.main-nav a,
+.text-link {
+  transition: color 180ms ease;
+}
+
+.main-nav a:hover,
+.main-nav a.active,
+.text-link:hover {
+  color: var(--gold-primary);
+}
+
+.main-nav a.active {
+  text-shadow: 0 0 18px rgba(228, 191, 122, 0.34);
+}
+
+.header-cta,
+.btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.header-cta {
+  padding: 0 16px;
+  border: 1px solid rgba(228, 191, 122, 0.36);
+  background: rgba(228, 191, 122, 0.06);
+  color: var(--gold-primary);
+}
+
+.auth-entry {
+  gap: 9px;
+}
+
+.auth-avatar {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(228, 191, 122, 0.42);
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 30%, #fff3c9, #d6a24d 54%, #2c1b07 100%);
+  color: #241405;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.auth-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-section {
+  position: relative;
+  min-height: 100svh;
+  padding: 104px 24px 52px;
+  isolation: isolate;
+}
+
+.hero-media,
+.hero-overlay {
+  position: fixed;
+  inset: 0;
+}
+
+.hero-media {
+  z-index: -3;
+  overflow: hidden;
+  background: #050508;
+}
+
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0.58;
+  filter: saturate(0.86) contrast(1.12) brightness(0.78);
+}
+
+.hero-overlay {
+  z-index: -2;
+  background:
+    linear-gradient(to bottom, rgba(5, 5, 8, 0.18) 0%, rgba(5, 5, 8, 0.42) 34%, rgba(5, 5, 8, 0.82) 76%, rgba(5, 5, 8, 0.98) 100%),
+    linear-gradient(90deg, rgba(5, 5, 8, 0.72) 0%, rgba(5, 5, 8, 0.28) 42%, rgba(5, 5, 8, 0.62) 100%),
+    radial-gradient(circle at 48% 37%, rgba(228, 191, 122, 0.17), transparent 58%);
+  pointer-events: none;
+}
+
+.hero-overlay::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(rgba(246, 232, 200, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 232, 200, 0.022) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.72), transparent 82%);
+}
+
+.hero-grid,
+.content-band,
+.site-footer {
+  width: min(100%, var(--container));
+  margin: 0 auto;
+}
+
+.hero-grid {
+  display: grid;
+  min-height: 640px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: 26px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--gold-primary);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2 {
+  font-family: "Songti SC", "Source Han Serif SC", STSong, serif;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+h1 {
+  max-width: min(1360px, calc(100vw - 56px));
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, #fff7e6 0%, var(--gold-primary) 48%, var(--gold-dark) 100%);
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 18px rgba(228, 191, 122, 0.34));
+  font-size: clamp(28px, 3.2vw, 42px);
+  line-height: 1.12;
+}
+
+.hero-copy h1 {
+  white-space: nowrap;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: clamp(28px, 3.8vw, 44px);
+  line-height: 1.12;
+}
+
+.hero-copy p {
+  max-width: 650px;
+  margin-right: auto;
+  margin-left: auto;
+  color: var(--text-body);
+  font-size: 18px;
+  line-height: 1.78;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 0 22px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold-pale), var(--gold-dark));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--shadow-gold);
+  color: var(--gold-brown);
+}
+
+.btn-secondary {
+  border: 1px solid var(--line-soft);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 620px) {
+  .site-header {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 14px 12px;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brand-copy strong {
+    font-size: 28px;
+  }
+
+  .brand-copy small {
+    font-size: 10px;
+  }
+
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    overflow: visible;
+    padding-top: 0;
+    font-size: 13px;
+  }
+
+  .main-nav a {
+    min-width: 0;
+    padding: 7px 9px;
+    border: 1px solid rgba(228, 191, 122, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.045);
+    line-height: 1;
+  }
+
+  .hero-section {
+    min-height: auto;
+    padding: 128px 14px 28px;
+  }
+
+  .hero-media img {
+    opacity: 0.64;
+    object-position: 51% top;
+  }
+
+  .hero-overlay {
+    background:
+      linear-gradient(to bottom, rgba(5, 5, 8, 0.18) 0%, rgba(5, 5, 8, 0.58) 42%, rgba(5, 5, 8, 0.98) 100%),
+      linear-gradient(90deg, rgba(5, 5, 8, 0.58), rgba(5, 5, 8, 0.34), rgba(5, 5, 8, 0.62)),
+      radial-gradient(circle at 50% 22%, rgba(228, 191, 122, 0.16), transparent 58%);
+  }
+
+  .hero-grid {
+    min-height: 580px;
+    gap: 22px;
+  }
+
+  .eyebrow {
+    margin-bottom: 10px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  h1 {
+    max-width: 94vw;
+    margin-right: auto;
+    margin-bottom: 14px;
+    margin-left: auto;
+    font-size: clamp(22px, 6.1vw, 30px);
+    line-height: 1.18;
+  }
+
+  .hero-copy h1 {
+    white-space: normal;
+  }
+
+  h2 {
+    font-size: clamp(24px, 7.5vw, 30px);
+  }
+
+  .hero-copy p {
+    max-width: 352px;
+    font-size: 15px;
+    line-height: 1.72;
+  }
+
+  .hero-actions {
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .btn {
+    min-height: 42px;
+    padding: 0 18px;
+  }
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -3,21 +3,28 @@
 <cite>
 **Referenced Files in This Document**
 - [app/auth.py](file://app/auth.py)
+- [app/owner_identity.py](file://app/owner_identity.py)
+- [app/memory_guard.py](file://app/memory_guard.py)
+- [app/memory_service.py](file://app/memory_service.py)
+- [app/memory_store.py](file://app/memory_store.py)
 - [app/__init__.py](file://app/__init__.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/uploader.py](file://app/uploader.py)
 - [app/templates/login.html](file://app/templates/login.html)
 - [app/templates/register.html](file://app/templates/register.html)
 - [app/templates/verify.html](file://app/templates/verify.html)
+- [migrations/agent_memory/001_postgres_memory_ledger.sql](file://migrations/agent_memory/001_postgres_memory_ledger.sql)
 - [_config.yml](file://_config.yml)
 - [requirements.txt](file://requirements.txt)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Enhanced uploader functionality with increased Git push timeout from 60s to 120s for improved reliability in larger repositories or slower networks
-- Updated Git synchronization process to handle longer push operations without timing out
-- Improved deployment reliability for authenticated users performing content synchronization
+- Enhanced authentication system with owner identity resolver supporting visitor, authenticated user, admin, and owner trust tiers
+- Integrated memory system with secure content management and access control
+- Added comprehensive permission catalog and role-based access control
+- Implemented trust-based memory governance with risk assessment
+- Added PostgreSQL-backed memory storage with advanced search capabilities
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -25,32 +32,40 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
+6. [Trust-Based Identity System](#trust-based-identity-system)
+7. [Memory Governance and Access Control](#memory-governance-and-access-control)
+8. [Permission Management System](#permission-management-system)
+9. [Dependency Analysis](#dependency-analysis)
+10. [Performance Considerations](#performance-considerations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the authentication system for PolaZhenJing. The system has been completely rewritten from a JWT-based multi-user authentication to a simplified session-based approach with QQ email verification. It explains the single-user login process, email verification workflow, session management, and protected route patterns. The system focuses on simplicity and ease of deployment while maintaining security through password hashing and email verification.
+This document describes the enhanced authentication system for PolaZhenJing, which has evolved from a simple session-based authentication to a sophisticated trust-based identity system with integrated memory management. The system now supports four distinct trust tiers: visitor, trusted user, admin, and owner, each with different access levels and capabilities. The authentication system is tightly integrated with a secure memory management system that provides controlled access to sensitive content based on user trust levels.
 
-**Updated** Enhanced Git synchronization capabilities with improved timeout handling for better reliability in various network conditions.
+The system implements comprehensive permission management, role-based access control, and advanced memory governance with risk assessment capabilities. It supports both SQLite-based user management and PostgreSQL-backed memory storage for scalable content management.
 
 ## Project Structure
-The authentication system is built around Flask Blueprints and SQLite database:
-- Authentication blueprint: handles login, registration, verification, password changes, and logout
-- Database initialization: manages user table with email verification support
-- Email service: QQ Email SMTP integration for verification codes
-- Upload blueprint: protected routes that require authentication, including enhanced Git synchronization
-- Template system: Jinja2 templates for authentication UI
+The authentication system is built around Flask Blueprints with enhanced trust-based identity resolution and integrated memory management:
+
+- **Authentication Blueprint**: Handles login, registration, verification, password changes, and logout with comprehensive permission management
+- **Owner Identity Resolver**: Provides trust-based identity resolution with four distinct trust tiers
+- **Memory Governance**: Implements risk assessment and content filtering based on trust levels
+- **Permission Catalog**: Defines granular permissions across multiple applications and services
+- **Database Layer**: Supports both SQLite user management and PostgreSQL memory storage
+- **Template System**: Jinja2 templates for authentication UI with permission-aware rendering
 
 ```mermaid
 graph TB
-subgraph "Backend Application"
+subgraph "Enhanced Authentication System"
 APP["app/__init__.py<br/>Flask App Factory"]
-AUTH["app/auth.py<br/>Authentication Blueprint"]
-MAILER["app/mailer.py<br/>Email Service"]
-UPLOADER["app/uploader.py<br/>Protected Routes & Git Sync"]
-DB["SQLite Database<br/>users table"]
+AUTH["app/auth.py<br/>Enhanced Auth Blueprint"]
+OWNER_ID["app/owner_identity.py<br/>Trust-Based Identity Resolver"]
+MEM_GUARD["app/memory_guard.py<br/>Risk Assessment & Content Filtering"]
+MEM_SERVICE["app/memory_service.py<br/>Memory Management Facade"]
+MEM_STORE["app/memory_store.py<br/>PostgreSQL Memory Store"]
+DB["SQLite Database<br/>users, permissions, preferences"]
+PG_DB["PostgreSQL Database<br/>memory_items, raw_events"]
 END
 subgraph "Templates"
 LOGIN["login.html"]
@@ -58,132 +73,139 @@ REGISTER["register.html"]
 VERIFY["verify.html"]
 END
 APP --> AUTH
-AUTH --> MAILER
+AUTH --> OWNER_ID
+AUTH --> MEM_GUARD
 AUTH --> DB
 AUTH --> LOGIN
 AUTH --> REGISTER
 AUTH --> VERIFY
-APP --> UPLOADER
-UPLOADER --> AUTH
+AUTH --> MEM_SERVICE
+MEM_SERVICE --> OWNER_ID
+MEM_SERVICE --> MEM_GUARD
+MEM_SERVICE --> MEM_STORE
+MEM_STORE --> PG_DB
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/__init__.py:112-157](file://app/__init__.py#L112-L157)
+- [app/auth.py:21](file://app/auth.py#L21)
+- [app/owner_identity.py:20-67](file://app/owner_identity.py#L20-L67)
+- [app/memory_service.py:13-15](file://app/memory_service.py#L13-L15)
+- [app/memory_store.py:62-110](file://app/memory_store.py#L62-L110)
 
 **Section sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
-- [app/auth.py:13](file://app/auth.py#L13)
+- [app/__init__.py:112-157](file://app/__init__.py#L112-L157)
+- [app/auth.py:21](file://app/auth.py#L21)
+- [app/owner_identity.py:20-67](file://app/owner_identity.py#L20-L67)
 
 ## Core Components
-- **Authentication Blueprint**: Handles all authentication-related routes and session management
-- **Database Layer**: SQLite-based user storage with unique constraints and verification flags
-- **Email Service**: QQ Email SMTP integration for 6-digit verification code delivery
-- **Session Management**: Flask session-based authentication with user_id tracking
-- **Template System**: Jinja2 templates for login, registration, and verification flows
-- **Protected Routes**: Upload and article management routes secured by login decorator, including enhanced Git synchronization
-- **Git Synchronization**: Improved deployment workflow with extended timeout for reliable operations
+- **Enhanced Authentication Blueprint**: Comprehensive authentication with permission management, user preferences, and administrative controls
+- **Trust-Based Identity Resolver**: Four-tier trust system (visitor, trusted user, admin, owner) with automatic privilege escalation
+- **Memory Governance Engine**: Risk assessment and content filtering based on trust levels and content patterns
+- **Permission Catalog System**: Granular permissions across multiple applications (PolaZhenjing, Skill Hub, PolaRead, PolaNews, AI Avatar, AIPD)
+- **Multi-Tier Database Architecture**: SQLite for user management, PostgreSQL for memory storage with optional fallback
+- **Template System**: Permission-aware rendering with dynamic UI based on user trust levels
+- **Protected Routes**: Enhanced with trust-based access control and memory management integration
+- **Secure Content Management**: Controlled access to sensitive content based on trust levels and risk assessment
 
 **Section sources**
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/__init__.py:26-40](file://app/__init__.py#L26-L40)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [app/uploader.py:14](file://app/uploader.py#L14)
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
+- [app/auth.py:49-69](file://app/auth.py#L49-L69)
+- [app/owner_identity.py:20-67](file://app/owner_identity.py#L20-L67)
+- [app/memory_guard.py:9-24](file://app/memory_guard.py#L9-L24)
+- [app/memory_service.py:13-15](file://app/memory_service.py#L13-L15)
 
 ## Architecture Overview
-The authentication architecture follows a simple session-based design:
-- Users authenticate via username/password with session storage
-- Registration requires QQ email with 6-digit verification code
-- Protected routes use login_required decorator for access control
-- Database stores hashed passwords and verification status
-- Email service handles verification code delivery via QQ SMTP
-- Git synchronization includes enhanced timeout handling for improved reliability
+The enhanced authentication architecture implements a trust-based identity system with integrated memory management:
+
+- **Trust Levels**: Visitor (0), Trusted User (1), Admin (2), Owner (3) with automatic privilege escalation
+- **Identity Resolution**: Automatic detection of owner/admin status based on email, username, or role
+- **Permission Management**: Granular permissions across multiple applications with manual and automated assignment
+- **Memory Governance**: Risk assessment with quarantine and candidate review workflows
+- **Access Control**: Trust-based filtering of sensitive content and memory operations
+- **Database Integration**: Seamless switching between SQLite and PostgreSQL backends
 
 ```mermaid
 sequenceDiagram
 participant User as "User Browser"
 participant Auth as "Auth Blueprint"
-participant DB as "SQLite Database"
-participant Mailer as "Email Service"
-participant Uploader as "Uploader Blueprint"
-User->>Auth : "POST /admin/register {username,email,password}"
-Auth->>Auth : "Validate input (QQ email required)"
-Auth->>DB : "Insert user with hashed password"
-Auth->>Mailer : "send_verification_code(email, code)"
-Mailer-->>Auth : "Success/Failure"
-Auth->>Auth : "Store verification code in session"
-Auth-->>User : "Redirect to /admin/verify"
-User->>Auth : "POST /admin/verify {code}"
-Auth->>Auth : "Validate code and time (5 min expiry)"
-Auth->>DB : "Update email_verified = 1"
-Auth->>Auth : "Clear verification session data"
-Auth-->>User : "Redirect to /admin/login"
+participant OwnerId as "Owner Identity Resolver"
+participant MemService as "Memory Service"
+participant Guard as "Memory Guard"
+participant DB as "Database Layer"
 User->>Auth : "POST /admin/login {username,password}"
 Auth->>DB : "Verify credentials"
-Auth->>Auth : "Set session[user_id, username]"
+Auth->>OwnerId : "Resolve trust level"
+OwnerId->>DB : "Fetch user details"
+OwnerId-->>Auth : "ActorIdentity with trust_tier"
+Auth->>Auth : "Set session with trust level"
 Auth-->>User : "Redirect to /admin/upload"
-User->>Uploader : "POST /admin/sync"
-Uploader->>Uploader : "Execute git add/commit with 30s timeout"
-Uploader->>Uploader : "Execute git push with 120s timeout"
-Uploader-->>User : "Display sync result"
+User->>MemService : "Write memory content"
+MemService->>Guard : "Assess risk based on trust_tier"
+Guard->>Guard : "Scan for risky patterns"
+Guard-->>MemService : "GuardResult (candidate/quarantined)"
+MemService->>DB : "Store with appropriate status"
+MemService-->>User : "Memory written with status"
 ```
 
 **Diagram sources**
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
+- [app/auth.py:286-317](file://app/auth.py#L286-L317)
+- [app/owner_identity.py:106-156](file://app/owner_identity.py#L106-L156)
+- [app/memory_service.py:162-188](file://app/memory_service.py#L162-L188)
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
 
 ## Detailed Component Analysis
 
-### Authentication Blueprint
-The authentication blueprint (`auth_bp`) provides all user-facing authentication functionality:
+### Enhanced Authentication Blueprint
+The authentication blueprint (`auth_bp`) provides comprehensive user management with integrated permission and preference systems:
 
 **Key Endpoints:**
-- `/admin/login`: User login with username/password validation
+- `/admin/login`: Enhanced login with trust level resolution and session management
 - `/admin/register`: User registration with QQ email requirement and verification
 - `/admin/verify`: Email verification with 6-digit code validation
 - `/admin/password`: Password change for authenticated users
-- `/admin/logout`: Session cleanup and logout
+- `/admin/account`: Comprehensive account management with preferences and permissions
+- `/admin/api/me`: API endpoint returning user profile with permissions
+- `/admin/api/sso/check`: Single sign-on validation with permission checking
+- `/admin/api/admin/*`: Administrative endpoints for user and permission management
 
-**Session Management:**
-- `login_required` decorator checks for `user_id` in session
-- Session stores `user_id` and `username` upon successful authentication
-- Session cleared on logout for security
-
-**Section sources**
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/auth.py:136-167](file://app/auth.py#L136-L167)
-
-### Database Schema and Initialization
-The system uses a simple SQLite database with a single users table:
-
-**User Table Structure:**
-- `id`: Auto-incrementing primary key
-- `username`: Unique, non-null text field
-- `email`: Unique, non-null text field with QQ email requirement
-- `password_hash`: Non-null hashed password storage
-- `email_verified`: Integer flag (0/1) for verification status
-- `created_at`: Timestamp for account creation
-
-**Database Operations:**
-- Automatic table creation during app initialization
-- Integrity constraints prevent duplicate usernames and emails
-- Password hashing using Werkzeug security utilities
+**Enhanced Features:**
+- Trust level resolution during login
+- Comprehensive user preferences management
+- Permission catalog integration
+- Administrative user management
+- API endpoints for external integrations
 
 **Section sources**
-- [app/__init__.py:26-40](file://app/__init__.py#L26-L40)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
+- [app/auth.py:286-317](file://app/auth.py#L286-L317)
+- [app/auth.py:320-363](file://app/auth.py#L320-L363)
+- [app/auth.py:366-403](file://app/auth.py#L366-L403)
+- [app/auth.py:406-541](file://app/auth.py#L406-L541)
+- [app/auth.py:544-671](file://app/auth.py#L544-L671)
+
+### Database Schema and Multi-Tier Architecture
+The system uses a dual-database architecture with enhanced schema support:
+
+**SQLite User Database:**
+- `users`: Enhanced with role and email verification fields
+- `user_preferences`: Theme, font, and layout preferences
+- `user_permissions`: Granular permission assignments
+- `permission_requests`: Permission request and approval workflow
+- `app_user_links`: External application user linking
+
+**PostgreSQL Memory Database:**
+- `raw_events`: Event logging with risk assessment
+- `memory_items`: Structured memory storage with status tracking
+- `visitor_suggestions`: Guest contribution management
+- `memory_embeddings`: Vector embeddings for advanced search
+- `persona_versions`: AI persona configuration management
+- `memory_audit_logs`: Complete audit trail of memory operations
+
+**Section sources**
+- [app/__init__.py:47-108](file://app/__init__.py#L47-L108)
+- [migrations/agent_memory/001_postgres_memory_ledger.sql:6-118](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L6-L118)
 
 ### Email Verification System
-The system implements a 6-digit email verification workflow:
+The system implements a 6-digit email verification workflow with enhanced security:
 
 **Verification Process:**
 1. Registration generates random 6-digit code
@@ -199,23 +221,24 @@ The system implements a 6-digit email verification workflow:
 - Immediate verification on successful code validation
 
 **Section sources**
-- [app/auth.py:77-90](file://app/auth.py#L77-L90)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/mailer.py:8](file://app/mailer.py#L8)
+- [app/auth.py:344-357](file://app/auth.py#L344-L357)
+- [app/auth.py:366-403](file://app/auth.py#L366-L403)
 
 ### Template System
-The authentication system uses Jinja2 templates for user interface:
+The authentication system uses Jinja2 templates with permission-aware rendering:
 
 **Template Components:**
 - `login.html`: Simple username/password form with login button
 - `register.html`: Registration form with QQ email requirement and password validation
 - `verify.html`: 6-digit code input form with resend option
+- `account.html`: Comprehensive account management with preferences and permissions
 
-**Template Features:**
+**Enhanced Features:**
 - Bootstrap-inspired styling with gold accents
 - Responsive design for mobile devices
 - Form validation and error message display
 - Internationalization support (Chinese/English labels)
+- Permission-aware UI elements
 
 **Section sources**
 - [app/templates/login.html:1](file://app/templates/login.html#L1)
@@ -223,31 +246,27 @@ The authentication system uses Jinja2 templates for user interface:
 - [app/templates/verify.html:1](file://app/templates/verify.html#L1)
 
 ### Protected Route Implementation
-The upload blueprint demonstrates session-based protection:
+The system implements trust-based protection for all routes:
 
-**Protection Mechanism:**
-- `@login_required` decorator on all upload routes
-- Redirects unauthenticated users to login page
-- Maintains user session across protected operations
-- Enhanced Git synchronization with improved timeout handling
+**Protection Mechanisms:**
+- `@login_required` decorator for basic authentication
+- Trust-level aware access control for sensitive operations
+- Permission-based authorization for administrative functions
+- Memory operation protection based on content risk assessment
 
 **Protected Routes:**
 - `/admin/upload`: File upload and content processing
-- `/admin/upload/style`: Style selection for generated content
 - `/admin/articles`: Article listing and management
 - `/admin/generate`: Content generation and post creation
-- `/admin/sync`: Git synchronization with extended timeout (120s)
-
-**Updated** Enhanced Git synchronization endpoint with increased timeout for improved reliability in larger repositories or slower networks.
+- `/admin/sync`: Git synchronization with enhanced timeout
+- `/admin/api/*`: API endpoints with comprehensive access control
 
 **Section sources**
+- [app/auth.py:276-283](file://app/auth.py#L276-L283)
 - [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
-- [app/uploader.py:121-168](file://app/uploader.py#L121-L168)
-- [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
 
 ### Security Implementation
-The system implements several security measures:
+The system implements comprehensive security measures across multiple layers:
 
 **Password Security:**
 - Passwords hashed using Werkzeug's `generate_password_hash`
@@ -257,44 +276,208 @@ The system implements several security measures:
 **Session Security:**
 - Flask secret key for session encryption
 - Session clearing on logout
-- Session-based authentication state
+- Session-based authentication state with trust levels
 
 **Email Security:**
 - QQ Email SMTP with SSL encryption
 - 5-minute verification code expiry
 - Session-based code storage
 
-**Section sources**
-- [app/auth.py:38](file://app/auth.py#L38)
-- [app/auth.py:155](file://app/auth.py#L155)
-- [app/mailer.py:45](file://app/mailer.py#L45)
-
-### Git Synchronization Enhancement
-**Updated** The Git synchronization functionality has been enhanced with improved timeout handling:
-
-**Enhanced Timeout Configuration:**
-- Git add operation: 30-second timeout
-- Git commit operation: 30-second timeout  
-- Git push operation: 120-second timeout (increased from 60 seconds)
-
-**Reliability Improvements:**
-- Extended push timeout accommodates larger repositories
-- Better handling of slower network connections
-- Reduced risk of synchronization failures during deployment
-- Improved user experience for content synchronization
+**Trust-Based Access Control:**
+- Automatic privilege escalation for owners/admins
+- Trust-level aware content filtering
+- Risk assessment for sensitive operations
+- Audit logging for all privileged actions
 
 **Section sources**
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
+- [app/auth.py:286-317](file://app/auth.py#L286-L317)
+- [app/owner_identity.py:140-156](file://app/owner_identity.py#L140-L156)
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+
+## Trust-Based Identity System
+
+### Trust Tier Architecture
+The system implements a four-tier trust hierarchy with automatic privilege escalation:
+
+**Trust Tiers:**
+1. **Visitor (0)**: Anonymous users with minimal privileges
+2. **Trusted User (1)**: Authenticated users with standard permissions
+3. **Admin (2)**: System administrators with elevated privileges
+4. **Owner (3)**: Primary system owner with maximum privileges
+
+**Trust Level Resolution:**
+- **Owner Detection**: Automatic recognition via email aliases, username aliases, or phone numbers
+- **Admin Detection**: Role-based or username-based elevation
+- **Authenticated User**: Standard user with basic permissions
+- **Visitor**: Anonymous user with limited access
+
+**Section sources**
+- [app/owner_identity.py:20-67](file://app/owner_identity.py#L20-L67)
+- [app/owner_identity.py:106-156](file://app/owner_identity.py#L106-L156)
+
+### Owner Identity Resolution
+The `ActorIdentity` class provides comprehensive identity resolution:
+
+**Identity Properties:**
+- `subject_id`: Unique identifier for the actor
+- `identity_scope`: Current trust level (visitor, user, admin, owner)
+- `user_id`: Database user identifier (None for visitors)
+- `username`, `email`, `phone`: User contact information
+- `role`: User role designation
+- `trust_tier`: String representation of trust level
+
+**Trust Level Determination:**
+- **Owner**: Explicit owner alias match or highest trust level
+- **Admin**: Role=admin or specific usernames
+- **Authenticated User**: Logged-in user with valid session
+- **Visitor**: Anonymous user without session
+
+**Section sources**
+- [app/owner_identity.py:20-67](file://app/owner_identity.py#L20-L67)
+- [app/owner_identity.py:140-156](file://app/owner_identity.py#L140-L156)
+
+### Trust-Level Aware Operations
+Many system operations are filtered based on trust levels:
+
+**Content Filtering:**
+- High-risk content (prompt injection, secret exfiltration) quarantined for non-owners
+- Boundary override patterns require owner confirmation
+- Recommendation poisoning triggers risk assessment
+
+**Access Control:**
+- Memory write operations restricted by trust level
+- Administrative functions require admin or owner status
+- Sensitive operations require explicit owner authorization
+
+**Section sources**
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [app/memory_service.py:190-227](file://app/memory_service.py#L190-L227)
+
+## Memory Governance and Access Control
+
+### Risk Assessment Framework
+The memory governance system implements comprehensive risk assessment:
+
+**Risk Categories:**
+- **Prompt Injection**: Attempts to bypass system rules or instructions
+- **Secret Exfiltration**: Requests to share API keys, secrets, or tokens
+- **Persona Takeover**: Commands attempting to alter AI personality
+- **Boundary Override**: Requests to bypass safety boundaries
+- **Recommendation Poisoning**: Commands to bias recommendations
+
+**Risk Scoring:**
+- Pattern matching with regular expressions
+- Context-aware risk assessment based on trust level
+- Quarantine vs. candidate classification
+- Owner-required confirmation for high-risk content
+
+**Section sources**
+- [app/memory_guard.py:27-33](file://app/memory_guard.py#L27-L33)
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+
+### Memory Type Classification
+Content is automatically classified into memory categories:
+
+**Memory Types:**
+- **Values**: Personality traits, values, and ethical guidelines
+- **Boundary**: Safety boundaries and restrictions
+- **Preference**: User preferences and inclinations
+- **Procedural**: Procedures, steps, and best practices
+- **Episodic**: Personal experiences and events
+- **Semantic**: General knowledge and facts
+
+**Classification Logic:**
+- Keyword-based pattern matching
+- Context-aware categorization
+- Automatic type assignment for memory items
+
+**Section sources**
+- [app/memory_guard.py:36-48](file://app/memory_guard.py#L36-L48)
+
+### Memory Status Management
+Memory items progress through different states based on trust level and risk assessment:
+
+**Status Types:**
+- **Candidate**: Content awaiting review or activation
+- **Active**: Content approved for use
+- **Pinned**: Content with elevated priority
+- **Deprecated**: Content marked for retirement
+- **Discarded**: Content rejected or removed
+- **Quarantined**: Content requiring owner intervention
+
+**Status Transitions:**
+- Non-owner risky content automatically quarantined
+- Owner-approved content moves to active status
+- Visitor suggestions require owner review
+- Automatic status updates based on risk assessment
+
+**Section sources**
+- [app/memory_service.py:230-263](file://app/memory_service.py#L230-L263)
+- [app/memory_service.py:272-303](file://app/memory_service.py#L272-L303)
+
+## Permission Management System
+
+### Permission Catalog
+The system defines granular permissions across multiple applications:
+
+**Permission Categories:**
+- **Articles**: Reading and managing articles
+- **Skills**: Access to Skill Hub functionality
+- **PolaRead**: Access to PolaRead service
+- **PolaNews**: Access to PolaNews service
+- **Agent**: Access to AI Avatar functionality
+- **Projects**: Project management capabilities
+- **Users**: User and permission management
+
+**Application Integration:**
+- Permissions organized by application context
+- Cross-application permission inheritance
+- Automated permission assignment for admins
+- Manual permission granting for users
+
+**Section sources**
+- [app/auth.py:49-69](file://app/auth.py#L49-L69)
+
+### Permission Assignment and Management
+The system supports flexible permission assignment:
+
+**Automatic Permissions:**
+- Admin users receive all permissions
+- Default user permissions for standard users
+- Stored permissions for individual users
+
+**Manual Management:**
+- Administrative permission granting
+- Permission request and approval workflow
+- Cross-application permission management
+- Permission revocation and updates
+
+**API Integration:**
+- RESTful endpoints for permission management
+- Single sign-on validation with permission checking
+- External application user linking
+- Permission synchronization across services
+
+**Section sources**
+- [app/auth.py:112-125](file://app/auth.py#L112-L125)
+- [app/auth.py:445-490](file://app/auth.py#L445-L490)
+- [app/auth.py:588-612](file://app/auth.py#L588-L612)
 
 ## Dependency Analysis
-The authentication system maintains clear separation of concerns:
+The enhanced authentication system maintains clear separation of concerns with integrated memory management:
 
 ```mermaid
 graph LR
 AUTH["auth.py"] --> INIT["__init__.py<br/>Database Setup"]
+AUTH --> OWNER_ID["owner_identity.py<br/>Trust-Based Identity"]
+AUTH --> MEM_GUARD["memory_guard.py<br/>Risk Assessment"]
 AUTH --> MAILER["mailer.py<br/>Email Service"]
 AUTH --> TEMPLATES["Template Files<br/>login/register/verify"]
-INIT --> SQLITE["SQLite Database<br/>users table"]
+INIT --> SQLITE["SQLite Database<br/>users, permissions, preferences"]
+MEM_SERVICE["memory_service.py"] --> OWNER_ID
+MEM_SERVICE --> MEM_GUARD
+MEM_SERVICE --> MEM_STORE["memory_store.py<br/>PostgreSQL Memory Store"]
+MEM_STORE --> PG_DB["PostgreSQL Database<br/>memory_items, raw_events"]
 UPLOADER["uploader.py"] --> AUTH
 UPLOADER --> GIT["Git Operations<br/>Enhanced Timeout"]
 CONFIG["_config.yml<br/>Jekyll Configuration"]
@@ -302,96 +485,105 @@ AUTH --> CONFIG
 ```
 
 **Diagram sources**
-- [app/auth.py:10](file://app/auth.py#L10)
-- [app/__init__.py:26-40](file://app/__init__.py#L26-L40)
-- [app/mailer.py:1](file://app/mailer.py#L1)
-- [app/uploader.py:11](file://app/uploader.py#L11)
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
+- [app/auth.py:18-19](file://app/auth.py#L18-L19)
+- [app/owner_identity.py:106-156](file://app/owner_identity.py#L106-L156)
+- [app/memory_service.py:13-15](file://app/memory_service.py#L13-L15)
+- [app/memory_store.py:62-110](file://app/memory_store.py#L62-L110)
 
-**Dependencies:**
-- Authentication blueprint depends on database connection and email service
-- Database initialization provides connection factory and table schema
-- Email service requires QQ email credentials from environment
-- Upload blueprint depends on authentication for access control
-- Git synchronization depends on enhanced timeout configuration
-- Templates provide user interface for authentication flows
+**Enhanced Dependencies:**
+- Authentication blueprint depends on database connection, email service, and identity resolver
+- Identity resolver provides trust-level awareness for all system operations
+- Memory service integrates with both identity resolver and risk assessment
+- PostgreSQL memory store provides scalable content management
+- Permission system supports cross-application access control
 
 ## Performance Considerations
-- **Database Performance**: SQLite provides adequate performance for single-user scenarios
-- **Session Storage**: Flask sessions stored server-side in memory
+- **Database Performance**: SQLite provides adequate performance for user management, PostgreSQL handles memory scale-out
+- **Session Storage**: Flask sessions stored server-side with trust-level caching
 - **Email Delivery**: SMTP operations are asynchronous and don't block user flow
-- **Memory Usage**: Simple session data minimizes memory footprint
-- **Connection Pooling**: SQLite connections managed automatically by Flask
-- **Git Operation Performance**: Enhanced timeout configuration improves reliability for larger repositories
-- **Network Efficiency**: Extended Git push timeout reduces synchronization failures
+- **Memory Operations**: PostgreSQL indexing and vector embeddings for fast memory search
+- **Trust Resolution**: Cached identity resolution reduces database queries
+- **Risk Assessment**: Efficient pattern matching with early termination
+- **Connection Pooling**: PostgreSQL connections managed through memory store abstraction
 
-**Updated** Enhanced Git synchronization performance with improved timeout handling for better reliability across different network conditions.
+**Enhanced Performance Features:**
+- Trust-level caching for identity resolution
+- PostgreSQL connection pooling for memory operations
+- Index optimization for memory search and filtering
+- Asynchronous risk assessment for non-blocking operations
 
 ## Troubleshooting Guide
 
 ### Common Issues and Resolutions
 
-**Registration Problems:**
-- **Issue**: "Only QQ email (@qq.com) is supported"
-  - **Solution**: Ensure email ends with @qq.com domain
-- **Issue**: "User already registered"
-  - **Solution**: Use different username or email address
-- **Issue**: Email not received
-  - **Solution**: Check QQ email credentials and SMTP settings
+**Authentication Problems:**
+- **Issue**: "Trust level not recognized"
+  - **Solution**: Verify owner/admin aliases in environment variables
+- **Issue**: "Permission denied despite login"
+  - **Solution**: Check user permissions in database or admin interface
+- **Issue**: "Trust level downgrade unexpected"
+  - **Solution**: Verify session data and user role in database
 
-**Login Problems:**
-- **Issue**: "Username not found" or "Incorrect password"
-  - **Solution**: Verify credentials and account existence
-- **Issue**: Redirect loop to login
-  - **Solution**: Check session cookie and browser settings
+**Memory Management Issues:**
+- **Issue**: "Memory write blocked for non-owner"
+  - **Solution**: Check risk assessment results and trust level
+- **Issue**: "Memory search returns empty results"
+  - **Solution**: Verify PostgreSQL configuration and memory store status
+- **Issue**: "Visitor suggestions not processed"
+  - **Solution**: Check visitor suggestion status and owner permissions
 
-**Verification Issues:**
-- **Issue**: "Verification code expired"
-  - **Solution**: Resend code and enter within 5 minutes
-- **Issue**: "Invalid verification code"
-  - **Solution**: Check code carefully and resend if needed
+**Permission Management Issues:**
+- **Issue**: "Permission not granted"
+  - **Solution**: Verify permission exists in catalog and user eligibility
+- **Issue**: "Permission request stuck pending"
+  - **Solution**: Check admin approval workflow and notification status
+- **Issue**: "Cross-application permission mismatch"
+  - **Solution**: Verify app_user_links table and external user IDs
 
-**Email Service Issues:**
-- **Issue**: Email sending fails
-  - **Solution**: Verify QQ_EMAIL and QQ_EMAIL_AUTH_CODE environment variables
-  - **Issue**: SMTP connection timeout
-  - **Solution**: Check network connectivity and QQ SMTP settings
+**Identity Resolution Issues:**
+- **Issue**: "Owner not recognized"
+  - **Solution**: Verify environment variables POLA_AGENT_OWNER_EMAILS/USERNAMES/PHONES
+- **Issue**: "Trust level incorrect"
+  - **Solution**: Check user role, email, and username in database
+- **Issue**: "Anonymous user treated as visitor"
+  - **Solution**: Verify session data and user authentication status
 
-**Git Synchronization Issues:**
-- **Issue**: "Git push timeout during synchronization"
-  - **Solution**: The system now uses 120-second timeout, allowing more time for larger repositories
-- **Issue**: "Sync operation failed"
-  - **Solution**: Check Git configuration and remote repository accessibility
-- **Issue**: "Large repository sync takes too long"
-  - **Solution**: The extended timeout (120s) improves reliability for larger repositories
-
-**Updated** Enhanced Git synchronization troubleshooting with improved timeout handling.
+**Database Connection Issues:**
+- **Issue**: "PostgreSQL connection failed"
+  - **Solution**: Verify DATABASE_URL environment variable and connection string
+- **Issue**: "SQLite database locked"
+  - **Solution**: Check concurrent access and WAL mode configuration
+- **Issue**: "Memory store unavailable"
+  - **Solution**: Verify PostgreSQL extensions and schema initialization
 
 ### Debugging Techniques
 - **Enable Debug Mode**: Set Flask debug mode for detailed error messages
-- **Check Environment Variables**: Verify SECRET_KEY, QQ_EMAIL, and QQ_EMAIL_AUTH_CODE
-- **Database Inspection**: Query users table to verify account status
-- **Session Monitoring**: Check browser cookies for session data
-- **Log Analysis**: Review application logs for authentication events
-- **Git Operation Monitoring**: Monitor Git add/commit/push operations for timing issues
+- **Check Environment Variables**: Verify SECRET_KEY, DATABASE_URL, and owner aliases
+- **Database Inspection**: Query users, permissions, and memory tables to verify state
+- **Session Monitoring**: Check browser cookies for trust-level and permission data
+- **Log Analysis**: Review application logs for authentication, permission, and memory events
+- **Trust Level Verification**: Use API endpoints to check current user trust level
+- **Memory Status Monitoring**: Check memory store status and PostgreSQL connection health
 
 ### Security Considerations
-- **Change Default Secrets**: Update SECRET_KEY in production environment
-- **Environment Configuration**: Store credentials in .env file, not in code
+- **Change Default Secrets**: Update SECRET_KEY and PostgreSQL credentials in production
+- **Environment Configuration**: Store all credentials in .env file, not in code
 - **HTTPS Deployment**: Use SSL certificates for production deployment
-- **Session Security**: Configure appropriate session cookie settings
-- **Rate Limiting**: Consider implementing rate limiting for login attempts
-- **Git Security**: Ensure proper Git credentials and repository permissions
+- **Session Security**: Configure appropriate session cookie settings and timeout
+- **Trust Level Auditing**: Monitor trust-level changes and permission modifications
+- **Memory Access Logging**: Track all memory operations and access attempts
+- **Risk Assessment Review**: Regularly review risk assessment patterns and quarantined content
 
 **Section sources**
-- [app/auth.py:66](file://app/auth.py#L66)
-- [app/auth.py:111](file://app/auth.py#L111)
-- [app/mailer.py:16](file://app/mailer.py#L16)
-- [app/uploader.py:190-209](file://app/uploader.py#L190-L209)
+- [app/auth.py:286-317](file://app/auth.py#L286-L317)
+- [app/owner_identity.py:75-80](file://app/owner_identity.py#L75-L80)
+- [app/memory_service.py:106-128](file://app/memory_service.py#L106-L128)
 
 ## Conclusion
-PolaZhenJing's authentication system provides a streamlined, single-user approach focused on simplicity and reliability. The session-based design eliminates complex token management while maintaining security through password hashing, email verification, and protected routes. The QQ email requirement ensures valid contact information while the 6-digit verification system provides an additional security layer. 
+PolaZhenJing's enhanced authentication system represents a significant evolution from simple session-based authentication to a sophisticated trust-based identity system with integrated memory management. The system now supports four distinct trust tiers (visitor, trusted user, admin, owner) with automatic privilege escalation and comprehensive access control.
 
-**Updated** Recent enhancements include improved Git synchronization capabilities with extended timeout handling, making the system more reliable for larger repositories and slower network conditions. This enhancement maintains the system's focus on simplicity while improving operational reliability for content deployment and synchronization tasks.
+The integration of memory governance provides secure content management with risk assessment and trust-based filtering. The comprehensive permission system enables granular access control across multiple applications, while the dual-database architecture supports both user management and scalable memory storage.
 
-This approach is ideal for personal blogs and single-user applications where ease of use and minimal complexity are priorities, while the enhanced Git synchronization capabilities ensure robust deployment workflows for content management tasks.
+This enhanced system maintains the simplicity of the original design while adding enterprise-grade security, scalability, and functionality. The trust-based approach ensures appropriate access levels for different types of content and operations, while the permission catalog provides fine-grained control over system capabilities.
+
+The system is ideal for applications requiring both user-friendly authentication and sophisticated content management with security-conscious access control. The enhanced Git synchronization capabilities and memory management features make it suitable for content-heavy applications with complex access requirements.

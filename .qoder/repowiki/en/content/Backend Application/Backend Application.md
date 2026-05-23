@@ -7,6 +7,12 @@
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/uploader.py](file://app/uploader.py)
+- [app/jobs.py](file://app/jobs.py)
+- [app/agent.py](file://app/agent.py)
+- [app/skillhub.py](file://app/skillhub.py)
+- [app/templates/status.html](file://app/templates/status.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
+- [app/templates/base.html](file://app/templates/base.html)
 - [app/templates/style_select.html](file://app/templates/style_select.html)
 - [app/templates/upload.html](file://app/templates/upload.html)
 - [assets/css/literary-narrative.css](file://assets/css/literary-narrative.css)
@@ -19,11 +25,11 @@
 
 ## Update Summary
 **Changes Made**
-- Updated enhanced document conversion pipeline section to reflect new DOCX formatting cleanup functionality
-- Added documentation for improved title extraction with enhanced markdown formatting removal
-- Enhanced PDF conversion pipeline documentation with sophisticated font analysis capabilities
-- Updated troubleshooting guide to include DOCX formatting cleanup and title extraction improvements
-- Added new section on DOCX formatting cleanup and title extraction functionality
+- Added comprehensive asynchronous job processing infrastructure documentation
+- Enhanced application initialization section to include automatic job schema setup
+- Updated content conversion pipeline documentation to reflect improved job integration
+- Added new sections covering job queue management, background processing, and real-time status monitoring
+- Enhanced troubleshooting guide with job processing and database schema migration information
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -38,19 +44,22 @@
 10. [Conclusion](#conclusion)
 
 ## Introduction
-This document describes the backend application for PolaZhenJing v2, a lightweight Flask-based management interface for a personal knowledge wiki and blogging platform. The system has been completely redesigned from the previous complex FastAPI architecture to a simplified Flask-based solution with single-user authentication, file upload capabilities, and automatic conversion pipeline. The new architecture focuses on simplicity with integrated SQLite database storage, QQ email verification, and seamless Jekyll static site generation for GitHub Pages deployment.
+This document describes the backend application for PolaZhenJing v2, a Flask-based management interface for a personal knowledge wiki and blogging platform. The system features a comprehensive asynchronous job processing infrastructure with SQLite-backed job queues, enhanced application initialization with automatic schema management, and improved content conversion pipeline. The architecture focuses on simplicity with integrated SQLite database storage, QQ email verification, and seamless Jekyll static site generation for GitHub Pages deployment.
 
-**Updated** The backend infrastructure has been completely removed, eliminating all FastAPI modules, AI providers, authentication systems, research pipelines, publishing frameworks, sharing mechanisms, tagging systems, and thought management components that existed in the previous architecture. The system now features enhanced literary narrative style support with MiniMax API integration for content rewriting and sophisticated document conversion capabilities.
+**Updated** The backend now includes a complete asynchronous job processing system that manages long-running tasks such as LLM article generation, content rewriting, and media processing. The job queue uses SQLite for cross-worker state management and provides real-time progress monitoring through dedicated status endpoints and HTML templates.
 
 ## Project Structure
-The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, and conversion capabilities. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with six main components: authentication, file upload/conversion, content management, LLM integration, literary styling, and CLI operations.
+The backend is organized around a Flask application factory pattern that creates a lightweight management interface with integrated authentication, file upload, conversion capabilities, and asynchronous job processing. The system uses SQLite for zero-configuration user storage and implements a file-based workflow for content management. The architecture focuses on simplicity with seven main components: authentication, file upload/conversion, content management, job processing, LLM integration, literary styling, and CLI operations.
 
 ```mermaid
 graph TB
 subgraph "Flask Application Factory"
-APP["__init__.py<br/>create_app(), get_db(), init_db()"]
+APP["__init__.py<br/>create_app(), get_db(), init_db()<br/>+ jobs.init_schema()"]
 AUTH["auth.py<br/>Authentication routes<br/>Login/Register/Verify"]
-UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation<br/>LLM integration + asset management"]
+UP["uploader.py<br/>Upload + conversion + management<br/>Style selection + generation<br/>LLM integration + asset management<br/>+ Job orchestration"]
+JOBS["jobs.py<br/>SQLite-backed job queue<br/>+ Background processing<br/>+ Real-time status monitoring"]
+AGENT["agent.py<br/>Chat and memory API"]
+SKILLHUB["skillhub.py<br/>Skill management and registry"]
 CONV["converter.py<br/>Enhanced PDF structure detection<br/>DOCX formatting cleanup<br/>Improved title extraction<br/>Multi-format conversion"]
 MAIL["mailer.py<br/>QQ email SMTP verification"]
 CLI["wiki.py<br/>CLI management tool<br/>Serve/Build/Admin/New/List/Deploy"]
@@ -58,6 +67,7 @@ end
 subgraph "Database Layer"
 SQLITE["SQLite Database<br/>wiki.db in data/"]
 USERS["users table<br/>username, email, password_hash,<br/>email_verified, created_at"]
+JOBS_TABLE["jobs table<br/>id, user_id, kind, status,<br/>stage, progress, messages"]
 end
 subgraph "Static Site Generation"
 JEKYLL["_config.yml<br/>Jekyll configuration<br/>Layouts, plugins, pagination"]
@@ -66,10 +76,12 @@ INCLUDES["_includes/<br/>Shared components<br/>head.html, header.html,<br/>foote
 ASSETS["assets/<br/>CSS + images<br/>main.css + style-specific CSS<br/>literary-narrative.css"]
 end
 subgraph "LLM Integration"
-MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts"]
+MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts<br/>+ Image generation"]
 end
 AUTH --> SQLITE
 UP --> SQLITE
+UP --> JOBS
+JOBS --> SQLITE
 CONV --> SQLITE
 MAIL --> SQLITE
 CLI --> JEKYLL
@@ -80,31 +92,34 @@ UP --> MINIMAX
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/__init__.py:69-113](file://app/__init__.py#L69-L113)
+- [app/jobs.py:1-188](file://app/jobs.py#L1-L188)
+- [app/uploader.py:1126-1165](file://app/uploader.py#L1126-L1165)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
-- [app/uploader.py:25-53](file://app/uploader.py#L25-L53)
 - [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
 - [assets/css/literary-narrative.css:1-148](file://assets/css/literary-narrative.css#L1-L148)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
 
 **Section sources**
-- [app/__init__.py:1-62](file://app/__init__.py#L1-L62)
+- [app/__init__.py:1-113](file://app/__init__.py#L1-L113)
 - [PRD.md:181-234](file://PRD.md#L181-L234)
 
 ## Core Components
 - **Application factory pattern**: Flask app created with template configuration and registers teardown handlers for database connections
 - **Database integration**: SQLite-based user storage with automatic table creation and connection management using Flask's g object pattern
+- **Job processing infrastructure**: Complete asynchronous job queue system with SQLite-backed state management, background thread execution, and real-time progress monitoring
 - **Authentication system**: Single-user authentication with QQ email verification using Flask sessions and secure cookies
 - **Enhanced file upload pipeline**: Support for multiple formats (PDF, DOCX, HTML, Markdown) with advanced PDF structure detection, DOCX formatting cleanup, and automatic conversion to blog-ready Markdown
-- **Template rendering**: Jinja2-based server-side rendering for all management interfaces
+- **Template rendering**: Jinja2-based server-side rendering for all management interfaces including job status monitoring
 - **Email verification**: QQ Email SMTP integration for 6-digit verification codes with 5-minute expiration
 - **Static site generation**: Jekyll integration for blog post generation with six predefined styles including literary narrative
 - **LLM integration**: MiniMax API integration for content rewriting with style-specific prompts and literary narrative enhancement
 - **CLI operations**: Comprehensive command-line interface for development, deployment, and content management
 
 **Section sources**
-- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/__init__.py:69-113](file://app/__init__.py#L69-L113)
+- [app/jobs.py:1-188](file://app/jobs.py#L1-L188)
 - [app/auth.py:16-24](file://app/auth.py#L16-L24)
 - [app/converter.py:58-145](file://app/converter.py#L58-L145)
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
@@ -112,32 +127,43 @@ UP --> MINIMAX
 - [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Architecture Overview
-The backend follows a simplified layered architecture focused on content management and static site generation:
-- **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface and Jekyll templates for public site
-- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection and DOCX formatting cleanup, content management operations, LLM-based content rewriting, and CLI command handling
-- **Persistence layer**: SQLite database with user management and session-based authentication
-- **Integration layer**: QQ Email SMTP for verification, MiniMax API for content rewriting, and Jekyll static site generation for publishing
+The backend follows a layered architecture focused on content management, asynchronous job processing, and static site generation:
+- **Presentation layer**: Flask blueprints with Jinja2 template rendering for admin interface, job status monitoring, and Jekyll templates for public site
+- **Business logic layer**: Authentication flows, file processing with enhanced PDF structure detection and DOCX formatting cleanup, content management operations, LLM-based content rewriting, job orchestration, and CLI command handling
+- **Job processing layer**: SQLite-backed job queue with background thread execution, real-time progress monitoring, and cross-worker state management
+- **Persistence layer**: SQLite database with user management, job state tracking, and session-based authentication
+- **Integration layer**: QQ Email SMTP for verification, MiniMax API for content rewriting and image generation, and Jekyll static site generation for publishing
 
 ```mermaid
 graph TB
 CLIENT["Admin Browser"]
 FLASK["Flask App Factory"]
 AUTH["Auth Blueprint<br/>Login/Register/Verify"]
-UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage<br/>Style selection + LLM integration"]
+UPLOAD["Uploader Blueprint<br/>Upload/Convert/Manage<br/>Style selection + LLM integration<br/>+ Job orchestration"]
+JOBS["Jobs Module<br/>SQLite-backed queue<br/>+ Background processing<br/>+ Status monitoring"]
+STATUS["Status Template<br/>Real-time progress<br/>+ Polling interface"]
+AGENT["Agent Blueprint<br/>Chat and memory API"]
+SKILLHUB["SkillHub Blueprint<br/>Skill management<br/>+ Registry operations"]
 CONV["Converter Module<br/>Enhanced PDF Structure Detection<br/>DOCX Formatting Cleanup<br/>Improved Title Extraction"]
 MAIL["Mailer Module<br/>QQ SMTP Verification"]
-DB["SQLite Database<br/>wiki.db"]
+DB["SQLite Database<br/>wiki.db + jobs table"]
 TEMPLATES["Jinja2 Templates<br/>Server-side Rendering"]
 CLI["CLI Tool<br/>wiki.py<br/>Serve/Build/Admin/New/List/Deploy"]
 JEKYLL["Jekyll Static Site Generator<br/>_config.yml + layouts"]
-MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts"]
+MINIMAX["MiniMax API<br/>Content rewriting<br/>Style-specific prompts<br/>+ Image generation"]
 CLIENT --> FLASK
 FLASK --> AUTH
 FLASK --> UPLOAD
+FLASK --> JOBS
+FLASK --> AGENT
+FLASK --> SKILLHUB
 AUTH --> DB
 UPLOAD --> DB
+UPLOAD --> JOBS
 UPLOAD --> CONV
 UPLOAD --> MINIMAX
+JOBS --> DB
+STATUS --> JOBS
 AUTH --> MAIL
 UPLOAD --> TEMPLATES
 AUTH --> TEMPLATES
@@ -146,11 +172,13 @@ CLI --> DB
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
+- [app/__init__.py:69-113](file://app/__init__.py#L69-L113)
+- [app/jobs.py:163-188](file://app/jobs.py#L163-L188)
+- [app/uploader.py:1299-1326](file://app/uploader.py#L1299-L1326)
 - [app/auth.py:13-168](file://app/auth.py#L13-L168)
-- [app/uploader.py:126-129](file://app/uploader.py#L126-L129)
 - [app/converter.py:1-145](file://app/converter.py#L1-L145)
 - [app/mailer.py:1-53](file://app/mailer.py#L1-L53)
+- [app/templates/status.html:1-127](file://app/templates/status.html#L1-L127)
 - [wiki.py:1-165](file://wiki.py#L1-L165)
 
 ## Detailed Component Analysis
@@ -158,6 +186,7 @@ CLI --> DB
 ### Application Initialization and Lifecycle
 - **App factory**: Creates Flask instance with template configuration and registers teardown handlers
 - **Database initialization**: Automatic SQLite table creation for user management during app startup
+- **Job schema initialization**: Automatic creation of jobs table with migration support for schema evolution
 - **Session management**: Flask secret key configuration for secure cookie-based sessions
 - **File upload limits**: 16MB maximum content length for document uploads
 - **Asset serving**: Dynamic asset serving from project root assets directory
@@ -167,26 +196,33 @@ sequenceDiagram
 participant Proc as "Process"
 participant App as "Flask App"
 participant DB as "SQLite DB"
+participant Jobs as "Jobs Module"
 Proc->>App : create_app()
 App->>DB : init_db()
 DB-->>App : users table created
+App->>Jobs : init_schema()
+Jobs->>DB : Create jobs table if missing
+Jobs-->>App : Schema initialized
 App->>App : register blueprints
 App-->>Proc : ready for requests
 ```
 
 **Diagram sources**
+- [app/__init__.py:69-113](file://app/__init__.py#L69-L113)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/jobs.py:50-69](file://app/jobs.py#L50-L69)
 
 **Section sources**
+- [app/__init__.py:69-113](file://app/__init__.py#L69-L113)
 - [app/__init__.py:43-62](file://app/__init__.py#L43-L62)
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
+- [app/jobs.py:50-69](file://app/jobs.py#L50-L69)
 
 ### Database Integration
 - **SQLite engine**: File-based database stored in `data/wiki.db` with WAL mode enabled for better concurrency
 - **Connection management**: Flask's `g` object pattern ensures thread-safe database connections per request
 - **User table schema**: Minimal design with unique constraints on username and email, password hash storage, and verification flag
-- **Automatic initialization**: Users table created on first app startup if it doesn't exist
+- **Job table schema**: Complete job queue infrastructure with status tracking, progress monitoring, and cross-worker state management
+- **Automatic initialization**: Users table created on first app startup if it doesn't exist, jobs table automatically migrated
 
 ```mermaid
 classDiagram
@@ -203,16 +239,146 @@ class UserTable {
 +email_verified : INTEGER DEFAULT 0
 +created_at : TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 }
+class JobsTable {
++id : TEXT PRIMARY KEY
++user_id : INTEGER
++kind : TEXT NOT NULL
++status : TEXT NOT NULL
++stage : TEXT
++progress : INTEGER DEFAULT 0
++title : TEXT
++result_filename : TEXT
++error : TEXT
++messages : TEXT
++created_at : TIMESTAMP DEFAULT CURRENT_TIMESTAMP
++updated_at : TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+}
 DatabaseManager --> UserTable : "creates/uses"
+DatabaseManager --> JobsTable : "creates/uses"
 ```
 
 **Diagram sources**
-- [app/__init__.py:9-41](file://app/__init__.py#L9-L41)
+- [app/__init__.py:26-67](file://app/__init__.py#L26-L67)
+- [app/jobs.py:32-47](file://app/jobs.py#L32-L47)
 - [PRD.md:264-274](file://PRD.md#L264-L274)
 
 **Section sources**
-- [app/__init__.py:9-41](file://app/__init__.py#L9-L41)
+- [app/__init__.py:26-67](file://app/__init__.py#L26-L67)
+- [app/jobs.py:32-47](file://app/jobs.py#L32-L47)
 - [PRD.md:264-274](file://PRD.md#L264-L274)
+
+### Asynchronous Job Processing Infrastructure
+**New** The system now includes a complete asynchronous job processing infrastructure with SQLite-backed job queue management.
+
+- **SQLite-backed job queue**: Centralized job state management allowing multiple workers to track progress and status
+- **Background thread execution**: Daemon threads handle long-running tasks without blocking the main request-response cycle
+- **Job lifecycle management**: Complete job states from pending through running to completion or failure
+- **Progress tracking**: Real-time progress updates with stage descriptions and percentage completion
+- **Message logging**: Structured message system for job events, warnings, and informational updates
+- **Error handling**: Automatic error capture and reporting with stack trace preservation
+- **Schema evolution**: Idempotent schema migrations supporting column additions and version upgrades
+- **Cross-worker coordination**: Shared state accessible across multiple Gunicorn workers for status monitoring
+
+```mermaid
+flowchart TD
+A["Job Submission"] --> B["create_job()"]
+B --> C["Pending State"]
+C --> D["Background Thread Execution"]
+D --> E["update_job() Progress Updates"]
+E --> F{"Task Complete?"}
+F --> |Yes| G["status=DONE<br/>progress=100%"]
+F --> |No| H["status=RUNNING<br/>stage=Processing"]
+H --> E
+G --> I["append_message() Success"]
+I --> J["Result Available"]
+```
+
+**Diagram sources**
+- [app/jobs.py:79-111](file://app/jobs.py#L79-L111)
+- [app/jobs.py:163-188](file://app/jobs.py#L163-L188)
+
+**Section sources**
+- [app/jobs.py:1-188](file://app/jobs.py#L1-L188)
+
+### Job Queue Management and Background Processing
+**New** Comprehensive job queue management system with real-time monitoring and status reporting.
+
+- **Job creation**: UUID-based job identifiers with automatic pending state initialization
+- **State transitions**: Controlled progression from pending → running → done | failed
+- **Progress updates**: Structured progress tracking with stage descriptions and percentage completion
+- **Message system**: JSON-encoded message logs with level-based categorization (info, success, warning, error)
+- **Background execution**: Daemon threads handle long-running tasks independently of request contexts
+- **Error recovery**: Automatic exception handling with detailed error reporting and status updates
+- **Status polling**: RESTful endpoints for real-time progress monitoring and status queries
+- **Active job tracking**: Efficient querying of in-progress jobs for administrative displays
+
+```mermaid
+sequenceDiagram
+participant Client as "Client Browser"
+participant Uploader as "Uploader Route"
+participant Jobs as "Jobs Module"
+participant Worker as "Background Thread"
+Client->>Uploader : POST /admin/generate
+Uploader->>Jobs : create_job(kind='generate')
+Jobs-->>Uploader : job_id
+Uploader->>Jobs : submit(target, job_id, payload)
+Jobs->>Worker : spawn daemon thread
+Worker->>Jobs : update_job(status=RUNNING)
+Worker->>Jobs : update_job(stage='Loading draft...')
+Worker->>Jobs : update_job(progress=5)
+Worker->>Jobs : append_message(info, "Content loaded successfully")
+Client->>Uploader : GET /admin/generate/status/ : job_id
+Uploader->>Jobs : get_job(job_id)
+Jobs-->>Uploader : job details
+Uploader-->>Client : status.html with progress
+Client->>Uploader : GET /admin/generate/progress/ : job_id
+Uploader->>Jobs : get_job(job_id)
+Jobs-->>Uploader : progress JSON
+Uploader-->>Client : {status, stage, progress, messages}
+```
+
+**Diagram sources**
+- [app/uploader.py:1126-1165](file://app/uploader.py#L1126-L1165)
+- [app/uploader.py:1299-1326](file://app/uploader.py#L1299-L1326)
+- [app/jobs.py:163-188](file://app/jobs.py#L163-L188)
+
+**Section sources**
+- [app/uploader.py:1126-1165](file://app/uploader.py#L1126-L1165)
+- [app/uploader.py:1299-1326](file://app/uploader.py#L1299-L1326)
+- [app/jobs.py:163-188](file://app/jobs.py#L163-L188)
+
+### Real-Time Job Status Monitoring
+**New** Sophisticated real-time status monitoring system with progressive web interface.
+
+- **Status page template**: Dedicated HTML interface with animated progress bars and real-time updates
+- **Polling mechanism**: JavaScript-based polling every 2 seconds with exponential backoff for transient errors
+- **Progress visualization**: Animated progress bar with percentage display and elapsed time tracking
+- **Message display**: Inline flash messages for job events, warnings, and informational updates
+- **Action buttons**: Contextual buttons for viewing articles or retrying failed jobs
+- **Auto-refresh**: Automatic page refresh for active jobs to keep status current
+- **Error handling**: Graceful handling of job not found scenarios and network errors
+
+```mermaid
+flowchart TD
+A["status.html"] --> B["JavaScript Polling"]
+B --> C["fetch(/admin/generate/progress/:job_id)"]
+C --> D{"Response Status"}
+D --> |200 OK| E["Update Progress UI"]
+D --> |404 Not Found| F["Show 'Job not found'"]
+E --> G{"status == done/failed?"}
+G --> |No| H["Set timeout for next poll"]
+G --> |Yes| I["Show actions, auto-redirect"]
+F --> J["Stop polling"]
+H --> C
+I --> K["Stop polling"]
+```
+
+**Diagram sources**
+- [app/templates/status.html:40-127](file://app/templates/status.html#L40-L127)
+
+**Section sources**
+- [app/templates/status.html:1-127](file://app/templates/status.html#L1-L127)
+- [app/templates/articles.html:31-63](file://app/templates/articles.html#L31-L63)
 
 ### Authentication Module
 - **Single-user focus**: Designed for personal use with simplified authentication flow
@@ -250,7 +416,7 @@ Auth-->>User : Redirect to /admin/login
 - [app/mailer.py:8-53](file://app/mailer.py#L8-L53)
 
 ### Enhanced Document Conversion Pipeline
-**Updated** The document conversion pipeline now features sophisticated DOCX formatting cleanup and improved title extraction functionality.
+**Updated** The document conversion pipeline now integrates seamlessly with the job processing system for long-running conversions.
 
 - **Advanced PDF structure detection**: PyMuPDF-based text extraction with font size analysis for automatic heading detection
 - **Intelligent heading classification**: Multi-level heading detection using font size thresholds (≥18px: H1, ≥14px: H2, ≥12px: H3)
@@ -260,6 +426,7 @@ Auth-->>User : Redirect to /admin/login
 - **Robust error handling**: Graceful fallback mechanisms when conversion libraries are unavailable
 - **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
 - **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
+- **Job integration**: Long-running conversions can be tracked through the job queue system
 
 ```mermaid
 flowchart TD
@@ -336,6 +503,7 @@ J --> K["Return Clean Content"]
 - **Image extraction**: Embedded images from PDFs extracted to `assets/images/` directory
 - **Title detection**: Automatic title extraction from first heading or content with enhanced formatting cleanup
 - **Session-based workflow**: Converted content stored temporarily in Flask session for style selection
+- **Job orchestration**: Long-running conversion tasks can be submitted to the job queue for background processing
 
 ```mermaid
 flowchart TD
@@ -363,7 +531,7 @@ J --> K["Generate Jekyll post"]
 - [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
 
 ### Literary Narrative Style and LLM Integration
-**Updated** The system now features a sophisticated literary narrative style with MiniMax API integration for content rewriting.
+**Updated** The system now features a sophisticated literary narrative style with MiniMax API integration for content rewriting, seamlessly integrated with the job processing system.
 
 - **Literary narrative style**: New "耕烟煮云" (Literary Narrative) style with poetic prose and imagery-driven content
 - **MiniMax API integration**: Content rewriting powered by MiniMax LLM with custom prompts for literary enhancement
@@ -371,6 +539,7 @@ J --> K["Generate Jekyll post"]
 - **Content rewriting workflow**: Optional LLM-based content enhancement with fallback to original content
 - **Enhanced metadata processing**: Improved summary generation and reading time estimation
 - **CSS styling**: Dedicated literary narrative CSS with traditional Chinese typography and poetic aesthetics
+- **Job integration**: LLM rewriting tasks are executed asynchronously through the job queue system
 
 ```mermaid
 flowchart TD
@@ -402,11 +571,13 @@ H --> I["Generate Jekyll post<br/>with literary styling"]
 - **Git integration**: One-click synchronization to GitHub with commit/push automation
 - **Template system**: Jinja2-based templates for consistent admin interface design
 - **Enhanced metadata**: Automatic summary generation and reading time calculation
+- **Job integration**: Active generation jobs displayed with progress indicators and status information
 
 **Section sources**
 - [app/uploader.py:211-215](file://app/uploader.py#L211-L215)
 - [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
 - [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
+- [app/templates/articles.html:31-63](file://app/templates/articles.html#L31-L63)
 
 ### CLI Management Tool
 - **Development commands**: Serve Jekyll locally, build static site, run Flask admin server
@@ -452,12 +623,15 @@ GitHub-->>Dev : Live website available
 - **Database security**: SQLite file permissions and connection isolation
 - **Environment configuration**: Separate configuration for production vs development
 - **LLM API security**: API keys stored in environment variables with fallback to shell sourcing
+- **Job security**: Background threads operate independently with proper error isolation
+- **Cross-worker coordination**: SQLite provides atomic operations for job state updates
 
 **Section sources**
-- [app/__init__.py:46-47](file://app/__init__.py#L46-L47)
+- [app/__init__.py:72-73](file://app/__init__.py#L72-L73)
 - [app/auth.py:64-67](file://app/auth.py#L64-L67)
 - [app/uploader.py:36-36](file://app/uploader.py#L36-L36)
 - [app/uploader.py:135-147](file://app/uploader.py#L135-L147)
+- [app/jobs.py:171-188](file://app/jobs.py#L171-L188)
 
 ## Migration from Previous Architecture
 The system has undergone complete architectural transformation from the previous FastAPI-based multi-module system to a simplified Flask-based solution:
@@ -475,13 +649,14 @@ The system has undergone complete architectural transformation from the previous
 - MkDocs static site generator
 
 **Current Architecture:**
-- Flask application with 4 modules (auth, uploader, converter, mailer)
+- Flask application with 5 modules (auth, uploader, jobs, agent, skillhub)
 - SQLite database with zero configuration
-- Simplified Jinja2 templates
+- Simplified Jinja2 templates with job status monitoring
 - Jekyll static site generator
 - Single-user authentication
 - Enhanced file-based conversion pipeline with PDF structure detection and DOCX formatting cleanup
 - Literary narrative style with MiniMax API integration
+- Complete asynchronous job processing infrastructure
 - GitHub Actions deployment
 - CLI management tool
 
@@ -489,7 +664,7 @@ The system has undergone complete architectural transformation from the previous
 - [PRD.md:160-180](file://PRD.md#L160-L180)
 
 ## Troubleshooting Guide
-**Updated** Enhanced troubleshooting guidance for the new DOCX formatting cleanup, improved title extraction, and MiniMax API integration.
+**Updated** Enhanced troubleshooting guidance for the new asynchronous job processing infrastructure, improved title extraction, and MiniMax API integration.
 
 - **Database issues**: Check `data/wiki.db` file permissions and SQLite availability
 - **Email verification**: Verify QQ email credentials and SMTP_SSL configuration
@@ -508,6 +683,10 @@ The system has undergone complete architectural transformation from the previous
 - **MiniMax API issues**: Configure `MINIMAX_TOKEN_PLAN_API_KEY` environment variable or source from shell profile
 - **LLM rewriting failures**: Check API connectivity and token validity, fallback to original content
 - **Literary narrative style issues**: Verify CSS file loading and style selection in templates
+- **Job processing failures**: Check SQLite permissions and ensure jobs table exists and is properly migrated
+- **Background thread issues**: Verify daemon thread execution and proper error handling in job functions
+- **Progress monitoring problems**: Ensure AJAX polling is working correctly and status endpoints are accessible
+- **Cross-worker coordination**: Verify SQLite WAL mode is enabled for concurrent access
 
 **Section sources**
 - [app/__init__.py:12-17](file://app/__init__.py#L12-L17)
@@ -518,9 +697,11 @@ The system has undergone complete architectural transformation from the previous
 - [app/converter.py:112-140](file://app/converter.py#L112-L140)
 - [app/uploader.py:135-147](file://app/uploader.py#L135-L147)
 - [app/uploader.py:150-191](file://app/uploader.py#L150-L191)
+- [app/jobs.py:50-69](file://app/jobs.py#L50-L69)
+- [app/jobs.py:163-188](file://app/jobs.py#L163-L188)
 - [wiki.py:117-130](file://wiki.py#L117-L130)
 
 ## Conclusion
-PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface. The new design emphasizes simplicity with single-user authentication, file upload capabilities, and automatic conversion pipeline with enhanced PDF structure detection and sophisticated DOCX formatting cleanup. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation.
+PolaZhenJing's backend has been successfully transformed from a complex FastAPI architecture to a streamlined Flask-based management interface with comprehensive asynchronous job processing capabilities. The new design emphasizes simplicity with single-user authentication, file upload capabilities, automatic conversion pipeline with enhanced PDF structure detection and sophisticated DOCX formatting cleanup, and a complete job queue system for managing long-running tasks. The system maintains security through SQLite storage, QQ email verification, and Flask session management while significantly reducing complexity compared to the previous multi-module FastAPI implementation.
 
-**Updated** The enhanced document conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The new DOCX formatting cleanup functionality removes excessive markdown formatting artifacts that commonly appear when converting Word documents, resulting in cleaner and more readable content. The improved title extraction functionality with enhanced markdown formatting removal ensures optimal title detection for blog posts. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. The addition of literary narrative style with MiniMax API integration provides powerful content rewriting capabilities with style-specific prompts, enabling poetic and imagery-driven content generation. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.
+**Updated** The enhanced document conversion capabilities now provide sophisticated document structure analysis through font size detection and bold text identification, enabling more accurate heading classification and improved content organization. The new DOCX formatting cleanup functionality removes excessive markdown formatting artifacts that commonly appear when converting Word documents, resulting in cleaner and more readable content. The improved title extraction functionality with enhanced markdown formatting removal ensures optimal title detection for blog posts. The robust error handling ensures graceful degradation when conversion libraries are unavailable, maintaining system reliability across different deployment environments. The addition of literary narrative style with MiniMax API integration provides powerful content rewriting capabilities with style-specific prompts, enabling poetic and imagery-driven content generation. The complete asynchronous job processing infrastructure enables efficient management of long-running tasks such as LLM article generation, content rewriting, and media processing, providing real-time progress monitoring and cross-worker state management. This architecture supports the lightweight personal blog wiki requirements with minimal dependencies and zero-configuration database storage, leveraging Jekyll for static site generation and GitHub Pages for hosting.

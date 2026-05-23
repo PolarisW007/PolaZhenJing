@@ -1,0 +1,320 @@
+﻿source,target,shared_papers,fractional_weight,papers
+Bingxuan Wang,Damai Dai,9,0.18481513984223666,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Bingxuan Wang,Erhang Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Fangyun Lin,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Guangbo Hao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Guowei Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Hanwei Xu,8,0.1408590958861927,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL
+Bingxuan Wang,Haoyu Lu,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Honghui Ding,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Hui Qu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Jianzhong Guo,4,0.03462148693845019,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Bingxuan Wang,Jingxiang Sun,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Junjie Qiu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Kaige Gao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Kang Guan,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Bingxuan Wang,Lecong Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Minghua Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Minghui Tang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ruiqi Ge,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shanghao Lu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shanhuang Chen,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shiyu Wang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shuiping Yu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Tian Pei,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Tongzheng Ren,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Wang Yongji,2,0.021198668146503882,DeepSeek LLM；DeepSeek-V2
+Bingxuan Wang,Xiaodong Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xiaotao Nie,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xin Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xin Xie,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Bingxuan Wang,Xuecheng Su,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yanhong Xu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yao Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yao Zhao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yaohui Wang,7,0.06943052445762124,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yichao Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yiliang Xiong,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yishi Piao,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Bingxuan Wang,Yiyuan Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yuheng Zou,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yuxiang You,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Bingxuan Wang,Zehui Ren,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zhangli Sha,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zhenda Xie,10,0.2562437112708081,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeek-VL2
+Bingxuan Wang,Zhewen Hao,8,0.1463536013806982,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ziwei Xie,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bo Liu,Chong Ruan,5,0.2801272395750753,DeepSeek LLM；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-V2；DeepSeek-VL
+Bo Liu,Haoyu Lu,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Jingxiang Sun,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Qihao Zhu,4,0.2086986681465039,DeepSeek LLM；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-V2
+Bo Liu,Tongzheng Ren,2,0.08319327731092437,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Wang Yongji,2,0.021198668146503882,DeepSeek LLM；DeepSeek-V2
+Chenggang Zhao,Chengqi Deng,10,0.25599067483356114,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Damai Dai,10,0.25599067483356114,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Erhang Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Fangyun Lin,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Guangbo Hao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Guowei Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Honghui Ding,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Hui Qu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Jianzhong Guo,4,0.03462148693845019,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Chenggang Zhao,Jiashi Li,10,0.25599067483356114,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Junjie Qiu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Kaige Gao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Lecong Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Minghua Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Minghui Tang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Ruiqi Ge,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Shanghao Lu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Shanhuang Chen,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Shiyu Wang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Shuiping Yu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Tian Pei,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xiaodong Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xiaotao Nie,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xin Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xuecheng Su,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yanhong Xu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yao Li,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yao Zhao,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yaohui Wang,7,0.06943052445762124,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yichao Zhang,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yiliang Xiong,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Ying He,7,0.11454330641250846,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Insights into DeepSeek-V3
+Chenggang Zhao,Yiyuan Liu,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yuheng Zou,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Zehui Ren,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Zhangli Sha,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Ziwei Xie,6,0.043114734983937045,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chengqi Deng,Chong Ruan,10,0.27478766731476406,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeekMoE；Insights into DeepSeek-V3
+Chengqi Deng,Hanwei Xu,8,0.1408590958861927,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL
+Chengqi Deng,Jiashi Li,10,0.25599067483356114,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Ying He,7,0.11454330641250846,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Insights into DeepSeek-V3
+Chong Ruan,Kang Guan,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Chong Ruan,Liyue Zhang,10,0.2621826252979574,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Insights into DeepSeek-V3
+Chong Ruan,Qiushi Du,8,0.13193052445762127,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chong Ruan,Shirong Ma,10,0.3425397681551002,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Generalist Reward Modeling；Insights into DeepSeek-V3
+Chong Ruan,Wen Liu,10,0.3958619877311898,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Wenjun Gao,9,0.190754053869386,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chong Ruan,Xin Xie,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Chong Ruan,Xingkai Yu,10,0.3869334163026183,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro
+Chong Ruan,Yishi Piao,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Chong Ruan,Yuxiang You,8,0.10789206291915972,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Chong Ruan,Zhe Fu,7,0.10193826439570175,DeepSeek LLM；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chong Ruan,Zhenda Xie,13,0.5561063486334453,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro；Native Sparse Attention
+Damai Dai,Deli Chen,9,0.3319305244576212,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；ESFT
+Damai Dai,Huazuo Gao,12,0.36588078472367097,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Damai Dai,Runxin Xu,9,0.3319305244576212,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；ESFT
+Damai Dai,Wenfeng Liang,12,0.4043423231852094,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Damai Dai,Yu Wu,10,0.37039206291915966,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMoE；ESFT
+Damai Dai,Zhenda Xie,12,0.3713752902181765,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMoE；Native Sparse Attention；mHC
+Damai Dai,Zhewen Hao,8,0.1463536013806982,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Dejian Yang,9,0.21158738720271927,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Guanting Chen,7,0.12644806831727037,DeepSeek LLM；DeepSeek-Coder；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Mingchuan Zhang,7,0.14311473498393706,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Daya Guo,Qihao Zhu,11,0.4365873872027192,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Daya Guo,Wentao Zhang,7,0.12644806831727037,DeepSeek LLM；DeepSeek-Coder；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Xiao Bi,9,0.25276385779095456,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Daya Guo,Zhe Fu,7,0.10193826439570175,DeepSeek LLM；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Zhihong Shao,10,0.35325405386938596,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Dejian Yang,Fuli Luo,7,0.2067706097454677,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Dejian Yang,Guanting Chen,7,0.12644806831727037,DeepSeek LLM；DeepSeek-Coder；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,Qihao Zhu,10,0.27408738720271925,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,Qiushi Du,8,0.13193052445762127,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,Wenjun Gao,9,0.190754053869386,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,Wentao Zhang,7,0.12644806831727037,DeepSeek LLM；DeepSeek-Coder；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Deli Chen,Runxin Xu,9,0.3319305244576212,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；ESFT
+Fuli Luo,Qihao Zhu,7,0.2067706097454677,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Haowei Zhang,Mingchuan Zhang,7,0.14311473498393706,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Haowei Zhang,Yu Wu,8,0.18157627344547553,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMath
+Haowei Zhang,Yukun Li,8,0.18157627344547553,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMath
+Huazuo Gao,Wenfeng Liang,11,0.3274192462621325,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Junxiao Song,Qihao Zhu,10,0.29075405386938596,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Junxiao Song,Zhihong Shao,10,0.29075405386938596,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Kai Dong,Yu Wu,9,0.19122539625249305,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Kai Dong,Zhenda Xie,10,0.26265396768106447,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeek-VL2
+Liyue Zhang,Panpan Huang,8,0.1978766397458418,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath；Insights into DeepSeek-V3
+Liyue Zhang,Shangyan Zhou,8,0.1978766397458418,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath；Insights into DeepSeek-V3
+Liyue Zhang,Shunfeng Zhou,7,0.12644806831727037,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath
+Panpan Huang,Shangyan Zhou,8,0.1978766397458418,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath；Insights into DeepSeek-V3
+Panpan Huang,Shunfeng Zhou,7,0.12644806831727037,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath
+Peiyi Wang,Runxin Xu,9,0.3122876673147641,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath；Generalist Reward Modeling
+Peiyi Wang,Yu Wu,9,0.3122876673147641,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath；Generalist Reward Modeling
+Qihao Zhu,Xiao Bi,9,0.25276385779095456,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Qihao Zhu,Zhihong Shao,11,0.41575405386938596,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath
+Runxin Xu,Yu Wu,11,0.5747876673147639,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath；DeepSeekMoE；ESFT；Generalist Reward Modeling
+Shirong Ma,Zhihong Shao,9,0.25325405386938593,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Wen Liu,Zhenda Xie,10,0.3958619877311898,DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL；DeepSeek-VL2；Janus；Janus-Pro
+Wenfeng Liang,Zhenda Xie,12,0.4162470850899713,Conditional Memory；DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Native Sparse Attention；mHC
+Xingkai Yu,Zhenda Xie,11,0.4638564932256952,Conditional Memory；DeepSeek LLM；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro
+Yaofeng Sun,Yukun Li,9,1.0815762734454757,DeepSeek LLM；DeepSeek-OCR；DeepSeek-OCR 2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Damai Dai,Wangding Zeng,10,0.3211490458742851,Conditional Memory；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Native Sparse Attention；mHC
+Wangding Zeng,Wenfeng Liang,10,0.3211490458742851,Conditional Memory；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMoE；Native Sparse Attention；mHC
+Bingxuan Wang,Hao Yang,2,0.08086253369272237,DeepSeek-V2；DeepSeek-VL
+Bo Liu,Hao Yang,2,0.08086253369272237,DeepSeek-V2；DeepSeek-VL
+Aixin Liu,Bingxuan Wang,6,0.09239601375322469,DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-VL2
+Aixin Liu,Chong Ruan,6,0.09239601375322469,DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-VL2
+Aixin Liu,H. Zhang,4,0.027618685818002014,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Aixin Liu,Shengfeng Ye,3,0.02285678105609725,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Bingxuan Wang,H. Zhang,4,0.027618685818002014,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Bingxuan Wang,Qinyu Chen,7,0.13458889549834524,Conditional Memory；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ruizhe Pan,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shengfeng Ye,3,0.02285678105609725,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Bingxuan Wang,Xiaohan Wang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xinyu Yang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yongqiang Guo,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yuduan Wang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zihui Gu,6,0.0576658185752683,DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zilin Li,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Ruizhe Pan,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xiaohan Wang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Xinyu Yang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yongqiang Guo,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Yuduan Wang,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Zihui Gu,6,0.0576658185752683,DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Zilin Li,5,0.031350029101584104,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chong Ruan,Huajian Xin,6,0.26918031046786195,DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Chong Ruan,Xiaokang Chen,8,0.3126687104202654,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Xuan Lu,3,0.09824975173783515,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V2
+Chong Ruan,Y. X. Wei,5,0.1657139239132401,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；Insights into DeepSeek-V3；Native Sparse Attention
+Damai Dai,Jingyang Yuan,7,0.15541017947752395,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Damai Dai,Lean Wang,7,0.15541017947752395,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Damai Dai,Liang Zhao,8,0.1938717179390624,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Native Sparse Attention；mHC
+Damai Dai,Qinyu Chen,7,0.13458889549834524,Conditional Memory；DeepSeek-Coder-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Damai Dai,Wang Zihan,2,0.20943396226415095,DeepSeek-V2；ESFT
+Damai Dai,Y. X. Wei,5,0.1657139239132401,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；Insights into DeepSeek-V3；Native Sparse Attention
+Damai Dai,Zhuoshu Li,6,0.23135002910158411,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；ESFT
+Dejian Yang,Xuan Lu,3,0.09824975173783515,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V2
+Deli Chen,Wang Zihan,2,0.20943396226415095,DeepSeek-V2；ESFT
+Deli Chen,Zhuoshu Li,6,0.23135002910158411,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；ESFT
+Huajian Xin,Qihao Zhu,6,0.26918031046786195,DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report
+Huazuo Gao,Jingyang Yuan,7,0.15541017947752395,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Huazuo Gao,Lean Wang,7,0.15541017947752395,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Huazuo Gao,Liang Zhao,8,0.1938717179390624,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Native Sparse Attention；mHC
+Liyue Zhang,Yixuan Tan,6,0.11468336243491743,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath
+Liyue Zhang,Yuxuan Liu,8,0.24493546327525356,DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath；Insights into DeepSeek-V3
+Panpan Huang,Yixuan Tan,6,0.11468336243491743,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath
+Panpan Huang,Yuxuan Liu,7,0.18611193386348887,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DualPath；Insights into DeepSeek-V3
+Wen Liu,Xiaokang Chen,8,0.3126687104202654,DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Z. Z. Ren,Zhihong Shao,7,0.2739422152297667,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeekMath-V2
+Chong Ruan,Zhizhou Ren,2,0.1287313432835821,DeepSeek-Prover；DeepSeek-V4
+Daya Guo,Zhizhou Ren,2,0.1287313432835821,DeepSeek-Prover；DeepSeek-V4
+Zhibin Gou,Zhihong Shao,8,0.2945553857228821,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Chong Ruan,Haocheng Wang,4,0.134746348203711,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report
+Chong Ruan,Wanjia Zhao,4,0.134746348203711,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report
+Chong Ruan,Z. F. Wu,6,0.14323959624919788,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,Haocheng Wang,4,0.134746348203711,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report
+Dejian Yang,Wanjia Zhao,4,0.134746348203711,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report
+Dejian Yang,Z. F. Wu,6,0.14323959624919788,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Z. Z. Ren,Zhibin Gou,6,0.26450825296561575,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeekMath-V2
+Chengyue Wu,Chong Ruan,2,0.13846153846153847,DeepSeek-VL2；Janus
+Chengyue Wu,Wen Liu,2,0.13846153846153847,DeepSeek-VL2；Janus
+Chong Ruan,Xingchao Liu,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Yiyang Ma,6,0.16037760529897163,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus
+Chong Ruan,Zhiyu Wu,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Zizheng Pan,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Xingchao Liu,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Yiyang Ma,6,0.16037760529897163,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus
+Wen Liu,Zhiyu Wu,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Zizheng Pan,7,0.30323474815611445,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2；Janus；Janus-Pro
+Aixin Liu,Jiawei Wang,3,0.05188435725348477,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-VL2
+Aixin Liu,Kai Hu,3,0.05188435725348477,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-VL2
+Bingxuan Wang,Jiawei Wang,3,0.05188435725348477,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-VL2
+Bingxuan Wang,Kai Hu,3,0.05188435725348477,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-VL2
+Bingxuan Wang,Yisong Wang,5,0.06037760529897161,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Chong Ruan,Yisong Wang,5,0.06037760529897161,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeek-VL2
+Aixin Liu,Kexin Huang,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Aixin Liu,Xinyuan Li,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Aixin Liu,Yue Gong,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Bing Xue,Bingxuan Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Bochao Wu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Fucong Dai,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Jingchang Chen,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Junlong Li,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Kexin Huang,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Bing Xue,Litong Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Qiancheng Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Ruisong Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Runji Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Ruoyu Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Shuting Pan,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Tao Yun,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Xinyuan Li,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Bing Xue,Xuheng Lin,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Y. Q. Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yang Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yi Yu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yifan Shi,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yuan Ou,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yue Gong,3,0.01818472355385107,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2
+Bing Xue,Yunfan Xiong,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Yuyang Zhou,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Zhicheng Ma,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Zhigang Yan,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Zijia Zhu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bing Xue,Ziyi Gao,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Bochao Wu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Fucong Dai,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Jingchang Chen,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Junlong Li,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Litong Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Qiancheng Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ruisong Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Runji Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ruoyu Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Shuting Pan,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Tao Yun,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xin Cheng,5,0.09883914376051008,Conditional Memory；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Xuheng Lin,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Y. Q. Wang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yang Zhang,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yi Yu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yifan Shi,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yuan Ou,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yunfan Xiong,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Yuyang Zhou,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zhicheng Ma,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zhigang Yan,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Zijia Zhu,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Bingxuan Wang,Ziyi Gao,4,0.02191606683743316,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Chengda Lu,Shirong Ma,5,0.1469160668374332,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Chengda Lu,Xiaokang Zhang,5,0.1469160668374332,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Chengda Lu,Yuxiang Luo,5,0.1469160668374332,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Chenggang Zhao,Kuai Yu,5,0.07454764578480157,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；mHC
+Chenggang Zhao,Zhean Xu,5,0.07454764578480157,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；mHC
+Chengqi Deng,Kuai Yu,5,0.07454764578480157,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；mHC
+Chengqi Deng,Zhean Xu,5,0.07454764578480157,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；mHC
+Chong Ruan,Zijun Liu,3,0.15627996164908917,DeepSeek-R1；DeepSeek-V3 Technical Report；Generalist Reward Modeling
+Damai Dai,Xin Cheng,5,0.09883914376051008,Conditional Memory；DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4
+Damai Dai,Zhengyan Zhang,6,0.145976217213373,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Huazuo Gao,Zhengyan Zhang,6,0.145976217213373,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；Native Sparse Attention；mHC
+Peiyi Wang,Zijun Liu,3,0.15627996164908917,DeepSeek-R1；DeepSeek-V3 Technical Report；Generalist Reward Modeling
+Shirong Ma,Xiaokang Zhang,5,0.1469160668374332,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Shirong Ma,Yuxiang Luo,5,0.1469160668374332,DeepSeek-R1；DeepSeek-V3 Technical Report；DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Damai Dai,Yuqing Wang,3,0.19548872180451127,Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Huazuo Gao,Yuqing Wang,3,0.19548872180451127,Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Chong Ruan,Hongxuan Tang,3,0.06731677745725155,DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,Hongxuan Tang,3,0.06731677745725155,DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Haoran Wei,Yaofeng Sun,4,1.008493248045487,DeepSeek-OCR；DeepSeek-OCR 2；DeepSeek-V3.2；DeepSeek-V4
+Haoran Wei,Yukun Li,4,1.008493248045487,DeepSeek-OCR；DeepSeek-OCR 2；DeepSeek-V3.2；DeepSeek-V4
+Chengda Lu,Jiewen Hu,3,0.13349324804548687,DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Chengda Lu,Tian Ye,3,0.13349324804548687,DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Jiewen Hu,Shirong Ma,3,0.13349324804548687,DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Jiewen Hu,Tian Ye,3,0.13349324804548687,DeepSeek-V3.2；DeepSeek-V4；DeepSeekMath-V2
+Bingxuan Wang,Kezhao Huang,3,0.08541632496856377,Conditional Memory；DeepSeek-V3.2；DeepSeek-V4
+Chenggang Zhao,Huanqi Cao,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Chenggang Zhao,Shengding Hu,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Chenggang Zhao,Yixuan Wei,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Chengqi Deng,Huanqi Cao,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Chengqi Deng,Shengding Hu,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Chengqi Deng,Yixuan Wei,3,0.06112482699285526,DeepSeek-V3.2；DeepSeek-V4；mHC
+Damai Dai,Kezhao Huang,3,0.08541632496856377,Conditional Memory；DeepSeek-V3.2；DeepSeek-V4
+Liyue Zhang,Shaoyuan Chen,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Liyue Zhang,Yinmin Zhong,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Liyue Zhang,Yongtong Wu,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Panpan Huang,Shaoyuan Chen,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Panpan Huang,Yinmin Zhong,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Panpan Huang,Yongtong Wu,3,0.09182658137882017,DeepSeek-V3.2；DeepSeek-V4；DualPath
+Bingxuan Wang,Han Zhang,2,0.08065442020665901,Conditional Memory；DeepSeek-V4
+Damai Dai,Han Zhang,2,0.08065442020665901,Conditional Memory；DeepSeek-V4

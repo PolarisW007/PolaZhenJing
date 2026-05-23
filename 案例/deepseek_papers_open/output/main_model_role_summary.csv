@@ -1,0 +1,6 @@
+﻿paper_id,short_title,stage,year_month,clean_author_count,role_unique_author_count,research_engineering_count,data_annotation_count,business_compliance_count,author_list_only_unspecified_count,authors_with_multiple_roles,role_authors_missing_from_clean_table,clean_table_authors_missing_from_role_appendix,recommended_comparable_count,note
+2401.02954,DeepSeek LLM,V1/LLM,2024-01,86,86,0,0,0,86,0,0,0,86,LLM: original paper author list has no role split; do not compare as Research & Engineering.
+2405.04434,DeepSeek-V2,V2,2024-05,156,156,107,32,19,0,2,0,0,107,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+2412.19437,DeepSeek-V3 Technical Report,V3,2024-12,197,197,150,31,18,0,2,0,0,150,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+2512.02556,DeepSeek-V3.2,V3.2,2025-12,262,262,211,27,24,0,0,0,0,211,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+V4-PDF,DeepSeek-V4,V4,2026-05,317,317,269,0,48,0,0,0,0,269,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.

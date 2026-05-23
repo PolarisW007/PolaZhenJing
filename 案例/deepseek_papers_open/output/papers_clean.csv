@@ -1,0 +1,43 @@
+﻿paper_id,short_title,title,year_month,coarse_topic,main_model_stage,author_count_clean,source_url
+2401.02954,DeepSeek LLM,DeepSeek LLM: Scaling Open-Source Language Models with Longtermism,2024-01,主模型,V1/LLM,86,https://huggingface.co/papers/2401.02954
+2401.06066,DeepSeekMoE,"DeepSeekMoE: Towards Ultimate Expert Specialization in
+  Mixture-of-Experts Language Models",2024-01,系统/效率,,17,https://huggingface.co/papers/2401.06066
+2401.14196,DeepSeek-Coder,"DeepSeek-Coder: When the Large Language Model Meets Programming -- The
+  Rise of Code Intelligence",2024-01,代码,,13,https://huggingface.co/papers/2401.14196
+2402.03300,DeepSeekMath,"DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open
+  Language Models",2024-02,数学/证明,,11,https://huggingface.co/papers/2402.03300
+2403.05525,DeepSeek-VL,DeepSeek-VL: Towards Real-World Vision-Language Understanding,2024-03,多模态,,15,https://huggingface.co/papers/2403.05525
+2405.04434,DeepSeek-V2,"DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts
+  Language Model",2024-05,主模型,V2,156,https://huggingface.co/papers/2405.04434
+2405.14333,DeepSeek-Prover,"DeepSeek-Prover: Advancing Theorem Proving in LLMs through Large-Scale
+  Synthetic Data",2024-05,数学/证明,,9,https://huggingface.co/papers/2405.14333
+2406.11931,DeepSeek-Coder-V2,"DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code
+  Intelligence",2024-06,代码,,39,https://huggingface.co/papers/2406.11931
+2407.01906,ESFT,"Let the Expert Stick to His Last: Expert-Specialized Fine-Tuning for
+  Sparse Architectural Large Language Models",2024-07,系统/效率,,6,https://huggingface.co/papers/2407.01906
+2408.08152,DeepSeek-Prover-V1.5,"DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for
+  Reinforcement Learning and Monte-Carlo Tree Search",2024-08,数学/证明,,17,https://huggingface.co/papers/2408.08152
+2410.13848,Janus,"Janus: Decoupling Visual Encoding for Unified Multimodal Understanding
+  and Generation",2024-10,多模态,,11,https://huggingface.co/papers/2410.13848
+2412.10302,DeepSeek-VL2,"DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced
+  Multimodal Understanding",2024-12,多模态,,27,https://huggingface.co/papers/2412.10302
+2412.19437,DeepSeek-V3 Technical Report,DeepSeek-V3 Technical Report,2024-12,主模型,V3,197,https://huggingface.co/papers/2412.19437
+2501.12948,DeepSeek-R1,"DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via
+  Reinforcement Learning",2025-01,推理/RL,R1,197,https://huggingface.co/papers/2501.12948
+2501.17811,Janus-Pro,"Janus-Pro: Unified Multimodal Understanding and Generation with Data and
+  Model Scaling",2025-01,多模态,,8,https://huggingface.co/papers/2501.17811
+2502.11089,Native Sparse Attention,"Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse
+  Attention",2025-02,系统/效率,,15,https://huggingface.co/papers/2502.11089
+2504.02495,Generalist Reward Modeling,Inference-Time Scaling for Generalist Reward Modeling,2025-04,推理/RL,,8,https://huggingface.co/papers/2504.02495
+2504.21801,DeepSeek-Prover-V2,"DeepSeek-Prover-V2: Advancing Formal Mathematical Reasoning via
+  Reinforcement Learning for Subgoal Decomposition",2025-04,数学/证明,,18,https://huggingface.co/papers/2504.21801
+2505.09343,Insights into DeepSeek-V3,"Insights into DeepSeek-V3: Scaling Challenges and Reflections on
+  Hardware for AI Architectures",2025-05,系统/效率,,15,https://huggingface.co/papers/2505.09343
+2510.18234,DeepSeek-OCR,DeepSeek-OCR: Contexts Optical Compression,2025-10,OCR,,3,https://huggingface.co/papers/2510.18234
+2511.22570,DeepSeekMath-V2,DeepSeekMath-V2: Towards Self-Verifiable Mathematical Reasoning,2025-11,数学/证明,,9,https://huggingface.co/papers/2511.22570
+2512.02556,DeepSeek-V3.2,DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models,2025-12,主模型,V3.2,262,https://huggingface.co/papers/2512.02556
+2512.24880,mHC,mHC: Manifold-Constrained Hyper-Connections,2025-12,系统/效率,,20,https://huggingface.co/papers/2512.24880
+2601.07372,Conditional Memory,Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models,2026-01,系统/效率,,14,https://huggingface.co/papers/2601.07372
+2601.20552,DeepSeek-OCR 2,DeepSeek-OCR 2: Visual Causal Flow,2026-01,OCR,,3,https://huggingface.co/papers/2601.20552
+2602.21548,DualPath,DualPath: Breaking the Storage Bandwidth Bottleneck in Agentic LLM Inference,2026-02,系统/效率,,13,https://huggingface.co/papers/2602.21548
+V4-PDF,DeepSeek-V4,DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence,2026-05,主模型,V4,317,https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/blob/main/DeepSeek_V4.pdf

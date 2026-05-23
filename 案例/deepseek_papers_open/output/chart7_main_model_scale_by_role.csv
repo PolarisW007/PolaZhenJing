@@ -1,0 +1,6 @@
+﻿stage,paper_id,year_month,short_title,total_signature_author_count,research_engineering_count,data_annotation_count,business_compliance_count,author_list_only_unspecified_count,recommended_comparable_count,authors_with_multiple_roles,note
+V1/LLM,2401.02954,2024-01,DeepSeek LLM,86,0,0,0,86,86,0,LLM: original paper author list has no role split; do not compare as Research & Engineering.
+V2,2405.04434,2024-05,DeepSeek-V2,156,107,32,19,0,107,2,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+V3,2412.19437,2024-12,DeepSeek-V3 Technical Report,197,150,31,18,0,150,2,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+V3.2,2512.02556,2025-12,DeepSeek-V3.2,262,211,27,24,0,211,0,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.
+V4,V4-PDF,2026-05,DeepSeek-V4,317,269,0,48,0,269,0,Comparable count uses Research & Engineering; total role count may include Data Annotation and Business & Compliance.

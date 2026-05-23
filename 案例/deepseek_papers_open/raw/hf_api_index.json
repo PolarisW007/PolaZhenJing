@@ -1,0 +1,158 @@
+﻿[
+    {
+        "id":  "2401.02954",
+        "title":  "DeepSeek LLM: Scaling Open-Source Language Models with Longtermism",
+        "author_count_hf_raw":  87,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2401.02954.json"
+    },
+    {
+        "id":  "2401.06066",
+        "title":  "DeepSeekMoE: Towards Ultimate Expert Specialization in\n  Mixture-of-Experts Language Models",
+        "author_count_hf_raw":  17,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2401.06066.json"
+    },
+    {
+        "id":  "2401.14196",
+        "title":  "DeepSeek-Coder: When the Large Language Model Meets Programming -- The\n  Rise of Code Intelligence",
+        "author_count_hf_raw":  13,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2401.14196.json"
+    },
+    {
+        "id":  "2402.03300",
+        "title":  "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open\n  Language Models",
+        "author_count_hf_raw":  9,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2402.03300.json"
+    },
+    {
+        "id":  "2403.05525",
+        "title":  "DeepSeek-VL: Towards Real-World Vision-Language Understanding",
+        "author_count_hf_raw":  14,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2403.05525.json"
+    },
+    {
+        "id":  "2405.04434",
+        "title":  "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts\n  Language Model",
+        "author_count_hf_raw":  157,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2405.04434.json"
+    },
+    {
+        "id":  "2405.14333",
+        "title":  "DeepSeek-Prover: Advancing Theorem Proving in LLMs through Large-Scale\n  Synthetic Data",
+        "author_count_hf_raw":  9,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2405.14333.json"
+    },
+    {
+        "id":  "2406.11931",
+        "title":  "DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code\n  Intelligence",
+        "author_count_hf_raw":  40,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2406.11931.json"
+    },
+    {
+        "id":  "2407.01906",
+        "title":  "Let the Expert Stick to His Last: Expert-Specialized Fine-Tuning for\n  Sparse Architectural Large Language Models",
+        "author_count_hf_raw":  6,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2407.01906.json"
+    },
+    {
+        "id":  "2408.08152",
+        "title":  "DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for\n  Reinforcement Learning and Monte-Carlo Tree Search",
+        "author_count_hf_raw":  17,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2408.08152.json"
+    },
+    {
+        "id":  "2410.13848",
+        "title":  "Janus: Decoupling Visual Encoding for Unified Multimodal Understanding\n  and Generation",
+        "author_count_hf_raw":  11,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2410.13848.json"
+    },
+    {
+        "id":  "2412.10302",
+        "title":  "DeepSeek-VL2: Mixture-of-Experts Vision-Language Models for Advanced\n  Multimodal Understanding",
+        "author_count_hf_raw":  27,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2412.10302.json"
+    },
+    {
+        "id":  "2412.19437",
+        "title":  "DeepSeek-V3 Technical Report",
+        "author_count_hf_raw":  200,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2412.19437.json"
+    },
+    {
+        "id":  "2501.12948",
+        "title":  "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via\n  Reinforcement Learning",
+        "author_count_hf_raw":  200,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2501.12948.json"
+    },
+    {
+        "id":  "2501.17811",
+        "title":  "Janus-Pro: Unified Multimodal Understanding and Generation with Data and\n  Model Scaling",
+        "author_count_hf_raw":  8,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2501.17811.json"
+    },
+    {
+        "id":  "2502.11089",
+        "title":  "Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse\n  Attention",
+        "author_count_hf_raw":  15,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2502.11089.json"
+    },
+    {
+        "id":  "2504.02495",
+        "title":  "Inference-Time Scaling for Generalist Reward Modeling",
+        "author_count_hf_raw":  8,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2504.02495.json"
+    },
+    {
+        "id":  "2504.21801",
+        "title":  "DeepSeek-Prover-V2: Advancing Formal Mathematical Reasoning via\n  Reinforcement Learning for Subgoal Decomposition",
+        "author_count_hf_raw":  18,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2504.21801.json"
+    },
+    {
+        "id":  "2505.09343",
+        "title":  "Insights into DeepSeek-V3: Scaling Challenges and Reflections on\n  Hardware for AI Architectures",
+        "author_count_hf_raw":  15,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2505.09343.json"
+    },
+    {
+        "id":  "2510.18234",
+        "title":  "DeepSeek-OCR: Contexts Optical Compression",
+        "author_count_hf_raw":  3,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2510.18234.json"
+    },
+    {
+        "id":  "2511.22570",
+        "title":  "DeepSeekMath-V2: Towards Self-Verifiable Mathematical Reasoning",
+        "author_count_hf_raw":  9,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2511.22570.json"
+    },
+    {
+        "id":  "2512.02556",
+        "title":  "DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models",
+        "author_count_hf_raw":  264,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2512.02556.json"
+    },
+    {
+        "id":  "2512.24880",
+        "title":  "mHC: Manifold-Constrained Hyper-Connections",
+        "author_count_hf_raw":  19,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2512.24880.json"
+    },
+    {
+        "id":  "2601.07372",
+        "title":  "Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models",
+        "author_count_hf_raw":  14,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2601.07372.json"
+    },
+    {
+        "id":  "2601.20552",
+        "title":  "DeepSeek-OCR 2: Visual Causal Flow",
+        "author_count_hf_raw":  3,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2601.20552.json"
+    },
+    {
+        "id":  "2602.21548",
+        "title":  "DualPath: Breaking the Storage Bandwidth Bottleneck in Agentic LLM Inference",
+        "author_count_hf_raw":  13,
+        "path":  "C:\\Users\\Esthe\\Documents\\New project\\data\\deepseek_papers\\raw\\hf_api_2602.21548.json"
+    }
+]

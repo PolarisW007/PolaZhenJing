@@ -1,0 +1,8 @@
+﻿display_group,group_letter,group_name,member_count,direction_summary,top_authors,top_authors_cn,top_authors_compact
+1,A,基模大兵团,94,R1 / V3 / V4 主干,Chengqi Deng / Bingxuan Wang / Chenggang Zhao,Chengqi Deng（邓乘奇） / Bingxuan Wang（王炳宣） / Chenggang Zhao（赵成刚）,邓乘奇 / 王炳宣 / 赵成刚
+2,B,系统效率小队,24,Infra / NSA / 模型维稳,Damai Dai / Yu Wu / Wenfeng Liang,Damai Dai（代达劢） / Yu Wu（吴俣） / Wenfeng Liang（梁文锋）,代达劢 / 吴俣 / 梁文锋
+3,C,数学与推理小队,21,Prover / Math / 推理泛化,Qihao Zhu / Zhihong Shao / Daya Guo,Qihao Zhu（朱琪豪） / Zhihong Shao（邵智宏） / Daya Guo（郭达雅）,朱琪豪 / 邵智宏 / 郭达雅
+4,D,多模态小队,11,视觉 / Janus 系列,Chong Ruan / Zhenda Xie / Xingkai Yu,Chong Ruan（阮翀） / Zhenda Xie（解振达） / Xingkai Yu（俞星凯）,阮翀 / 解振达 / 俞星凯
+5,E,缓存与系统小队,9,DualPath / 小型系统优化,Liyue Zhang / Panpan Huang / Shangyan Zhou,Liyue Zhang（张力越） / Panpan Huang / Shangyan Zhou,张力越 / Panpan Huang / Shangyan Zhou
+6,F,垂类数学小队,6,DeepSeekMath-V2,Shirong Ma / Chengda Lu / Xiaokang Zhang,Shirong Ma / Chengda Lu / Xiaokang Zhang,Shirong Ma / Chengda Lu / Xiaokang Zhang
+7,G,OCR视觉小队,3,复杂文档视觉理解,Yukun Li / Yaofeng Sun / Haoran Wei,Yukun Li（李宇琨） / Yaofeng Sun（孙耀峰） / Haoran Wei,李宇琨 / 孙耀峰 / Haoran Wei

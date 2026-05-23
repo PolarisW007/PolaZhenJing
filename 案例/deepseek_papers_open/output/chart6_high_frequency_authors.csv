@@ -1,0 +1,188 @@
+﻿author,paper_count,topic_count,topics,first_seen,last_seen,papers
+Chong Ruan,18,6,主模型、代码、多模态、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-VL；DeepSeek-Prover；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；Native Sparse Attention；DeepSeek-Prover-V2；Generalist Reward Modeling；Insights into DeepSeek-V3；DeepSeek-V3.2；DeepSeek-V4
+Zhenda Xie,16,5,主模型、代码、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-Coder；DeepSeek-VL；DeepSeek-V2；DeepSeek-Coder-V2；Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；Native Sparse Attention；mHC；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Damai Dai,14,5,主模型、代码、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；ESFT；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Native Sparse Attention；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Yukun Li,14,7,OCR、主模型、代码、多模态、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-Coder；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-OCR；DeepSeek-V3.2；Conditional Memory；DeepSeek-OCR 2；DeepSeek-V4
+Wenfeng Liang,13,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-Coder；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Yu Wu,13,6,主模型、代码、多模态、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-Coder；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；ESFT；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Generalist Reward Modeling；DeepSeek-V3.2；DeepSeek-V4
+Huazuo Gao,12,5,主模型、代码、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Native Sparse Attention；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；DeepSeek-V4
+Qihao Zhu,12,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeekMath；DeepSeek-Prover；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Zhihong Shao,12,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeekMath；DeepSeek-Prover；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Chengqi Deng,11,5,主模型、代码、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-VL；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；DeepSeek-V4
+Daya Guo,11,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeekMath；DeepSeek-Prover；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Liyue Zhang,11,5,主模型、代码、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；Insights into DeepSeek-V3；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Runxin Xu,11,5,主模型、代码、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；ESFT；DeepSeek-V3 Technical Report；DeepSeek-R1；Generalist Reward Modeling；DeepSeek-V3.2；DeepSeek-V4
+Shirong Ma,11,5,主模型、代码、推理/RL、数学/证明、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；Generalist Reward Modeling；Insights into DeepSeek-V3；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Xingkai Yu,11,4,主模型、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Bingxuan Wang,10,5,主模型、代码、多模态、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-VL；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Chenggang Zhao,10,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；DeepSeek-V4
+Dejian Yang,10,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Jiashi Li,10,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；DeepSeek-V4
+Junxiao Song,10,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Kai Dong,10,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeek-VL；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Wangding Zeng,10,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；mHC；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Wen Liu,10,3,主模型、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-VL；DeepSeek-V2；Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；DeepSeek-V4
+Yaofeng Sun,10,4,OCR、主模型、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-VL；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-OCR；DeepSeek-V3.2；DeepSeek-OCR 2；DeepSeek-V4
+Deli Chen,9,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；ESFT；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Panpan Huang,9,3,主模型、推理/RL、系统/效率,2024-01,2026-05,DeepSeekMoE；DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Peiyi Wang,9,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Generalist Reward Modeling；DeepSeek-V3.2；DeepSeek-V4
+Shangyan Zhou,9,3,主模型、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；mHC；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Wenjun Gao,9,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Xiao Bi,9,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeekMath；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Fuli Luo,8,5,主模型、代码、推理/RL、数学/证明、系统/效率,2024-01,2025-01,DeepSeekMoE；DeepSeek LLM；DeepSeek-Coder；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1
+Hanwei Xu,8,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-VL；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Haowei Zhang,8,4,主模型、多模态、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeekMath；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Kang Guan,8,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Liang Zhao,8,4,主模型、多模态、推理/RL、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Native Sparse Attention；mHC；DeepSeek-V3.2；DeepSeek-V4
+Qiushi Du,8,4,主模型、代码、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Wentao Zhang,8,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Xiaokang Chen,8,3,主模型、多模态、推理/RL,2024-05,2026-05,DeepSeek-V2；Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；DeepSeek-V4
+Xin Xie,8,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yishi Piao,8,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuxiang You,8,4,主模型、代码、多模态、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuxuan Liu,8,4,主模型、推理/RL、数学/证明、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；Insights into DeepSeek-V3；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Zhewen Hao,8,4,主模型、代码、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Zhibin Gou,8,4,主模型、代码、推理/RL、数学/证明,2024-06,2026-05,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Guanting Chen,7,3,主模型、代码、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-Coder；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Jingyang Yuan,7,3,主模型、推理/RL、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；mHC；DeepSeek-V3.2；DeepSeek-V4
+Lean Wang,7,3,主模型、推理/RL、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；mHC；DeepSeek-V3.2；DeepSeek-V4
+Mingchuan Zhang,7,3,主模型、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeekMath；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Qinyu Chen,7,4,主模型、代码、推理/RL、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Shunfeng Zhou,7,3,主模型、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Xingchao Liu,7,3,主模型、多模态、推理/RL,2024-10,2026-05,Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；DeepSeek-V4
+Yaohui Wang,7,3,主模型、代码、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ying He,7,3,主模型、推理/RL、系统/效率,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Insights into DeepSeek-V3；DeepSeek-V3.2；DeepSeek-V4
+Z. Z. Ren,7,3,主模型、推理/RL、数学/证明,2024-05,2025-12,DeepSeek-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeekMath-V2；DeepSeek-V3.2
+Zhe Fu,7,3,主模型、推理/RL、数学/证明,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Zhiyu Wu,7,3,主模型、多模态、推理/RL,2024-10,2026-05,Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；DeepSeek-V4
+Zhuoshu Li,7,4,主模型、多模态、推理/RL、系统/效率,2024-03,2026-05,DeepSeek-VL；DeepSeek-V2；ESFT；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zizheng Pan,7,3,主模型、多模态、推理/RL,2024-10,2026-05,Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；Janus-Pro；DeepSeek-V3.2；DeepSeek-V4
+Aixin Liu,6,4,主模型、代码、多模态、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2
+Erhang Li,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Fangyun Lin,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Guangbo Hao,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Guowei Li,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Honghui Ding,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Huajian Xin,6,3,主模型、推理/RL、数学/证明,2024-05,2025-04,DeepSeek-Prover；DeepSeek-V2；DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2
+Hui Qu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Junjie Qiu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Kaige Gao,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Lecong Zhang,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Minghua Zhang,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Minghui Tang,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ruiqi Ge,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Shanghao Lu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Shanhuang Chen,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Shiyu Wang,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Shuiping Yu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Tian Pei,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xiaodong Liu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xiaotao Nie,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xin Liu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xuecheng Su,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yanhong Xu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yao Li,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yao Zhao,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yichao Zhang,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yiliang Xiong,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yixuan Tan,6,3,主模型、推理/RL、系统/效率,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DualPath；DeepSeek-V4
+Yiyang Ma,6,3,主模型、多模态、推理/RL,2024-10,2026-05,Janus；DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yiyuan Liu,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuheng Zou,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Z. F. Wu,6,3,主模型、推理/RL、数学/证明,2024-08,2026-05,DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2；DeepSeek-V3.2；DeepSeek-V4
+Zehui Ren,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zhangli Sha,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zhengyan Zhang,6,3,主模型、推理/RL、系统/效率,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；mHC；DeepSeek-V3.2；DeepSeek-V4
+Zihui Gu,6,3,主模型、代码、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-Coder-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ziwei Xie,6,2,主模型、推理/RL,2024-01,2026-05,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Bo Liu,5,3,主模型、多模态、数学/证明,2024-01,2024-08,DeepSeek LLM；DeepSeek-VL；DeepSeek-Prover；DeepSeek-V2；DeepSeek-Prover-V1.5
+Chengda Lu,5,3,主模型、推理/RL、数学/证明,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Dongjie Ji,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Jian Liang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Jianzhong Guo,5,2,主模型、推理/RL,2024-01,2025-12,DeepSeek LLM；DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Jin Chen,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Kuai Yu,5,3,主模型、推理/RL、系统/效率,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；mHC；DeepSeek-V3.2；DeepSeek-V4
+Leyi Xia,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Miaojun Wang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Mingming Li,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Peng Zhang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ruizhe Pan,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ruyi Chen,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Shaoqing Wu,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+W. L. Xiao,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Wei An,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xianzu Wang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xiaohan Wang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xiaokang Zhang,5,3,主模型、推理/RL、数学/证明,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Xiaowen Sun,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xiaoxiang Wang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Xin Cheng,5,3,主模型、推理/RL、系统/效率,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；Conditional Memory；DeepSeek-V4
+Xinyu Yang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Y. X. Wei,5,3,主模型、推理/RL、系统/效率,2024-05,2025-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；Native Sparse Attention；Insights into DeepSeek-V3
+Ying Tang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yisong Wang,5,3,主模型、多模态、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-VL2；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yongqiang Guo,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuduan Wang,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yukun Zha,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuxiang Luo,5,3,主模型、推理/RL、数学/证明,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeekMath-V2；DeepSeek-V3.2；DeepSeek-V4
+Zhean Xu,5,3,主模型、推理/RL、系统/效率,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；mHC；DeepSeek-V3.2；DeepSeek-V4
+Zilin Li,5,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Bei Feng,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Bing Xue,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Bochao Wu,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Fucong Dai,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+H. Zhang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Haocheng Wang,4,3,主模型、推理/RL、数学/证明,2024-08,2025-04,DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2
+Haoran Wei,4,2,OCR、主模型,2025-10,2026-05,DeepSeek-OCR；DeepSeek-V3.2；DeepSeek-OCR 2；DeepSeek-V4
+Hui Li,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+J. L. Cai,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Jiaqi Ni,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Jingchang Chen,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Junlong Li,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Lei Xu,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Litong Wang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Meng Li,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Ning Tian,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Qiancheng Wang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+R. J. Chen,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+R. L. Jin,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Ruisong Zhang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Runji Wang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ruoyu Zhang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+S. S. Li,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Shengfeng Ye,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Shuang Zhou,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Shuting Pan,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+T. Wang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Tao Yun,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Tianyu Sun,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Wanjia Zhao,4,3,主模型、推理/RL、数学/证明,2024-08,2025-04,DeepSeek-Prover-V1.5；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-Prover-V2
+X. Q. Li,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xiangyue Jin,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xiaojin Shen,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xiaosha Chen,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xinnan Song,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xinyi Zhou,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Xuheng Lin,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Y. Q. Wang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Y. X. Zhu,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yang Zhang,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yanping Huang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yaohui Li,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yi Yu,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yi Zheng,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yifan Shi,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuan Ou,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yuchen Zhu,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yunfan Xiong,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Yunxian Ma,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Yuting Yan,4,2,主模型、推理/RL,2024-05,2026-05,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V4
+Yuyang Zhou,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zhen Huang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Zhen Zhang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Zhicheng Ma,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zhigang Yan,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Zhipeng Xu,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Zhongyu Zhang,4,2,主模型、推理/RL,2024-05,2025-12,DeepSeek-V2；DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2
+Zijia Zhu,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4
+Ziyi Gao,4,2,主模型、推理/RL,2024-12,2026-05,DeepSeek-V3 Technical Report；DeepSeek-R1；DeepSeek-V3.2；DeepSeek-V4

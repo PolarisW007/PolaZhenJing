@@ -7,13 +7,16 @@
 - [app/uploader.py](file://app/uploader.py)
 - [app/converter.py](file://app/converter.py)
 - [app/mailer.py](file://app/mailer.py)
+- [app/agent.py](file://app/agent.py)
+- [app/memory_service.py](file://app/memory_service.py)
+- [app/memory_store.py](file://app/memory_store.py)
+- [app/memory_guard.py](file://app/memory_guard.py)
+- [app/owner_identity.py](file://app/owner_identity.py)
+- [app/search_projection.py](file://app/search_projection.py)
+- [app/jobs.py](file://app/jobs.py)
 - [app/templates/base.html](file://app/templates/base.html)
-- [app/templates/upload.html](file://app/templates/upload.html)
-- [app/templates/articles.html](file://app/templates/articles.html)
-- [app/templates/login.html](file://app/templates/login.html)
-- [app/templates/register.html](file://app/templates/register.html)
-- [app/templates/password.html](file://app/templates/password.html)
-- [app/templates/style_select.html](file://app/templates/style_select.html)
+- [app/templates/memory_workbench.html](file://app/templates/memory_workbench.html)
+- [migrations/agent_memory/001_postgres_memory_ledger.sql](file://migrations/agent_memory/001_postgres_memory_ledger.sql)
 - [_config.yml](file://_config.yml)
 - [Gemfile](file://Gemfile)
 - [requirements.txt](file://requirements.txt)
@@ -22,11 +25,12 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced upload system with new draft storage mechanism using temporary JSON files
-- Implemented session-based draft management to avoid cookie size limitations
-- Added structured draft data storage with content, title, tags, and description fields
-- Improved file upload workflow with temporary file handling and cleanup
-- Enhanced error handling and validation for draft operations
+- Added comprehensive memory service facade architecture coordinating PostgreSQL backend with legacy JSON fallback
+- Enhanced agent integration layer with MiniMax API support and memory management endpoints
+- Introduced visitor suggestion system for community-driven memory curation
+- Added memory governance and risk assessment framework
+- Implemented Meilisearch integration for advanced search capabilities
+- Enhanced admin interface with memory workbench for PostgreSQL management
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,480 +38,444 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Memory Service Architecture](#memory-service-architecture)
+7. [Agent Integration Layer](#agent-integration-layer)
+8. [Visitor Suggestion System](#visitor-suggestion-system)
+9. [Memory Governance Framework](#memory-governance-framework)
+10. [Search and Indexing Integration](#search-and-indexing-integration)
+11. [Admin Interface and Workbench](#admin-interface-and-workbench)
+12. [Dependency Analysis](#dependency-analysis)
+13. [Performance Considerations](#performance-considerations)
+14. [Troubleshooting Guide](#troubleshooting-guide)
+15. [Conclusion](#conclusion)
+16. [Appendices](#appendices)
 
 ## Introduction
-This document describes the application architecture of the PolaZhenJing backend following its complete migration from FastAPI to Flask/Jekyll architecture. The system now operates as a Flask application with three integrated blueprints (auth, uploader, converter) that manage user authentication, content upload and processing, and Jekyll static site generation. The architecture leverages SQLite for data persistence, QQ Email SMTP for verification, and a comprehensive template system with dark gold theming. A CLI management tool (wiki.py) provides additional operational capabilities for Jekyll site management.
+This document describes the application architecture of the PolaZhenJing backend with its new memory service facade architecture and enhanced agent integration layer. The system now features a sophisticated memory management system that coordinates between PostgreSQL backend and legacy JSON fallback, providing enterprise-grade memory storage for the Super Xiaowang AI agent. The architecture leverages FastAPI (via Flask blueprint pattern) for API services, PostgreSQL for persistent storage with optional pgvector extensions, and comprehensive security frameworks including visitor suggestion moderation and memory governance.
 
-**Updated** Enhanced with improved upload system infrastructure featuring temporary JSON file storage for draft management, addressing session cookie size limitations and providing robust content staging capabilities.
+**Updated** Enhanced with new memory service facade architecture that seamlessly coordinates legacy JSON memories with PostgreSQL backend, comprehensive agent integration layer with MiniMax API support, and visitor suggestion system for community-driven memory curation.
 
 ## Project Structure
-The backend is organized around a Flask application factory with three integrated blueprints. The structure follows Flask conventions with separate modules for authentication, content management, and conversion utilities. Configuration is managed through environment variables and Jekyll settings. Templates utilize Jinja2 with custom styling and responsive design. The CLI tool (wiki.py) provides command-line interface for Jekyll operations and Flask administration.
+The backend follows a modular Flask architecture with specialized components for memory management, agent services, and administrative interfaces. The structure includes dedicated modules for memory service coordination, PostgreSQL storage management, visitor suggestion handling, and comprehensive search integration.
 
 ```mermaid
 graph TB
-subgraph "Flask App Factory"
-APP["app/__init__.py<br/>create_app(), get_db(), init_db()"]
-ENDPT["Endpoints"]
-ENDPT --> AUTH["auth.py<br/>Authentication routes"]
-ENDPT --> UP["uploader.py<br/>Upload & Jekyll integration"]
-ENDPT --> CONV["converter.py<br/>File conversion utilities"]
-ENDPT --> MAIL["mailer.py<br/>QQ Email SMTP"]
-ENDPT --> TPL["templates/<br/>Jinja2 templates"]
-ENDPT --> CFG["_config.yml<br/>Jekyll configuration"]
-ENDPT --> GEM["Gemfile<br/>Ruby dependencies"]
-ENDPT --> REQ["requirements.txt<br/>Python dependencies"]
-ENDPT --> WIKI["wiki.py<br/>CLI management tool"]
+subgraph "Core Application"
+APP["app/__init__.py<br/>Flask application factory"]
+AUTH["app/auth.py<br/>Authentication system"]
+UP["app/uploader.py<br/>Content management"]
+SKILL["app/skillhub.py<br/>Skill management"]
+ENDPT["API Endpoints"]
+ENDPT --> AG["app/agent.py<br/>Agent API & Chat"]
+ENDPT --> MS["app/memory_service.py<br/>Memory facade"]
+ENDPT --> MG["app/memory_guard.py<br/>Governance checks"]
+ENDPT --> OID["app/owner_identity.py<br/>Identity resolution"]
+ENDPT --> SP["app/search_projection.py<br/>Search projection"]
+ENDPT --> JOB["app/jobs.py<br/>Async job queue"]
 APP --> AUTH
 APP --> UP
-APP --> CONV
-APP --> MAIL
-APP --> TPL
-APP --> CFG
-APP --> GEM
-APP --> REQ
-APP --> WIKI
+APP --> SKILL
+APP --> AG
+APP --> MS
+APP --> MG
+APP --> OID
+APP --> SP
+APP --> JOB
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/uploader.py:14](file://app/uploader.py#L14)
-- [app/converter.py:1](file://app/converter.py#L1)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [_config.yml:1](file://_config.yml#L1)
-- [Gemfile:1](file://Gemfile#L1)
-- [requirements.txt:1](file://requirements.txt#L1)
-- [wiki.py:1](file://wiki.py#L1)
+- [app/__init__.py:112-157](file://app/__init__.py#L112-L157)
+- [app/agent.py:30-31](file://app/agent.py#L30-L31)
+- [app/memory_service.py:1-16](file://app/memory_service.py#L1-L16)
+- [app/memory_guard.py:1-25](file://app/memory_guard.py#L1-L25)
+- [app/owner_identity.py:20-68](file://app/owner_identity.py#L20-L68)
+- [app/search_projection.py:13-22](file://app/search_projection.py#L13-L22)
+- [app/jobs.py:1-12](file://app/jobs.py#L1-L12)
 
 **Section sources**
-- [app/__init__.py:1-69](file://app/__init__.py#L1-L69)
-- [_config.yml:1-49](file://_config.yml#L1-L49)
-- [wiki.py:1-165](file://wiki.py#L1-L165)
+- [app/__init__.py:112-157](file://app/__init__.py#L112-L157)
+- [app/agent.py:30-31](file://app/agent.py#L30-L31)
+- [app/memory_service.py:1-16](file://app/memory_service.py#L1-L16)
 
 ## Core Components
-- **Application Factory**: Flask application creation with template and static folder configuration, secret key management, and database initialization.
-- **Database Integration**: SQLite connection management with Flask's application context, WAL mode for improved concurrency, and automatic cleanup.
-- **Authentication System**: User registration, login, password management, and email verification with QQ Email SMTP integration.
-- **Enhanced Content Management**: File upload handling with temporary JSON draft storage, content conversion pipeline, and Jekyll post generation with Git synchronization.
-- **Template System**: Comprehensive Jinja2 templates with dark gold theming, responsive design, and interactive UI components.
-- **Blueprint Architecture**: Three integrated blueprints (auth, uploader, converter) with URL prefixes and modular routing.
-- **CLI Management Tool**: Command-line interface for Jekyll operations, Flask administration, and post management.
-- **Static Site Generation**: Jekyll configuration with custom layouts and theme support for GitHub Pages deployment.
+- **Application Factory**: Flask application creation with reverse proxy support, database initialization, and blueprint registration.
+- **Memory Service Facade**: Central coordinator between PostgreSQL backend and legacy JSON fallback with intelligent routing and fallback mechanisms.
+- **PostgreSQL Memory Store**: Typed memory ledger with full-text search capabilities, embedding support, and audit trails.
+- **Agent Integration Layer**: MiniMax API integration with memory-aware chat completion and comprehensive memory management endpoints.
+- **Visitor Suggestion System**: Community-driven memory curation with risk assessment and owner approval workflows.
+- **Memory Governance Framework**: Risk detection, content classification, and trust-tier based access control.
+- **Search and Indexing**: Meilisearch integration with PostgreSQL-backed document projection and sensitive data redaction.
+- **Admin Interface**: Memory workbench for PostgreSQL management with real-time search and suggestion handling.
+- **Async Job Queue**: SQLite-backed job management for long-running tasks with cross-worker coordination.
 
-**Updated** Added temporary JSON file draft storage system to handle large content efficiently and avoid session cookie size limitations.
+**Updated** Added comprehensive memory service facade architecture, visitor suggestion system, and enhanced agent integration with MiniMax API support.
 
 **Section sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [app/auth.py:16-23](file://app/auth.py#L16-L23)
-- [app/uploader.py:50-70](file://app/uploader.py#L50-L70)
-- [app/uploader.py:140-145](file://app/uploader.py#L140-L145)
-- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
-- [wiki.py:54-60](file://wiki.py#L54-L60)
+- [app/memory_service.py:1-361](file://app/memory_service.py#L1-L361)
+- [app/memory_store.py:62-110](file://app/memory_store.py#L62-L110)
+- [app/agent.py:111-150](file://app/agent.py#L111-L150)
+- [app/memory_guard.py:51-87](file://app/memory_guard.py#L51-L87)
+- [app/search_projection.py:29-71](file://app/search_projection.py#L29-L71)
 
 ## Architecture Overview
-The backend follows a Flask-based architecture with integrated Jekyll static site generation and enhanced draft management:
-- **Presentation Layer**: Flask blueprints with Jinja2 templates and responsive design.
-- **Business Logic**: Modular services within blueprints for authentication, content management, and conversion.
-- **Data Layer**: SQLite database with Flask application context and session management.
-- **Draft Storage**: Temporary JSON file system for content staging and session management.
-- **Integration Layer**: QQ Email SMTP for verification, Git operations for deployment, and file system operations.
-- **Static Site Generation**: Jekyll configuration with custom layouts and theme support.
-- **Management Interface**: Flask admin interface with comprehensive content management capabilities.
-- **Command Line Interface**: CLI tool for Jekyll operations and administrative tasks.
+The backend implements a hybrid memory architecture with PostgreSQL as the primary source of truth and JSON fallback for backward compatibility. The agent integration layer provides comprehensive memory-aware chat capabilities with visitor suggestion moderation and owner approval workflows.
 
 ```mermaid
 graph TB
-Client["Web Browser"]
+Client["Web Client<br/>/agent.html"]
+ADMIN["Admin Interface<br/>/admin/agent/memory"]
 FLASK["Flask App<br/>app/__init__.py"]
-AUTH["Auth Blueprint<br/>auth.py"]
-UP["Uploader Blueprint<br/>uploader.py"]
-CONV["Converter Utilities<br/>converter.py"]
-MAIL["Mailer Service<br/>mailer.py"]
-DB["SQLite Database<br/>users table"]
-DRAFT["Draft Storage<br/>data/drafts/"]
-TPL["Jinja2 Templates<br/>templates/"]
-JEKYLL["Jekyll Static Site<br/>_config.yml"]
-CLI["CLI Management<br/>wiki.py"]
-Client --> FLASK
-FLASK --> AUTH
-FLASK --> UP
-FLASK --> CONV
-FLASK --> MAIL
-AUTH --> DB
-UP --> DB
-UP --> DRAFT
-UP --> CONV
-UP --> JEKYLL
-AUTH --> TPL
-UP --> TPL
-CONV --> TPL
-MAIL --> TPL
-CLI --> JEKYLL
-CLI --> FLASK
+AGENT["Agent API<br/>app/agent.py"]
+MEM_FACADE["Memory Facade<br/>app/memory_service.py"]
+PG_STORE["PostgreSQL Store<br/>app/memory_store.py"]
+JSON_FALLBACK["JSON Fallback<br/>data/agent_memory.json"]
+MINIMAX["MiniMax API<br/>Chat completions"]
+SEARCH["Search Projection<br/>app/search_projection.py"]
+MEILI["Meilisearch<br/>Search index"]
+ADMIN_UI["Memory Workbench<br/>templates/memory_workbench.html"]
+Client --> ADMIN
+Client --> AGENT
+ADMIN --> ADMIN_UI
+FLASK --> AGENT
+FLASK --> MEM_FACADE
+FLASK --> SEARCH
+AGENT --> MEM_FACADE
+MEM_FACADE --> PG_STORE
+MEM_FACADE --> JSON_FALLBACK
+PG_STORE --> MEILI
+AGENT --> MINIMAX
+MEM_FACADE --> SEARCH
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/uploader.py:14](file://app/uploader.py#L14)
-- [app/converter.py:1](file://app/converter.py#L1)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [_config.yml:1](file://_config.yml#L1)
-- [wiki.py:54-60](file://wiki.py#L54-L60)
+- [app/agent.py:99-150](file://app/agent.py#L99-L150)
+- [app/memory_service.py:131-143](file://app/memory_service.py#L131-L143)
+- [app/memory_store.py:77-110](file://app/memory_store.py#L77-L110)
+- [app/search_projection.py:29-44](file://app/search_projection.py#L29-L44)
+- [app/templates/memory_workbench.html:1-61](file://app/templates/memory_workbench.html#L1-L61)
 
 ## Detailed Component Analysis
 
 ### Flask Application Factory and Lifecycle
-- **Application Creation**: Flask instance with template folder configuration and security settings.
-- **Database Management**: Context-aware SQLite connection with automatic cleanup and WAL mode.
-- **Blueprint Registration**: Three integrated blueprints (auth, uploader) with URL prefixes.
-- **Environment Configuration**: Secret key loading from environment variables with development fallback.
+The application factory creates a Flask instance with reverse proxy support, database initialization, and comprehensive blueprint registration for all services including the new memory management and agent components.
 
 ```mermaid
 sequenceDiagram
 participant Proc as "Process"
 participant App as "Flask App"
 participant DB as "SQLite Connection"
-participant Auth as "Auth Blueprint"
-participant Up as "Uploader Blueprint"
+participant Mem as "Memory Service"
+participant Agent as "Agent API"
 Proc->>App : create_app()
 App->>DB : get_db() (lazy init)
-App->>Auth : register_blueprint()
-App->>Up : register_blueprint()
+App->>Mem : init_memory_store_if_enabled()
+App->>Agent : register_blueprint(agent_bp)
+App->>Agent : register_blueprint(agent_admin_bp)
 App-->>Proc : Flask app ready
 Proc->>App : Request handling
 App->>DB : get_db() (per-request)
-App->>Auth : Route handler
-App->>Up : Route handler
+App->>Agent : Route handler
+App->>Mem : Memory operations
 App->>DB : close_db() (teardown)
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
+- [app/__init__.26-41:26-41](file://app/__init__.py#L26-L41)
+- [app/__init__.py:142-157](file://app/__init__.py#L142-L157)
+- [app/memory_service.py:95-104](file://app/memory_service.py#L95-L104)
 
 **Section sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
+- [app/__init__.py:112-157](file://app/__init__.py#L112-L157)
+- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
 
-### Authentication System
-- **User Management**: Registration with QQ email validation, password hashing, and email verification workflow.
-- **Session Security**: Login-required decorators, session-based authentication, and secure password handling.
-- **Verification Workflow**: 6-digit code generation with 5-minute expiry, email delivery via QQ SMTP.
-- **Password Operations**: Secure password hashing, verification, and change functionality.
+### Enhanced Agent Integration Layer
+The agent integration layer provides comprehensive memory-aware chat capabilities with MiniMax API support, visitor suggestion handling, and owner approval workflows.
 
 ```mermaid
 flowchart TD
-Start(["User Registration"]) --> Validate["Validate Input<br/>Username, Email, Password"]
-Validate --> Exists{"User Exists?"}
-Exists --> |Yes| Error["Flash Error<br/>Already Registered"]
-Exists --> |No| Hash["Hash Password"]
-Hash --> Create["Create User Record"]
-Create --> Code["Generate 6-digit Code"]
-Code --> Email["Send QQ Email"]
-Email --> Verify["Verification Page"]
-Verify --> Valid{"Valid Code?"}
-Valid --> |Yes| Activate["Mark Verified"]
-Valid --> |No| Expired["Code Expired/Error"]
-Activate --> Success["Redirect to Login"]
-Expired --> Reset["Redirect to Register"]
+Start["Chat Request"] --> Resolve["Resolve Actor Identity"]
+Resolve --> RecordEvent["Record Raw Event"]
+RecordEvent --> SearchMem["Search Memories"]
+SearchMem --> CallModel["Call MiniMax API"]
+CallModel --> RecordResponse["Record Response Event"]
+RecordResponse --> RouteWrite["Route Memory Write"]
+RouteWrite --> CheckRisk{"High Risk?"}
+CheckRisk --> |Yes| OwnerConfirm["Owner Confirmation Required"]
+CheckRisk --> |No| VisitorSuggest["Visitor Suggestion"]
+OwnerConfirm --> ConfirmWrite["Confirm Write API"]
+VisitorSuggest --> AdoptSuggestion["Adopt Suggestion"]
+ConfirmWrite --> CreateMemory["Create Memory Item"]
+AdoptSuggestion --> CreateMemory
+CreateMemory --> AuditLog["Audit Log Entry"]
+AuditLog --> SearchJob["Enqueue Search Job"]
 ```
 
 **Diagram sources**
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
+- [app/agent.py:111-150](file://app/agent.py#L111-L150)
+- [app/memory_service.py:190-227](file://app/memory_service.py#L190-L227)
+- [app/memory_service.py:321-361](file://app/memory_service.py#L321-L361)
 
 **Section sources**
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/auth.py:136-167](file://app/auth.py#L136-L167)
+- [app/agent.py:69-96](file://app/agent.py#L69-L96)
+- [app/agent.py:111-150](file://app/agent.py#L111-L150)
+- [app/agent.py:163-245](file://app/agent.py#L163-L245)
 
-### Enhanced Content Management and Draft System
-- **Upload Pipeline**: Multi-format support (PDF, DOCX, HTML, Markdown) with drag-and-drop interface and temporary file handling.
-- **Draft Storage**: Temporary JSON file system storing content, title, tags, and description with unique draft IDs.
-- **Session Management**: Draft ID stored in session for seamless user experience across upload steps.
-- **Conversion System**: Integrated conversion utilities with fallback mechanisms for missing dependencies.
-- **Post Generation**: Automatic Jekyll front matter creation with style selection and metadata.
-- **Git Integration**: Automated Git operations for deployment to GitHub Pages.
-- **Article Management**: CRUD operations for managing generated articles.
-
-```mermaid
-flowchart TD
-Upload["File Upload"] --> Detect["Detect Format<br/>PDF/DOCX/HTML/MD"]
-Detect --> Convert{"Conversion Available?"}
-Convert --> |Yes| Convert["Run Converter"]
-Convert --> |No| Fallback["Fallback Text"]
-Convert --> Title["Extract Title"]
-Title --> Draft["Create Temporary JSON Draft<br/>with draft_id"]
-Draft --> Session["Store draft_id in Session"]
-Session --> Style["Style Selection"]
-Style --> Generate["Generate Jekyll Post"]
-Generate --> Save["Save to _posts/"]
-Save --> Sync["Git Sync"]
-Sync --> Deploy["GitHub Deployment"]
-```
-
-**Updated** Added draft storage mechanism using temporary JSON files to handle large content efficiently and avoid session cookie size limitations.
-
-**Diagram sources**
-- [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
-- [app/uploader.py:50-70](file://app/uploader.py#L50-L70)
-- [app/uploader.py:140-145](file://app/uploader.py#L140-L145)
-- [app/converter.py:78-91](file://app/converter.py#L78-L91)
-- [app/uploader.py:164-208](file://app/uploader.py#L164-L208)
-
-**Section sources**
-- [app/uploader.py:50-70](file://app/uploader.py#L50-L70)
-- [app/uploader.py:104-147](file://app/uploader.py#L104-L147)
-- [app/uploader.py:140-145](file://app/uploader.py#L140-L145)
-- [app/uploader.py:150-161](file://app/uploader.py#L150-L161)
-- [app/uploader.py:164-208](file://app/uploader.py#L164-L208)
-- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
-
-### Template System and Styling
-- **Base Template**: Comprehensive dark gold theming with glass-morphism effects and responsive design.
-- **Interactive Components**: Tab switching, drag-and-drop file upload, and form validation.
-- **Flash Messages**: Category-based notification system with visual feedback.
-- **Navigation**: Session-aware navigation with conditional rendering based on authentication state.
-- **Admin Interface**: Comprehensive management interface for content operations.
+## Memory Service Architecture
+The memory service facade provides a unified interface for accessing both PostgreSQL backend and legacy JSON fallback, with intelligent routing and fallback mechanisms.
 
 ```mermaid
 classDiagram
-class BaseTemplate {
-+admin-nav
-+admin-main
-+card
-+flash-messages
-+responsive-design
+class MemoryServiceFacade {
++memory_store_enabled() bool
++memory_write_enabled() bool
++memory_status() dict
++search_memories() list
++build_memory_context() str
++record_raw_event() str|None
++route_chat_memory_write() dict|None
++confirm_owner_memory() dict
++list_memory_items() list
++update_memory_item() dict
++list_visitor_suggestions() list
++discard_visitor_suggestion() dict
++adopt_visitor_suggestion() dict
 }
-class UploadTemplate {
-+tab-switching
-+drag-drop-zone
-+multi-format-support
-+form-validation
+class MemoryStore {
++configured bool
++init_schema() void
++status() dict
++add_raw_event() str
++create_memory_item() str
++create_visitor_suggestion() str
++search_memory() list
++list_memory_items() list
++get_memory_item() dict|None
++update_memory_item() dict|None
++list_visitor_suggestions() list
++get_visitor_suggestion() dict|None
++update_visitor_suggestion() void
++pending_search_jobs() list
++mark_search_job() void
 }
-class StyleCards {
-+style-grid
-+style-selection
-+preview-themes
+class LegacyMemory {
++load_legacy_memory() dict
++legacy_memory_search() list
 }
-class Navigation {
-+session-aware
-+conditional-rendering
-+user-menu
-}
-BaseTemplate <|-- UploadTemplate
-BaseTemplate <|-- StyleCards
-BaseTemplate <|-- Navigation
+MemoryServiceFacade --> MemoryStore : "PostgreSQL backend"
+MemoryServiceFacade --> LegacyMemory : "JSON fallback"
 ```
 
 **Diagram sources**
-- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
-- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
+- [app/memory_service.py:82-128](file://app/memory_service.py#L82-L128)
+- [app/memory_store.py:62-110](file://app/memory_store.py#L62-L110)
+- [app/memory_service.py:22-30](file://app/memory_service.py#L22-L30)
 
 **Section sources**
-- [app/templates/base.html:1-226](file://app/templates/base.html#L1-L226)
-- [app/templates/upload.html:1-82](file://app/templates/upload.html#L1-L82)
-- [app/templates/articles.html:1-64](file://app/templates/articles.html#L1-L64)
-- [app/templates/style_select.html:1-41](file://app/templates/style_select.html#L1-L41)
+- [app/memory_service.py:82-143](file://app/memory_service.py#L82-L143)
+- [app/memory_store.py:62-205](file://app/memory_store.py#L62-L205)
+- [app/memory_service.py:22-80](file://app/memory_service.py#L22-L80)
 
-### Database Integration and Session Management
-- **SQLite Connection**: Context-aware database connections with automatic cleanup.
-- **WAL Mode**: Write-Ahead Logging for improved concurrent access.
-- **User Schema**: Comprehensive user table with verification status and timestamps.
-- **Session Management**: Flask session-based authentication with secure storage.
+## Visitor Suggestion System
+The visitor suggestion system enables community-driven memory curation with comprehensive risk assessment and owner approval workflows.
 
 ```mermaid
-classDiagram
-class DatabaseManager {
-+get_db() : Connection
-+close_db() : void
-+init_db() : void
-}
-class UserModel {
-+id : INTEGER
-+username : TEXT
-+email : TEXT
-+password_hash : TEXT
-+email_verified : INTEGER
-+created_at : TIMESTAMP
-}
-class SessionManager {
-+user_id : INTEGER
-+username : TEXT
-+verify_code : STRING
-+verify_code_time : FLOAT
-+draft_id : STRING
-}
-DatabaseManager --> UserModel : "manages"
-SessionManager --> UserModel : "authenticated"
+stateDiagram-v2
+[*] --> Pending
+Pending --> Quarantined : High Risk Detected
+Pending --> Candidate : Low Risk
+Candidate --> Active : Owner Approval
+Candidate --> Discarded : Owner Rejection
+Quarantined --> Discarded : Owner Final Decision
+Active --> [*]
+Discarded --> [*]
 ```
 
-**Updated** Added draft_id field to session manager to track temporary draft storage.
+**Diagram sources**
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [app/memory_service.py:208-227](file://app/memory_service.py#L208-L227)
+- [app/memory_service.py:312-361](file://app/memory_service.py#L312-L361)
+
+**Section sources**
+- [app/memory_guard.py:51-87](file://app/memory_guard.py#L51-L87)
+- [app/memory_service.py:208-227](file://app/memory_service.py#L208-L227)
+- [app/memory_service.py:312-361](file://app/memory_service.py#L312-L361)
+
+## Memory Governance Framework
+The memory governance framework provides comprehensive risk assessment, content classification, and trust-tier based access control for memory management operations.
+
+```mermaid
+flowchart LR
+Input["Memory Content"] --> Classify["Classify Memory Type"]
+Input --> Scan["Scan for Risk Patterns"]
+Classify --> RiskFlags["Risk Flags"]
+Scan --> RiskFlags
+RiskFlags --> TrustTier{"Trust Tier"}
+TrustTier --> |Owner| DirectWrite["Direct Write Allowed"]
+TrustTier --> |Admin| OwnerReview["Owner Review Required"]
+TrustTier --> |Trusted| Candidate["Candidate Status"]
+TrustTier --> |Public| Quarantine["Quarantine"]
+```
 
 **Diagram sources**
-- [app/__init__.py:9-40](file://app/__init__.py#L9-L40)
-- [app/__init__.py:30-39](file://app/__init__.py#L30-L39)
+- [app/memory_guard.py:36-48](file://app/memory_guard.py#L36-L48)
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [app/owner_identity.py:44-52](file://app/owner_identity.py#L44-L52)
 
 **Section sources**
-- [app/__init__.py:9-40](file://app/__init__.py#L9-L40)
-- [app/__init__.py:30-39](file://app/__init__.py#L30-L39)
+- [app/memory_guard.py:9-25](file://app/memory_guard.py#L9-L25)
+- [app/memory_guard.py:36-87](file://app/memory_guard.py#L36-L87)
+- [app/owner_identity.py:20-68](file://app/owner_identity.py#L20-L68)
 
-### QQ Email SMTP Integration
-- **SMTP Configuration**: QQ Email SMTP with SSL connection and authentication.
-- **HTML Templates**: Professional verification email with styled layout.
-- **Error Handling**: Graceful degradation when SMTP credentials are unavailable.
-- **Timeout Management**: Controlled timeout for email delivery operations.
+## Search and Indexing Integration
+The search and indexing system provides advanced search capabilities with PostgreSQL-backed document projection and sensitive data redaction for Meilisearch integration.
 
-**Section sources**
-- [app/mailer.py:8-52](file://app/mailer.py#L8-L52)
+```mermaid
+sequenceDiagram
+participant Pg as "PostgreSQL"
+participant Proj as "Projection"
+participant Ms as "Meilisearch"
+Pg->>Proj : Query memory_items
+Proj->>Proj : Redact sensitive keys
+Proj->>Ms : Index document
+Ms->>Pg : Reload on hit
+Note over Ms,Pg : Documents always reload PostgreSQL before entering prompt
+```
 
-### Jekyll Configuration and Static Site Generation
-- **Site Configuration**: Jekyll settings with pagination, SEO plugins, and permalink structure.
-- **Build Exclusions**: System excludes for Python files, development directories, and configuration files.
-- **Layout Defaults**: Default layout assignment for blog posts.
-- **Deployment Ready**: Optimized for GitHub Pages deployment workflow.
-
-**Section sources**
-- [_config.yml:1-49](file://_config.yml#L1-L49)
-
-### CLI Management Tool
-- **Command Interface**: Comprehensive CLI for Jekyll operations and Flask administration.
-- **Local Development**: Jekyll serve with live reload functionality.
-- **Post Management**: Create, list, and manage blog posts from command line.
-- **Deployment Automation**: Git operations for site deployment.
+**Diagram sources**
+- [app/search_projection.py:29-71](file://app/search_projection.py#L29-L71)
+- [migrations/agent_memory/001_postgres_memory_ledger.sql:45-47](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L45-L47)
 
 **Section sources**
-- [wiki.py:1-165](file://wiki.py#L1-L165)
+- [app/search_projection.py:13-71](file://app/search_projection.py#L13-L71)
+- [migrations/agent_memory/001_postgres_memory_ledger.sql:1-119](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L1-L119)
+
+## Admin Interface and Workbench
+The admin interface provides comprehensive memory management capabilities with real-time search, visitor suggestion handling, and PostgreSQL status monitoring.
+
+```mermaid
+graph TB
+ADMIN["Admin Interface<br/>/admin/agent/memory"]
+STATUS["Status Grid<br/>PostgreSQL, JSON stats"]
+TOOLBAR["Toolbar<br/>Query, Status Filter"]
+RESULTS["Results Panel<br/>Memory List"]
+SUGGESTIONS["Suggestions Panel<br/>Visitor Suggestions"]
+ACTION["Action Buttons<br/>Adopt, Discard, Edit"]
+ADMIN --> STATUS
+ADMIN --> TOOLBAR
+ADMIN --> RESULTS
+ADMIN --> SUGGESTIONS
+RESULTS --> ACTION
+SUGGESTIONS --> ACTION
+```
+
+**Diagram sources**
+- [app/templates/memory_workbench.html:16-61](file://app/templates/memory_workbench.html#L16-L61)
+- [app/templates/memory_workbench.html:148-183](file://app/templates/memory_workbench.html#L148-L183)
+
+**Section sources**
+- [app/templates/memory_workbench.html:1-186](file://app/templates/memory_workbench.html#L1-L186)
+- [app/agent.py:248-255](file://app/agent.py#L248-L255)
 
 ## Dependency Analysis
-The application exhibits clean separation of concerns with three main blueprints and supporting infrastructure:
-- **Auth Blueprint**: Handles user authentication, session management, and email verification.
-- **Uploader Blueprint**: Manages file uploads, temporary draft storage, content conversion, and Jekyll integration.
-- **Converter Utilities**: Provides file format conversion capabilities with fallback mechanisms.
-- **Mailer Service**: Encapsulates QQ Email SMTP functionality with error handling.
-- **Template System**: Shared Jinja2 templates with consistent theming across all views.
-- **CLI Infrastructure**: Command-line interface for operational tasks and development workflows.
-- **Static Site Dependencies**: Ruby-based Jekyll ecosystem for site generation.
-
-**Updated** Added draft storage system as a supporting infrastructure component for content management.
+The application exhibits a clean separation of concerns with specialized modules for memory management, agent services, and administrative interfaces, all coordinated through the memory service facade.
 
 ```mermaid
 graph TB
 APP["app/__init__.py"]
 AUTH["app/auth.py"]
 UP["app/uploader.py"]
-CONV["app/converter.py"]
-MAIL["app/mailer.py"]
-TPL["app/templates/"]
-CFG["_config.yml"]
-GEM["Gemfile"]
-REQ["requirements.txt"]
-WIKI["wiki.py"]
-DRAFT["data/drafts/"]
+SKILL["app/skillhub.py"]
+AGENT["app/agent.py"]
+MEM_FACADE["app/memory_service.py"]
+PG_STORE["app/memory_store.py"]
+MEM_GUARD["app/memory_guard.py"]
+OID["app/owner_identity.py"]
+SEARCH["app/search_projection.py"]
+JOBS["app/jobs.py"]
+TEMPLATES["app/templates/"]
+DB["SQLite Database<br/>users, jobs tables"]
+PG_DB["PostgreSQL Database<br/>memory_items, visitor_suggestions"]
 APP --> AUTH
 APP --> UP
-APP --> CONV
-APP --> MAIL
-APP --> TPL
-APP --> CFG
-APP --> GEM
-APP --> REQ
-APP --> WIKI
-AUTH --> DB["SQLite Users Table"]
-UP --> DB
-UP --> DRAFT
-UP --> CONV
-UP --> JEKYLL["Jekyll Posts"]
-AUTH --> TPL
-UP --> TPL
-CONV --> TPL
-MAIL --> TPL
-WIKI --> JEKYLL
-WIKI --> FLASK["Flask Admin"]
+APP --> SKILL
+APP --> AGENT
+APP --> MEM_FACADE
+APP --> JOBS
+AGENT --> MEM_FACADE
+MEM_FACADE --> PG_STORE
+MEM_FACADE --> MEM_GUARD
+MEM_FACADE --> OID
+MEM_FACADE --> SEARCH
+MEM_GUARD --> OID
+PG_STORE --> PG_DB
+DB --> AUTH
+DB --> JOBS
 ```
 
 **Diagram sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [app/auth.py:13](file://app/auth.py#L13)
-- [app/uploader.py:14](file://app/uploader.py#L14)
-- [app/converter.py:1](file://app/converter.py#L1)
-- [app/mailer.py:8](file://app/mailer.py#L8)
-- [_config.yml:1](file://_config.yml#L1)
-- [Gemfile:1](file://Gemfile#L1)
-- [requirements.txt:1](file://requirements.txt#L1)
-- [wiki.py:54-60](file://wiki.py#L54-L60)
+- [app/__init__.py:131-141](file://app/__init__.py#L131-L141)
+- [app/memory_service.py:13-16](file://app/memory_service.py#L13-L16)
+- [app/memory_store.py:63-68](file://app/memory_store.py#L63-L68)
+- [app/memory_guard.py:13-15](file://app/memory_guard.py#L13-L15)
+- [app/owner_identity.py:9-12](file://app/owner_identity.py#L9-L12)
 
 **Section sources**
-- [app/__init__.py:43-61](file://app/__init__.py#L43-L69)
-- [requirements.txt:1-8](file://requirements.txt#L1-L8)
+- [app/__init__.py:131-141](file://app/__init__.py#L131-L141)
+- [app/memory_service.py:13-16](file://app/memory_service.py#L13-L16)
 
 ## Performance Considerations
-- **SQLite Optimization**: WAL mode improves concurrent read/write performance for the small-scale application.
-- **Memory Management**: Flask's application context ensures proper database connection cleanup.
-- **File Processing**: Conversion utilities gracefully handle missing dependencies with fallback mechanisms.
-- **Template Rendering**: Jinja2 templates are cached and compiled for efficient rendering.
-- **Git Operations**: Timeout limits prevent hanging operations during deployment.
-- **Static Site Generation**: Jekyll build process optimized for GitHub Pages deployment.
-- **CLI Efficiency**: Command-line operations minimize overhead for administrative tasks.
-- **Draft Storage**: Temporary JSON files provide efficient content staging without session size constraints.
-- **Session Management**: Draft ID storage avoids large payload transmission between requests.
+- **Memory Store Optimization**: PostgreSQL with pg_trgm and optional pgvector extensions for advanced search capabilities.
+- **Connection Pooling**: Context-aware database connections with automatic cleanup and WAL mode for improved concurrency.
+- **Search Performance**: Trigram indexes and JSONB storage for efficient memory querying and visitor suggestion management.
+- **Async Processing**: Background job queue for long-running tasks with cross-worker coordination and SQLite-based state management.
+- **Cache Strategy**: LRU caching for legacy memory loading and environment variable caching for feature flags.
+- **API Response Optimization**: Efficient JSON serialization and minimal payload construction for memory operations.
+- **Security**: Comprehensive input sanitization and risk assessment before memory persistence operations.
 
-**Updated** Added performance considerations for draft storage system and session management improvements.
+**Updated** Added performance considerations for PostgreSQL memory store, async job processing, and search optimization.
+
+**Section sources**
+- [app/memory_store.py:77-110](file://app/memory_store.py#L77-L110)
+- [app/jobs.py:50-77](file://app/jobs.py#L50-L77)
+- [app/memory_service.py:22-30](file://app/memory_service.py#L22-L30)
 
 ## Troubleshooting Guide
-- **Database Issues**: Verify SQLite file permissions and disk space; check WAL mode compatibility.
-- **Email Delivery**: Confirm QQ Email credentials and SMTP_SSL configuration; verify firewall settings.
-- **File Conversion**: Install required dependencies (PyMuPDF, mammoth, html2text) for full conversion support.
-- **Template Rendering**: Clear browser cache for CSS/JS updates; verify Jinja2 syntax in templates.
-- **Git Deployment**: Check SSH keys and repository permissions; verify GitHub Pages configuration.
-- **Authentication Errors**: Validate session storage and cookie settings; check user table integrity.
-- **Jekyll Build**: Verify Ruby environment and gem installations; check bundle configuration.
-- **CLI Operations**: Ensure proper command syntax and dependency availability for wiki.py commands.
-- **Draft Storage Issues**: Check data/drafts directory permissions; verify JSON file integrity; monitor disk space.
-- **Session Management**: Clear browser cookies if draft ID becomes corrupted; verify session storage configuration.
+- **Memory Store Issues**: Verify PostgreSQL connectivity, extension availability (pg_trgm, vector), and DATABASE_URL configuration.
+- **Feature Flag Problems**: Check POLA_MEMORY_DB_ENABLED, POLA_MEMORY_WRITE_ENABLED, and POLA_MEMORY_FALLBACK_JSON environment variables.
+- **MiniMax API Errors**: Confirm POLA_AGENT_API_KEY or MINIMAX_TOKEN_PLAN_API_KEY configuration and network connectivity.
+- **Search Index Problems**: Verify Meilisearch URL and API key configuration, and check search index job status.
+- **Visitor Suggestion Failures**: Monitor risk assessment patterns and owner approval workflows for high-risk content.
+- **Async Job Issues**: Check SQLite job table integrity and worker thread status for background processing failures.
+- **Memory Governance Errors**: Validate risk pattern detection and trust tier resolution for different user roles.
+- **Admin Interface Problems**: Verify session-based authentication and role-based access control for memory management operations.
 
-**Updated** Added troubleshooting guidance for draft storage and session management issues.
+**Updated** Added troubleshooting guidance for memory store, visitor suggestions, and admin interface issues.
 
 **Section sources**
-- [app/__init__.py:9-23](file://app/__init__.py#L9-L23)
-- [app/mailer.py:13-18](file://app/mailer.py#L13-L18)
-- [app/converter.py:85-87](file://app/converter.py#L85-L87)
-- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
-- [app/uploader.py:50-70](file://app/uploader.py#L50-L70)
-- [wiki.py:132-165](file://wiki.py#L132-L165)
+- [app/memory_store.py:70-76](file://app/memory_store.py#L70-L76)
+- [app/agent.py:51-52](file://app/agent.py#L51-L52)
+- [app/memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
 
 ## Conclusion
-The PolaZhenJing backend successfully migrated to a Flask/Jekyll architecture with three integrated blueprints and comprehensive CLI management capabilities. The system provides a robust solution for content management with user authentication, file conversion, and static site generation. The SQLite database integration, QQ Email SMTP service, and responsive template system create a cohesive platform for managing AI knowledge content. The addition of the CLI tool (wiki.py) enhances operational flexibility with Jekyll integration and administrative functions. 
+The PolaZhenJing backend successfully implements a sophisticated memory management architecture that seamlessly coordinates PostgreSQL backend with legacy JSON fallback, providing enterprise-grade memory storage for AI agents. The enhanced architecture includes comprehensive visitor suggestion systems, memory governance frameworks, and advanced search capabilities with Meilisearch integration. The agent integration layer provides robust MiniMax API support with memory-aware chat completion and comprehensive administrative interfaces for memory management.
 
-**Updated** The enhanced architecture now includes a sophisticated draft storage system using temporary JSON files, addressing session cookie size limitations and providing efficient content staging capabilities. This improvement enables handling of larger content inputs while maintaining a seamless user experience across the upload workflow.
-
-The architecture balances simplicity with functionality, making it suitable for personal knowledge blogging and content curation with modern static site generation capabilities and robust content management infrastructure.
+**Updated** The architecture now provides a complete memory management solution with PostgreSQL as the primary source of truth, comprehensive visitor participation workflows, and enterprise-grade security and governance frameworks. The system balances scalability with functionality, making it suitable for advanced AI knowledge management and memory curation with modern search and administrative capabilities.
 
 ## Appendices
-- **Environment Variables**: SECRET_KEY, QQ_EMAIL, QQ_EMAIL_AUTH_CODE for application configuration.
-- **Supported Formats**: PDF, DOCX, HTML, Markdown with automatic conversion pipeline.
-- **Deployment**: GitHub Pages compatible with automated Git operations and Jekyll build process.
-- **Styling**: Dark gold theme with glass-morphism effects and responsive design.
-- **CLI Commands**: serve, build, admin, new, list, deploy for comprehensive site management.
-- **Template Categories**: Deep Technical, Academic Insight, Industry Vision, Friendly Explainer, Creative Visual styles.
-- **Draft Storage**: Temporary JSON files in data/drafts/ directory with automatic cleanup and unique ID generation.
-- **Session Management**: Draft ID tracking with automatic cleanup upon successful content generation.
+- **Environment Variables**: DATABASE_URL, POLA_MEMORY_DB_ENABLED, POLA_MEMORY_WRITE_ENABLED, POLA_MEMORY_FALLBACK_JSON, POLA_AGENT_API_KEY, MINIMAX_TOKEN_PLAN_API_KEY, SECRET_KEY.
+- **Memory Types**: values, boundary, preference, procedural, episodic, semantic with automatic classification.
+- **Risk Patterns**: Prompt injection, secret exfiltration, persona takeover, boundary override, recommendation poisoning.
+- **Trust Tiers**: owner, admin, trusted_user, public_user with role-based access control.
+- **Search Capabilities**: Full-text search with pg_trgm, JSONB storage, and sensitive data redaction.
+- **Admin Features**: Memory workbench, visitor suggestion management, audit logging, and real-time status monitoring.
+- **Async Processing**: SQLite-backed job queue with cross-worker coordination and progress tracking.
+- **Security Features**: Comprehensive input sanitization, risk assessment, and owner approval workflows.
 
-**Updated** Added information about draft storage system and session management enhancements.
+**Updated** Added comprehensive environment variable documentation, memory type classifications, risk pattern detection, and administrative feature descriptions.
 
 **Section sources**
-- [app/__init__.py:46](file://app/__init__.py#L46)
-- [app/converter.py:30-38](file://app/converter.py#L30-L38)
-- [_config.yml:18-22](file://_config.yml#L18-L22)
-- [app/templates/base.html:10-31](file://app/templates/base.html#L10-L31)
-- [wiki.py:1-11](file://wiki.py#L1-L11)
-- [app/uploader.py:50-70](file://app/uploader.py#L50-L70)
-- [app/uploader.py:140-145](file://app/uploader.py#L140-L145)
+- [app/memory_service.py:82-88](file://app/memory_service.py#L82-L88)
+- [app/memory_guard.py:27-33](file://app/memory_guard.py#L27-L33)
+- [app/owner_identity.py:44-52](file://app/owner_identity.py#L44-L52)
+- [app/search_projection.py:13-21](file://app/search_projection.py#L13-L21)
+- [app/jobs.py:26-47](file://app/jobs.py#L26-L47)

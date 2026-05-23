@@ -34,12 +34,12 @@
 
 ## Update Summary
 **Changes Made**
-- Enhanced article viewing with sophisticated JavaScript-based page loading detection and polling mechanism
-- Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability and user experience
-- Added URL validation for GitHub Pages article availability checking with retry logic
-- Improved sharing functionality with enhanced copy-to-clipboard experience
-- Implemented polling mechanism for GitHub Pages article availability checking with user feedback
-- Updated article management interface with improved status indicators and error handling
+- Added comprehensive URL content fetching system with anti-bot detection and enhanced security
+- Implemented sophisticated JavaScript-based page loading detection with polling mechanism
+- Enhanced article viewing with real-time status monitoring and improved user feedback
+- Improved GitHub Pages integration with dedicated URL validation service and security restrictions
+- Enhanced article management interface with improved status indicators and error handling
+- Added support for multiple content sources including file uploads, paste content, and URL fetching
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -57,13 +57,13 @@
 13. [Appendices](#appendices)
 
 ## Introduction
-The Article Presentation System is a lightweight personal blog wiki designed to streamline content creation and publishing. It supports multi-format article input (Markdown, PDF, Word, HTML), automatic conversion to blog-ready Markdown, flexible blog style selection (six distinct layouts), and seamless GitHub Pages publishing. The system combines a Flask-based management server for authentication, uploads, and conversions with a Jekyll-powered static site generator for blog rendering and publishing.
+The Article Presentation System is a lightweight personal blog wiki designed to streamline content creation and publishing. It supports multi-format article input (Markdown, PDF, Word, HTML, URL content), automatic conversion to blog-ready Markdown with anti-bot detection, flexible blog style selection (six distinct layouts), and seamless GitHub Pages publishing. The system combines a Flask-based management server for authentication, uploads, and conversions with a Jekyll-powered static site generator for blog rendering and publishing.
 
-**Updated** Enhanced with sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality. Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability and user experience. Added polling mechanism for GitHub Pages article availability checking with retry logic and user feedback to address GitHub Pages DNS delays and improve user experience during article publication.
+**Updated** Enhanced with sophisticated JavaScript-based page loading detection, comprehensive URL content fetching system with anti-bot detection, improved sharing functionality, and dedicated GitHub Pages URL validation service. The system now provides enhanced user experience during article publication with polling mechanism for GitHub Pages article availability checking and improved reliability through security restrictions and validation.
 
 ## Project Structure
 The project is organized into two primary layers:
-- Flask management server (app/): Handles authentication, file uploads, content conversion, style selection, and article management with advanced LLM integration.
+- Flask management server (app/): Handles authentication, file uploads, content conversion, style selection, and article management with advanced LLM integration and URL content fetching capabilities.
 - Jekyll static site (root): Generates styled HTML blogs from Markdown posts, manages pagination, SEO, and theme assets.
 
 ```mermaid
@@ -71,9 +71,9 @@ graph TB
 subgraph "Flask Management Server (app/)"
 A_init["app/__init__.py<br/>App factory, DB init, routes"]
 A_auth["app/auth.py<br/>Login, register, verify, password"]
-A_conv["app/converter.py<br/>PDF/DOCX/HTML → Markdown"]
+A_conv["app/converter.py<br/>PDF/DOCX/HTML → Markdown<br/>URL Fetching with Anti-Bot Detection"]
 A_mail["app/mailer.py<br/>QQ email SMTP verification"]
-A_up["app/uploader.py<br/>Upload, style select, generate, sync, LLM rewriting"]
+A_up["app/uploader.py<br/>Upload, style select, generate, sync, LLM rewriting<br/>URL Validation API, GitHub Pages Integration"]
 A_view["app/templates/article_view.html<br/>Enhanced article viewing with JS polling"]
 A_articles["app/templates/articles.html<br/>Article management interface"]
 end
@@ -96,6 +96,10 @@ Ext_gem["Gemfile<br/>Ruby/Jekyll deps"]
 Ext_req["requirements.txt<br/>Python deps"]
 Ext_llm["MiniMax API<br/>LLM rewriting service"]
 Ext_api["GitHub Pages API<br/>URL validation service"]
+Ext_requests["requests library<br/>URL fetching and validation"]
+Ext_bs4["BeautifulSoup<br/>HTML parsing and content extraction"]
+Ext_urllib["urllib.parse<br/>URL parsing and validation"]
+Ext_re["re module<br/>Pattern matching and validation"]
 end
 A_init --> A_auth
 A_init --> A_conv
@@ -106,6 +110,10 @@ A_up --> A_articles
 A_up --> J_posts
 A_up --> Ext_llm
 A_up --> Ext_api
+A_up --> Ext_requests
+A_up --> Ext_bs4
+A_up --> Ext_urllib
+A_up --> Ext_re
 CLI_wiki --> J_cfg
 CLI_wiki --> J_layout
 CLI_wiki --> J_css
@@ -144,12 +152,13 @@ AIS --> A_up
 ## Core Components
 - Flask Application Factory: Creates the Flask app, initializes SQLite database, registers blueprints, and serves assets.
 - Authentication Module: Provides login, registration with QQ email verification, password change, and session management.
-- File Converter: Converts PDF, DOCX, HTML, and Markdown into clean Markdown, extracting images and detecting titles.
+- File Converter: Converts PDF, DOCX, HTML, and Markdown into clean Markdown, extracting images and detecting titles, with comprehensive URL content fetching and anti-bot detection.
 - Mailer: Sends 6-digit verification codes via QQ Email SMTP.
-- Uploader: Manages upload and style selection, generates front matter, writes posts to _posts/, builds Jekyll site, syncs to GitHub, and integrates LLM-based content rewriting.
-- **Updated** Enhanced Article Viewer: Provides sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality with polling mechanism for GitHub Pages article availability checking.
+- Uploader: Manages upload and style selection, generates front matter, writes posts to _posts/, builds Jekyll site, syncs to GitHub, integrates LLM-based content rewriting, and provides URL validation service for GitHub Pages.
+- **Updated** Enhanced Article Viewer: Provides sophisticated JavaScript-based page loading detection with polling mechanism for GitHub Pages URL validation, improved sharing functionality, and enhanced user feedback.
 - CLI Tool: Offers commands for local preview, building, admin server, creating posts, listing posts, and deploying.
 - **Updated** Article Illustration Skills: Provides configuration for enhanced visual content creation with customizable preferences and output directories.
+- **Updated** URL Content Fetching System: Comprehensive system for fetching content from URLs with anti-bot detection, security validation, and intelligent content extraction.
 
 **Section sources**
 - [app/__init__.py:43-76](file://app/__init__.py#L43-L76)
@@ -162,13 +171,13 @@ AIS --> A_up
 - [.baoyu-skills/baoyu-article-illustrator/EXTEND.md:1-15](file://.baoyu-skills/baoyu-article-illustrator/EXTEND.md#L1-L15)
 
 ## Architecture Overview
-The system follows a clear separation of concerns with enhanced LLM integration and improved user experience:
-- Flask handles user interactions, authentication, and content ingestion.
-- Converter transforms heterogeneous inputs into standardized Markdown.
+The system follows a clear separation of concerns with enhanced LLM integration, comprehensive URL content fetching, and improved user experience:
+- Flask handles user interactions, authentication, and content ingestion with URL content fetching capabilities.
+- Converter transforms heterogeneous inputs into standardized Markdown with anti-bot detection and security validation.
 - **Updated** LLM Rewriting Engine: Applies style-specific content enhancement using MiniMax API for literary narrative and friendly explainer styles.
-- **Updated** Enhanced Article Viewing: Implements sophisticated JavaScript-based page loading detection with polling mechanism for GitHub Pages URL validation.
+- **Updated** Enhanced Article Viewing: Implements sophisticated JavaScript-based page loading detection with polling mechanism for GitHub Pages URL validation and improved sharing functionality.
 - Jekyll renders styled HTML from Markdown posts with shared layouts and assets.
-- GitHub Pages publishes the static site with improved availability checking.
+- GitHub Pages publishes the static site with improved availability checking and security restrictions.
 
 ```mermaid
 graph TB
@@ -181,10 +190,14 @@ FS["_posts/ (Markdown)"]
 JE["Jekyll Build<br/>_config.yml, _layouts/, _includes/"]
 GH["GitHub Pages"]
 AV["Article Viewer<br/>JS Polling, URL Validation"]
+URL["URL Content Fetching<br/>Anti-Bot Detection"]
+SEC["Security Validation<br/>URL Restrictions"]
 U --> FL
 FL --> DB
 FL --> CV
 FL --> LLM
+FL --> URL
+FL --> SEC
 CV --> FS
 LLM --> FS
 FL --> FS
@@ -271,27 +284,68 @@ A-->>U : Redirect to /admin/login
 - HTML: Uses html2text to convert to Markdown.
 - Markdown: Pass-through with validation.
 - Extracts title from first heading or first line.
+- **Updated** URL Content Fetching: Comprehensive system for fetching content from URLs with anti-bot detection, security validation, and intelligent content extraction.
 
 ```mermaid
 flowchart TD
-In(["Input File/Text"]) --> Detect["Detect Extension/Type"]
+In(["Input File/Text/URL"]) --> Detect["Detect Extension/Type"]
 Detect --> |PDF| PDFConv["convert_pdf()<br/>PyMuPDF"]
 Detect --> |DOCX| DocxConv["convert_docx()<br/>Mammoth + html2text"]
 Detect --> |HTML| HtmlConv["convert_html()<br/>html2text"]
 Detect --> |MD| MdPass["Pass-through"]
+Detect --> |URL| UrlFetch["fetch_url_as_markdown()<br/>Anti-Bot Detection"]
 PDFConv --> OutMd["Clean Markdown"]
 DocxConv --> OutMd
 HtmlConv --> OutMd
 MdPass --> OutMd
+UrlFetch --> OutMd
 OutMd --> Title["extract_title()"]
 Title --> End(["Return Markdown"])
 ```
 
 **Diagram sources**
 - [app/converter.py:78-108](file://app/converter.py#L78-L108)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
 
 **Section sources**
 - [app/converter.py:7-108](file://app/converter.py#L7-L108)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
+
+### URL Content Fetching System
+
+The system now includes a comprehensive URL content fetching system with sophisticated anti-bot detection and security validation:
+
+#### Anti-Bot Detection
+- **Known Host Blocking**: Pre-flight validation against known anti-bot domains (掘金, 知乎, 微信公众号, Twitter, Medium, etc.)
+- **Response Analysis**: Post-flight detection of JS-challenge and login-wall markers in fetched content
+- **Short Content Protection**: Detection of extremely short responses that indicate anti-bot pages
+- **User Agent Rotation**: Intelligent user agent and referer headers to mimic real browsers
+
+#### Security Validation
+- **Domain Whitelisting**: Only allows fetching from trusted domains
+- **Content Validation**: Ensures fetched content is legitimate article content
+- **Timeout Handling**: Prevents hanging requests with 30-second timeout
+- **Encoding Detection**: Automatic charset detection and handling
+
+```mermaid
+flowchart TD
+URL["URL Input"] --> PreCheck["Pre-flight Host Check"]
+PreCheck --> |Blocked| Error["URLFetchBlocked Exception"]
+PreCheck --> |Allowed| Fetch["HTTP GET Request"]
+Fetch --> Response["HTTP Response"]
+Response --> Validate["Content Validation"]
+Validate --> |Anti-Bot Detected| Error
+Validate --> |Valid Content| Convert["Convert to Markdown"]
+Convert --> Success["Return (Markdown, Title)"]
+```
+
+**Diagram sources**
+- [app/converter.py:336-376](file://app/converter.py#L336-L376)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
+
+**Section sources**
+- [app/converter.py:297-398](file://app/converter.py#L297-L398)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
 
 ### Uploader and Article Generation
 - Upload: Accepts file or pasted content, converts to Markdown, saves draft to data/drafts, stores draft_id in session.
@@ -300,6 +354,7 @@ Title --> End(["Return Markdown"])
 - Generate: Builds front matter (layout, title, date, tags, optional description/summary), writes to _posts/, optionally auto-syncs to GitHub.
 - Articles: Scans _posts/, parses front matter, renders management list.
 - View/Delete: Renders individual article previews and deletes posts.
+- **Updated** URL Validation Service: Dedicated Flask route for validating GitHub Pages article URLs with security restrictions and timeout handling.
 
 ```mermaid
 sequenceDiagram
@@ -310,7 +365,7 @@ participant LLM as "MiniMax API"
 participant FS as "_posts/"
 participant JE as "Jekyll"
 U->>UP : POST /admin/upload
-UP->>CV : detect_and_convert()
+UP->>CV : detect_and_convert() or fetch_url_as_markdown()
 CV-->>UP : Markdown + title
 UP->>UP : Save draft to data/drafts
 UP-->>U : Redirect to /admin/upload/style
@@ -334,6 +389,27 @@ UP-->>U : Success + optional auto-sync
 
 **Section sources**
 - [app/uploader.py:299-518](file://app/uploader.py#L299-L518)
+
+### GitHub Pages URL Validation Service
+
+The system implements a dedicated Flask route for validating GitHub Pages article URLs with comprehensive security and validation:
+
+#### URL Building Logic
+- **Filename Parsing**: Extracts date and slug from Jekyll post filename format (YYYY-MM-DD-slug.md)
+- **URL Construction**: Builds proper GitHub Pages URL structure with year/month/day hierarchy
+- **Migration from Blob URLs**: Migrated from GitHub blob URLs to GitHub Pages URLs for improved reliability
+- **Fallback Handling**: Graceful fallback to base URL if filename parsing fails
+
+#### Security and Validation
+- **Base URL Restriction**: Prevents validation of non-GitHub Pages URLs using strict prefix checking
+- **HTTP HEAD Requests**: Efficient validation using HEAD requests to minimize bandwidth
+- **Timeout Handling**: 8-second timeout to prevent hanging requests
+- **Redirect Following**: Automatic handling of URL redirects
+- **Rate Limiting**: Built-in rate limiting through timeout and retry mechanisms
+
+**Section sources**
+- [app/uploader.py:1346-1361](file://app/uploader.py#L1346-L1361)
+- [app/uploader.py:1466-1479](file://app/uploader.py#L1466-L1479)
 
 ### Jekyll Configuration and Styling
 - Jekyll configuration enables feed, SEO, and pagination plugins, sets permalink and defaults for posts.
@@ -667,6 +743,7 @@ The system now supports enhanced content management with expanded categorization
 - **Multi-Format Support**: Seamless handling of research papers, literary works, and technical documents
 - **Updated** LLM Integration: Automatic content enhancement for literary and friendly styles
 - **Updated** Status Indicators: Visual indicators for article publication status
+- **Updated** URL Content Fetching: Support for fetching content from external URLs with anti-bot detection
 
 **Section sources**
 - [_posts/2025-01-20-emergence-reasoning-llm.md:1-41](file://_posts/2025-01-20-emergence-reasoning-llm.md#L1-L41)
@@ -764,9 +841,11 @@ GENERIC --> REWRITTEN
 - Python dependencies: Flask, Flask-Login, PyMuPDF, Mammoth, html2text, python-dotenv, python-slugify.
 - Ruby dependencies: Jekyll, jekyll-feed, jekyll-seo-tag, jekyll-paginate.
 - **Updated** LLM dependencies: MiniMax API integration for content rewriting services.
-- **Updated** External API dependencies: requests library for GitHub Pages URL validation.
+- **Updated** External API dependencies: requests library for GitHub Pages URL validation and URL content fetching.
+- **Updated** Security dependencies: BeautifulSoup for HTML parsing and content extraction, urllib.parse for URL validation.
+- **Updated** Pattern matching dependencies: Regular expressions for anti-bot detection and content validation.
 - Internal coupling:
-  - uploader.py depends on converter.py, Jekyll build, MiniMax API, and requests library.
+  - uploader.py depends on converter.py, Jekyll build, MiniMax API, requests library, and security validation.
   - auth.py depends on SQLite and mailer.py.
   - app/__init__.py centralizes DB initialization and blueprint registration.
   - article_view.html depends on uploader.py for URL validation API endpoint.
@@ -783,6 +862,9 @@ A_view["app/templates/article_view.html"]
 Wiki["wiki.py"]
 LLM["MiniMax API"]
 REQ["requests library"]
+BS4["BeautifulSoup"]
+URLLIB["urllib.parse"]
+RE["re module"]
 AIS[".baoyu-skills/EXTEND.md"]
 Req --> A_init
 Req --> A_auth
@@ -790,6 +872,9 @@ Req --> A_conv
 Req --> A_up
 Req --> LLM
 Req --> REQ
+Req --> BS4
+Req --> URLLIB
+Req --> RE
 Gem --> Wiki
 A_up --> Wiki
 A_up --> AIS
@@ -828,6 +913,8 @@ A_view --> A_up
 - **Updated** URL validation service implements timeout handling to prevent hanging requests.
 - **Updated** Copy-to-clipboard functionality provides immediate user feedback without blocking UI.
 - **Updated** GitHub Pages URL migration improves reliability and reduces DNS-related issues.
+- **Updated** Anti-bot detection prevents wasted resources on invalid content sources.
+- **Updated** Security validation protects against malicious URL requests and unauthorized access.
 
 ## Troubleshooting Guide
 Common issues and resolutions:
@@ -840,6 +927,11 @@ Common issues and resolutions:
   - File too large: Limit 20MB uploads.
   - PDF extraction failures: Scanned PDFs unsupported.
   - Empty content: Provide non-empty input.
+- **Updated** URL Content Fetching Issues
+  - Anti-bot blocked: Sites like 知乎, 掘金, Twitter are intentionally blocked.
+  - Timeout errors: Increase timeout or try alternative content sources.
+  - Invalid URLs: Ensure URLs start with http:// or https://.
+  - Content validation failures: Check if fetched content is legitimate article content.
 - Generation and Sync
   - Jekyll build failures: Check content validity and front matter.
   - Git configuration missing: Configure user.name and user.email.
@@ -863,10 +955,12 @@ Common issues and resolutions:
   - URL validation failures: Ensure GitHub Pages URL format matches expected pattern.
   - DNS delay messages: Wait for GitHub Pages propagation (typically 30-60 seconds).
   - **Updated** GitHub Pages URL migration issues: Verify migration from blob URLs to Pages URLs completed successfully.
+  - **Updated** Anti-bot detection false positives: Check if URL is legitimately blocked.
 - **Updated** JavaScript Polling Issues
   - Infinite retries: Check console for JavaScript errors preventing retry logic.
   - Incorrect status messages: Verify PAGES_URL variable is properly set in template.
   - API endpoint not found: Ensure Flask route is properly registered and accessible.
+  - **Updated** Security validation failures: Check if URL passes base URL restriction.
 
 **Section sources**
 - [app/auth.py:36-48](file://app/auth.py#L36-L48)
@@ -881,7 +975,7 @@ Common issues and resolutions:
 ## Conclusion
 The Article Presentation System offers a streamlined workflow for creating, styling, and publishing blog articles with enhanced visual content creation capabilities and improved user experience. By combining Flask for management, Jekyll for rendering, and LLM integration for content enhancement, it achieves simplicity, flexibility, and efficient publishing to GitHub Pages. The six blog styles enable diverse presentation while maintaining a cohesive design system, supporting everything from academic research to literary narratives, technical documentation, and enhanced visual storytelling.
 
-**Updated** The addition of sophisticated JavaScript-based page loading detection, URL validation, and improved sharing functionality significantly enhances the user experience during article publication. The polling mechanism for GitHub Pages article availability checking with retry logic and user feedback addresses common DNS delay issues, while the enhanced copy-to-clipboard functionality provides immediate user feedback and social sharing capabilities. The migration from GitHub blob URLs to GitHub Pages URLs improves reliability and reduces DNS-related issues, providing a more robust publishing experience.
+**Updated** The addition of sophisticated JavaScript-based page loading detection, comprehensive URL content fetching system with anti-bot detection, URL validation, and improved sharing functionality significantly enhances the user experience during article publication. The polling mechanism for GitHub Pages article availability checking with retry logic and user feedback addresses common DNS delay issues, while the enhanced copy-to-clipboard functionality provides immediate user feedback and social sharing capabilities. The migration from GitHub blob URLs to GitHub Pages URLs improves reliability and reduces DNS-related issues, providing a more robust publishing experience. The anti-bot detection system protects system resources and ensures only legitimate content is processed.
 
 ## Appendices
 
@@ -889,7 +983,7 @@ The Article Presentation System offers a streamlined workflow for creating, styl
 ```mermaid
 flowchart LR
 Login["Login"] --> Wiki["Wiki Homepage"]
-Wiki --> Upload["Upload/Paste Content"]
+Wiki --> Upload["Upload/Paste/URL Content"]
 Upload --> Style["Select Blog Style<br/>(6 Options)"]
 Style --> LLM["LLM Content Enhancement<br/>(if applicable)"]
 LLM --> Generate["Generate Markdown + Front Matter"]
@@ -952,3 +1046,14 @@ The article viewing interface now provides sophisticated user experience with Ja
 - [app/uploader.py:492-507](file://app/uploader.py#L492-L507)
 - [app/uploader.py:509-522](file://app/uploader.py#L509-L522)
 - [app/templates/article_view.html:322-381](file://app/templates/article_view.html#L322-L381)
+
+### URL Content Fetching Security
+- **Anti-Bot Detection**: Comprehensive blocking of known anti-bot domains
+- **Content Validation**: Post-flight detection of JS-challenge and login-wall markers
+- **Security Restrictions**: URL validation service prevents unauthorized access attempts
+- **Timeout Handling**: Prevents resource exhaustion through timeout mechanisms
+
+**Section sources**
+- [app/converter.py:297-398](file://app/converter.py#L297-L398)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
+- [app/uploader.py:1466-1479](file://app/uploader.py#L1466-L1479)

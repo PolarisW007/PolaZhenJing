@@ -6,11 +6,13 @@
 - [app/auth.py](file://app/auth.py)
 - [app/converter.py](file://app/converter.py)
 - [app/uploader.py](file://app/uploader.py)
+- [app/jobs.py](file://app/jobs.py)
 - [app/mailer.py](file://app/mailer.py)
 - [app/templates/upload.html](file://app/templates/upload.html)
+- [app/templates/status.html](file://app/templates/status.html)
+- [app/templates/articles.html](file://app/templates/articles.html)
 - [app/templates/login.html](file://app/templates/login.html)
 - [app/templates/register.html](file://app/templates/register.html)
-- [app/templates/articles.html](file://app/templates/articles.html)
 - [app/templates/base.html](file://app/templates/base.html)
 - [_config.yml](file://_config.yml)
 - [.github/workflows/deploy.yml](file://.github/workflows/deploy.yml)
@@ -21,31 +23,36 @@
 
 ## Update Summary
 **Changes Made**
-- Updated to reflect enhanced file upload and processing capabilities with improved API key handling
-- Added documentation for new MiniMax API integration for LLM rewriting
-- Documented expanded dependency support including markdown, requests, and gunicorn libraries
-- Enhanced file conversion pipeline with better text processing capabilities
-- Updated deployment workflow with improved GitHub Actions configuration
+- Added comprehensive documentation for new asynchronous job processing system with SQLite-backed job queue
+- Enhanced upload interface documentation with URL input capability and anti-bot protection
+- Documented new status monitoring APIs for real-time job progress tracking
+- Updated authentication system documentation to reflect Flask session-based approach
+- Expanded AI integration documentation with MiniMax API capabilities
+- Enhanced deployment workflow documentation with GitHub Actions improvements
 
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [System Architecture](#system-architecture)
 3. [Authentication System](#authentication-system)
-4. [File Upload and Conversion Interface](#file-upload-and-conversion-interface)
-5. [Blog Style Management](#blog-style-management)
-6. [Article Management](#article-management)
-7. [AI Integration and LLM Rewriting](#ai-integration-and-llm-rewriting)
-8. [Deployment and Publishing](#deployment-and-publishing)
-9. [Configuration](#configuration)
-10. [Migration from REST API](#migration-from-rest-api)
-11. [Troubleshooting Guide](#troubleshooting-guide)
+4. [Asynchronous Job Processing System](#asynchronous-job-processing-system)
+5. [Enhanced Upload Interface](#enhanced-upload-interface)
+6. [Status Monitoring APIs](#status-monitoring-apis)
+7. [Article Management](#article-management)
+8. [AI Integration and LLM Rewriting](#ai-integration-and-llm-rewriting)
+9. [Deployment and Publishing](#deployment-and-publishing)
+10. [Configuration](#configuration)
+11. [Migration from REST API](#migration-from-rest-api)
+12. [Troubleshooting Guide](#troubleshooting-guide)
 
 ## Introduction
-This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaced the previous FastAPI RESTful API. The system now operates as a lightweight Flask application with server-rendered HTML templates, integrated with Jekyll for static site generation and GitHub Actions for automated deployment. The latest enhancements include improved file upload processing capabilities, enhanced API key handling for AI integrations, and expanded dependency support for better text processing and deployment options.
+This document provides comprehensive documentation for PolaZhenJing's new Flask-based management interface that replaced the previous FastAPI RESTful API. The system now operates as a lightweight Flask application with server-rendered HTML templates, integrated with Jekyll for static site generation and GitHub Actions for automated deployment. The latest enhancements include a robust asynchronous job processing system, enhanced file upload processing capabilities with URL input support, improved API key handling for AI integrations, and expanded dependency support for better text processing and deployment options.
 
 **Key Changes from Previous REST API:**
 - Complete removal of all REST endpoints and FastAPI backend
 - Migration from JWT authentication to Flask session-based authentication
+- Implementation of asynchronous job processing with SQLite-backed queue
+- Enhanced upload interface with URL input capability and anti-bot protection
+- Real-time status monitoring APIs for job progress tracking
 - Implementation of file conversion pipeline for multiple document formats
 - Replacement of dynamic API calls with static site generation
 - Integration with GitHub Actions for automated deployment to GitHub Pages
@@ -53,22 +60,25 @@ This document provides comprehensive documentation for PolaZhenJing's new Flask-
 - Improved file processing with markdown, requests, and gunicorn libraries
 
 ## System Architecture
-The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication. The system now includes enhanced AI integration capabilities and improved deployment options.
+The new architecture consists of a Flask management server that handles authentication and file processing, with Jekyll generating static HTML content for publication. The system now includes enhanced AI integration capabilities, asynchronous job processing, and improved deployment options.
 
 ```mermaid
 graph TB
 FlaskApp["Flask Management App<br/>app/__init__.py"] --> AuthBP["Authentication Blueprint<br/>app/auth.py"]
 FlaskApp --> UploadBP["Upload Blueprint<br/>app/uploader.py"]
+FlaskApp --> Jobs["Job Queue System<br/>app/jobs.py"]
 FlaskApp --> Converter["File Conversion Pipeline<br/>app/converter.py"]
 FlaskApp --> Mailer["Email Verification<br/>app/mailer.py"]
 AuthBP --> Templates["Jinja2 Templates<br/>app/templates/"]
 UploadBP --> Templates
+UploadBP --> Jobs
 UploadBP --> Converter
 UploadBP --> MiniMax["MiniMax API Integration<br/>LLM Rewriting"]
 UploadBP --> RequestsLib["HTTP Communication<br/>requests library"]
 UploadBP --> MarkdownLib["Text Processing<br/>markdown library"]
 UploadBP --> Gunicorn["Production Deployment<br/>gunicorn server"]
 UploadBP --> Jekyll["Jekyll Static Generator<br/>_config.yml"]
+Jobs --> SQLite["SQLite Database<br/>wiki.db"]
 Templates --> HTML["Generated HTML Pages"]
 Converter --> Posts["_posts/ Directory<br/>Markdown Articles"]
 MiniMax --> Posts
@@ -84,6 +94,7 @@ Site --> GitHubPages["GitHub Pages Deployment<br/>.github/workflows/deploy.yml"]
 - [app/__init__.py:43-61](file://app/__init__.py#L43-L61)
 - [app/auth.py:13](file://app/auth.py#L13)
 - [app/uploader.py:14](file://app/uploader.py#L14)
+- [app/jobs.py:12](file://app/jobs.py#L12)
 - [app/converter.py:1](file://app/converter.py#L1)
 - [app/mailer.py](file://app/mailer.py)
 - [_config.yml:1-49](file://_config.yml#L1-L49)
@@ -135,79 +146,162 @@ Auth-->>User : Set Flask session + redirect
 - [app/auth.py:26-167](file://app/auth.py#L26-L167)
 - [PRD.md:258-280](file://PRD.md#L258-L280)
 
-## File Upload and Conversion Interface
-The upload interface supports multiple document formats with automatic conversion to Markdown and style selection. The system now includes enhanced processing capabilities with improved text handling and better error management.
+## Asynchronous Job Processing System
+The system implements a robust asynchronous job processing system using SQLite for persistent job state and daemon threads for background execution. This enables long-running operations like LLM rewriting and article generation without blocking the main application thread.
+
+### Job Queue Architecture
+```mermaid
+flowchart TD
+A[Job Submission] --> B[Create Job Record<br/>SQLite]
+B --> C[Spawn Daemon Thread]
+C --> D[Execute Background Task]
+D --> E[Update Job State<br/>Progress/Stage/Error]
+E --> F[Status Polling<br/>Real-time Updates]
+F --> G[Job Completion<br/>Success/Failure]
+G --> H[Redirect to Results Page]
+```
+
+**Diagram sources**
+- [app/jobs.py:79-187](file://app/jobs.py#L79-L187)
+- [app/uploader.py:1161-1164](file://app/uploader.py#L1161-L1164)
+
+### Job States and Transitions
+- **PENDING** → Initial state when job is created
+- **RUNNING** → Job is actively being processed
+- **DONE** → Job completed successfully
+- **FAILED** → Job encountered an error during processing
+
+### Job Management Endpoints
+- **POST /admin/generate** - Submit async generation job and redirect to status page
+- **GET /admin/generate/status/<job_id>** - Render HTML status page with real-time progress
+- **GET /admin/generate/progress/<job_id>** - JSON endpoint for status polling
+
+### Job Data Model
+| Field | Type | Description |
+|-------|------|-------------|
+| id | String | Unique job identifier (UUID hex) |
+| user_id | Integer | User who submitted the job |
+| kind | String | Job type (e.g., 'generate') |
+| status | String | Current job state |
+| stage | String | Current processing stage |
+| progress | Integer | Progress percentage (0-100) |
+| title | String | Job title/description |
+| result_filename | String | Generated file name |
+| error | String | Error message if failed |
+| messages | JSON Array | Progress messages/logs |
+| created_at | Timestamp | Job creation time |
+| updated_at | Timestamp | Last update time |
+
+**Section sources**
+- [app/jobs.py:12-187](file://app/jobs.py#L12-L187)
+- [app/uploader.py:1126-1164](file://app/uploader.py#L1126-L1164)
+- [app/uploader.py:1299-1326](file://app/uploader.py#L1299-L1326)
+
+## Enhanced Upload Interface
+The upload interface supports multiple document formats with automatic conversion to Markdown and style selection. The system now includes enhanced processing capabilities with improved text handling, URL input support, and anti-bot protection.
 
 ### Upload Endpoints
-- **GET /admin/upload** - Upload form with file upload and paste content options
-- **POST /admin/upload** - Process uploaded files or pasted content
+- **GET /admin/upload** - Upload form with file upload, paste content, and URL input tabs
+- **POST /admin/upload** - Process uploaded files, pasted content, or URL input
 - **GET /admin/upload/style** - Style selection interface
-- **POST /admin/generate** - Generate final blog post with selected style
+- **POST /admin/generate** - Submit async generation job with selected style
 
-### Supported File Formats
-| Format | Extension | Processing Method |
-|--------|-----------|-------------------|
-| Markdown | `.md` | Direct passthrough with markdown library processing |
-| PDF | `.pdf` | PyMuPDF text extraction + image extraction |
-| Word | `.docx`, `.doc` | Mammoth HTML conversion + html2text |
-| HTML | `.html`, `.htm` | Direct HTML to Markdown conversion using requests library |
+### Supported Input Methods
+1. **File Upload** - Drag and drop or browse for PDF, Word, HTML, Markdown files
+2. **Paste Content** - Direct Markdown content input with formatting preservation
+3. **URL Input** - Fetch content from public web pages with anti-bot protection
+
+### URL Input Capabilities
+The URL input feature includes comprehensive anti-bot protection and intelligent content extraction:
+
+**Supported Domains**: Personal blogs, GitHub Pages, arXiv, official documentation sites
+**Blocked Domains**: Juejin, Zhihu, WeChat Official Accounts, Xiaohongshu, X/Twitter, Weibo, Bilibili, CSDN, Medium (due to anti-bot measures)
+
+**Content Extraction Features**:
+- Intelligent HTML parsing with site-specific selectors
+- Title extraction from OpenGraph, Twitter Cards, and JSON-LD
+- Relative URL absolutization for proper link resolution
+- Noise removal and content isolation
+- Anti-bot detection and graceful fallback handling
 
 ### Upload Process Flow
 ```mermaid
 flowchart TD
-A[User Upload Form] --> B{File or Paste?}
+A[User Upload Form] --> B{Input Method?}
 B --> |File Upload| C[File Validation]
 B --> |Paste Content| D[Content Processing]
-C --> E[Format Detection]
-E --> F[Conversion Pipeline]
-D --> F
-F --> G[Title Extraction]
-G --> H[Style Selection]
-H --> I[Final Generation]
-I --> J[Markdown Output]
-J --> K[LLM Enhancement]
-K --> L[Final Processing]
-L --> M[GitHub Pages URL Check]
+B --> |URL Input| E[URL Validation]
+C --> F[Format Detection]
+E --> F
+F --> G[Conversion Pipeline]
+G --> H[Title Extraction]
+H --> I[Style Selection]
+I --> J[Async Job Submission]
+J --> K[Status Page with Real-time Updates]
+K --> L[Article Generation Complete]
 ```
 
 **Diagram sources**
-- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
-- [app/converter.py:58-87](file://app/converter.py#L58-L87)
+- [app/uploader.py:1041-1109](file://app/uploader.py#L1041-L1109)
+- [app/converter.py:379-445](file://app/converter.py#L379-L445)
 
 **Section sources**
-- [app/uploader.py:76-210](file://app/uploader.py#L76-L210)
-- [app/converter.py:1-88](file://app/converter.py#L1-L88)
-- [PRD.md:40-62](file://PRD.md#L40-L62)
+- [app/uploader.py:1041-1109](file://app/uploader.py#L1041-L1109)
+- [app/converter.py:284-445](file://app/converter.py#L284-L445)
+- [app/templates/upload.html:1-132](file://app/templates/upload.html#L1-L132)
 
-## Blog Style Management
-The system supports 5 distinct blog styles with custom layouts and CSS. The style selection interface now includes enhanced preview capabilities and better integration with the markdown processing pipeline.
+## Status Monitoring APIs
+The system provides comprehensive real-time status monitoring for asynchronous jobs with both HTML and JSON endpoints for different use cases.
 
-### Available Styles
-1. **Deep Technical** - Code-heavy, dark-mode optimized
-2. **Academic Insight** - Research paper structure, citation format
-3. **Industry Vision** - Bold headlines, modern layout
-4. **Friendly Explainer** - Warm storytelling, beginner-friendly
-5. **Creative Visual** - Image-first, gallery presentation
-6. **Literary Narrative** - Enhanced with MiniMax AI rewriting capabilities
+### Status Monitoring Endpoints
+- **GET /admin/generate/status/<job_id>** - HTML status page with live progress updates
+- **GET /admin/generate/progress/<job_id>** - JSON endpoint for AJAX polling
 
-### Style Selection Interface
-The style selection page displays 5 cards with:
-- Style name (Chinese + English)
-- Mini preview thumbnail
-- Brief description
-- "Best for" recommendations
-- Live content preview
-- LLM enhancement capability indicator
+### Status Page Features
+The HTML status page provides rich user experience with:
+- Real-time progress bar with percentage completion
+- Stage-by-stage processing indicators
+- Elapsed time counter
+- Inline progress messages
+- Auto-refresh every 2 seconds
+- Automatic redirection on completion
+- Retry and navigation controls
+
+### JSON Status Endpoint Response
+The JSON endpoint returns structured data for programmatic access:
+
+```json
+{
+  "status": "running|done|failed",
+  "stage": "Current processing stage",
+  "progress": 75,
+  "error": "Error message if failed",
+  "messages": [
+    {"level": "info|warning", "text": "Progress message"}
+  ],
+  "articles_url": "/admin/articles"
+}
+```
+
+### Active Job Monitoring
+The articles page displays active generation jobs with:
+- Automatic refresh every 10 seconds when pending jobs exist
+- Real-time progress updates
+- Direct links to individual job status pages
+- Color-coded status indicators
+- Creation time tracking
 
 **Section sources**
-- [app/uploader.py:16-27](file://app/uploader.py#L16-L27)
-- [PRD.md:64-99](file://PRD.md#L64-L99)
+- [app/uploader.py:1299-1326](file://app/uploader.py#L1299-L1326)
+- [app/jobs.py:140-160](file://app/jobs.py#L140-L160)
+- [app/templates/status.html:1-126](file://app/templates/status.html#L1-L126)
+- [app/templates/articles.html:1-104](file://app/templates/articles.html#L1-L104)
 
 ## Article Management
-The management interface provides CRUD operations for blog posts with enhanced preview capabilities and GitHub Pages integration.
+The management interface provides CRUD operations for blog posts with enhanced preview capabilities, GitHub Pages integration, and real-time job status monitoring.
 
 ### Article Management Endpoints
-- **GET /admin/articles** - List all articles with metadata and preview capabilities
+- **GET /admin/articles** - List all articles with metadata and real-time job status
 - **POST /admin/articles/<filename>/delete** - Delete specific article
 - **POST /admin/sync** - Sync to GitHub for deployment
 - **GET /admin/api/check-pages-url** - Check GitHub Pages URL availability
@@ -231,11 +325,18 @@ Each article includes:
 - Status indicators (published/local only)
 - Live URL validation
 - Reading time estimation
+- Real-time job status display
+
+### GitHub Pages Integration
+The system automatically generates GitHub Pages URLs from Jekyll filename patterns:
+- **Filename Pattern**: `YYYY-MM-DD-slug.md`
+- **URL Pattern**: `https://polarisw007.github.io/PolaZhenJing/YYYY/MM/DD/slug/`
+- **Live URL Checking**: Real-time validation of published articles
 
 **Section sources**
-- [app/uploader.py:171-187](file://app/uploader.py#L171-L187)
-- [app/uploader.py:190-210](file://app/uploader.py#L190-L210)
-- [PRD.md:428-470](file://PRD.md#L428-L470)
+- [app/uploader.py:1329-1343](file://app/uploader.py#L1329-L1343)
+- [app/uploader.py:1466-1479](file://app/uploader.py#L1466-L1479)
+- [app/templates/articles.html:1-104](file://app/templates/articles.html#L1-L104)
 
 ## AI Integration and LLM Rewriting
 The system now includes advanced AI integration capabilities with MiniMax API for content enhancement and style-specific rewriting.
@@ -269,10 +370,15 @@ I --> J[Return Enhanced Content]
 ```
 
 **Diagram sources**
-- [app/uploader.py:185-235](file://app/uploader.py#L185-L235)
+- [app/uploader.py:1184-1194](file://app/uploader.py#L1184-L1194)
+
+### AI Integration Endpoints
+- **GET /admin/api/check-pages-url** - Validate GitHub Pages URL accessibility
+- **Internal AI Calls** - MiniMax API integration for content rewriting and image generation
 
 **Section sources**
 - [app/uploader.py:185-235](file://app/uploader.py#L185-L235)
+- [app/uploader.py:1466-1479](file://app/uploader.py#L1466-L1479)
 - [PRD.md:40-62](file://PRD.md#L40-L62)
 
 ## Deployment and Publishing
@@ -376,6 +482,8 @@ The system has been completely migrated from the previous FastAPI RESTful archit
 - **Enhanced**: AI integration with MiniMax API
 - **Robust**: Improved error handling and fallback mechanisms
 - **Production-ready**: Gunicorn deployment support
+- **Asynchronous**: Job queue system for long-running operations
+- **Real-time**: Status monitoring with live updates
 
 ### Migration Impact
 - **Authentication**: Changed from JWT to Flask sessions
@@ -384,6 +492,7 @@ The system has been completely migrated from the previous FastAPI RESTful archit
 - **Development**: Simplified local setup without Docker/PostgreSQL
 - **AI Integration**: Enhanced with MiniMax API capabilities
 - **Deployment**: Improved with production-ready server options
+- **User Experience**: Real-time job status monitoring and progress updates
 
 **Section sources**
 - [PRD.md:160-180](file://PRD.md#L160-L180)
@@ -411,9 +520,22 @@ The system has been completely migrated from the previous FastAPI RESTful archit
   - **Solution**: Install required dependencies (PyMuPDF, mammoth, html2text)
   - **Check**: Library availability in environment
 
+- **Problem**: "URL fetch failed"
+  - **Solution**: Check URL accessibility and anti-bot protection
+  - **Check**: Blocked domain or login wall detection
+
 - **Problem**: "LLM rewrite failed"
   - **Solution**: Check MiniMax API key configuration and network connectivity
   - **Check**: Environment variable MINIMAX_TOKEN_PLAN_API_KEY
+
+#### Job Processing Issues
+- **Problem**: "Task not found or expired"
+  - **Solution**: Refresh status page or resubmit job
+  - **Check**: Job ID validity and expiration (24-hour window)
+
+- **Problem**: "Background job failed"
+  - **Solution**: Check server logs for detailed error information
+  - **Check**: SQLite database connectivity and permissions
 
 #### Style Selection Issues
 - **Problem**: No style preview available
@@ -445,6 +567,6 @@ The system has been completely migrated from the previous FastAPI RESTful archit
 **Section sources**
 - [app/auth.py:34-48](file://app/auth.py#L34-L48)
 - [app/uploader.py:84-100](file://app/uploader.py#L84-L100)
-- [app/uploader.py:195-209](file://app/uploader.py#L195-L209)
-- [app/uploader.py:189-191](file://app/uploader.py#L189-L191)
-- [app/uploader.py:220-234](file://app/uploader.py#L220-L234)
+- [app/uploader.py:1072-1098](file://app/uploader.py#L1072-L1098)
+- [app/jobs.py:171-187](file://app/jobs.py#L171-L187)
+- [app/uploader.py:1466-1479](file://app/uploader.py#L1466-L1479)

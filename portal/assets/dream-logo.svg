@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">织梦空间黑金标识</title>
+  <desc id="desc">黑金三角、眼睛与放射光芒构成的站点 logo。</desc>
+  <defs>
+    <radialGradient id="halo" cx="50%" cy="46%" r="48%">
+      <stop offset="0%" stop-color="#fff6c7"/>
+      <stop offset="32%" stop-color="#e3b85e"/>
+      <stop offset="68%" stop-color="#5b3a13"/>
+      <stop offset="100%" stop-color="#050706"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="24%" y1="4%" x2="78%" y2="94%">
+      <stop offset="0%" stop-color="#fff5ca"/>
+      <stop offset="36%" stop-color="#efc267"/>
+      <stop offset="70%" stop-color="#9a661e"/>
+      <stop offset="100%" stop-color="#f8df91"/>
+    </linearGradient>
+    <linearGradient id="darkTri" x1="26%" y1="12%" x2="74%" y2="100%">
+      <stop offset="0%" stop-color="#15130d"/>
+      <stop offset="52%" stop-color="#060706"/>
+      <stop offset="100%" stop-color="#201508"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="160" height="160" rx="80" fill="#050706"/>
+  <circle cx="80" cy="78" r="60" fill="url(#halo)" opacity=".86"/>
+  <g stroke="url(#gold)" stroke-linecap="round" filter="url(#glow)" opacity=".88">
+    <path d="M80 6v28M80 126v28M18 78h25M117 78h25M34 32l18 18M108 106l18 18M126 32l-18 18M52 106l-18 18" stroke-width="3"/>
+    <path d="M57 13l7 24M103 13l-7 24M20 54l24 8M140 54l-24 8M20 102l24-8M140 102l-24-8M57 143l7-24M103 143l-7-24" stroke-width="2"/>
+    <path d="M71 20l4 21M89 20l-4 21M42 21l13 18M118 21l-13 18M12 70l21 3M148 70l-21 3M12 86l21-3M148 86l-21-3M42 135l13-18M118 135l-13-18" stroke-width="1.6"/>
+  </g>
+  <path d="M80 28 31 116h98Z" fill="url(#darkTri)" stroke="url(#gold)" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M80 43 46 106h68Z" fill="none" stroke="#6f4717" stroke-width="2" opacity=".85"/>
+  <path d="M39 112c18-10 27-17 41-17s23 7 41 17" fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M43 83c13-18 25-27 37-27s24 9 37 27c-13 17-25 25-37 25S56 100 43 83Z" fill="#f6db93" stroke="#2b1a08" stroke-width="3"/>
+  <path d="M54 83c9-10 17-15 26-15s17 5 26 15c-9 10-17 15-26 15s-17-5-26-15Z" fill="#11130f"/>
+  <circle cx="80" cy="83" r="15" fill="url(#gold)"/>
+  <circle cx="80" cy="83" r="7" fill="#060706"/>
+  <circle cx="75" cy="77" r="4" fill="#fff7d4"/>
+  <path d="M58 111c9-4 15-10 20-19M102 111c-9-4-15-10-20-19" fill="none" stroke="url(#gold)" stroke-width="2" stroke-linecap="round"/>
+</svg>

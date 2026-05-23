@@ -1,0 +1,7 @@
+﻿stage,paper_id,year_month,short_title,author_count_for_chart,author_count_total,author_count_comparable,note
+V1/LLM,2401.02954,2024-01,DeepSeek LLM,86,86,86,
+V2,2405.04434,2024-05,DeepSeek-V2,156,156,156,
+V3,2412.19437,2024-12,DeepSeek-V3 Technical Report,197,197,197,
+R1,2501.12948,2025-01,DeepSeek-R1,197,197,197,
+V3.2,2512.02556,2025-12,DeepSeek-V3.2,262,262,262,
+V4,V4-PDF,2026-05,DeepSeek-V4,269,317,269,V4 total includes Business & Compliance; comparable count keeps Research & Engineering only

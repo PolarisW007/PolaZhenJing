@@ -1,0 +1,25 @@
+﻿model_or_paper,date,stage,tech_lane,tech_module,problem_solved,inherits_from,feeds_into,confidence,note
+DeepSeek LLM,2024-01,DeepSeek LLM,模型架构 / MoE,稠密基座,建立主线训练底座,,DeepSeek-V2,high,LLaMA式架构；规模律与预训练流程
+DeepSeek-V2,2024-05,DeepSeek-V2,模型架构 / MoE,DeepSeekMoE,稀疏计算扩容,稠密基座,DeepSeek-V3; DeepSeek-V4,high,V2 report / DeepSeekMoE
+DeepSeek-V3,2024-12,DeepSeek-V3,模型架构 / MoE,Aux-loss-free Load Balancing,稳住大规模 MoE,DeepSeekMoE,DeepSeek-V4,high,auxiliary-loss-free load balancing
+DeepSeek-V4,2026-05,DeepSeek-V4,模型架构 / MoE,DeepSeekMoE + MTP,主干架构继续扩展,DeepSeekMoE; MTP; Aux-loss-free Load Balancing,DeepSeek-V4,high,并集成 Hybrid Attention、mHC、Muon 等新模块
+DeepSeek-V2,2024-05,DeepSeek-V2,注意力与长上下文,MLA,压缩 KV Cache,,DeepSeek-V3; DeepSeek-V3.2; DeepSeek-V4,high,Multi-head Latent Attention
+DeepSeek-V3,2024-12,DeepSeek-V3,注意力与长上下文,MLA 延续,高效注意力底座,MLA,DeepSeek-R1; DeepSeek-V3.2; DeepSeek-V4,high,V3 adopts MLA validated in V2
+DeepSeek-R1,2025-01,DeepSeek-R1,注意力与长上下文,沿用 V3 基座,注意力非主创新,MLA,DeepSeek-V3.2; DeepSeek-V4,medium,R1核心在后训练/RL，不是注意力架构升级
+DeepSeek-V3.2,2025-12,DeepSeek-V3.2,注意力与长上下文,DSA,长上下文效率,MLA 延续; 相关 Sparse Attention 系统探索,DeepSeek-V4,high,DeepSeek Sparse Attention under MLA
+DeepSeek-V4,2026-05,DeepSeek-V4,注意力与长上下文,Hybrid Attention: CSA + HCA,面向 1M 上下文,DSA; MLA 延续,DeepSeek-V4,high,CSA应用DSA；HCA做更重压缩
+DeepSeek-V2,2024-05,DeepSeek-V2,训练效率与稳定性,FP8 / KV 量化,降低推理与训练成本,,DeepSeek-V3,medium,V2 serving optimization
+DeepSeek-V3,2024-12,DeepSeek-V3,训练效率与稳定性,FP8 训练 + DualPipe,低成本大规模训练,FP8 / KV 量化,DeepSeek-V4,high,mixed precision training / pipeline overlap
+DeepSeek-V4; mHC,2026-05,DeepSeek-V4,训练效率与稳定性,mHC + Muon,更大 MoE 稳定训练,FP8 训练 + DualPipe,DeepSeek-V4,high,Manifold-Constrained Hyper-Connections / Muon optimizer
+DeepSeek LLM / DeepSeek-V2,2024-01/2024-05,DeepSeek LLM,推理 / RL / 后训练,SFT / RL 对齐,对话与基础能力释放,,DeepSeek-V3,high,SFT and alignment pipeline
+DeepSeek-V3,2024-12,DeepSeek-V3,推理 / RL / 后训练,SFT + RL,释放基座能力,SFT / RL 对齐,DeepSeek-R1,high,V3 post-training
+DeepSeek-R1,2025-01,DeepSeek-R1,推理 / RL / 后训练,GRPO / 推理RL,强化长链推理,SFT + RL,DeepSeek-V3.2; DeepSeek-V4,high,R1 built on V3-Base with GRPO
+DeepSeek-V3.2,2025-12,DeepSeek-V3.2,推理 / RL / 后训练,推理 + Agent 后训练,面向复杂任务,GRPO / 推理RL,DeepSeek-V4,high,mixed RL training with GRPO
+DeepSeek-V4,2026-05,DeepSeek-V4,推理 / RL / 后训练,综合后训练,推理/工具/Agent 集成,推理 + Agent 后训练; GRPO / 推理RL,DeepSeek-V4,high,comprehensive post-training pipeline
+DeepSeek-V3,2024-12,DeepSeek-V3,记忆、缓存与推理系统,MTP,可用于推测解码,,DeepSeek-V4,high,Multi-Token Prediction
+DeepSeek-V3.2,2025-12,DeepSeek-V3.2,记忆、缓存与推理系统,128K 长上下文工程,训练扩展 / 推理效率,MLA; DSA,DeepSeek-V4,high,128K long-context extension data
+Engram; Conditional Memory,2026-01/2026-02,related_system_paper,记忆、缓存与推理系统,Engram / Conditional Memory,知识查找 / 静态记忆,memory / lookup 系统探索,DeepSeek-V4,low,相关 memory 探索；非V4报告明确继承模块
+DeepSeek-V4,2026-05,DeepSeek-V4,记忆、缓存与推理系统,1M 上下文系统,降 FLOPs / KV Cache,Hybrid Attention: CSA + HCA; 128K 长上下文工程,DeepSeek-V4,high,Hybrid Attention 改善长上下文效率
+DeepSeek-VL; Janus; Janus-Pro,2024-03/2025-01,related_multimodal_paper,多模态 / OCR 旁路探索,视觉 / 多模态,理解与生成探索,,DeepSeek-OCR,medium,VL / Janus series
+DeepSeek-OCR; DeepSeek-OCR 2,2025-10/2026-01,related_multimodal_paper,多模态 / OCR 旁路探索,OCR 信息压缩,复杂文档压缩理解,视觉 / 多模态,DeepSeek-V4,low,Contexts Optical Compression / Visual Causal Flow
+DeepSeek-V4,2026-05,DeepSeek-V4,多模态 / OCR 旁路探索,多模态 / OCR 经验,弱关联，非主干架构,OCR 信息压缩,DeepSeek-V4,low,解释性弱关联；不作为V4主干架构线

@@ -2,24 +2,25 @@
 
 <cite>
 **Referenced Files in This Document**
-- [app/__init__.py](file://app/__init__.py)
-- [app/auth.py](file://app/auth.py)
-- [app/uploader.py](file://app/uploader.py)
-- [app/converter.py](file://app/converter.py)
-- [app/mailer.py](file://app/mailer.py)
-- [wiki.py](file://wiki.py)
-- [_posts/2025-01-15-understanding-transformer-attention.md](file://_posts/2025-01-15-understanding-transformer-attention.md)
-- [_posts/2025-02-10-visual-language-of-ai.md](file://_posts/2025-02-10-visual-language-of-ai.md)
+- [001_postgres_memory_ledger.sql](file://migrations/agent_memory/001_postgres_memory_ledger.sql)
+- [memory_store.py](file://app/memory_store.py)
+- [memory_service.py](file://app/memory_service.py)
+- [memory_guard.py](file://app/memory_guard.py)
+- [owner_identity.py](file://app/owner_identity.py)
+- [import_agent_memory_legacy.py](file://scripts/import_agent_memory_legacy.py)
+- [test_memory_store.py](file://tests/test_memory_store.py)
+- [test_memory_guard.py](file://tests/test_memory_guard.py)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Complete removal of PostgreSQL + Alembic architecture and SQLAlchemy models
-- Elimination of complex relational schema (Researches, Thoughts, Tags, Sharing entities)
-- Replacement with simplified SQLite-based single-table design
-- Removal of migration system and complex authentication token infrastructure
-- Streamlined database initialization and connection management
-- Shift from database-stored content to file-based article management
+- Complete replacement of SQLite-based architecture with PostgreSQL memory ledger implementation
+- Introduction of comprehensive memory management schema with 6 specialized tables
+- Implementation of intelligent memory governance with risk assessment and trust tiers
+- Addition of visitor suggestion system for community-driven memory curation
+- Integration of search index job queue for asynchronous indexing operations
+- Enhancement of audit logging for complete memory lifecycle tracking
+- Migration from file-based content storage to database-backed memory management
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,333 +35,603 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the database design and schema for PolaZhenJing v2, focusing on the simplified SQLite-based architecture for zero-configuration local development. The system has evolved from a complex PostgreSQL-backed application with Alembic migrations to a streamlined Flask-based solution with a single-user authentication table. This document covers the table structures, field definitions, data types, constraints, and the new simplified database design.
+This document describes the comprehensive PostgreSQL memory ledger design for PolaZhenJing's intelligent memory management system. The system has evolved from a simple SQLite-based architecture to a sophisticated PostgreSQL-backed memory management platform supporting advanced AI agent memory capabilities. The new design implements six specialized tables for raw event capture, memory item storage, embeddings, visitor suggestions, persona versions, and audit logging, enabling intelligent memory management with risk assessment, trust tiers, and community-driven curation.
 
-**Updated** Removed all references to previous SQLAlchemy models, researches, thoughts, tags, and sharing entities. The system now operates with a completely different architectural foundation.
+**Updated** The system now operates as a complete PostgreSQL memory ledger with advanced features for AI agent memory management, replacing the previous SQLite-based single-table design.
 
 ## Project Structure
-The database layer now uses a simple SQLite connection managed through Flask's application context. The system eliminates the previous complex relational schema and migration system in favor of a straightforward single-table design optimized for personal blog management. Database initialization occurs automatically during application startup, creating the necessary tables with minimal configuration requirements.
+The database layer now implements a comprehensive PostgreSQL schema with specialized tables for different aspects of memory management. The system supports both direct PostgreSQL access and optional JSON fallback for legacy compatibility. Database initialization occurs through migration scripts and programmatic schema creation, with automatic extension loading for PostgreSQL-specific features like pg_trgm and vector support.
 
 ```mermaid
 graph TB
-Config["Environment Variables"] --> App["Flask App"]
-App --> DBInit["init_db()"]
-DBInit --> SQLite["SQLite Database<br/>wiki.db"]
-SQLite --> UsersTable["users Table"]
-UsersTable --> AuthFlow["Authentication Flow"]
-AuthFlow --> Session["Flask Sessions"]
-Session --> UploadBP["Uploader Blueprint"]
+Config["Environment Variables"] --> App["Memory Service"]
+App --> DBInit["Schema Initialization"]
+DBInit --> Extensions["PostgreSQL Extensions"]
+Extensions --> RawEvents["raw_events Table"]
+Extensions --> MemoryItems["memory_items Table"]
+Extensions --> Embeddings["memory_embeddings Table"]
+Extensions --> Suggestions["visitor_suggestions Table"]
+Extensions --> Persona["persona_versions Table"]
+Extensions --> Audit["memory_audit_logs Table"]
+Extensions --> SearchJobs["search_index_jobs Table"]
 ```
 
 **Diagram sources**
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [001_postgres_memory_ledger.sql:1-119](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L1-L119)
+- [memory_store.py:77-86](file://app/memory_store.py#L77-L86)
 
 **Section sources**
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [001_postgres_memory_ledger.sql:1-119](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L1-L119)
+- [memory_store.py:77-86](file://app/memory_store.py#L77-L86)
 
 ## Core Components
-The simplified database design consists of a single table structure optimized for personal blog management with basic user authentication.
+The PostgreSQL memory ledger consists of six specialized tables designed for intelligent memory management with comprehensive tracking and governance capabilities.
 
-- Users Table
-  - Purpose: Store user authentication credentials and verification status
-  - Primary key: id (INTEGER, AUTOINCREMENT)
-  - Unique indexes: username, email
-  - Additional fields: password_hash, email_verified (INTEGER flag), created_at (TIMESTAMP)
-  - Business constraints:
-    - Username and email must be unique
-    - Passwords are stored as hashes using Werkzeug security
-    - Email verification tracked via integer flag (0/1)
-    - Automatic timestamp creation on user registration
+### Raw Events Table
+Purpose: Capture and store raw memory events with deduplication and risk assessment
+Primary Key: id (TEXT)
+Unique Constraints: (content_hash, source_type, subject_id)
+Additional Fields: source_type, source_uri, subject_id, actor_id, content, occurred_at, ingested_at, trust_tier, privacy_scope, risk_flags (JSONB)
+Business Constraints:
+- Prevents duplicate event ingestion through composite unique constraint
+- Automatically timestamps ingestion with default now()
+- Stores risk assessment flags as JSONB for flexible schema evolution
+
+### Memory Items Table
+Purpose: Store processed memory items with rich metadata and lifecycle tracking
+Primary Key: id (TEXT)
+Indexes: status, subject_id, content (GIN trigram)
+Additional Fields: memory_type, subject_id, namespace, title, content, status, confidence, importance, sensitivity, trust_tier, validity period, created_by, version, evidence_event_ids (JSONB), supersedes_id, conflict_group_id
+Business Constraints:
+- Status field controls memory lifecycle (candidate, active, pinned, deprecated, discarded, quarantined)
+- Confidence and importance scores drive memory ranking and retrieval
+- Evidence linking connects memories to their source events
+- Version tracking supports memory evolution and conflict resolution
+
+### Memory Embeddings Table
+Purpose: Store vector embeddings for semantic search and similarity matching
+Primary Key: id (TEXT)
+Indexes: memory_item_id, status
+Additional Fields: memory_item_id (FOREIGN KEY), embedding_model, embedding_dimension, content_hash, backend, vector_store_ref, vector_json (JSONB), status, deprecated_at
+Business Constraints:
+- Links embeddings to specific memory items
+- Supports multiple embedding backends (pgvector, custom)
+- Tracks embedding lifecycle and deprecation
+
+### Visitor Suggestions Table
+Purpose: Enable community-driven memory curation through visitor proposals
+Primary Key: id (TEXT)
+Additional Fields: raw_event_id (FOREIGN KEY), visitor_subject_id, suggestion_text, suggested_memory_type, summary, risk_flags (JSONB), status, adopted_memory_id, adopted_by_owner_id, adoption timestamps, discarded_reason
+Business Constraints:
+- Supports suggestion lifecycle (pending, spam, adopted, edited_adopted, discarded)
+- Links suggestions to source events and potential memory items
+- Tracks owner adoption decisions and editing history
+
+### Persona Versions Table
+Purpose: Manage AI agent persona evolution and configuration
+Primary Key: id (TEXT)
+Additional Fields: version, status, core_identity, values_json (JSONB), style_json (JSONB), boundaries_json (JSONB), prompt_template, change_summary, harness_run_id
+Business Constraints:
+- Version tracking for persona evolution
+- Structured JSON storage for persona components
+- Association with harness run identification
+
+### Memory Audit Logs Table
+Purpose: Provide complete audit trail for memory lifecycle modifications
+Primary Key: id (TEXT)
+Additional Fields: action, actor_id, target_type, target_id, before_json (JSONB), after_json (JSONB), reason, created_at
+Business Constraints:
+- Captures all memory modifications with before/after states
+- Links actions to specific actors and targets
+- Supports compliance and debugging requirements
+
+### Search Index Jobs Table
+Purpose: Queue and manage asynchronous search index operations
+Primary Key: id (TEXT)
+Additional Fields: target_type, target_id, action, payload_json (JSONB), status, attempts, last_error, timestamps
+Business Constraints:
+- Supports job queuing for upsert, delete, and maintenance operations
+- Tracks retry attempts and error conditions
+- Maintains operation ordering and consistency
 
 **Section sources**
-- [app/__init__.py:30-40](file://app/__init__.py#L30-L40)
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
+- [001_postgres_memory_ledger.sql:6-20](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L6-L20)
+- [001_postgres_memory_ledger.sql:22-43](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L22-L43)
+- [001_postgres_memory_ledger.sql:49-61](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L49-L61)
+- [001_postgres_memory_ledger.sql:63-78](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L63-L78)
+- [001_postgres_memory_ledger.sql:80-93](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L80-L93)
+- [001_postgres_memory_ledger.sql:95-105](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L95-L105)
+- [001_postgres_memory_ledger.sql:107-118](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L107-L118)
 
 ## Architecture Overview
-The new architecture eliminates the previous PostgreSQL and Alembic complexity in favor of a lightweight SQLite solution. The system initializes the database automatically during application startup, creates the users table with appropriate constraints, and manages connections through Flask's application context. Authentication flows through Flask sessions rather than JWT tokens.
+The new architecture implements a comprehensive PostgreSQL memory management system with intelligent governance, risk assessment, and community-driven curation. The system supports both direct PostgreSQL access and optional JSON fallback for legacy compatibility, with automatic schema initialization and extension management.
 
 ```mermaid
 graph TB
-subgraph "Configuration"
+subgraph "Configuration Layer"
 Env["Environment Variables"]
-DotEnv[".env file"]
+ConfigFlags["Memory Flags<br/>POLA_MEMORY_DB_ENABLED<br/>POLA_MEMORY_WRITE_ENABLED"]
 end
-subgraph "Database Layer"
-SQLite["SQLite Engine"]
-WikiDB["wiki.db file"]
-UsersTbl["users table"]
+subgraph "Service Layer"
+MemoryService["Memory Service"]
+ActorIdentity["Actor Identity Resolver"]
+MemoryGuard["Memory Governance"]
 end
-subgraph "Application"
-FlaskApp["Flask App"]
-AuthBP["Auth Blueprint"]
-UploadBP["Uploader Blueprint"]
+subgraph "Data Access Layer"
+MemoryStore["Memory Store"]
+Connection["PostgreSQL Connection"]
+Extensions["pg_trgm & vector Extensions"]
 end
-subgraph "Session Management"
-Session["Flask Sessions"]
-LoginReq["login_required decorator"]
+subgraph "Storage Layer"
+RawEvents["Raw Events"]
+MemoryItems["Memory Items"]
+Embeddings["Embeddings"]
+Suggestions["Visitor Suggestions"]
+Persona["Persona Versions"]
+AuditLogs["Audit Logs"]
+SearchJobs["Search Jobs"]
 end
-Env --> DotEnv
-DotEnv --> FlaskApp
-FlaskApp --> SQLite
-SQLite --> WikiDB
-WikiDB --> UsersTbl
-UsersTbl --> AuthBP
-AuthBP --> LoginReq
-LoginReq --> UploadBP
+subgraph "Legacy Support"
+LegacyMemory["Legacy JSON Fallback"]
+end
+Env --> MemoryService
+ConfigFlags --> MemoryService
+ActorIdentity --> MemoryService
+MemoryGuard --> MemoryService
+MemoryService --> MemoryStore
+MemoryStore --> Connection
+Connection --> Extensions
+Extensions --> RawEvents
+Extensions --> MemoryItems
+Extensions --> Embeddings
+Extensions --> Suggestions
+Extensions --> Persona
+Extensions --> AuditLogs
+Extensions --> SearchJobs
+MemoryService --> LegacyMemory
 ```
 
 **Diagram sources**
-- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/auth.py:16-23](file://app/auth.py#L16-L23)
+- [memory_service.py:82-89](file://app/memory_service.py#L82-L89)
+- [memory_service.py:91-93](file://app/memory_service.py#L91-L93)
+- [memory_store.py:62-76](file://app/memory_store.py#L62-L76)
+- [memory_store.py:77-86](file://app/memory_store.py#L77-L86)
 
 ## Detailed Component Analysis
 
 ### Entity Relationship Diagram
 ```mermaid
 erDiagram
-USERS {
-integer id PK
-text username UK
-text email UK
-text password_hash
-integer email_verified
-timestamp created_at
+RAW_EVENTS {
+text id PK
+text source_type
+text source_uri
+text subject_id
+text actor_id
+text content
+text content_hash
+timestamptz occurred_at
+timestamptz ingested_at
+text trust_tier
+text privacy_scope
+jsonb risk_flags
 }
+MEMORY_ITEMS {
+text id PK
+text memory_type
+text subject_id
+text namespace
+text title
+text content
+text status
+real confidence
+real importance
+text sensitivity
+text trust_tier
+timestamptz valid_from
+timestamptz valid_to
+timestamptz created_at
+timestamptz updated_at
+text created_by
+integer version
+jsonb evidence_event_ids
+text supersedes_id
+text conflict_group_id
+}
+MEMORY_EMBEDDINGS {
+text id PK
+text memory_item_id FK
+text embedding_model
+integer embedding_dimension
+text content_hash
+text backend
+text vector_store_ref
+jsonb vector_json
+text status
+timestamptz created_at
+timestamptz deprecated_at
+}
+VISITOR_SUGGESTIONS {
+text id PK
+text raw_event_id FK
+text visitor_subject_id
+text suggestion_text
+text suggested_memory_type
+text summary
+jsonb risk_flags
+text status
+text adopted_memory_id
+integer adopted_by_owner_id
+timestamptz adopted_at
+text discarded_reason
+timestamptz created_at
+timestamptz updated_at
+}
+PERSONA_VERSIONS {
+text id PK
+integer version
+text status
+text core_identity
+jsonb values_json
+jsonb style_json
+jsonb boundaries_json
+text prompt_template
+text change_summary
+timestamptz created_at
+text created_by
+text harness_run_id
+}
+MEMORY_AUDIT_LOGS {
+text id PK
+text action
+text actor_id
+text target_type
+text target_id
+jsonb before_json
+jsonb after_json
+text reason
+timestamptz created_at
+}
+SEARCH_INDEX_JOBS {
+text id PK
+text target_type
+text target_id
+text action
+jsonb payload_json
+text status
+integer attempts
+text last_error
+timestamptz created_at
+timestamptz updated_at
+}
+MEMORY_ITEMS ||--o{ MEMORY_EMBEDDINGS : contains
+RAW_EVENTS ||--o{ VISITOR_SUGGESTIONS : generates
+VISITOR_SUGGESTIONS ||--|| MEMORY_ITEMS : may adopt
 ```
 
 **Diagram sources**
-- [app/__init__.py:31-38](file://app/__init__.py#L31-L38)
+- [001_postgres_memory_ledger.sql:6-20](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L6-L20)
+- [001_postgres_memory_ledger.sql:22-43](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L22-L43)
+- [001_postgres_memory_ledger.sql:49-61](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L49-L61)
+- [001_postgres_memory_ledger.sql:63-78](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L63-L78)
+- [001_postgres_memory_ledger.sql:80-93](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L80-L93)
+- [001_postgres_memory_ledger.sql:95-105](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L95-L105)
+- [001_postgres_memory_ledger.sql:107-118](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L107-L118)
 
-### Simplified Authentication Flow
-The authentication system now operates through Flask sessions rather than JWT tokens, significantly simplifying the authentication mechanism for personal blog management.
+### Memory Governance and Risk Assessment
+The system implements comprehensive memory governance through risk assessment patterns and trust tier classification, enabling intelligent memory management with safety controls.
 
-- User Registration
-  - Validates username, email, and password requirements
-  - Generates 6-digit verification code sent via QQ email SMTP
-  - Stores user with email_verified flag set to 0 initially
-  - Commits transaction on successful registration
+- Risk Pattern Detection
+  - Prompt injection prevention for unauthorized instruction overriding
+  - Secret exfiltration detection for sensitive information leakage
+  - Persona takeover protection against identity manipulation
+  - Boundary override detection for rule bypass attempts
+  - Recommendation poisoning prevention for biased content promotion
 
-- User Login
-  - Verifies username exists and password hash matches
-  - Checks email_verified flag equals 1
-  - Creates Flask session with user_id and username
-  - Redirects to article management interface
+- Trust Tier Classification
+  - Owner: Highest trust level with full administrative privileges
+  - Admin: Elevated trust for system operations
+  - Trusted User: Authenticated user with limited privileges
+  - Public User: Anonymous visitor with basic restrictions
 
-- Session Management
-  - login_required decorator protects all admin endpoints
-  - Session cleared on logout operation
-  - No token persistence or refresh mechanisms
+- Memory Type Classification
+  - Values: Core agent values and principles
+  - Boundary: Rules and constraints governing behavior
+  - Preference: User preferences and inclinations
+  - Procedural: Process knowledge and best practices
+  - Episodic: Personal experiences and events
+  - Semantic: General knowledge and facts
+
+```mermaid
+flowchart TD
+Input["Memory Content Input"] --> RiskScan["Risk Pattern Scanning"]
+RiskScan --> PatternMatch{"Pattern Match Found?"}
+PatternMatch --> |Yes| RiskAssessment["Risk Assessment"]
+PatternMatch --> |No| SafeCandidate["Safe Candidate"]
+RiskAssessment --> TrustTier{"Trust Tier Level"}
+TrustTier --> |Owner| DirectApproval["Direct Approval"]
+TrustTier --> |Admin| AdminReview["Admin Review"]
+TrustTier --> |Trusted User| Quarantine["Quarantine for Review"]
+TrustTier --> |Public User| Quarantine
+DirectApproval --> MemoryItem["Create Memory Item"]
+AdminReview --> OwnerConfirmation["Owner Confirmation Required"]
+Quarantine --> OwnerReview["Owner Review Required"]
+SafeCandidate --> MemoryItem
+OwnerConfirmation --> MemoryItem
+OwnerReview --> MemoryItem
+```
+
+**Diagram sources**
+- [memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [memory_guard.py:36-48](file://app/memory_guard.py#L36-L48)
+- [owner_identity.py:45-52](file://app/owner_identity.py#L45-L52)
+
+**Section sources**
+- [memory_guard.py:27-33](file://app/memory_guard.py#L27-L33)
+- [memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [memory_guard.py:36-48](file://app/memory_guard.py#L36-L48)
+- [owner_identity.py:45-52](file://app/owner_identity.py#L45-L52)
+
+### Visitor Suggestion System
+The visitor suggestion system enables community-driven memory curation, allowing users to propose memory additions while maintaining quality control through risk assessment and owner approval.
+
+- Suggestion Lifecycle
+  - Pending: Initial proposal awaiting review
+  - Spam: Low-quality or inappropriate suggestions
+  - Adopted: Owner-approved suggestions converted to memories
+  - Edited Adopted: Modified suggestions accepted with changes
+  - Discarded: Rejected suggestions with reasons recorded
+
+- Integration Flow
+  - Raw event capture triggers suggestion creation
+  - Risk assessment determines suggestion status
+  - Owner review process for non-quarantined suggestions
+  - Memory item creation upon adoption
+  - Audit logging for all suggestion modifications
 
 ```mermaid
 sequenceDiagram
-participant Client as "Client Browser"
-participant Auth as "Auth Blueprint"
-participant DB as "SQLite Database"
-participant Session as "Flask Session"
-Client->>Auth : "POST /admin/register"
-Auth->>Auth : "Validate input requirements"
-Auth->>DB : "Insert user with email_verified=0"
-DB-->>Auth : "Success"
-Auth->>Session : "Store verification code"
-Auth-->>Client : "Redirect to /admin/verify"
-Client->>Auth : "POST /admin/verify"
-Auth->>Session : "Verify code and timestamp"
-Auth->>DB : "UPDATE users SET email_verified=1"
-DB-->>Auth : "Success"
-Auth->>Session : "Clear verification data"
-Auth-->>Client : "Redirect to /admin/login"
-Client->>Auth : "POST /admin/login"
-Auth->>DB : "SELECT user by username"
-DB-->>Auth : "User record"
-Auth->>Auth : "Verify password hash"
-Auth->>Auth : "Check email_verified=1"
-Auth->>Session : "Create session with user_id"
-Auth-->>Client : "Redirect to /admin/upload"
+participant Visitor as "Visitor User"
+participant MemoryService as "Memory Service"
+participant MemoryStore as "Memory Store"
+participant Guard as "Memory Guard"
+Visitor->>MemoryService : "Chat Message with Memory Request"
+MemoryService->>MemoryService : "Record Raw Event"
+MemoryService->>Guard : "Scan Memory Risk"
+Guard-->>MemoryService : "Risk Assessment Result"
+MemoryService->>MemoryStore : "Create Visitor Suggestion"
+MemoryStore-->>MemoryService : "Suggestion ID"
+MemoryService-->>Visitor : "Suggestion Status Response"
+Note over Visitor,MemoryService : Owner Review Process
+Visitor->>MemoryService : "Owner Confirmation Request"
+MemoryService->>MemoryStore : "Adopt Visitor Suggestion"
+MemoryStore->>MemoryStore : "Create Memory Item"
+MemoryStore->>MemoryStore : "Update Suggestion Status"
+MemoryStore-->>MemoryService : "Adoption Result"
+MemoryService-->>Visitor : "Memory Creation Confirmation"
 ```
 
 **Diagram sources**
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [memory_service.py:190-227](file://app/memory_service.py#L190-L227)
+- [memory_service.py:321-360](file://app/memory_service.py#L321-L360)
+- [memory_store.py:207-241](file://app/memory_store.py#L207-L241)
 
 **Section sources**
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:99-133](file://app/auth.py#L99-L133)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
+- [memory_service.py:190-227](file://app/memory_service.py#L190-L227)
+- [memory_service.py:321-360](file://app/memory_service.py#L321-L360)
+- [memory_store.py:207-241](file://app/memory_store.py#L207-L241)
 
-### Database Initialization and Connection Management
-The database initialization process has been simplified to automatic table creation during application startup, eliminating the need for manual migration commands or complex configuration.
+### Search and Retrieval System
+The search system combines PostgreSQL full-text search with vector similarity matching for comprehensive memory retrieval capabilities.
 
-- Connection Management
-  - get_db() function manages SQLite connections per request
-  - Uses Flask's application context (g) for connection storage
-  - Enables WAL mode for improved concurrency
-  - Implements row_factory for dict-like access to records
+- Text Search Capabilities
+  - ILIKE pattern matching for title, content, and type fields
+  - GIN trigram indexes for efficient text searching
+  - Case-insensitive matching with accent folding
 
-- Automatic Initialization
-  - init_db() function creates users table if it doesn't exist
-  - Applies all necessary constraints and indexes automatically
-  - Executes within application context during startup
-  - No manual migration steps required
+- Ranking and Filtering
+  - Importance-based sorting for primary ranking
+  - Updated timestamp for recency consideration
+  - Status filtering for active/pinned memories
+  - Candidate inclusion option for review processes
 
-**Section sources**
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/__init__.py:26-41](file://app/__init__.py#L26-L41)
-
-### File-Based Article Management
-**Updated** The system now focuses entirely on file-based article management rather than database-stored content, aligning with the Jekyll static site generation approach. All content is stored as Markdown files in the _posts/ directory with YAML front matter.
-
-- Upload Processing
-  - Supports multiple file formats (MD, PDF, DOCX, HTML, etc.)
-  - Converts various formats to Markdown for processing
-  - Stores converted content in _posts/ directory
-  - Generates Jekyll-compatible front matter
-
-- Article Generation
-  - Creates Jekyll posts with proper front matter
-  - Supports multiple predefined styles/layouts
-  - Handles tagging and description metadata
-  - Integrates with GitHub Pages deployment
+- Vector Similarity Integration
+  - Embedding-based similarity matching
+  - Configurable similarity thresholds
+  - Hybrid search combining text and vector results
 
 **Section sources**
-- [app/uploader.py:76-118](file://app/uploader.py#L76-L118)
-- [app/uploader.py:130-168](file://app/uploader.py#L130-L168)
+- [memory_store.py:302-323](file://app/memory_store.py#L302-L323)
+- [001_postgres_memory_ledger.sql:47](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L47)
 
-### Content Storage Architecture
-**Updated** Content is now permanently stored as static files rather than in a database. The system maintains a clean separation between authentication data (stored in SQLite) and content data (stored as files).
+### Data Integrity and Security
+The system implements comprehensive data integrity measures including input sanitization, constraint enforcement, and audit logging.
 
-- File Organization
-  - Posts stored in _posts/ directory with date-prefixed filenames
-  - Each post contains YAML front matter followed by Markdown content
-  - Supports multiple content formats through conversion pipeline
+- Input Sanitization
+  - Null byte removal from all string inputs
+  - Recursive sanitization for nested JSON structures
+  - SQL injection prevention through parameterized queries
 
-- Static Site Generation
-  - Direct integration with Jekyll for site building
-  - No database queries required for content retrieval
-  - Simplified deployment to GitHub Pages
+- Constraint Enforcement
+  - Composite unique constraints prevent duplicate ingestion
+  - Foreign key relationships maintain referential integrity
+  - JSONB validation ensures structured data consistency
+
+- Audit Trail
+  - Comprehensive modification logging
+  - Before/after state capture for all changes
+  - Actor identification and timestamp tracking
 
 **Section sources**
-- [app/uploader.py:49-73](file://app/uploader.py#L49-L73)
-- [app/uploader.py:161-168](file://app/uploader.py#L161-L168)
+- [memory_store.py:33-51](file://app/memory_store.py#L33-L51)
+- [memory_store.py:404-422](file://app/memory_store.py#L404-L422)
+- [test_memory_store.py:4-15](file://tests/test_memory_store.py#L4-L15)
 
 ## Dependency Analysis
-The dependency structure has been dramatically simplified with SQLite replacing PostgreSQL and Flask's application context managing database connections.
+The dependency structure has been transformed from a simple SQLite setup to a complex PostgreSQL-based memory management system with multiple interconnected services and governance layers.
 
 ```mermaid
 graph LR
-EnvVars["Environment Variables"] --> FlaskApp["Flask Application"]
-FlaskApp --> DBConn["SQLite Connection"]
-DBConn --> UsersTable["users Table"]
-UsersTable --> AuthBP["Authentication Blueprint"]
-AuthBP --> SessionMgr["Session Management"]
-SessionMgr --> UploadBP["Uploader Blueprint"]
-UploadBP --> FileSystem["File System Operations"]
+EnvVars["Environment Variables"] --> MemoryService["Memory Service"]
+MemoryService --> MemoryStore["Memory Store"]
+MemoryStore --> PostgreSQL["PostgreSQL Database"]
+PostgreSQL --> RawEvents["Raw Events"]
+PostgreSQL --> MemoryItems["Memory Items"]
+PostgreSQL --> Embeddings["Embeddings"]
+PostgreSQL --> Suggestions["Visitor Suggestions"]
+PostgreSQL --> Persona["Persona Versions"]
+PostgreSQL --> AuditLogs["Audit Logs"]
+PostgreSQL --> SearchJobs["Search Jobs"]
+MemoryService --> MemoryGuard["Memory Guard"]
+MemoryService --> ActorIdentity["Actor Identity"]
+ActorIdentity --> Users["Legacy Users Table"]
+MemoryService --> LegacyMemory["Legacy JSON Fallback"]
 ```
 
 **Diagram sources**
-- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/auth.py:16-23](file://app/auth.py#L16-L23)
+- [memory_service.py:82-89](file://app/memory_service.py#L82-L89)
+- [memory_store.py:62-76](file://app/memory_store.py#L62-L76)
+- [owner_identity.py:106-156](file://app/owner_identity.py#L106-L156)
 
 **Section sources**
-- [app/__init__.py:1-6](file://app/__init__.py#L1-L6)
-- [app/__init__.py:9-17](file://app/__init__.py#L9-L17)
-- [app/auth.py:16-23](file://app/auth.py#L16-L23)
+- [memory_service.py:82-89](file://app/memory_service.py#L82-L89)
+- [memory_store.py:62-76](file://app/memory_store.py#L62-L76)
+- [owner_identity.py:106-156](file://app/owner_identity.py#L106-L156)
 
 ## Performance Considerations
-- SQLite Advantages
-  - Zero-configuration local development eliminates setup complexity
-  - Single-file database reduces deployment overhead
-  - WAL mode improves concurrent read/write performance
-  - Automatic memory management reduces resource overhead
+- PostgreSQL Advantages
+  - Advanced indexing strategies with GIN trigrams and composite indexes
+  - Connection pooling and prepared statement optimization
+  - Extension-based vector and text search acceleration
+  - ACID compliance for reliable memory operations
 
-- Connection Management
-  - Flask's application context ensures proper connection cleanup
-  - Row factory enables efficient data access patterns
-  - Automatic table creation eliminates runtime schema checks
+- Memory Management Optimization
+  - Status-based indexing for fast active memory queries
+  - Subject-based partitioning for user-specific memory isolation
+  - Embedding caching for frequently accessed vector operations
+  - Asynchronous search indexing through job queue system
 
-- Simplified Authentication
-  - No JWT token validation overhead
-  - Session-based authentication reduces cryptographic operations
-  - Elimination of database queries for token verification
+- Governance Performance
+  - Risk assessment caching for repeated content evaluation
+  - Trust tier resolution through efficient identity lookup
+  - Audit log batching for reduced write overhead
+  - Legacy fallback optimization for graceful degradation
 
-- File-Based Content
-  - Direct file system access eliminates database overhead
-  - Static content serves efficiently without query processing
-  - Reduced memory footprint for content management
+- Scalability Features
+  - Horizontal scaling through connection pooling
+  - Read replica support for search-heavy workloads
+  - Memory item versioning for conflict-free updates
+  - Embedding model abstraction for backend switching
 
 ## Troubleshooting Guide
 - Database Connectivity
-  - Verify SQLite file permissions in data/wiki.db location
-  - Check that data/ directory is writable by the application
-  - Ensure Python has read/write access to the database file
+  - Verify DATABASE_URL environment variable format
+  - Check PostgreSQL extension availability (pg_trgm, vector)
+  - Confirm connection pool limits and timeout settings
+  - Validate SSL configuration for remote databases
 
-- Authentication Issues
-  - Verify SECRET_KEY environment variable is set
-  - Check QQ email SMTP configuration for verification emails
-  - Confirm verification codes are not expired (5-minute window)
+- Memory Operations
+  - Monitor raw event ingestion rates and duplicate prevention
+  - Track memory item status transitions and governance failures
+  - Verify embedding generation and similarity search performance
+  - Check visitor suggestion processing and adoption rates
 
-- File Operations
-  - Ensure _posts/ directory exists and is writable
-  - Verify sufficient disk space for uploaded files
-  - Check file format support for conversion operations
+- Governance Issues
+  - Review risk assessment false positives/negatives
+  - Validate trust tier resolution for different user types
+  - Monitor memory type classification accuracy
+  - Check owner confirmation workflow bottlenecks
+
+- Legacy Compatibility
+  - Ensure legacy JSON fallback functionality
+  - Verify migration script execution success
+  - Test backward compatibility with existing systems
+  - Monitor data synchronization between old and new schemas
 
 **Section sources**
-- [app/__init__.py:12-16](file://app/__init__.py#L12-L16)
-- [app/auth.py:66-67](file://app/auth.py#L66-L67)
-- [app/uploader.py:29-31](file://app/uploader.py#L29-L31)
+- [memory_store.py:70-76](file://app/memory_store.py#L70-L76)
+- [memory_service.py:95-104](file://app/memory_service.py#L95-L104)
+- [import_agent_memory_legacy.py:23-71](file://scripts/import_agent_memory_legacy.py#L23-L71)
 
 ## Conclusion
-The PolaZhenJing v2 database design represents a fundamental shift toward simplicity and zero-configuration local development. The elimination of PostgreSQL, Alembic migrations, and complex authentication tokens has resulted in a streamlined architecture focused on essential functionality. The SQLite-based user authentication system, combined with file-based article management and Jekyll static site generation, provides an efficient solution for personal blog management with minimal operational overhead.
+The PolaZhenJing PostgreSQL memory ledger represents a comprehensive evolution from simple SQLite storage to sophisticated AI agent memory management. The six-table schema with intelligent governance, risk assessment, and community-driven curation provides a robust foundation for advanced memory capabilities. The system's emphasis on data integrity, audit trails, and performance optimization ensures reliable operation at scale while maintaining backward compatibility through legacy fallback mechanisms.
 
-**Updated** This represents a complete architectural reset from the previous SQLAlchemy-based design to a much simpler system that prioritizes ease of use and deployment over complex database features.
+**Updated** This represents a complete architectural transformation from the previous SQLite-based design to a production-ready PostgreSQL memory management system supporting intelligent AI agent capabilities.
 
 ## Appendices
 
-### Appendix A: SQLite Schema Definition
-- Users Table Structure
-  - id: INTEGER PRIMARY KEY AUTOINCREMENT
-  - username: TEXT UNIQUE NOT NULL
-  - email: TEXT UNIQUE NOT NULL
-  - password_hash: TEXT NOT NULL
-  - email_verified: INTEGER DEFAULT 0
-  - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+### Appendix A: PostgreSQL Schema Definition
+- Raw Events Table Structure
+  - Primary Key: id (TEXT)
+  - Unique Constraint: (content_hash, source_type, subject_id)
+  - JSONB Fields: risk_flags
+  - Timestamp Defaults: ingested_at (DEFAULT now())
+
+- Memory Items Table Structure
+  - Primary Key: id (TEXT)
+  - Indexes: status, subject_id, content (GIN trigram)
+  - JSONB Fields: evidence_event_ids
+  - Default Values: confidence (0.7), importance (0.5), sensitivity ('low')
+
+- Embeddings Table Structure
+  - Primary Key: id (TEXT)
+  - Foreign Key: memory_item_id REFERENCES memory_items(id)
+  - JSONB Fields: vector_json
+  - Default Values: backend ('pgvector'), status ('active')
 
 **Section sources**
-- [app/__init__.py:31-38](file://app/__init__.py#L31-L38)
+- [001_postgres_memory_ledger.sql:6-20](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L6-L20)
+- [001_postgres_memory_ledger.sql:22-43](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L22-L43)
+- [001_postgres_memory_ledger.sql:49-61](file://migrations/agent_memory/001_postgres_memory_ledger.sql#L49-L61)
 
-### Appendix B: Authentication Flow Summary
-- Registration Process
-  - Input validation for username, email, password
-  - QQ email verification with 6-digit code
-  - Automatic user creation with email_verified=0
-  - Verification code expiration handling
+### Appendix B: Memory Governance Flow Summary
+- Risk Assessment Process
+  - Pattern matching against predefined threat categories
+  - Trust tier influence on risk tolerance thresholds
+  - Dynamic status assignment (candidate, quarantined)
+  - Owner escalation requirements for risky content
 
-- Login Process
-  - Username/password validation
-  - Email verification requirement check
-  - Flask session establishment
-  - Protected route access control
-
-**Section sources**
-- [app/auth.py:51-96](file://app/auth.py#L51-L96)
-- [app/auth.py:26-48](file://app/auth.py#L26-L48)
-
-### Appendix C: File-Based Content Examples
-**Updated** Sample content structure showing the transition from database-stored content to file-based storage.
-
-- Example Post Structure
-  - Date-prefixed filename: YYYY-MM-DD-title.md
-  - YAML front matter with layout, title, date, tags
-  - Markdown content body
-  - Automatic Jekyll processing
+- Memory Classification System
+  - Automated type detection based on content patterns
+  - Manual override capability for edge cases
+  - Context-aware classification for nuanced content
+  - Evolution tracking for memory type refinement
 
 **Section sources**
-- [_posts/2025-01-15-understanding-transformer-attention.md:1-50](file://_posts/2025-01-15-understanding-transformer-attention.md#L1-L50)
-- [_posts/2025-02-10-visual-language-of-ai.md:1-50](file://_posts/2025-02-10-visual-language-of-ai.md#L1-L50)
+- [memory_guard.py:51-77](file://app/memory_guard.py#L51-L77)
+- [memory_guard.py:36-48](file://app/memory_guard.py#L36-L48)
+
+### Appendix C: Visitor Suggestion Workflow
+- Suggestion Creation Process
+  - Risk assessment integration during suggestion generation
+  - Status assignment based on content safety evaluation
+  - Owner notification for potentially valuable suggestions
+  - Community feedback incorporation for suggestion refinement
+
+- Adoption and Curation Process
+  - Owner review workflow for suggestion acceptance
+  - Memory item creation from approved suggestions
+  - Audit trail generation for all adoption decisions
+  - Performance metrics tracking for suggestion effectiveness
+
+**Section sources**
+- [memory_service.py:190-227](file://app/memory_service.py#L190-L227)
+- [memory_service.py:321-360](file://app/memory_service.py#L321-L360)
+- [memory_store.py:207-241](file://app/memory_store.py#L207-L241)
+
+### Appendix D: Legacy Migration Strategy
+- Data Import Process
+  - Hash-based deduplication during legacy data ingestion
+  - Risk assessment application to historical content
+  - Status assignment based on content sensitivity
+  - Evidence linking to original source events
+
+- Migration Validation
+  - Count verification between legacy and new systems
+  - Content integrity checking for migrated memories
+  - Performance benchmarking for search operations
+  - User experience validation for memory recall
+
+**Section sources**
+- [import_agent_memory_legacy.py:23-71](file://scripts/import_agent_memory_legacy.py#L23-L71)
+- [memory_service.py:22-30](file://app/memory_service.py#L22-L30)

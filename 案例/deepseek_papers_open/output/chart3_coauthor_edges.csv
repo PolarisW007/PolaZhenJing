@@ -1,0 +1,935 @@
+﻿source,target,weight_shared_papers,topics,papers
+Chong Ruan,Zhenda Xie,8,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro；Native Sparse Attention
+Damai Dai,Huazuo Gao,7,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Damai Dai,Wenfeng Liang,7,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Damai Dai,Zhenda Xie,7,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Native Sparse Attention；mHC
+Wenfeng Liang,Zhenda Xie,7,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention；mHC
+Chong Ruan,Damai Dai,6,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention
+Chong Ruan,Huazuo Gao,6,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention
+Daya Guo,Qihao Zhu,6,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V2；DeepSeekMath
+Huazuo Gao,Wenfeng Liang,6,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Huazuo Gao,Zhenda Xie,6,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Native Sparse Attention；mHC
+Qihao Zhu,Zhihong Shao,6,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath
+Runxin Xu,Yu Wu,6,主模型、代码、推理/RL、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath；DeepSeekMoE；ESFT；Generalist Reward Modeling
+Xingkai Yu,Zhenda Xie,6,主模型、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro
+Yu Wu,Yukun Li,6,主模型、代码、多模态、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMath；DeepSeekMoE
+Yukun Li,Zhenda Xie,6,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Bingxuan Wang,Zhenda Xie,5,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2
+Chenggang Zhao,Chengqi Deng,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Damai Dai,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Huazuo Gao,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Jiashi Li,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Wenfeng Liang,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Chong Ruan,5,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeekMoE；Insights into DeepSeek-V3
+Chengqi Deng,Damai Dai,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Huazuo Gao,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Jiashi Li,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Wenfeng Liang,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Zhenda Xie,5,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeekMoE；mHC
+Chong Ruan,Liyue Zhang,5,主模型、代码、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；Insights into DeepSeek-V3
+Chong Ruan,Qihao Zhu,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Shirong Ma,5,主模型、代码、推理/RL、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；Generalist Reward Modeling；Insights into DeepSeek-V3
+Chong Ruan,Wen Liu,5,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Wenfeng Liang,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；Native Sparse Attention
+Chong Ruan,Xingkai Yu,5,主模型、多模态、系统/效率,DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE；Janus；Janus-Pro
+Chong Ruan,Yu Wu,5,主模型、代码、多模态、推理/RL、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；Generalist Reward Modeling
+Chong Ruan,Zhihong Shao,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Damai Dai,Jiashi Li,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Damai Dai,Wangding Zeng,5,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention；mHC
+Damai Dai,Yu Wu,5,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE；ESFT
+Damai Dai,Yukun Li,5,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Daya Guo,Zhihong Shao,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V2；DeepSeekMath
+Dejian Yang,Qihao Zhu,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huazuo Gao,Jiashi Li,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Jiashi Li,Wenfeng Liang,5,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3；mHC
+Junxiao Song,Qihao Zhu,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath
+Junxiao Song,Zhihong Shao,5,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath
+Kai Dong,Zhenda Xie,5,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2
+Wangding Zeng,Wenfeng Liang,5,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention；mHC
+Wangding Zeng,Zhenda Xie,5,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention；mHC
+Wen Liu,Zhenda Xie,5,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2；Janus；Janus-Pro
+Wenfeng Liang,Yukun Li,5,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Yu Wu,Zhenda Xie,5,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Bingxuan Wang,Chong Ruan,4,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2
+Bingxuan Wang,Damai Dai,4,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Kai Dong,4,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2
+Bingxuan Wang,Yukun Li,4,主模型、代码、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bo Liu,Chong Ruan,4,主模型、多模态、数学/证明,DeepSeek LLM；DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-VL
+Chenggang Zhao,Chong Ruan,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3
+Chenggang Zhao,Zhenda Xie,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；mHC
+Chong Ruan,Daya Guo,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover；DeepSeek-Prover-V2
+Chong Ruan,Dejian Yang,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Fuli Luo,4,主模型、代码、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeekMoE
+Chong Ruan,Jiashi Li,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Insights into DeepSeek-V3
+Chong Ruan,Junxiao Song,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Kai Dong,4,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL；DeepSeek-VL2
+Chong Ruan,Runxin Xu,4,主模型、代码、推理/RL、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；Generalist Reward Modeling
+Chong Ruan,Wenjun Gao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Yukun Li,4,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Damai Dai,Deli Chen,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；ESFT
+Damai Dai,Runxin Xu,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；ESFT
+Damai Dai,Xingkai Yu,4,主模型、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE
+Daya Guo,Dejian Yang,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Daya Guo,Junxiao Song,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeekMath
+Daya Guo,Xiao Bi,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Daya Guo,Yu Wu,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Daya Guo,Yukun Li,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Dejian Yang,Fuli Luo,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Dejian Yang,Junxiao Song,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Liyue Zhang,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Wenjun Gao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Zhihong Shao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Deli Chen,Runxin Xu,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；ESFT
+Deli Chen,Yu Wu,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；ESFT
+Fuli Luo,Qihao Zhu,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Wenfeng Liang,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Yu Wu,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Yukun Li,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Zhenda Xie,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Huazuo Gao,Wangding Zeng,4,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention；mHC
+Huazuo Gao,Yu Wu,4,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Huazuo Gao,Yukun Li,4,主模型、代码、多模态、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2；DeepSeekMoE
+Jiashi Li,Zhenda Xie,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE；mHC
+Junxiao Song,Liyue Zhang,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Junxiao Song,Wenjun Gao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Kai Dong,Yu Wu,4,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL2
+Kai Dong,Yukun Li,4,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeek-VL2
+Liyue Zhang,Qihao Zhu,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Liyue Zhang,Shirong Ma,4,主模型、代码、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；Insights into DeepSeek-V3
+Liyue Zhang,Wenjun Gao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Liyue Zhang,Zhihong Shao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Peiyi Wang,Runxin Xu,4,主模型、代码、推理/RL、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath；Generalist Reward Modeling
+Peiyi Wang,Yu Wu,4,主模型、代码、推理/RL、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath；Generalist Reward Modeling
+Qihao Zhu,Wenjun Gao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Qihao Zhu,Xiao Bi,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Qihao Zhu,Yu Wu,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Qihao Zhu,Yukun Li,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Runxin Xu,Yukun Li,4,主模型、代码、数学/证明、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath；DeepSeekMoE
+Shirong Ma,Zhihong Shao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeekMath-V2
+Wen Liu,Xingkai Yu,4,主模型、多模态,DeepSeek LLM；DeepSeek-VL2；Janus；Janus-Pro
+Wenfeng Liang,Yu Wu,4,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMoE
+Wenjun Gao,Zhihong Shao,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Xiao Bi,Yu Wu,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Xiao Bi,Yukun Li,4,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2；DeepSeekMath
+Xingkai Yu,Yukun Li,4,主模型、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE
+Yaofeng Sun,Yukun Li,4,OCR、主模型、多模态,DeepSeek LLM；DeepSeek-OCR；DeepSeek-OCR 2；DeepSeek-VL2
+Zhibin Gou,Zhihong Shao,4,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath-V2
+Bingxuan Wang,Chengqi Deng,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Bingxuan Wang,Hanwei Xu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Bingxuan Wang,Huazuo Gao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Kang Guan,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Wen Liu,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Bingxuan Wang,Wenfeng Liang,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Xingkai Yu,3,主模型、多模态、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-VL2
+Bingxuan Wang,Yaofeng Sun,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Bingxuan Wang,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Yu Wu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Zhewen Hao,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Bo Liu,Qihao Zhu,3,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover；DeepSeek-Prover-V1.5
+Bo Liu,Zhihong Shao,3,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover；DeepSeek-Prover-V1.5
+Chenggang Zhao,Deli Chen,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chenggang Zhao,Fuli Luo,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chenggang Zhao,Liyue Zhang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Chenggang Zhao,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Chenggang Zhao,Runxin Xu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chenggang Zhao,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Shirong Ma,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Chenggang Zhao,Wangding Zeng,3,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE；mHC
+Chenggang Zhao,Yu Wu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chenggang Zhao,Yukun Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chengqi Deng,Deli Chen,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chengqi Deng,Fuli Luo,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chengqi Deng,Hanwei Xu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Chengqi Deng,Kai Dong,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Chengqi Deng,Liyue Zhang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Chengqi Deng,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Chengqi Deng,Runxin Xu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chengqi Deng,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Chengqi Deng,Shirong Ma,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Chengqi Deng,Wangding Zeng,3,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE；mHC
+Chengqi Deng,Yu Wu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chengqi Deng,Yukun Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chong Ruan,Deli Chen,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Chong Ruan,Hanwei Xu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Chong Ruan,Huajian Xin,3,数学/证明,DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Kang Guan,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Chong Ruan,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Chong Ruan,Peiyi Wang,3,主模型、代码、推理/RL,DeepSeek LLM；DeepSeek-Coder-V2；Generalist Reward Modeling
+Chong Ruan,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Chong Ruan,Wangding Zeng,3,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE；Native Sparse Attention
+Chong Ruan,Xiaokang Chen,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Chong Ruan,Xingchao Liu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Yaofeng Sun,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Chong Ruan,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Chong Ruan,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Chong Ruan,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Chong Ruan,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Damai Dai,Fuli Luo,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Damai Dai,Kai Dong,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Damai Dai,Kang Guan,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Damai Dai,Liang Zhao,3,多模态、系统/效率,DeepSeek-VL2；Native Sparse Attention；mHC
+Damai Dai,Liyue Zhang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Damai Dai,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Damai Dai,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Damai Dai,Shirong Ma,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Damai Dai,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Damai Dai,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Damai Dai,Yuqing Wang,3,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Damai Dai,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Damai Dai,Zhewen Hao,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Fuli Luo,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Daya Guo,Kai Dong,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Daya Guo,Liyue Zhang,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Daya Guo,Peiyi Wang,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Daya Guo,Runxin Xu,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Daya Guo,Shirong Ma,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Daya Guo,Wenfeng Liang,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Daya Guo,Wenjun Gao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Daya Guo,Zhenda Xie,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Kai Dong,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Dejian Yang,Shirong Ma,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Dejian Yang,Wenfeng Liang,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Xiao Bi,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Yu Wu,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Yukun Li,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Zhenda Xie,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Dejian Yang,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Deli Chen,Fuli Luo,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Huazuo Gao,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Jiashi Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Wenfeng Liang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Yukun Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Zhenda Xie,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Huazuo Gao,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Jiashi Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Junxiao Song,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Kai Dong,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Fuli Luo,Liyue Zhang,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Runxin Xu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Wenjun Gao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Xiao Bi,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Fuli Luo,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Hanwei Xu,Kai Dong,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Hanwei Xu,Zhenda Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL
+Haowei Zhang,Yu Wu,3,主模型、多模态、数学/证明,DeepSeek LLM；DeepSeek-VL2；DeepSeekMath
+Haowei Zhang,Yukun Li,3,主模型、多模态、数学/证明,DeepSeek LLM；DeepSeek-VL2；DeepSeekMath
+Huajian Xin,Qihao Zhu,3,数学/证明,DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Zhihong Shao,3,数学/证明,DeepSeek-Prover；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huazuo Gao,Kai Dong,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Huazuo Gao,Kang Guan,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Huazuo Gao,Liang Zhao,3,多模态、系统/效率,DeepSeek-VL2；Native Sparse Attention；mHC
+Huazuo Gao,Liyue Zhang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Huazuo Gao,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Huazuo Gao,Runxin Xu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Huazuo Gao,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Huazuo Gao,Shirong Ma,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Huazuo Gao,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Huazuo Gao,Xingkai Yu,3,主模型、多模态、系统/效率,DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE
+Huazuo Gao,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Huazuo Gao,Yuqing Wang,3,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Huazuo Gao,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Jiashi Li,Liyue Zhang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Jiashi Li,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Jiashi Li,Runxin Xu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Jiashi Li,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Jiashi Li,Shirong Ma,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Jiashi Li,Wangding Zeng,3,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE；mHC
+Jiashi Li,Yu Wu,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Jiashi Li,Yukun Li,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Junxiao Song,Peiyi Wang,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Junxiao Song,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Junxiao Song,Runxin Xu,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Junxiao Song,Shirong Ma,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Junxiao Song,Xiao Bi,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Junxiao Song,Yu Wu,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Junxiao Song,Yukun Li,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Junxiao Song,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Kai Dong,Kang Guan,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kai Dong,Qihao Zhu,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Kai Dong,Wen Liu,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Kai Dong,Wenfeng Liang,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Kai Dong,Xiao Bi,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Kai Dong,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kai Dong,Yaofeng Sun,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Kai Dong,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kai Dong,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Xin Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Yu Wu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Yukun Li,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Kang Guan,Zhenda Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Liang Zhao,Zhenda Xie,3,多模态、系统/效率,DeepSeek-VL2；Native Sparse Attention；mHC
+Liyue Zhang,Panpan Huang,3,主模型、系统/效率,DeepSeek LLM；DualPath；Insights into DeepSeek-V3
+Liyue Zhang,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Liyue Zhang,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；DualPath；Insights into DeepSeek-V3
+Liyue Zhang,Wenfeng Liang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Liyue Zhang,Yuxuan Liu,3,数学/证明、系统/效率,DeepSeek-Prover-V2；DualPath；Insights into DeepSeek-V3
+Liyue Zhang,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Panpan Huang,Shangyan Zhou,3,主模型、系统/效率,DeepSeek LLM；DualPath；Insights into DeepSeek-V3
+Panpan Huang,Wenfeng Liang,3,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE；Insights into DeepSeek-V3
+Peiyi Wang,Qihao Zhu,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Peiyi Wang,Shirong Ma,3,主模型、代码、推理/RL,DeepSeek LLM；DeepSeek-Coder-V2；Generalist Reward Modeling
+Peiyi Wang,Xiao Bi,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Peiyi Wang,Yukun Li,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Peiyi Wang,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Qihao Zhu,Qiushi Du,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Qihao Zhu,Runxin Xu,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Qihao Zhu,Shirong Ma,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Qihao Zhu,Wenfeng Liang,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Qihao Zhu,Zhenda Xie,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Qihao Zhu,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Qiushi Du,Wenjun Gao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Qiushi Du,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Runxin Xu,Shirong Ma,3,主模型、代码、推理/RL,DeepSeek LLM；DeepSeek-Coder-V2；Generalist Reward Modeling
+Runxin Xu,Wenfeng Liang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Runxin Xu,Xiao Bi,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Runxin Xu,Zhenda Xie,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMoE
+Runxin Xu,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Shangyan Zhou,Wenfeng Liang,3,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3；mHC
+Shirong Ma,Wenfeng Liang,3,主模型、代码、系统/效率,DeepSeek LLM；DeepSeek-Coder-V2；Insights into DeepSeek-V3
+Shirong Ma,Wenjun Gao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Shirong Ma,Yu Wu,3,主模型、代码、推理/RL,DeepSeek LLM；DeepSeek-Coder-V2；Generalist Reward Modeling
+Shirong Ma,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V2；DeepSeekMath-V2
+Wangding Zeng,Yukun Li,3,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2；DeepSeekMoE
+Wen Liu,Xiaokang Chen,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Xingchao Liu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Yaofeng Sun,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Wen Liu,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Wen Liu,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Wenfeng Liang,Xiao Bi,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Wenfeng Liang,Xingkai Yu,3,主模型、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeekMoE
+Wenfeng Liang,Yuqing Wang,3,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention；mHC
+Wenfeng Liang,Zhewen Hao,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Zhibin Gou,3,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Xiao Bi,Zhenda Xie,3,主模型、代码,DeepSeek LLM；DeepSeek-Coder；DeepSeek-Coder-V2
+Xiao Bi,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Xiaokang Chen,Xingchao Liu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xiaokang Chen,Xingkai Yu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xiaokang Chen,Zhenda Xie,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xiaokang Chen,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xiaokang Chen,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xin Xie,Yishi Piao,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Xin Xie,Yu Wu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Xin Xie,Yukun Li,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Xin Xie,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Xin Xie,Zhenda Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Xingchao Liu,Xingkai Yu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xingchao Liu,Zhenda Xie,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xingchao Liu,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xingchao Liu,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xingkai Yu,Yu Wu,3,主模型、多模态、系统/效率,DeepSeek LLM；DeepSeek-VL2；DeepSeekMoE
+Xingkai Yu,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Xingkai Yu,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Yaofeng Sun,Zhenda Xie,3,主模型、多模态,DeepSeek LLM；DeepSeek-VL；DeepSeek-VL2
+Yishi Piao,Yu Wu,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yishi Piao,Yukun Li,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yishi Piao,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yishi Piao,Zhenda Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yu Wu,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yu Wu,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Yukun Li,Yuxiang You,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Yukun Li,Zhewen Hao,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Yukun Li,Zhihong Shao,3,主模型、代码、数学/证明,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeekMath
+Yuxiang You,Zhenda Xie,3,主模型、代码、多模态,DeepSeek LLM；DeepSeek-Coder-V2；DeepSeek-VL2
+Z. Z. Ren,Zhibin Gou,3,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath-V2
+Z. Z. Ren,Zhihong Shao,3,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2；DeepSeekMath-V2
+Zhenda Xie,Zhewen Hao,3,主模型、代码、系统/效率,Conditional Memory；DeepSeek LLM；DeepSeek-Coder-V2
+Zhenda Xie,Zhiyu Wu,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Zhenda Xie,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Zhiyu Wu,Zizheng Pan,3,多模态,DeepSeek-VL2；Janus；Janus-Pro
+Aixin Liu,Bingxuan Wang,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Chong Ruan,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Damai Dai,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Huazuo Gao,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Kai Dong,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Kang Guan,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Xin Xie,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Yishi Piao,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Yu Wu,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Yukun Li,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Yuxiang You,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Aixin Liu,Zhenda Xie,2,代码、多模态,DeepSeek-Coder-V2；DeepSeek-VL2
+Bingxuan Wang,Bo Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Chenggang Zhao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Daya Guo,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Dejian Yang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Deli Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Fuli Luo,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Haowei Zhang,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Bingxuan Wang,Haoyu Lu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Jiashi Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Liyue Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Qinyu Chen,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Bingxuan Wang,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bingxuan Wang,Wangding Zeng,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Bingxuan Wang,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bingxuan Wang,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Bo Liu,Chengqi Deng,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Daya Guo,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover
+Bo Liu,Dejian Yang,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Fuli Luo,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Hanwei Xu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Haoyu Lu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Huajian Xin,2,数学/证明,DeepSeek-Prover；DeepSeek-Prover-V1.5
+Bo Liu,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Junxiao Song,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Kai Dong,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Liyue Zhang,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Qiushi Du,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Wenjun Gao,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V1.5
+Bo Liu,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Bo Liu,Zhenda Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chenggang Zhao,Daya Guo,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Dejian Yang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Kai Dong,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Chenggang Zhao,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Chenggang Zhao,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；mHC
+Chenggang Zhao,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chenggang Zhao,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Daya Guo,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Dejian Yang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Haoyu Lu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chengqi Deng,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chengqi Deng,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chengqi Deng,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chengqi Deng,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Chengqi Deng,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chengqi Deng,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Chengqi Deng,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；mHC
+Chengqi Deng,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengqi Deng,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chengyue Wu,Chong Ruan,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Wen Liu,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Xiaokang Chen,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Xingchao Liu,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Xingkai Yu,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Zhenda Xie,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Zhiyu Wu,2,多模态,DeepSeek-VL2；Janus
+Chengyue Wu,Zizheng Pan,2,多模态,DeepSeek-VL2；Janus
+Chong Ruan,Haocheng Wang,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Haowei Zhang,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Chong Ruan,Haoyu Lu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chong Ruan,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chong Ruan,Liang Zhao,2,多模态、系统/效率,DeepSeek-VL2；Native Sparse Attention
+Chong Ruan,Shangyan Zhou,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Chong Ruan,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Chong Ruan,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chong Ruan,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Chong Ruan,Y. X. Wei,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Chong Ruan,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Chong Ruan,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Chong Ruan,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Chong Ruan,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Chong Ruan,Yuxuan Liu,2,数学/证明、系统/效率,DeepSeek-Prover-V2；Insights into DeepSeek-V3
+Chong Ruan,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Chong Ruan,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Chong Ruan,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Daya Guo,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Dejian Yang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Haowei Zhang,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Damai Dai,Jingyang Yuan,2,系统/效率,Native Sparse Attention；mHC
+Damai Dai,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Lean Wang,2,系统/效率,Native Sparse Attention；mHC
+Damai Dai,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Qinyu Chen,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Damai Dai,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Damai Dai,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Y. X. Wei,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Damai Dai,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Damai Dai,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Damai Dai,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Damai Dai,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Damai Dai,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Deli Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Guanting Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Daya Guo,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Haowei Zhang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Daya Guo,Huajian Xin,2,数学/证明,DeepSeek-Prover；DeepSeek-Prover-V2
+Daya Guo,Huazuo Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Jiashi Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Mingchuan Zhang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Daya Guo,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Daya Guo,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Daya Guo,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Daya Guo,Zhibin Gou,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V2
+Dejian Yang,Deli Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Guanting Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Dejian Yang,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Haocheng Wang,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Huajian Xin,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Huazuo Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Jiashi Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Dejian Yang,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Dejian Yang,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Dejian Yang,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Dejian Yang,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Dejian Yang,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Kai Dong,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Liyue Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Panpan Huang,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Deli Chen,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Wangding Zeng,2,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE
+Deli Chen,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Deli Chen,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Deli Chen,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Guanting Chen,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Fuli Luo,Hanwei Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Panpan Huang,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Fuli Luo,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Wangding Zeng,2,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE
+Fuli Luo,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Fuli Luo,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Fuli Luo,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Fuli Luo,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Fuli Luo,Zhibin Gou,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Guanting Chen,Kai Dong,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Guanting Chen,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Hanwei Xu,Haoyu Lu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Hanwei Xu,Huazuo Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Jiashi Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Hanwei Xu,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Liyue Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Hanwei Xu,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Hanwei Xu,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Hanwei Xu,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Hanwei Xu,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Haocheng Wang,Huajian Xin,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Junxiao Song,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Liyue Zhang,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Qihao Zhu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Wenjun Gao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Zhibin Gou,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haocheng Wang,Zhihong Shao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Haoran Wei,Yaofeng Sun,2,OCR,DeepSeek-OCR；DeepSeek-OCR 2
+Haoran Wei,Yukun Li,2,OCR,DeepSeek-OCR；DeepSeek-OCR 2
+Haowei Zhang,Huazuo Gao,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Junxiao Song,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Kai Dong,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Kang Guan,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Mingchuan Zhang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Peiyi Wang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Qihao Zhu,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Runxin Xu,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Xiao Bi,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haowei Zhang,Xin Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Xingkai Yu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Yishi Piao,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Yuxiang You,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Zhenda Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Haowei Zhang,Zhihong Shao,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Haoyu Lu,Jingxiang Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Haoyu Lu,Kai Dong,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Haoyu Lu,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Haoyu Lu,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Haoyu Lu,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Haoyu Lu,Zhenda Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Huajian Xin,Junxiao Song,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Liyue Zhang,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Wenjun Gao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huajian Xin,Zhibin Gou,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Huazuo Gao,Jingyang Yuan,2,系统/效率,Native Sparse Attention；mHC
+Huazuo Gao,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Lean Wang,2,系统/效率,Native Sparse Attention；mHC
+Huazuo Gao,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Huazuo Gao,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Y. X. Wei,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Huazuo Gao,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Huazuo Gao,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Huazuo Gao,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Huazuo Gao,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Huazuo Gao,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Junxiao Song,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Kai Dong,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Jiashi Li,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Jiashi Li,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；mHC
+Jiashi Li,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jiashi Li,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Jingxiang Sun,Kai Dong,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Jingxiang Sun,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Jingxiang Sun,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Jingxiang Sun,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Jingxiang Sun,Zhenda Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Jingyang Yuan,Lean Wang,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Liang Zhao,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Wangding Zeng,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Wenfeng Liang,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Yuqing Wang,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Zhenda Xie,2,系统/效率,Native Sparse Attention；mHC
+Jingyang Yuan,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Junxiao Song,Kai Dong,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Kang Guan,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Mingchuan Zhang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Junxiao Song,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Junxiao Song,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Junxiao Song,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Junxiao Song,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Junxiao Song,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Junxiao Song,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Junxiao Song,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Liyue Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Tongzheng Ren,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Kai Dong,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Kai Dong,Xingkai Yu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Kai Dong,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kai Dong,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Liyue Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Qihao Zhu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Kang Guan,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Xingkai Yu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Kang Guan,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Kang Guan,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Kang Guan,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Lean Wang,Liang Zhao,2,系统/效率,Native Sparse Attention；mHC
+Lean Wang,Wangding Zeng,2,系统/效率,Native Sparse Attention；mHC
+Lean Wang,Wenfeng Liang,2,系统/效率,Native Sparse Attention；mHC
+Lean Wang,Yuqing Wang,2,系统/效率,Native Sparse Attention；mHC
+Lean Wang,Zhenda Xie,2,系统/效率,Native Sparse Attention；mHC
+Lean Wang,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Liang Zhao,Wangding Zeng,2,系统/效率,Native Sparse Attention；mHC
+Liang Zhao,Wenfeng Liang,2,系统/效率,Native Sparse Attention；mHC
+Liang Zhao,Yuqing Wang,2,系统/效率,Native Sparse Attention；mHC
+Liang Zhao,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Liyue Zhang,Peiyi Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Shunfeng Zhou,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Liyue Zhang,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Liyue Zhang,Wentao Zhang,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Liyue Zhang,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Liyue Zhang,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Liyue Zhang,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Liyue Zhang,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Liyue Zhang,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Liyue Zhang,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Liyue Zhang,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Mingchuan Zhang,Peiyi Wang,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Qihao Zhu,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Runxin Xu,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Xiao Bi,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Yu Wu,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Yukun Li,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Mingchuan Zhang,Zhihong Shao,2,主模型、数学/证明,DeepSeek LLM；DeepSeekMath
+Panpan Huang,Runxin Xu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Panpan Huang,Shirong Ma,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Panpan Huang,Shunfeng Zhou,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Panpan Huang,Wentao Zhang,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Panpan Huang,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Panpan Huang,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Panpan Huang,Yu Wu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Panpan Huang,Yukun Li,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Panpan Huang,Yuxuan Liu,2,系统/效率,DualPath；Insights into DeepSeek-V3
+Panpan Huang,Zhenda Xie,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Peiyi Wang,Qiushi Du,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Peiyi Wang,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qihao Zhu,Wanjia Zhao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Qihao Zhu,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Qihao Zhu,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qihao Zhu,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Qihao Zhu,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qihao Zhu,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qihao Zhu,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qihao Zhu,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Qihao Zhu,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Qihao Zhu,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Qihao Zhu,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qinyu Chen,Wangding Zeng,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Qinyu Chen,Wenfeng Liang,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Qinyu Chen,Yukun Li,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Qinyu Chen,Zhenda Xie,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Qinyu Chen,Zhewen Hao,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Qiushi Du,Runxin Xu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Shirong Ma,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Wenfeng Liang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Qiushi Du,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Qiushi Du,Zhibin Gou,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Runxin Xu,Wangding Zeng,2,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE
+Runxin Xu,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Runxin Xu,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Runxin Xu,Xingkai Yu,2,主模型、系统/效率,DeepSeek LLM；DeepSeekMoE
+Runxin Xu,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Runxin Xu,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Runxin Xu,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Runxin Xu,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shangyan Zhou,Shirong Ma,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Shangyan Zhou,Shunfeng Zhou,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Shangyan Zhou,Wentao Zhang,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Shangyan Zhou,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Shangyan Zhou,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；mHC
+Shangyan Zhou,Yuxuan Liu,2,系统/效率,DualPath；Insights into DeepSeek-V3
+Shangyan Zhou,Zhenda Xie,2,主模型、系统/效率,DeepSeek LLM；mHC
+Shirong Ma,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Shirong Ma,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Yuxuan Liu,2,数学/证明、系统/效率,DeepSeek-Prover-V2；Insights into DeepSeek-V3
+Shirong Ma,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V2；DeepSeekMath-V2
+Shirong Ma,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Shirong Ma,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shirong Ma,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Shunfeng Zhou,Wentao Zhang,2,主模型、系统/效率,DeepSeek LLM；DualPath
+Tongzheng Ren,Wen Liu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Tongzheng Ren,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Tongzheng Ren,Zhenda Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL
+Wangding Zeng,Xingkai Yu,2,系统/效率,Conditional Memory；DeepSeekMoE
+Wangding Zeng,Yu Wu,2,代码、系统/效率,DeepSeek-Coder-V2；DeepSeekMoE
+Wangding Zeng,Yuqing Wang,2,系统/效率,Native Sparse Attention；mHC
+Wangding Zeng,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Wangding Zeng,Zhewen Hao,2,代码、系统/效率,Conditional Memory；DeepSeek-Coder-V2
+Wanjia Zhao,Wenjun Gao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wanjia Zhao,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wanjia Zhao,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wanjia Zhao,Zhibin Gou,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wanjia Zhao,Zhihong Shao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wen Liu,Xin Xie,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Wen Liu,Yishi Piao,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Wen Liu,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Wen Liu,Yu Wu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Wen Liu,Yukun Li,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Wen Liu,Yuxiang You,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Wenfeng Liang,Wenjun Gao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenfeng Liang,Wentao Zhang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Wenfeng Liang,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenfeng Liang,Y. X. Wei,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Wenfeng Liang,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenfeng Liang,Ying He,2,主模型、系统/效率,DeepSeek LLM；Insights into DeepSeek-V3
+Wenfeng Liang,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenfeng Liang,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenfeng Liang,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Wenfeng Liang,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Xuan Lu,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Wenjun Gao,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Z. F. Wu,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wenjun Gao,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Wenjun Gao,Zhe Fu,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Wenjun Gao,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wenjun Gao,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Wentao Zhang,Xiao Bi,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Wentao Zhang,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Wentao Zhang,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Wentao Zhang,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder
+Xiao Bi,Xin Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xiao Bi,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xiao Bi,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xiao Bi,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xiao Bi,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xiaokang Chen,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Xin Xie,Xingkai Yu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Xin Xie,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Xin Xie,Yaohui Wang,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xin Xie,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xin Xie,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Xingchao Liu,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Xingkai Yu,Yaofeng Sun,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Xingkai Yu,Yishi Piao,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Xingkai Yu,Yiyang Ma,2,多模态,DeepSeek-VL2；Janus
+Xingkai Yu,Yuxiang You,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Xingkai Yu,Zhewen Hao,2,主模型、系统/效率,Conditional Memory；DeepSeek LLM
+Xuan Lu,Zhibin Gou,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Xuan Lu,Zhihong Shao,2,代码、数学/证明,DeepSeek-Coder-V2；DeepSeek-Prover-V1.5
+Y. X. Wei,Yuqing Wang,2,系统/效率,Insights into DeepSeek-V3；Native Sparse Attention
+Yaofeng Sun,Yishi Piao,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Yaofeng Sun,Yu Wu,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Yaofeng Sun,Yuxiang You,2,主模型、多模态,DeepSeek LLM；DeepSeek-VL2
+Yaohui Wang,Yishi Piao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Yu Wu,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Yukun Li,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Yuxiang You,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Zhenda Xie,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yaohui Wang,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yishi Piao,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yishi Piao,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yiyang Ma,Zhenda Xie,2,多模态,DeepSeek-VL2；Janus
+Yiyang Ma,Zhiyu Wu,2,多模态,DeepSeek-VL2；Janus
+Yiyang Ma,Zizheng Pan,2,多模态,DeepSeek-VL2；Janus
+Yu Wu,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yuqing Wang,Zhenda Xie,2,系统/效率,Native Sparse Attention；mHC
+Yuqing Wang,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Yuxiang You,Zhewen Hao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Yuxiang You,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Z. F. Wu,Z. Z. Ren,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Z. F. Wu,Zhibin Gou,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Z. F. Wu,Zhihong Shao,2,数学/证明,DeepSeek-Prover-V1.5；DeepSeek-Prover-V2
+Zhe Fu,Zhihong Shao,2,主模型、数学/证明,DeepSeek LLM；DeepSeek-Prover-V2
+Zhenda Xie,Zhengyan Zhang,2,系统/效率,Native Sparse Attention；mHC
+Zhenda Xie,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
+Zhewen Hao,Zhihong Shao,2,主模型、代码,DeepSeek LLM；DeepSeek-Coder-V2
