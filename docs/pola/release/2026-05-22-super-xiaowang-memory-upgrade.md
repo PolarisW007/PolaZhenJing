@@ -61,6 +61,7 @@ systemctl restart polazj.service
 - `polazj.service` active。
 - `/memory/status` 返回 200。
 - `/memory/search` 返回 200。
+- `/release/status` 返回 200，并能展示当前运行 commit 与最近更新摘要。
 - `/agent.html` 页面可加载并正常调用 chat。
 - 未登录 `/admin/agent/memory` 进入登录页。
 
@@ -86,3 +87,11 @@ systemctl restart polazj.service
   - `https://aipd.me/PolaZhenjing/admin/agent/memory` 未登录 -> 302 到登录页。
   - `https://aipd.me/agent.html` -> 200。
   - `POST /PolaZhenjing/admin/api/agent/chat` -> 200，`ok=true`。
+
+## 2026-05-23 追加发布项：更新感知
+
+- 新增 `app/release_awareness.py`。
+- 新增 `GET /PolaZhenjing/admin/api/agent/release/status`。
+- Chat prompt 注入运行版本自我感知上下文。
+- 新增 Harness 项 `H36-release-awareness`。
+- 回滚方式：`git revert <release-awareness-commit>` 后重启 `polazj.service`。

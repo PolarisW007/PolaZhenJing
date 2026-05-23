@@ -38,3 +38,13 @@
 - Owner 登录后台 `/PolaZhenjing/admin/agent/memory` 后，优先审核 candidate 记忆并逐步转 active/pinned。
 - 如需更好的后台搜索体验，启动 Meilisearch 后执行 `scripts/rebuild_meilisearch_index.py`。
 - Phase 2 再启用 pgvector embedding shadow mode，并用 Harness 对比召回质量。
+
+## 2026-05-23 追加：小王更新感知
+
+- 目标：让超级小王知道自己当前运行的版本、最近一次更新摘要和对应交付文档。
+- 实现：
+  - `app/release_awareness.py` 读取当前 git commit、commit subject、commit time、最新 release doc 和 delivery log。
+  - `app/agent.py` 在 chat system context 中注入短版本感知信息。
+  - 新增 `GET /admin/api/agent/release/status` 作为运维/验收入口。
+  - `scripts/run_memory_harness.py` 新增 `H36-release-awareness`。
+- 安全边界：只暴露 commit、分支、提交标题和文档相对路径；不暴露服务器绝对路径、环境变量值、密钥和系统提示词。

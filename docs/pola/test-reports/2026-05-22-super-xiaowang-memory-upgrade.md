@@ -33,6 +33,7 @@
 - H33 反投毒隔离。
 - H34 boundary 分类。
 - H35 Meilisearch projection 使用可回查 `target_id`。
+- H36 release awareness：小王能读取当前运行提交和更新摘要，且不暴露敏感配置。
 
 ## 存储层异常数据回归
 
@@ -61,6 +62,22 @@
 | `GET https://aipd.me/PolaZhenjing/admin/agent/memory` 未登录 | 302 -> `/admin/login` |
 | `GET https://aipd.me/agent.html` | 200 |
 | `POST https://aipd.me/PolaZhenjing/admin/api/agent/chat` | 200，`ok=true`，`model=MiniMax-M2.7` |
+
+## 2026-05-23 小能力回归：更新感知
+
+新增能力：
+
+- `app/release_awareness.py` 从服务器当前 git commit、最新发布文档和交付日志生成“运行版本自我感知上下文”。
+- `/admin/api/agent/release/status` 返回当前 commit、分支、最近提交标题、提交时间和发布/交付文档引用。
+- `/admin/api/agent/chat` 的 system context 注入短版本感知信息；仅在用户询问更新、版本、部署或新能力时使用。
+
+验证项：
+
+| 路径/命令 | 结果 |
+| --- | --- |
+| `pytest tests/test_release_awareness.py` | 待远端部署后记录 |
+| `scripts/run_memory_harness.py` | 新增 H36，待远端部署后记录 |
+| `GET /admin/api/agent/release/status` | 待远端部署后记录 |
 
 生产状态：
 

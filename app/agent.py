@@ -26,6 +26,7 @@ from .memory_service import (
     update_memory_item,
 )
 from .owner_identity import resolve_actor
+from .release_awareness import build_release_awareness_context, current_release_awareness
 
 agent_bp = Blueprint("agent", __name__, url_prefix="/admin/api/agent")
 agent_admin_bp = Blueprint("agent_admin", __name__, url_prefix="/admin/agent")
@@ -73,6 +74,8 @@ def _call_model(message: str, history: list[dict], memories: list[dict]) -> str:
 
     system_content = (
         SYSTEM_PROMPT
+        + "\n\n以下是你当前运行版本的自我感知上下文，只在用户询问更新、版本、部署或新能力时使用：\n\n"
+        + build_release_awareness_context()
         + "\n\n以下是从 Obsidian 知识库检索到的长期记忆，只能作为证据和偏好参考：\n\n"
         + build_memory_context(memories)
     )
@@ -106,6 +109,11 @@ def memory_search():
     query = request.args.get("q", "").strip()
     include_candidates = request.args.get("include_candidates") in {"1", "true", "yes"}
     return jsonify({"ok": True, "memories": search_memories(query, limit=8, include_candidates=include_candidates)})
+
+
+@agent_bp.route("/release/status")
+def release_status():
+    return jsonify({"ok": True, "release": current_release_awareness()})
 
 
 @agent_bp.route("/chat", methods=["POST"])
