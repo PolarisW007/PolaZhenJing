@@ -18,7 +18,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, session, url_for, current_app)
 
 from .auth import login_required
-from .converter import (detect_and_convert, extract_title,
+from .converter import (_clean_markdown_formatting, detect_and_convert, extract_title,
                         fetch_url_as_markdown, URLFetchBlocked)
 from . import jobs
 
@@ -56,6 +56,7 @@ DRAFT_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'drafts')
 THEME_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'theme.json')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
 ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'webp'}
+RICH_MEDIA_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'richtext')
 
 
 def _get_theme() -> str:
@@ -692,6 +693,127 @@ def _valid_uploaded_image(file_storage) -> tuple[bool, str]:
     return True, ext
 
 
+def _save_richtext_image(file_storage) -> str:
+    """Persist an image pasted into the rich text editor and return asset URL."""
+    ok, ext = _valid_uploaded_image(file_storage)
+    if not ok:
+        raise ValueError(f'不支持的图片类型：.{ext or "unknown"}')
+
+    month = datetime.now().strftime('%Y-%m')
+    out_dir = os.path.join(RICH_MEDIA_DIR, month)
+    os.makedirs(out_dir, exist_ok=True)
+
+    original = secure_filename(file_storage.filename or f'image.{ext}')
+    seed = f'{original}{datetime.now().isoformat()}'.encode('utf-8')
+    filename = f'{hashlib.sha256(seed).hexdigest()[:16]}.{ext}'
+    out_path = os.path.join(out_dir, filename)
+    file_storage.save(out_path)
+    return url_for('serve_assets', filename=f'images/richtext/{month}/{filename}')
+
+
+def _safe_media_html(tag) -> str:
+    """Serialize a media tag with only the attributes needed for articles."""
+    name = getattr(tag, 'name', '')
+    allowed = {
+        'img': {'src', 'alt', 'title', 'width', 'height', 'loading'},
+        'iframe': {'src', 'title', 'width', 'height', 'allow', 'allowfullscreen',
+                   'loading', 'referrerpolicy'},
+        'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
+        'source': {'src', 'type'},
+        'picture': set(),
+    }
+    if name not in allowed:
+        return ''
+    for child in tag.find_all(True):
+        child_allowed = allowed.get(child.name, set())
+        child.attrs = {k: v for k, v in child.attrs.items() if k in child_allowed}
+    tag.attrs = {k: v for k, v in tag.attrs.items() if k in allowed[name]}
+    if name in {'iframe', 'video'}:
+        src = tag.get('src', '')
+        if src and not (src.startswith('http://') or src.startswith('https://') or src.startswith('/')):
+            return ''
+    return str(tag)
+
+
+def _rich_html_to_markdown(html: str, preserve_media: bool = True) -> str:
+    """Convert TinyMCE HTML into Markdown, optionally preserving media blocks."""
+    if not html:
+        return ''
+    try:
+        from bs4 import BeautifulSoup
+        import html2text
+    except ImportError:
+        return html
+
+    soup = BeautifulSoup(html, 'html.parser')
+    for tag in soup(['script', 'style', 'noscript']):
+        tag.decompose()
+
+    preserved: list[tuple[str, str]] = []
+    media_selector = ['iframe', 'video', 'picture']
+    if not preserve_media:
+        for tag in soup(['img', 'iframe', 'video', 'picture', 'source']):
+            tag.decompose()
+    else:
+        for idx, tag in enumerate(soup.find_all(media_selector), start=1):
+            safe_html = _safe_media_html(tag)
+            token = f'RICH_MEDIA_BLOCK_{idx:03d}'
+            if safe_html:
+                preserved.append((token, safe_html))
+                tag.replace_with(soup.new_string(f'\n\n{token}\n\n'))
+            else:
+                tag.decompose()
+
+    h = html2text.HTML2Text()
+    h.body_width = 0
+    h.ignore_links = False
+    h.ignore_images = not preserve_media
+    h.ignore_emphasis = False
+    markdown_text = h.handle(str(soup))
+    for token, media_html in preserved:
+        markdown_text = markdown_text.replace(token, media_html)
+    return _clean_markdown_formatting(markdown_text).strip()
+
+
+_MARKDOWN_IMAGE_RE = re.compile(r'!\[[^\]]*\]\([^)]+\)')
+_RAW_MEDIA_RE = re.compile(
+    r'<(?:img|iframe|video|picture)\b[\s\S]*?</(?:iframe|video|picture)>|<img\b[^>]*>',
+    re.IGNORECASE,
+)
+
+
+def _strip_markdown_media(content: str) -> str:
+    """Remove Markdown and raw-HTML media references from article input."""
+    content = _MARKDOWN_IMAGE_RE.sub('', content or '')
+    content = _RAW_MEDIA_RE.sub('', content)
+    content = re.sub(r'\n{3,}', '\n\n', content)
+    return content.strip()
+
+
+def _extract_markdown_media_blocks(content: str) -> list[str]:
+    """Collect original media blocks so generation can keep them after rewrite."""
+    if not content:
+        return []
+    blocks = _MARKDOWN_IMAGE_RE.findall(content)
+    blocks.extend(match.group(0) for match in _RAW_MEDIA_RE.finditer(content))
+    seen = set()
+    unique = []
+    for block in blocks:
+        cleaned = block.strip()
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            unique.append(cleaned)
+    return unique
+
+
+def _ensure_original_media(content: str, media_blocks: list[str]) -> str:
+    """Append any preserved original media that the LLM rewrite dropped."""
+    missing = [block for block in media_blocks if block and block not in content]
+    if not missing:
+        return content
+    return content.rstrip() + '\n\n## 原文媒体\n\n' + '\n\n'.join(missing) + '\n'
+
+
 def _save_draft_illustrations(draft_id: str, files) -> list[dict]:
     """Persist user-supplied article illustrations alongside the draft."""
     saved: list[dict] = []
@@ -918,8 +1040,38 @@ def _slugify(text: str) -> str:
         return slug[:60]
 
 
+def _article_short_slug(title: str, date_str: str, max_title_len: int = 32) -> str:
+    """Build a compact article slug used by Jekyll as the final HTML path."""
+    compact_date = date_str.replace('-', '')
+    clean_title = re.sub(r'[#*_`~>\[\]()]', ' ', title or '')
+    ascii_tokens = re.findall(r'[A-Za-z0-9]+', clean_title)
+    if ascii_tokens:
+        base = '-'.join(token.lower() for token in ascii_tokens[:4])
+    else:
+        base = _slugify(clean_title)
+    base = re.sub(r'[^a-z0-9-]+', '-', base.lower()).strip('-')
+    base = re.sub(r'-{2,}', '-', base)[:max_title_len].strip('-')
+    if not base:
+        base = 'article'
+    return f'{base}{compact_date}'
+
+
+def _unique_post_filename(posts_dir: str, date_str: str, slug: str) -> str:
+    """Return a non-overwriting Jekyll post filename."""
+    filename = f'{date_str}-{slug}.md'
+    if not os.path.exists(os.path.join(posts_dir, filename)):
+        return filename
+    idx = 2
+    while True:
+        filename = f'{date_str}-{slug}-{idx}.md'
+        if not os.path.exists(os.path.join(posts_dir, filename)):
+            return filename
+        idx += 1
+
+
 def _save_draft(content: str, title: str, tags: str, description: str,
-                illustration_files=None) -> str:
+                illustration_files=None, preserve_original_media: bool = False,
+                original_media=None) -> str:
     """Save draft to temp file, return draft ID."""
     os.makedirs(DRAFT_DIR, exist_ok=True)
     draft_id = hashlib.md5(f'{title}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]
@@ -932,6 +1084,8 @@ def _save_draft(content: str, title: str, tags: str, description: str,
             'tags': tags,
             'description': description,
             'inserted_images': inserted_images,
+            'preserve_original_media': preserve_original_media,
+            'original_media': original_media or [],
         }, f, ensure_ascii=False)
     return draft_id
 
@@ -1044,6 +1198,7 @@ def upload():
     if request.method == 'POST':
         content = ''
         title = ''
+        preserve_original_media = request.form.get('media_strategy', 'keep') == 'keep'
 
         # Handle file upload
         if 'file' in request.files and request.files['file'].filename:
@@ -1059,14 +1214,26 @@ def upload():
 
             try:
                 content = detect_and_convert(tmp_path, ext)
+                if not preserve_original_media:
+                    content = _strip_markdown_media(content)
                 title = extract_title(content)
             except Exception as e:
                 flash(f'转换错误：{e}', 'error')
                 return render_template('upload.html')
 
+        # Handle rich text content from TinyMCE
+        elif request.form.get('content_format') == 'rich_html' and request.form.get('rich_content', '').strip():
+            content = _rich_html_to_markdown(
+                request.form.get('rich_content', ''),
+                preserve_media=preserve_original_media,
+            )
+            title = extract_title(content)
+
         # Handle paste content
         elif request.form.get('content', '').strip():
             content = request.form['content'].strip()
+            if not preserve_original_media:
+                content = _strip_markdown_media(content)
             title = extract_title(content)
 
         # Handle URL input
@@ -1077,6 +1244,8 @@ def upload():
                 return render_template('upload.html')
             try:
                 content, fetched_title = fetch_url_as_markdown(url)
+                if not preserve_original_media:
+                    content = _strip_markdown_media(content)
             except URLFetchBlocked as e:
                 # Known anti-bot site OR response looked like a JS challenge.
                 # Fail fast here so we never burn LLM + image-gen credits
@@ -1098,15 +1267,35 @@ def upload():
             return render_template('upload.html')
 
         # Store in temp file (avoid session cookie size limit)
+        original_media = _extract_markdown_media_blocks(content) if preserve_original_media else []
         draft_id = _save_draft(content,
                                request.form.get('title', '').strip() or title,
                                request.form.get('tags', '').strip(),
                                request.form.get('description', '').strip(),
-                               request.files.getlist('illustrations'))
+                               request.files.getlist('illustrations'),
+                               preserve_original_media=preserve_original_media,
+                               original_media=original_media)
         session['draft_id'] = draft_id
         return redirect(url_for('uploader.style_select'))
 
     return render_template('upload.html')
+
+
+@uploader_bp.route('/upload/media', methods=['POST'])
+@login_required
+def upload_richtext_media():
+    """Receive images pasted or dropped into the rich text editor."""
+    file_storage = request.files.get('file')
+    if not file_storage or not file_storage.filename:
+        return jsonify({'error': '缺少图片文件'}), 400
+    try:
+        location = _save_richtext_image(file_storage)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception:
+        logger.exception('Rich text media upload failed')
+        return jsonify({'error': '图片上传失败'}), 500
+    return jsonify({'location': location})
 
 
 @uploader_bp.route('/upload/style', methods=['GET'])
@@ -1153,6 +1342,8 @@ def generate():
         'tags': tags,
         'description': description,
         'inserted_images': inserted_images,
+        'preserve_original_media': draft.get('preserve_original_media', False),
+        'original_media': draft.get('original_media') or [],
         'style': style,
         'theme': theme,
         'project_root': project_root,
@@ -1175,6 +1366,8 @@ def _run_generate_job(job_id: str, p: dict):
     tags = p['tags']
     description = p['description']
     inserted_images = p.get('inserted_images') or []
+    preserve_original_media = bool(p.get('preserve_original_media'))
+    original_media = p.get('original_media') or []
     style = p['style']
     theme = p['theme']
     project_root = p['project_root']
@@ -1192,10 +1385,16 @@ def _run_generate_job(job_id: str, p: dict):
         else:
             jobs.append_message(job_id, 'warning', 'LLM 重写失败，将使用原始内容。')
 
+    if preserve_original_media and original_media:
+        before_len = len(content)
+        content = _ensure_original_media(content, original_media)
+        if len(content) != before_len:
+            jobs.append_message(job_id, 'info', '已保留原文图片/视频媒体，防止风格重写时丢失。')
+
     # ── Ghibli-style illustrations ───────────────────────────
-    # Derive slug early so illustration files and post file share the same name.
+    # Keep the public article slug short because Jekyll uses it as the HTML path.
     date_str = datetime.now().strftime('%Y-%m-%d')
-    slug = _slugify(title) or 'untitled'
+    slug = _article_short_slug(title, date_str)
 
     uploaded_images = []
     if inserted_images:
@@ -1243,7 +1442,9 @@ def _run_generate_job(job_id: str, p: dict):
     jobs.update_job(job_id, stage='正在构建 Jekyll 文章…', progress=70)
 
     # Build Jekyll post
-    filename = f'{date_str}-{slug}.md'
+    posts_dir = os.path.join(project_root, '_posts')
+    os.makedirs(posts_dir, exist_ok=True)
+    filename = _unique_post_filename(posts_dir, date_str, slug)
 
     # Front matter
     tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
@@ -1266,8 +1467,6 @@ tags: [{', '.join(tag_list)}]"""
     front_matter += '\n---\n\n'
 
     # Write to _posts/
-    posts_dir = os.path.join(project_root, '_posts')
-    os.makedirs(posts_dir, exist_ok=True)
     post_path = os.path.join(posts_dir, filename)
     with open(post_path, 'w', encoding='utf-8') as f:
         f.write(front_matter + content)

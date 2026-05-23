@@ -1,6 +1,44 @@
 {% extends "base.html" %}
 {% block title %}上传{% endblock %}
 {% block card_class %}card-wide{% endblock %}
+{% block head_extra %}
+<style>
+  .editor-mode-switch,
+  .media-policy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+  .editor-mode-switch label,
+  .media-policy label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.035);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .editor-mode-switch input,
+  .media-policy input { accent-color: var(--gold-primary); }
+  .rich-editor-help {
+    margin-top: 0.55rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.65;
+  }
+  .tox-tinymce {
+    border-color: var(--text-ghost) !important;
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+  }
+</style>
+{% endblock %}
 {% block content %}
 <h2>上传文章</h2>
 
@@ -25,6 +63,13 @@
       <input type="text" id="title" name="title" class="form-input" placeholder="文章标题...">
     </div>
     <div class="form-group">
+      <label>原文媒体处理</label>
+      <div class="media-policy">
+        <label><input type="radio" name="media_strategy" value="keep" checked> 保留图片和视频</label>
+        <label><input type="radio" name="media_strategy" value="remove"> 去除图片和视频</label>
+      </div>
+    </div>
+    <div class="form-group">
       <label for="tags">标签（英文逗号分隔）</label>
       <input type="text" id="tags" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
     </div>
@@ -45,10 +90,26 @@
 
 <!-- Paste Tab -->
 <div id="tab-paste" style="display: none;">
-  <form method="POST" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data" id="paste-form">
+    <input type="hidden" name="content_format" id="content-format" value="rich_html">
     <div class="form-group">
-      <label for="content">Markdown 内容</label>
-      <textarea id="content" name="content" class="form-input" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
+      <label>正文编辑</label>
+      <div class="editor-mode-switch">
+        <label><input type="radio" name="editor_mode" value="rich" checked> 富文本编辑</label>
+        <label><input type="radio" name="editor_mode" value="markdown"> Markdown 源码</label>
+      </div>
+      <textarea id="rich-content" name="rich_content" class="form-input" placeholder="可以直接粘贴富文本内容，支持图片、视频、表格和链接..."></textarea>
+      <textarea id="content" name="content" class="form-input" style="display:none;" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
+      <div class="rich-editor-help">
+        富文本模式支持从网页、文档和公众号后台粘贴内容；粘贴/拖入图片会先上传到服务器，再进入生成流程。
+      </div>
+    </div>
+    <div class="form-group">
+      <label>富文本媒体处理</label>
+      <div class="media-policy">
+        <label><input type="radio" name="media_strategy" value="keep" checked> 保留图片和视频</label>
+        <label><input type="radio" name="media_strategy" value="remove"> 去除图片和视频</label>
+      </div>
     </div>
     <div class="form-group">
       <label for="title2">标题（可选）</label>
@@ -89,6 +150,13 @@
       <input type="text" id="title3" name="title" class="form-input" placeholder="文章标题...">
     </div>
     <div class="form-group">
+      <label>原文媒体处理</label>
+      <div class="media-policy">
+        <label><input type="radio" name="media_strategy" value="keep" checked> 保留图片和视频</label>
+        <label><input type="radio" name="media_strategy" value="remove"> 去除图片和视频</label>
+      </div>
+    </div>
+    <div class="form-group">
       <label for="tags3">标签（英文逗号分隔）</label>
       <input type="text" id="tags3" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
     </div>
@@ -109,6 +177,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
 function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -127,5 +196,75 @@ const dt = document.getElementById('drop-text');
 ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('dragover'); }));
 dz.addEventListener('drop', ev => { fi.files = ev.dataTransfer.files; dt.textContent = fi.files[0].name; });
 fi.addEventListener('change', () => { if (fi.files.length) dt.textContent = fi.files[0].name; });
+
+let richEditorReady = false;
+
+function initRichEditor() {
+  if (richEditorReady || !window.tinymce) return;
+  richEditorReady = true;
+  tinymce.init({
+    selector: '#rich-content',
+    base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6.8.5',
+    suffix: '.min',
+    height: 420,
+    menubar: false,
+    branding: false,
+    promotion: false,
+    plugins: 'autoresize code fullscreen image link lists media preview table wordcount',
+    toolbar: [
+      'undo redo | blocks bold italic underline blockquote | bullist numlist |',
+      'link image media table | removeformat code fullscreen preview'
+    ].join(' '),
+    block_formats: '段落=p; 标题 1=h1; 标题 2=h2; 标题 3=h3; 引用=blockquote; 代码=pre',
+    paste_data_images: true,
+    automatic_uploads: true,
+    images_upload_url: '{{ url_for("uploader.upload_richtext_media") }}',
+    images_file_types: 'jpeg,jpg,png,webp',
+    convert_urls: false,
+    relative_urls: false,
+    remove_script_host: false,
+    content_style: [
+      'body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;font-size:16px;line-height:1.75;color:#1d1d1f;}',
+      'img,video,iframe{max-width:100%;height:auto;}',
+      'blockquote{border-left:4px solid #e4bf7a;margin:1em 0;padding:.3em 1em;color:#555;background:#faf7ef;}'
+    ].join('')
+  });
+}
+
+function setEditorMode(mode) {
+  const contentFormat = document.getElementById('content-format');
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
+  if (mode === 'markdown') {
+    contentFormat.value = 'markdown';
+    markdown.style.display = 'block';
+    if (window.tinymce && tinymce.get('rich-content')) {
+      tinymce.get('rich-content').hide();
+    } else {
+      rich.style.display = 'none';
+    }
+  } else {
+    contentFormat.value = 'rich_html';
+    markdown.style.display = 'none';
+    initRichEditor();
+    if (window.tinymce && tinymce.get('rich-content')) {
+      tinymce.get('rich-content').show();
+    } else {
+      rich.style.display = 'block';
+    }
+  }
+}
+
+document.querySelectorAll('input[name="editor_mode"]').forEach(input => {
+  input.addEventListener('change', () => setEditorMode(input.value));
+});
+
+document.getElementById('paste-form').addEventListener('submit', () => {
+  if (window.tinymce && tinymce.get('rich-content')) {
+    tinymce.triggerSave();
+  }
+});
+
+initRichEditor();
 </script>
 {% endblock %}
