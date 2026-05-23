@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一位年轻创业者坐在被数字信息包围的工作室里，左手边是一个巨大的发光AI聊天气泡（象征ChatGPT），右手边是一个正在操控真实电脑桌面的机械手臂机器人（象征Codex App），气泡里写着空洞的建议，而机械手正在真实地整理文件、敲击键盘，周围漂浮着各种工作文档和文件夹，整体表达AI从动嘴顾问到动手员工的转变。",
+    "prompt": "A young person sitting at a modern desk, on the left side a giant glowing chat bubble floating like a consultant giving advice but staying in the cloud, on the right side a friendly robot arm physically operating the computer keyboard and mouse, the robot is connected to the person's desktop, papers and folders are being organized by the robot hand in real time, scattered documents float around like a digital workspace, Studio Ghibli animation style, soft watercolor textures, natural daylight from window, warm color palette, detailed illustration, no text or logos"
+  },
+  "scenes": [
+    {
+      "block_index": 1,
+      "alt": "两个年轻人在咖啡馆对话，其中一人满脸困惑地看着手机屏幕上显示的各种AI对话界面，另一人无奈地摊开双手，桌上放着半凉的咖啡和一台打开的笔记本电脑，背景是模糊的城市街景和飘散的AI应用图标。",
+      "prompt": "Two young people having conversation in a cozy cafe, one person looking confused at their smartphone screen showing various AI chat interfaces with dotted lines, the other person shrugging with both hands open, half-cold coffee cup on the table, laptop open nearby, blurred city street visible through window, floating faint icons of various AI apps in background, Studio Ghibli style, watercolor painting, warm natural lighting from cafe window, gentle atmosphere, detailed character expressions showing frustration and helplessness"
+    },
+    {
+      "block_index": 42,
+      "alt": "一只手用鼠标点击浏览器中的Codex下载按钮，浏览器窗口显示OpenAI开发者官网界面，桌面背景是整洁的Mac风格工作界面，整个场景聚焦在下载安装这一关键动作上。",
+      "prompt": "Close-up view of a hand holding a mouse clicking on a prominent download button on OpenAI developer website in browser, the browser shows clean developer interface with Codex App download section highlighted, clean Mac-style desktop background visible, Studio Ghibli style, soft watercolor texture, natural desk lamp lighting, warm color tones, cinematic composition with focus on the clicking action, no text or logos"
+    },
+    {
+      "block_index": 94,
+      "alt": "Codex App的对话界面特写，展示多个智能提示气泡和快捷指令标签浮在输入框上方，像小鱼一样游动的小图标代表各种快捷方式，光标在输入框中闪烁，整体呈现流畅的对话交互设计。",
+      "prompt": "Close-up of Codex App conversation interface design, multiple smart suggestion bubbles floating above the text input box like colorful bubbles, small fish-like icons representing various quick commands swimming around the input area, blinking cursor in the text box, elegant UI design with soft glow effects, dreamy Studio Ghibli animation aesthetic, watercolor brush strokes, natural ambient light from screen, detailed interface elements, no text, soft blue and white color palette"
+    },
+    {
+      "block_index": 151,
+      "alt": "一个分叉的思维导图式画面，左侧多条路径逐渐变淡消失并标记错误符号，右侧一条清晰的主路径闪闪发光延伸向前，整个场景是一个AI助手正在帮助用户做出关键决策的瞬间。",
+      "prompt": "A split-screen concept showing a branching decision tree or mind map, on the left side multiple paths fading away with X marks and error symbols, on the right side one bright golden path glowing and extending forward triumphantly, a small friendly AI assistant character pointing to the correct path like a wise guide, watercolor style illustration, Studio Ghibli aesthetic, dramatic contrast between dark fading paths and bright successful path, natural light from above illuminating the winning direction, inspiring mood"
+    },
+    {
+      "block_index": 189,
+      "alt": "一位年轻女性创作者在工作台前专注工作，左边角落有一个可爱的玩具机器人（代表过去的AI玩具时代），右边工作台上是各种真实工具如扳手和螺丝刀（代表真正的AI工具能力），她的双手正在键盘上敲打，周围环绕着正在被创建的数字作品。",
+      "prompt": "A young female creator working at a modern work desk, on the left corner a cute toy robot sitting idly (representing past AI as toy era), on the right side of the desk various real tools like wrenches and screwdrivers glowing with purpose (representing AI as real tools), her hands typing confidently on keyboard, digital creations like documents images and code floating around being generated in real-time, Studio Ghibli animation style, watercolor texture, warm natural daylight from window, hopeful and inspiring atmosphere showing transformation from toy to tool"
+    }
+  ]
+}

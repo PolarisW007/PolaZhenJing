@@ -36,6 +36,83 @@
     border-color: var(--text-ghost) !important;
     border-radius: var(--radius-md) !important;
     overflow: hidden;
+    background: rgba(255,255,255,0.035) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tox .tox-editor-header,
+  .tox .tox-toolbar-overlord,
+  .tox .tox-toolbar,
+  .tox .tox-toolbar__primary,
+  .tox .tox-toolbar__overflow,
+  .tox .tox-menubar,
+  .tox .tox-statusbar {
+    background: color-mix(in srgb, var(--bg-deepest) 78%, var(--bg-card-hover)) !important;
+    border-color: var(--text-ghost) !important;
+  }
+  .tox .tox-toolbar__group {
+    border-color: var(--text-ghost) !important;
+  }
+  .tox .tox-tbtn,
+  .tox .tox-mbtn,
+  .tox .tox-listboxfield .tox-listbox--select,
+  .tox .tox-statusbar__path-item,
+  .tox .tox-statusbar__wordcount {
+    color: var(--text-secondary) !important;
+  }
+  .tox .tox-tbtn svg,
+  .tox .tox-mbtn svg {
+    fill: var(--text-secondary) !important;
+  }
+  .tox .tox-tbtn:hover,
+  .tox .tox-tbtn--enabled,
+  .tox .tox-tbtn--active,
+  .tox .tox-mbtn:hover {
+    background: rgba(228,191,122,0.12) !important;
+    color: var(--gold-primary) !important;
+  }
+  .tox .tox-tbtn:hover svg,
+  .tox .tox-tbtn--enabled svg,
+  .tox .tox-tbtn--active svg {
+    fill: var(--gold-primary) !important;
+  }
+  .tox .tox-edit-area__iframe {
+    background: color-mix(in srgb, var(--bg-deepest) 88%, var(--bg-card-hover)) !important;
+  }
+  .tox .tox-statusbar {
+    color: var(--text-muted) !important;
+  }
+  .tox .tox-split-button:hover {
+    box-shadow: 0 0 0 1px rgba(228,191,122,0.25) inset !important;
+  }
+  .tox .tox-collection,
+  .tox .tox-menu {
+    background: color-mix(in srgb, var(--bg-deepest) 92%, var(--bg-card-hover)) !important;
+    border: 1px solid var(--text-ghost) !important;
+    color: var(--text-secondary) !important;
+  }
+  .tox .tox-collection__item {
+    color: var(--text-secondary) !important;
+  }
+  .tox .tox-collection__item--active,
+  .tox .tox-collection__item:hover {
+    background: rgba(228,191,122,0.12) !important;
+    color: var(--gold-primary) !important;
+  }
+  body[data-theme="claude"] .tox .tox-editor-header,
+  body[data-theme="claude"] .tox .tox-toolbar-overlord,
+  body[data-theme="claude"] .tox .tox-toolbar,
+  body[data-theme="claude"] .tox .tox-toolbar__primary,
+  body[data-theme="claude"] .tox .tox-toolbar__overflow,
+  body[data-theme="claude"] .tox .tox-statusbar {
+    background: #F7F1E7 !important;
+  }
+  body[data-theme="pmframe"] .tox .tox-editor-header,
+  body[data-theme="pmframe"] .tox .tox-toolbar-overlord,
+  body[data-theme="pmframe"] .tox .tox-toolbar,
+  body[data-theme="pmframe"] .tox .tox-toolbar__primary,
+  body[data-theme="pmframe"] .tox .tox-toolbar__overflow,
+  body[data-theme="pmframe"] .tox .tox-statusbar {
+    background: #F8F9F7 !important;
   }
 </style>
 {% endblock %}
@@ -199,6 +276,42 @@ fi.addEventListener('change', () => { if (fi.files.length) dt.textContent = fi.f
 
 let richEditorReady = false;
 
+function themeVar(name, fallback) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
+}
+
+function editorContentStyle() {
+  const bg = themeVar('--bg-deepest', '#050508');
+  const card = themeVar('--bg-card-hover', 'rgba(255,255,255,0.12)');
+  const primary = themeVar('--text-primary', '#fff');
+  const secondary = themeVar('--text-secondary', 'rgba(255,255,255,0.80)');
+  const muted = themeVar('--text-muted', 'rgba(255,255,255,0.45)');
+  const ghost = themeVar('--text-ghost', 'rgba(255,255,255,0.12)');
+  const gold = themeVar('--gold-primary', '#E4BF7A');
+  return [
+    `html{background:${bg};}`,
+    `body{margin:0;padding:18px 20px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;font-size:16px;line-height:1.75;color:${secondary};background:linear-gradient(135deg, ${card}, ${bg});}`,
+    `body.mce-content-body{min-height:360px;}`,
+    `p{margin:0 0 1em;color:${secondary};}`,
+    `h1,h2,h3,h4{color:${primary};font-family:"Noto Serif SC","PingFang SC",serif;line-height:1.35;margin:1.15em 0 .55em;}`,
+    `a{color:${gold};text-decoration:none;}`,
+    `img,video,iframe{max-width:100%;height:auto;border-radius:10px;border:1px solid ${ghost};}`,
+    `blockquote{border-left:4px solid ${gold};margin:1em 0;padding:.45em 1em;color:${secondary};background:rgba(228,191,122,.08);border-radius:0 10px 10px 0;}`,
+    `table{border-collapse:collapse;width:100%;margin:1em 0;color:${secondary};}`,
+    `td,th{border:1px solid ${ghost};padding:.55em .7em;}`,
+    `th{color:${gold};background:rgba(228,191,122,.08);}`,
+    `code,pre{color:${primary};background:rgba(255,255,255,.06);border:1px solid ${ghost};border-radius:8px;}`,
+    `pre{padding:1em;overflow:auto;}`,
+    `::selection{background:rgba(228,191,122,.28);}`,
+    `.mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before{color:${muted};}`
+  ].join('');
+}
+
+function editorSkin() {
+  const theme = document.body.dataset.theme || '';
+  return theme === 'claude' || theme === 'pmframe' ? 'oxide' : 'oxide-dark';
+}
+
 function initRichEditor() {
   if (richEditorReady || !window.tinymce) return;
   richEditorReady = true;
@@ -206,6 +319,8 @@ function initRichEditor() {
     selector: '#rich-content',
     base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6.8.5',
     suffix: '.min',
+    skin: editorSkin(),
+    content_css: false,
     height: 420,
     menubar: false,
     branding: false,
@@ -223,11 +338,7 @@ function initRichEditor() {
     convert_urls: false,
     relative_urls: false,
     remove_script_host: false,
-    content_style: [
-      'body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;font-size:16px;line-height:1.75;color:#1d1d1f;}',
-      'img,video,iframe{max-width:100%;height:auto;}',
-      'blockquote{border-left:4px solid #e4bf7a;margin:1em 0;padding:.3em 1em;color:#555;background:#faf7ef;}'
-    ].join('')
+    content_style: editorContentStyle()
   });
 }
 
