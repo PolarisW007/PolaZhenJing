@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "Agent的Harness与Runtime双层架构图：蜿蜒的铁路从本地小山坡延伸向远方城市高山，铁轨下方是坚固的基石和管道代表runtime层，铁轨上方是Agent列车驾驶舱和信号灯代表harness层，前景小列车上机器人在操作",
+    "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, warm sunset tones. A winding railway track extends from a small green hill on the left (representing local development) toward distant mountains and a glowing city skyline on the right (representing production environment). Below the tracks, sturdy foundations and pipes symbolizing infrastructure and runtime layer. Above the tracks, a small charming locomotive with a robot operator in the cabin, holding a map and tools symbolizing harness layer. Green meadows, white clouds, wildflowers, small wooden fences in foreground. Rich detailed environment, hand-painted texture, no text or labels."
+  },
+  "scenes": [
+    {
+      "block_index": 5,
+      "alt": "本地开发环境与生产环境对比图：左侧温暖工作室内程序员在笔记本电脑前调试，窗外是宁静草地；右侧是繁忙的数据中心建筑剖面，服务器机柜闪烁指示灯，用户请求如光线般涌入",
+      "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, warm interior tones on left, cool technical tones on right. Split scene: left side shows a cozy warm room with a programmer at a wooden desk with a glowing laptop, large window showing peaceful green fields and hills outside. Right side shows a cross-section of a large modern data center building with rows of server racks blinking with LEDs, network cables and pipes connecting everywhere, multiple user connections visualized as streams of light particles entering. Cloud shapes floating in background, industrial yet magical atmosphere. Hand-painted texture, no text or logos."
+    },
+    {
+      "block_index": 51,
+      "alt": "持久化checkpoint机制图：蜿蜒的数据河流从山间流出，河岸两侧是PostgreSQL服务器机房建筑，河中有checkpoint浮标标注编号，Agent列车在河流上运行，每节车厢都载着数据",
+      "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, gentle flowing atmosphere. A winding river of data flowing from misty mountains, river banks lined with PostgreSQL server room buildings resembling traditional Japanese warehouses with glowing windows. Bright checkpoint buoys floating in the river marked with numbers. A small data train running on tracks along the river, each carriage loaded with glowing data cubes and scrolls. Small robots inspecting checkpoints along the river. Green hills, willow trees, stepping stones in water. Dreamy pastel colors, hand-painted watercolor texture, no text or labels."
+    },
+    {
+      "block_index": 94,
+      "alt": "工厂流水线拦截机制图：传送带上Agent机器人经过多个检查站和机械臂，每个工位有透明闸门、机械触手和警示灯，代表拦截输入、过滤输出、限制成本",
+      "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, industrial workshop atmosphere. A long conveyor belt running through a whimsical factory interior with high ceilings letting in natural light. Small cute robots on the conveyor belt passing through multiple inspection stations with transparent gates, mechanical arms, and signal lights representing input interception, output filtering, and cost limits. Each station has glowing screens and dials. Gear decorations on walls, copper pipes, warm wood elements. Small fairy-like workers monitoring the stations. Steam and light particles, hand-painted texture, no text or labels."
+    },
+    {
+      "block_index": 129,
+      "alt": "Agent协作平台城市图：城市广场中多个Agent机器人在协作，连接到周围不同风格的建筑（GitHub代码仓库、CI系统钟楼、数据库图书馆），建筑之间有发光的数据管道和光纤连接",
+      "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, vibrant bustling city square atmosphere. Multiple cute robots in a European-style plaza collaborating, each robot connected to different buildings around the square with glowing fiber optic cables and data pipes. Buildings include a code library resembling a temple, a clock tower for CI systems, a crystal dome for databases, and a workshop for GitHub. Robots shaking hands and passing data scrolls between them. Cobblestone plaza, flower vendors, outdoor cafes with warm lighting. Blue sky with fluffy clouds, rooftop gardens. Rich detailed environment, hand-painted texture, no text or labels."
+    },
+    {
+      "block_index": 163,
+      "alt": "可靠生产Agent平台图：前景是坚固的铁路基座和铁轨延伸向城市天际线，Agent列车安全停靠，车上机器人透过望远镜观景，远方有高山和云朵，展示runtime作为Agent可靠运行的基础",
+      "prompt": "Studio Ghibli anime style watercolor painting, soft natural lighting, warm hopeful atmosphere. Foreground shows sturdy reinforced concrete foundations and steel railway tracks extending toward a beautiful city skyline in the distance. A friendly train safely parked at a station platform, a small robot operator looking through a telescope at the grand view of mountains, forests and a glowing city beyond. Green rolling hills, wildflowers, wooden fences, birds flying. Golden hour lighting with long shadows. The tracks represent reliable runtime infrastructure. Strong sense of stability and reliability, hand-painted watercolor texture, no text or labels."
+    }
+  ]
+}
