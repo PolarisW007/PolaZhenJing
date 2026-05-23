@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "程序员坐在工作台前，周围环绕着多个自动化齿轮和流水线场景，代表 hooks 将 Claude 的行为抽离并自动化",
+    "prompt": "Studio Ghibli style, watercolor texture, natural lighting, a programmer sitting at a wooden desk surrounded by multiple floating gear mechanisms and conveyor belts, gears and pipelines automatically processing code files, each gear labeled with different task icons like test tube, broom, bell, a gentle smile on the developer's face watching the automation flow, warm afternoon light from window, detailed mechanical illustration, cinematic composition, soft color palette with blue and orange accents"
+  },
+  "scenes": [
+    {
+      "block_index": 5,
+      "alt": "代码文件自动流入多个处理站，象征 hooks 将行为配置成自动流程，不再依赖人工检查",
+      "prompt": "Studio Ghibli style, watercolor texture, natural lighting, code files floating on a magical conveyor belt entering multiple automatic processing stations, each station has a glowing label like 'format', 'test', 'notify', a small robot arm in each station performing tasks automatically, the developer sits nearby drinking coffee without watching, soft warm light, whimsical factory scene, dreamy atmosphere, hand-painted aesthetic"
+    },
+    {
+      "block_index": 21,
+      "alt": "Claude 完成回复后，自动触发测试跑道和 Git 提交流水线，象征 Stop 钩子的自动执行",
+      "prompt": "Studio Ghibli style, watercolor texture, natural lighting, a cute robot Claude character finishing typing at a vintage typewriter, after the period symbol appears, a magical green checkmark activates, code automatically flies to a test tube laboratory station then to a colorful train station labeled 'git commit', the train departs smoothly, meadow background with wildflowers, golden hour light, whimsical progression scene, soft watercolor washes"
+    },
+    {
+      "block_index": 40,
+      "alt": "交互菜单界面以机械仪表盘形式呈现，开发者通过旋钮选择事件、设置匹配器",
+      "prompt": "Studio Ghibli style, watercolor texture, natural lighting, a retro-futuristic control panel interface floating in air, the panel has rotating dials labeled 'event', 'matcher', 'command', a developer reaching out to turn a brass dial, steam-punk inspired machinery with warm amber glow, mechanical levers and colorful indicator lights, the panel floats above a wooden desk scattered with code papers, whimsical steampunk aesthetic, cozy workshop atmosphere"
+    },
+    {
+      "block_index": 81,
+      "alt": "代码在检查站面临分叉路口，继续或阻止的决策由环境机制控制",
+      "prompt": "Studio Ghibli style, watercolor texture, natural lighting, a cute code file character standing at a forked road intersection, one path has a green glowing arrow and says 'continue', the other path has a red shield and says 'block', traffic light style mechanisms with friendly faces, a mechanical inspection gate with magnifying glass, forest path background with dappled sunlight, whimsical decision point scene, detailed gate machinery, soft natural colors"
+    },
+    {
+      "block_index": 94,
+      "alt": "规则框架像坚固的机械结构强制执行关键动作，象征环境机制而非 prompt 约束",
+      "prompt": "Studio Ghibli style, watercolor texture, natural lighting, a sturdy mechanical framework structure made of gears and metal beams standing like a protective fortress, a small robot being guided through the correct workflow path by rails, prompt paper notes falling away discarded on the ground, the framework has locked gates forcing the correct sequence, strong supportive pillars, meadow background with gentle breeze, power and stability symbolism, hand-painted steel and brass textures, warm workshop lighting"
+    }
+  ]
+}
