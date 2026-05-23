@@ -13,6 +13,7 @@
 | 测试门禁 | Done | `docs/pola/test-reports/2026-05-22-super-xiaowang-memory-upgrade.md` |
 | 发布清单 | Done | `docs/pola/release/2026-05-22-super-xiaowang-memory-upgrade.md` |
 | 云端部署 | Done | rsync 到 `/PolaZhenjing`，启用 PostgreSQL 记忆账本，重启 `polazj.service` |
+| 产品更新日志 | Done | `docs/pola/agent-memory-persona/CHANGELOG.md` |
 
 ## 决策记录
 
@@ -50,7 +51,9 @@
 - 安全边界：只暴露 commit、分支、提交标题和文档相对路径；不暴露服务器绝对路径、环境变量值、密钥和系统提示词。
 - 发布结果：
   - 提交 `884c2cf feat: 增加超级小王更新感知` 已部署到服务器。
+  - 提交 `d07fa70 docs: 记录小王更新感知发布验证` 已同步到本地、GitHub 和服务器。
   - 远端 pytest 10 passed。
   - 远端 Harness 新增 `H36-release-awareness` 并通过。
-  - 线上 `/admin/api/agent/release/status` 返回 `commit=884c2cf`。
+  - 线上 `/admin/api/agent/release/status` 返回 200，可展示当前运行 commit、分支、提交标题和最近交付文档。
   - 线上 chat 已能回答“我刚刚被更新了，并新增更新感知能力”。
+- 产品更新日志：`docs/pola/agent-memory-persona/CHANGELOG.md` 已记录 2026-05-22 记忆系统升级、2026-05-23 代码线同步和更新感知发布。

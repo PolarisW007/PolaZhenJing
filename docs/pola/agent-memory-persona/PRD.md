@@ -1,8 +1,8 @@
 # PRD: 超级小王持续成长记忆与人格系统
 
-更新时间：2026-05-22
+更新时间：2026-05-23
 
-## 0. 2026-05-22 实现状态
+## 0. 2026-05-23 实现状态与更新日志
 
 Phase 1 已在 PolaZhenJing 落地并部署到 `https://aipd.me`：
 
@@ -13,6 +13,8 @@ Phase 1 已在 PolaZhenJing 落地并部署到 `https://aipd.me`：
 - 已上线 Owner/visitor 区分、Owner 确认式写入、访客建议池、记忆工作台、搜索 API、投毒扫描、审计和 Meilisearch outbox。
 - 已保留 JSON fallback；Meilisearch 与 pgvector 暂为后续 Phase，不作为当前事实源。
 - 线上最新状态：`memory_items=4420`、`raw_events=4422`、`candidates=4411`、`visitor_suggestions=0`。
+- 已上线运行版本自我感知：小王可在被问到更新、版本、部署或新增能力时说明最近更新摘要。
+- 产品更新日志：`docs/pola/agent-memory-persona/CHANGELOG.md`。
 
 ## 1. 背景
 

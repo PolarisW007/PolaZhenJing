@@ -1,8 +1,8 @@
 # SDD: 超级小王持续成长记忆与人格系统
 
-更新时间：2026-05-22
+更新时间：2026-05-23
 
-## 0. 2026-05-22 实施状态
+## 0. 2026-05-23 实施状态与更新日志
 
 Phase 1 已完成并部署：
 
@@ -11,7 +11,9 @@ Phase 1 已完成并部署：
 - 数据库：生产 PostgreSQL `polazj_memory` 已启用，`data/agent_memory.json` 仅作为 fallback。
 - 导入：旧 Obsidian JSON `4387` 条，文章 `_posts/*.md` `33` 条。
 - 安全：写入进入 raw_event/candidate/suggestion，active/pinned 仍需 Owner 管理；历史 NUL 字节在存储层统一清洗。
-- 验证：本地与远端 `pytest` 9 passed，`scripts/run_memory_harness.py` Pass，线上 `/memory/status`、`/memory/search`、`/agent.html`、`/agent/chat` 回归通过。
+- 更新感知：`app/release_awareness.py` 与 `/PolaZhenjing/admin/api/agent/release/status` 已上线，chat context 可在相关问题中注入当前运行版本摘要。
+- 验证：本地与远端 `pytest` 10 passed，`scripts/run_memory_harness.py` Pass，线上 `/memory/status`、`/memory/search`、`/release/status`、`/agent.html`、`/agent/chat` 回归通过。
+- 产品更新日志：`docs/pola/agent-memory-persona/CHANGELOG.md`。
 
 ## 1. 背景和目标
 
