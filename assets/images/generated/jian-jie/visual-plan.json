@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一位年轻工程师坐在深夜的工作室中，面前是发光的代码界面，周围的空气中悬浮着代码片段、数据流和微缩的系统架构图，他正在专注地与AI助手协作编程，光线温暖而充满未来感",
+    "prompt": "Ghibli anime style, watercolor texture, natural lighting, cinematic composition, a young software engineer sitting at a modern workstation in a cozy studio at night, multiple holographic code windows floating around him showing complex system architecture and data flows, soft warm light emanating from the screens, code snippets and system diagrams gently floating in the air like luminous fireflies representing AI assistance, the engineer's face shows focused concentration, bookshelves and plants in background, detailed digital art, 8k quality, masterpiece"
+  },
+  "scenes": [
+    {
+      "block_index": 3,
+      "alt": "开放办公空间中，不同团队的开发者在各自工位上同时使用Codex工具，画面中心是一个发光的AI图标连接着多个程序员",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, wide shot of a modern open office space with multiple developers from different teams working simultaneously, security team member debugging, frontend engineer building interfaces, backend developer optimizing APIs, infrastructure engineer managing servers, performance engineer analyzing metrics, all with glowing AI assistant windows on their screens connected by soft light beams to a central luminous Codex symbol, warm natural daylight from windows, lush indoor plants, cozy industrial aesthetic, detailed character designs, 8k quality"
+    },
+    {
+      "block_index": 36,
+      "alt": "程序员在查看Codex生成的代码影响分析报告，界面上显示扫描结果和修复方案，准备提交PR，窗外是城市夜景",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, close-up of a developer at a desk reviewing a comprehensive Markdown report on screen, showing code pattern analysis with highlighted instances across multiple files, side panel displaying a PR draft with suggested fixes, the report shows old code patterns being replaced with new ones, soft evening light from a nearby lamp, city skyline visible through window, coffee cup and notebooks nearby, cozy productive atmosphere, detailed technical visualization, 8k quality"
+    },
+    {
+      "block_index": 69,
+      "alt": "开发者利用模板和规范快速创建新功能，屏幕上显示API路由、验证逻辑和遥测钩子的代码框架，流程清晰可见",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, a developer typing at a workstation with multiple code editor tabs open, one tab showing new API route implementation with basic validation and logging, another tab showing telemetry hook code for tracking process status, template snippets floating as semi-transparent overlays, code snippets connected by flowing light representing the transformation from specification to implementation, hands typing confidently on keyboard, warm desk lamp lighting, scattered sticky notes with requirements, modern minimal office, 8k quality"
+    },
+    {
+      "block_index": 93,
+      "alt": "双屏展示对话式交互过程，左边屏幕是询问模式的问题和AI分析方案，右边屏幕是执行模式生成的代码片段",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, split-screen composition showing a developer working with dual monitors, left monitor displaying conversational interface with detailed query about system architecture and AI's analysis response with implementation plan, right monitor showing generated code being reviewed, a subtle connecting line or flow between the two screens showing the two-step workflow, developer leaning back in thoughtful posture, natural window light casting soft shadows, plants and a cup of tea on the desk, the scene conveys methodical planning before execution, 8k quality"
+    },
+    {
+      "block_index": 114,
+      "alt": "远景镜头展示一位程序员站在巨大的代码宇宙前，AI工具已从工具变为可靠的伙伴，光芒中映射出成熟的工作流程图",
+      "prompt": "Ghibli anime style, watercolor texture, natural lighting, wide cinematic shot of a developer standing confidently before a vast luminous landscape representing transformed software development, AI programming tools shown as integrated reliable companions rather than mere tools, flowing data streams and organized code constellations forming a cohesive system map, warm golden hour sunlight from a large window illuminating the scene, the figure's posture conveys mastery and purposeful direction, detailed world-building showing mature workflows and efficient systems, inspirational and aspirational mood, 8k quality"
+    }
+  ]
+}
