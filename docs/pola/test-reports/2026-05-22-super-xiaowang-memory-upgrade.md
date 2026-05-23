@@ -75,9 +75,10 @@
 
 | 路径/命令 | 结果 |
 | --- | --- |
-| `pytest tests/test_release_awareness.py` | 待远端部署后记录 |
-| `scripts/run_memory_harness.py` | 新增 H36，待远端部署后记录 |
-| `GET /admin/api/agent/release/status` | 待远端部署后记录 |
+| 远端 `pytest tests/test_release_awareness.py` | 10-test suite passed，含 `test_release_awareness.py` |
+| 远端 `scripts/run_memory_harness.py` | Pass，新增 `H36-release-awareness` |
+| `GET /admin/api/agent/release/status` | 200，返回 `commit=884c2cf`、`commit_subject=feat: 增加超级小王更新感知` |
+| `POST /admin/api/agent/chat` 询问“你刚刚被更新了吗” | 200，小王回答自己刚被更新并说明新增“更新感知”能力 |
 
 生产状态：
 

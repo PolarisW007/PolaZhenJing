@@ -95,3 +95,7 @@ systemctl restart polazj.service
 - Chat prompt 注入运行版本自我感知上下文。
 - 新增 Harness 项 `H36-release-awareness`。
 - 回滚方式：`git revert <release-awareness-commit>` 后重启 `polazj.service`。
+- 实际发布提交：`884c2cf feat: 增加超级小王更新感知`。
+- 线上验证：
+  - `/admin/api/agent/release/status` -> 200，`commit=884c2cf`。
+  - `/admin/api/agent/chat` 询问“你刚刚被更新了吗” -> 200，小王能说明自己新增了更新感知能力。

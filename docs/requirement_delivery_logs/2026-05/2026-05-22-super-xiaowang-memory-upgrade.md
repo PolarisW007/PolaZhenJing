@@ -48,3 +48,9 @@
   - 新增 `GET /admin/api/agent/release/status` 作为运维/验收入口。
   - `scripts/run_memory_harness.py` 新增 `H36-release-awareness`。
 - 安全边界：只暴露 commit、分支、提交标题和文档相对路径；不暴露服务器绝对路径、环境变量值、密钥和系统提示词。
+- 发布结果：
+  - 提交 `884c2cf feat: 增加超级小王更新感知` 已部署到服务器。
+  - 远端 pytest 10 passed。
+  - 远端 Harness 新增 `H36-release-awareness` 并通过。
+  - 线上 `/admin/api/agent/release/status` 返回 `commit=884c2cf`。
+  - 线上 chat 已能回答“我刚刚被更新了，并新增更新感知能力”。
