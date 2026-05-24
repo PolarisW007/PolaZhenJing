@@ -2,6 +2,7 @@
 layout: creative-visual
 title: "The Visual Language of AI: From Pixels to Understanding"
 date: 2025-02-10
+image: "/assets/images/test_cover.jpg"
 tags: [computer-vision, multimodal, visual-AI]
 description: "Exploring how AI systems learn to see, understand, and generate visual content."
 ---

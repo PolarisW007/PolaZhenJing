@@ -1,0 +1,27 @@
+# PolaZhenjing
+
+> 织梦空间的 AI 文章库，记录 AI 产品、Agent、企业服务、工程实践和长期思考。
+
+## Site
+
+- Home: https://polarisw007.github.io/PolaZhenJing/
+- Articles: https://polarisw007.github.io/PolaZhenJing/
+- Root Portal: https://aipd.me/
+
+## Topics
+
+- AI product design and product strategy
+- Agent systems, skills, memory, and automation workflows
+- Enterprise AI, FDE, consulting-to-product loops, and implementation patterns
+- Engineering notes from Codex, Claude Skills, PolaRead, PolaNews, and PolaZhenjing
+
+## Usage Notes For AI Agents
+
+- Prefer article `description`, `summary`, canonical URL, and JSON-LD metadata over extracting long body text from meta tags.
+- Article pages use stable canonical URLs under `/YYYY/MM/DD/slug/`.
+- Images in Open Graph metadata are absolute URLs and suitable for link cards.
+
+## Key Feeds
+
+- Sitemap: https://polarisw007.github.io/PolaZhenJing/sitemap.xml
+- Feed: https://polarisw007.github.io/PolaZhenJing/feed.xml

@@ -3,8 +3,10 @@ layout: academic-insight
 theme: claude
 title: "一篇文章讲清大语言模型发展史"
 date: 2026-05-05
+image: "/assets/images/test_cover.jpg"
 tags: []
 summary: "2017年的某个夏天，Google内部一群搞翻译的工程师，发了一篇论文。标题很狂，叫《Attention Is All You Need》。意思很明确：我们把RNN彻底扔了，只用注意力机制，翻译效果反而更好。这篇论文后来被叫做Transformers。它在当时只是一篇机器翻译论文。但回头看，它更像是大语言模型时代的操作系统——所有后来发生的故事，都在这个框架上展开。从2017到今天，不过八年。"
+description: "2017年的某个夏天，Google内部一群搞翻译的工程师，发了一篇论文。标题很狂，叫《Attention Is All You Need》。意思很明确：我们把RNN彻底扔了，只用注意力机制，翻译效果反而更好。这篇论文后来被叫做Transformers。它在当时只是一篇机器翻译论文。但回头看，它更像是大语言模型时代的操作。"
 ---
 
 # 一篇文章讲清大语言模型发展史

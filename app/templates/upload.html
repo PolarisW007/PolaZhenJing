@@ -338,7 +338,15 @@ function initRichEditor() {
     convert_urls: false,
     relative_urls: false,
     remove_script_host: false,
-    content_style: editorContentStyle()
+    content_style: editorContentStyle(),
+    init_instance_callback: editor => {
+      if (document.getElementById('content-format').value === 'markdown') {
+        editor.hide();
+        if (editor.getContainer()) {
+          editor.getContainer().style.display = 'none';
+        }
+      }
+    }
   });
 }
 
@@ -346,11 +354,16 @@ function setEditorMode(mode) {
   const contentFormat = document.getElementById('content-format');
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
   if (mode === 'markdown') {
     contentFormat.value = 'markdown';
     markdown.style.display = 'block';
-    if (window.tinymce && tinymce.get('rich-content')) {
-      tinymce.get('rich-content').hide();
+    if (editor) {
+      editor.save();
+      editor.hide();
+      if (editor.getContainer()) {
+        editor.getContainer().style.display = 'none';
+      }
     } else {
       rich.style.display = 'none';
     }
@@ -358,8 +371,12 @@ function setEditorMode(mode) {
     contentFormat.value = 'rich_html';
     markdown.style.display = 'none';
     initRichEditor();
-    if (window.tinymce && tinymce.get('rich-content')) {
-      tinymce.get('rich-content').show();
+    const activeEditor = window.tinymce ? tinymce.get('rich-content') : null;
+    if (activeEditor) {
+      if (activeEditor.getContainer()) {
+        activeEditor.getContainer().style.display = '';
+      }
+      activeEditor.show();
     } else {
       rich.style.display = 'block';
     }
@@ -371,7 +388,8 @@ document.querySelectorAll('input[name="editor_mode"]').forEach(input => {
 });
 
 document.getElementById('paste-form').addEventListener('submit', () => {
-  if (window.tinymce && tinymce.get('rich-content')) {
+  const activeMode = document.getElementById('content-format').value;
+  if (activeMode === 'rich_html' && window.tinymce && tinymce.get('rich-content')) {
     tinymce.triggerSave();
   }
 });

@@ -1233,6 +1233,9 @@ def upload():
         content = ''
         title = ''
         preserve_original_media = request.form.get('media_strategy', 'keep') == 'keep'
+        content_format = request.form.get('content_format', '').strip()
+        markdown_content = request.form.get('content', '').strip()
+        rich_content = request.form.get('rich_content', '').strip()
 
         # Handle file upload
         if 'file' in request.files and request.files['file'].filename:
@@ -1255,19 +1258,35 @@ def upload():
                 flash(f'转换错误：{e}', 'error')
                 return render_template('upload.html')
 
+        # Handle Markdown paste explicitly. Keep this before rich text so the
+        # visible editor mode is the source of truth when both fields exist.
+        elif content_format == 'markdown' and markdown_content:
+            content = markdown_content
+            if not preserve_original_media:
+                content = _strip_markdown_media(content)
+            title = extract_title(content)
+
         # Handle rich text content from TinyMCE
-        elif request.form.get('content_format') == 'rich_html' and request.form.get('rich_content', '').strip():
+        elif content_format == 'rich_html' and rich_content:
             content = _rich_html_to_markdown(
-                request.form.get('rich_content', ''),
+                rich_content,
                 preserve_media=preserve_original_media,
             )
             title = extract_title(content)
 
-        # Handle paste content
-        elif request.form.get('content', '').strip():
-            content = request.form['content'].strip()
+        # Backward-compatible paste fallback. This also saves users who typed
+        # into the rich editor while the old UI still showed both editors.
+        elif markdown_content:
+            content = markdown_content
             if not preserve_original_media:
                 content = _strip_markdown_media(content)
+            title = extract_title(content)
+
+        elif rich_content:
+            content = _rich_html_to_markdown(
+                rich_content,
+                preserve_media=preserve_original_media,
+            )
             title = extract_title(content)
 
         # Handle URL input

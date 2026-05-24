@@ -3,8 +3,10 @@ layout: industry-vision
 theme: wukong
 title: "Anthropic 是如何搭建可以持续运行 6 小时的 Agent Harness?"
 date: 2026-05-19
+image: "/assets/images/generated/anthropic-shi-ru-he-da-jian-ke-yi-chi-xu-yun-xing-6-xiao-shi/cover.png"
 tags: []
 summary: "“build a retro game maker”。就这一句话。一个完整的复古游戏制作器，54色调色板、8-bit怀旧美术风格、可玩的play mode、能感知角色撞墙的物理反馈，还有一套AI关卡助手——你跟它说“造一座城堡，让小角色守在门口”，它真的能给你做出来。整个过程持续了6小时，耗资约200美元。"
+description: "“build a retro game maker”。就这一句话。一个完整的复古游戏制作器，54色调色板、8-bit怀旧美术风格、可玩的play mode、能感知角色撞墙的物理反馈，还有一套AI关卡助手——你跟它说“造一座城堡，让小角色守在门口”，它真的能给你做出来。整个过程持续了6小时，耗资约200美元。"
 ---
 
 ![三个AI Agent在像素游戏场景中协作，Generator在编写代码，Evaluator在测试，Planner在规划，整体呈现吉卜力风格的团队合作画面]({{ site.baseurl }}/assets/images/generated/anthropic-shi-ru-he-da-jian-ke-yi-chi-xu-yun-xing-6-xiao-shi/cover.png)

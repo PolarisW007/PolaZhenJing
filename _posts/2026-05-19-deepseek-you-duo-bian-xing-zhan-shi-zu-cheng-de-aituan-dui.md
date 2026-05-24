@@ -3,8 +3,10 @@ layout: industry-vision
 theme: wukong
 title: "DeepSeek，由多边形战士组成的AI团队"
 date: 2026-05-19
+image: "/assets/images/generated/deepseek-you-duo-bian-xing-zhan-shi-zu-cheng-de-aituan-dui/cover.png"
 tags: []
 summary: "过去一年，围绕DeepSeek的人才流动消息一直没有停。从早期罗福莉离职，到初代大模型作者王炳宣、多模态骨干阮翀、R1核心作者郭达雅，相继跳槽。核心作者接连被挖，DeepSeek的技术壁垒会不会松动？我们决定换一种方式来看这个问题。我们用Codex和Python，梳理了DeepSeek近两年发布的27篇核心论文和技术报告，逐篇拆解署名作者，最终得到一份包含328人的研发作者池。"
+description: "过去一年，围绕DeepSeek的人才流动消息一直没有停。从早期罗福莉离职，到初代大模型作者王炳宣、多模态骨干阮翀、R1核心作者郭达雅，相继跳槽。核心作者接连被挖，DeepSeek的技术壁垒会不会松动？我们决定换一种方式来看这个问题。我们用Codex和Python，梳理了DeepSeek近两年发布的27篇核心论文和技术报。"
 ---
 
 ![DeepSeek多边形战士团队，由水晶多面体组成的人形剪影环绕着代码光芒，远处是透明屋顶的研发办公室]({{ site.baseurl }}/assets/images/generated/deepseek-you-duo-bian-xing-zhan-shi-zu-cheng-de-aituan-dui/cover.png)

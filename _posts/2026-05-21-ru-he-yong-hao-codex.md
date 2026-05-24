@@ -3,8 +3,10 @@ layout: friendly-explainer
 theme: wukong
 title: "如何用好Codex"
 date: 2026-05-21
+image: "/assets/images/generated/ru-he-yong-hao-codex/cover.png"
 tags: []
 summary: "很多人在用AI编程助手的时候，其实只发挥了它两成功力。怎么讲？就是那种「写代码、检查、提PR」的固定套路，来了走走了来，每次都像第一次见面。这也不能怪大家，因为AI助手刚出来那会儿，确实就是这么用的。但你有没有想过一个问题——你在电脑上干的那些事，有几样是跟代码完全没关系的？打开终端敲命令，是代码。发Slack消息，是代码。导出一份文档，是代码。响应一个事件触发自动化，还是代码。"
+description: "很多人在用AI编程助手的时候，其实只发挥了它两成功力。怎么讲？就是那种「写代码、检查、提PR」的固定套路，来了走走了来，每次都像第一次见面。这也不能怪大家，因为AI助手刚出来那会儿，确实就是这么用的。但你有没有想过一个问题——你在电脑上干的那些事，有几样是跟代码完全没关系的？打开终端敲命令，是代码。发Slack消息，是。"
 ---
 
 ![程序员站在数字海浪前，身边环绕着多个专业分身：有人拿着文档、有人盯着数据、有人敲着代码]({{ site.baseurl }}/assets/images/generated/ru-he-yong-hao-codex/cover.png)

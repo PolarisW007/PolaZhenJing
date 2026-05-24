@@ -2,7 +2,9 @@
 layout: deep-technical
 title: "DE E P  RE S E ARCH"
 date: 2026-04-11
+image: "/assets/images/test_cover.jpg"
 tags: []
+description: "DE E P RE S E ARCH 数据编织 数据编织实现与应用研究 日期: 2026年4月10日 领域: 数据管理 数据编织（Data Fabric）作为Gartner连续多年推荐的数据架构理念，正在从概念走向大 规模商业应用。与传统ETL和数据仓库架构相比，数据编织通过构建一个虚拟的、智能的集 成层，实现了对分散。"
 ---
 
 DE E P  RE S E ARCH

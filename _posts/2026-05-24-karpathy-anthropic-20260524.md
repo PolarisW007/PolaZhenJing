@@ -5,6 +5,8 @@ title: "Karpathy 去 Anthropic 这件事，我现在更愿意把它看成一个�
 date: 2026-05-24
 tags: []
 summary: "如果只从公司关系看，这当然很有戏剧性。OpenAI founding team 成员，Tesla Autopilot 早期负责人，去了 OpenAI 现在最难缠的竞争对手。这个叙事框架太容易接受了，接受完发现什么都没想。你脑子里多了一个「啊这」，但它没有给你任何新的坐标。怎么说呢，这其实是科技媒体最擅长的一种讲法。把人事变动翻译成「谁挖了谁」，把技术领袖的流动简化成「谁赢了谁」。"
+description: "Karpathy 去 Anthropic 这件事，不只是一次普通跳槽，更像是一个技术教育者重新回到模型现场。"
+image: "/assets/images/generated/karpathy-anthropic-20260524/cover.png"
 ---
 
 ![一个人影从讲台/舞台的聚光灯下走出，穿过一道光幕，进入一个灯火通明的服务器机房实验室。象征从公众教育者回到技术研究现场。]({{ site.baseurl }}/assets/images/generated/karpathy-anthropic-20260524/cover.png)

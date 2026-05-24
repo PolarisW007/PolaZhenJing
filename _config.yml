@@ -1,10 +1,20 @@
 # PolaZhenjing v2 — Jekyll Configuration
 # Deployed via GitHub Actions
 title: PolaZhenjing
-description: "个人 AI 知识博客 · Personal AI Knowledge Blog"
+description: "织梦空间的 AI 文章库，记录 AI 产品、Agent、企业服务、工程实践和长期思考。"
 url: "https://PolarisW007.github.io"
 baseurl: "/PolaZhenJing"
 author: PolaZhenjing
+lang: zh_CN
+locale: zh_CN
+logo: "/assets/images/test_cover.jpg"
+image: "/assets/images/test_cover.jpg"
+twitter:
+  username: PolarisW007
+social:
+  name: 炽驹 Polaris
+  links:
+    - https://aipd.me/
 
 # Build
 markdown: kramdown
@@ -19,7 +29,6 @@ paginate_path: "/page:num/"
 # Plugins
 plugins:
   - jekyll-feed
-  - jekyll-seo-tag
   - jekyll-paginate
 
 # Defaults

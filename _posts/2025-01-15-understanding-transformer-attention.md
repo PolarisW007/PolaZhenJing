@@ -2,6 +2,7 @@
 layout: deep-technical
 title: "Understanding Transformer Attention Mechanisms"
 date: 2025-01-15
+image: "/assets/images/test_cover.jpg"
 tags: [transformers, attention, deep-learning]
 description: "A deep dive into the self-attention mechanism that powers modern language models."
 ---

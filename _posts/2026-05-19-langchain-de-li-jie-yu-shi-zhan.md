@@ -3,8 +3,10 @@ layout: deep-technical
 theme: wukong
 title: "LangChain 的理解与实战"
 date: 2026-05-19
+image: "/assets/images/generated/langchain-de-li-jie-yu-shi-zhan/cover.png"
 tags: []
 summary: "很多人跟着教程 npm install 一下，写了个调用 DeepSeek 的 Demo，输出一句「你好，我是 AI」，就发朋友圈说自己入门 AI 开发了。结果产品经理一句「给我做个能查公司内部文档的客服机器人」，直接傻眼：- RAG 检索永远答非所问，上下文驴唇不对马嘴- 多轮对话聊个七八轮就崩，token 直接爆仓- 想换个性价比更高的模型，代码要全量重写- 线上一限流、API 一超时，服务直…"
+description: "很多人跟着教程 npm install 一下，写了个调用 DeepSeek 的 Demo，输出一句「你好，我是 AI」，就发朋友圈说自己入门 AI 开发了。结果产品经理一句「给我做个能查公司内部文档的客服机器人」，直接傻眼：- RAG 检索永远答非所问，上下文驴唇不对马嘴- 多轮对话聊个七八轮就崩，token 直接爆仓。"
 ---
 
 ![前端开发者从调包侠成长为AI应用架构师的转变之路]({{ site.baseurl }}/assets/images/generated/langchain-de-li-jie-yu-shi-zhan/cover.png)

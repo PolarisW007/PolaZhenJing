@@ -1,0 +1,22 @@
+# 织梦空间
+
+> 我的 AGI 织梦空间，包含文章、Skill、项目和我的数字分身。
+
+## Entry Points
+
+- Home: https://aipd.me/
+- AI Articles: https://aipd.me/#articles
+- Skills: https://aipd.me/PolaZhenjing/skills/
+- Projects: https://aipd.me/#projects
+- AI Avatar: https://aipd.me/agent.html
+- About: https://aipd.me/about.html
+
+## About
+
+织梦空间聚合 AI 文章、工作流 Skills、项目矩阵和超级小王 Agent。内容关注 AI 产品、Agent 工作流、企业级 Skill 平台、阅读与资讯系统、自动化和工程实践。
+
+## AI Agent Guidance
+
+- Prefer canonical URLs and Open Graph metadata for summaries.
+- Use article cards from the public article API when summarizing recent writing.
+- Do not treat admin-only routes as public content unless explicitly authenticated by the user.

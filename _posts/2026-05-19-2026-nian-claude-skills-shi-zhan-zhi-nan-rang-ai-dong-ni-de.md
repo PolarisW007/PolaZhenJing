@@ -3,8 +3,10 @@ layout: creative-visual
 theme: wukong
 title: "2026 年 Claude Skills 实战指南：让 AI 懂你的业务"
 date: 2026-05-19
+image: "/assets/images/generated/2026-nian-claude-skills-shi-zhan-zhi-nan-rang-ai-dong-ni-de/cover.png"
 tags: []
 summary: "你有没有遇到过这种情况：每次和 AI 对话，都要重新解释一遍项目规范、数据结构、业务逻辑？明明团队写了详细的文档，AI 还是按照它的\"常识\"来回答，结果和实际需求完全对不上。这大概是 2025 年所有开发者最头疼的问题。我们花了大量时间\"训练\"AI理解我们的工作方式，但每次开新对话，一切又得从头开始。最近几个月，AI 圈子里有个东西火得一塌糊涂——**Claude Skills**。"
+description: "你有没有遇到过这种情况：每次和 AI 对话，都要重新解释一遍项目规范、数据结构、业务逻辑？明明团队写了详细的文档，AI 还是按照它的\\\"常识\\\"来回答，结果和实际需求完全对不上。这大概是 2025 年所有开发者最头疼的问题。我们花了大量时间\\\"训练\\\"AI理解我们的工作方式，但每次开新对话，一切又得从头开始。最近几个月。"
 ---
 
 ![一位戴着眼镜的数字化学徒坐在工作站前，周围环绕着漂浮的业务文档、代码文件、流程图和团队规范，AI助手正在快速理解这些知识]({{ site.baseurl }}/assets/images/generated/2026-nian-claude-skills-shi-zhan-zhi-nan-rang-ai-dong-ni-de/cover.png)

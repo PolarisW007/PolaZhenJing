@@ -2,6 +2,7 @@
 layout: industry-vision
 title: "AI Will Reshape Every Industry Within 5 Years"
 date: 2025-01-25
+image: "/assets/images/test_cover.jpg"
 tags: [AI, industry, future, prediction]
 description: "A bold vision for how artificial intelligence will transform traditional industries."
 ---

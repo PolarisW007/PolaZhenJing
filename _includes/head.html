@@ -1,8 +1,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {% assign page_title = page.title | default: site.title %}
+  {% assign raw_description = page.description | default: page.summary | default: site.description %}
+  {% assign seo_description = raw_description | strip_html | normalize_whitespace | truncate: 180, "" %}
+  {% assign raw_image = page.image | default: site.image | default: site.logo %}
+  {% assign seo_image = raw_image | absolute_url %}
+  {% assign canonical_url = page.url | absolute_url %}
+  {% assign article_author = page.author | default: site.social.name | default: site.author %}
+
   <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
-  <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <meta name="description" content="{{ seo_description | escape }}">
+  <meta name="author" content="{{ article_author | escape }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  <meta property="og:site_name" content="{{ site.title | escape }}">
+  <meta property="og:locale" content="{{ site.locale | default: 'zh_CN' }}">
+  <meta property="og:type" content="{% if page.date %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{{ page_title | escape }}">
+  <meta property="og:description" content="{{ seo_description | escape }}">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:image" content="{{ seo_image }}">
+  <meta property="og:image:secure_url" content="{{ seo_image }}">
+  <meta property="og:image:alt" content="{{ page_title | escape }}">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title | escape }}">
+  <meta name="twitter:description" content="{{ seo_description | escape }}">
+  <meta name="twitter:image" content="{{ seo_image }}">
+
+  {% if page.date %}
+  <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+  {% if page.tags %}
+  {% for tag in page.tags %}
+  <meta property="article:tag" content="{{ tag | escape }}">
+  {% endfor %}
+  {% endif %}
+  {% endif %}
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "{% if page.date %}Article{% else %}WebSite{% endif %}",
+    "headline": {{ page_title | jsonify }},
+    "description": {{ seo_description | jsonify }},
+    "url": {{ canonical_url | jsonify }},
+    "image": [{{ seo_image | jsonify }}],
+    "inLanguage": "zh-CN",
+    "author": {
+      "@type": "Person",
+      "name": {{ article_author | jsonify }}
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": {{ site.title | jsonify }},
+      "logo": {
+        "@type": "ImageObject",
+        "url": {{ site.logo | absolute_url | jsonify }}
+      }
+    }{% if page.date %},
+    "datePublished": "{{ page.date | date_to_xmlschema }}",
+    "dateModified": "{{ page.last_modified_at | default: page.date | date_to_xmlschema }}",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": {{ canonical_url | jsonify }}
+    }{% endif %}
+  }
+  </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +87,5 @@
   <link rel="stylesheet" href="{{ '/assets/css/' | append: page.layout | append: '.css' | relative_url }}">
   {% endif %}
 
-  {% seo %}
   {% feed_meta %}
 </head>
