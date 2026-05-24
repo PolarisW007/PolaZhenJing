@@ -2,6 +2,27 @@
 
 更新时间：2026-05-22
 
+## 2026-05-23 补充：微信私域数据、Owner 风格和好友画像
+
+新增补充文档：
+
+- `WECHAT_PERSONA_PRD.md`
+- `WECHAT_PERSONA_SDD.md`
+- `WECHAT_PERSONA_HARNESS.md`
+
+新增脚本门禁：
+
+| Harness | 目标 |
+| --- | --- |
+| H43-wechat-docs-present | 补充 PRD/SDD/Harness 文档存在 |
+| H44-owner-style-gates | Owner 风格必须候选、审核、发布，不可直接污染核心人格 |
+| H45-social-profile-schema | 好友画像 schema 覆盖 social_subjects / social_profile_versions / social_insight_candidates |
+| H46-privacy-boundary | 访客不可访问微信数据和好友画像，原文默认私有 |
+| H47-pola-aibrain-reuse | 明确复用 PolaAIBrain 遗产并拒绝重型搬迁 |
+| H48-no-raw-chat-leak | 文档只描述结构和脱敏证据，不包含聊天原文样例 |
+
+结论：补充方案将“像炽驹”拆成 Owner 风格版本，将“好友人设”拆成私域社交画像数据库，并通过 Owner-only、证据链、候选审核、敏感推断禁区和发布回滚防止误判与隐私泄露。
+
 本文是 `PRD.md` 和 `SDD.md` 的设计校验审计记录。它不是泛泛的“自我感觉良好”，而是把方案逐轮放进 Agent Harness Engineering 的七层框架里检查：
 
 - E: Execution environment，执行环境与部署/权限约束。

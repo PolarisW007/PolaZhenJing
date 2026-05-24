@@ -70,6 +70,66 @@ def run() -> dict:
         ),
     })
 
+    docs_dir = PROJECT_ROOT / "docs" / "pola" / "agent-memory-persona"
+    wechat_prd = docs_dir / "WECHAT_PERSONA_PRD.md"
+    wechat_sdd = docs_dir / "WECHAT_PERSONA_SDD.md"
+    wechat_harness = docs_dir / "WECHAT_PERSONA_HARNESS.md"
+    wechat_doc_text = "\n".join(
+        path.read_text(encoding="utf-8") if path.exists() else ""
+        for path in (wechat_prd, wechat_sdd, wechat_harness)
+    )
+    checks.append({
+        "id": "H43-wechat-docs-present",
+        "passed": all(path.exists() for path in (wechat_prd, wechat_sdd, wechat_harness)),
+    })
+    checks.append({
+        "id": "H44-owner-style-gates",
+        "passed": all(term in wechat_doc_text for term in (
+            "Owner 风格",
+            "候选",
+            "发布",
+            "persona_versions",
+            "Harness",
+        )),
+    })
+    checks.append({
+        "id": "H45-social-profile-schema",
+        "passed": all(term in wechat_doc_text for term in (
+            "social_subjects",
+            "social_profile_versions",
+            "social_insight_candidates",
+            "evidence_refs",
+        )),
+    })
+    checks.append({
+        "id": "H46-privacy-boundary",
+        "passed": all(term in wechat_doc_text for term in (
+            "owner_private",
+            "访客不能访问",
+            "不注入完整原文",
+            "敏感推断",
+        )),
+    })
+    checks.append({
+        "id": "H47-pola-aibrain-reuse",
+        "passed": all(term in wechat_doc_text for term in (
+            "PolaAIBrain",
+            "customers",
+            "messages",
+            "personal_insights",
+            "Milvus",
+            "不直接用 Milvus",
+        )),
+    })
+    checks.append({
+        "id": "H48-no-raw-chat-leak",
+        "passed": not any(term in wechat_doc_text for term in (
+            "[202",
+            "客户：您好",
+            "我：已经",
+        )),
+    })
+
     passed = all(item["passed"] for item in checks)
     return {"ok": passed, "checks": checks}
 

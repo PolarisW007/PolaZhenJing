@@ -6,6 +6,18 @@
 
 ### Added
 
+- 新增微信私域数据补充方案：`WECHAT_PERSONA_PRD.md`、`WECHAT_PERSONA_SDD.md`、`WECHAT_PERSONA_HARNESS.md`。
+- 设计 Owner 聊天风格提炼、好友画像数据库、私域证据链、工作台审核、隐私边界和发布回滚流程。
+- 新增 Harness 文档门禁项 `H43-H48`，校验微信补充方案是否覆盖文档、Owner 风格门槛、好友画像 schema、隐私边界、PolaAIBrain 复用和无聊天原文泄露。
+
+### Verification
+
+- `scripts/run_memory_harness.py` 本地通过，包含 `H43-H48`。
+
+## 2026-05-23
+
+### Added
+
 - 新增运行版本自我感知：小王在被问到“最近是否更新”“新增了什么能力”“当前版本是什么”时，可以基于运行环境说明当前 commit、最近更新摘要和相关交付文档。
 - 新增运维验收接口：`GET /PolaZhenjing/admin/api/agent/release/status`，用于确认当前运行 commit、分支、提交标题、提交时间和最近 release/delivery 文档。
 - 新增 `H36-release-awareness` Harness 用例，覆盖小王是否能感知更新、是否避免暴露密钥/系统提示词/服务器绝对路径。
