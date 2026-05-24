@@ -25,6 +25,7 @@ from . import jobs
 logger = logging.getLogger(__name__)
 
 uploader_bp = Blueprint('uploader', __name__, url_prefix='/admin')
+public_articles_bp = Blueprint('public_articles', __name__)
 
 STYLES = [
     {'id': 'deep-technical', 'name': '深度技术', 'color': '#1a1a2e',
@@ -1182,7 +1183,7 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
     summary = summary or _generate_summary(body, max_chars=120)
     summary = re.sub(r'!\[[^\]]*(?:\]\([^)]+\))?', '', summary).strip()
     admin_filename = _article_admin_filename(filename)
-    local_url = url_for('uploader.view_article', filename=admin_filename)
+    local_url = url_for('public_articles.public_article_view', filename=admin_filename)
     return {
         'filename': filename,
         'admin_filename': admin_filename,
@@ -1193,7 +1194,7 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
         'theme': meta.get('theme', ''),
         'cover': cover,
         'url': local_url,
-        'admin_url': local_url,
+        'admin_url': url_for('uploader.view_article', filename=admin_filename),
     }
 
 
@@ -1601,8 +1602,10 @@ def generate_progress(job_id):
 
 
 @uploader_bp.route('/articles')
-@login_required
 def articles():
+    if not session.get('user_id'):
+        return _render_public_articles()
+
     posts = _scan_posts()
     # Load in-flight generation jobs so users see a "生成中" placeholder
     # in the list immediately after submission.
@@ -1615,6 +1618,35 @@ def articles():
             j['messages'] = []
     return render_template('articles.html', posts=posts, styles=STYLES,
                            pending_jobs=pending_jobs)
+
+
+@public_articles_bp.route('/articles')
+def public_article_index():
+    """Public read-only article list."""
+    return _render_public_articles()
+
+
+def _render_public_articles():
+    posts = _scan_posts()
+    summaries = []
+    for post in posts:
+        filename = post.get('filename', '')
+        fpath = post.get('path', '')
+        if not filename or not fpath or not os.path.isfile(fpath):
+            continue
+        try:
+            with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
+                raw = f.read()
+        except OSError:
+            continue
+        body = raw
+        meta = dict(post)
+        if raw.startswith('---'):
+            parts = raw.split('---', 2)
+            if len(parts) >= 3:
+                body = parts[2].strip()
+        summaries.append(_post_public_summary(filename, meta, body))
+    return render_template('public_articles.html', posts=summaries)
 
 
 GITHUB_REPO = 'PolarisW007/PolaZhenJing'
@@ -1739,7 +1771,6 @@ def _sync_project_to_github(project_root: str, commit_msg: str) -> tuple[bool, s
 
 
 @uploader_bp.route('/api/check-pages-url')
-@login_required
 def check_pages_url():
     """Check if a GitHub Pages URL is live (returns 200)."""
     import requests as _requests
@@ -1755,11 +1786,22 @@ def check_pages_url():
 
 
 @uploader_bp.route('/articles/<filename>')
-@login_required
 def view_article(filename):
     """Preview a single article."""
+    return _render_article(filename, public=not bool(session.get('user_id')))
+
+
+@public_articles_bp.route('/articles/<filename>')
+def public_article_view(filename):
+    """Public read-only article detail."""
+    return _render_article(filename, public=True)
+
+
+def _render_article(filename: str, public: bool = False):
     fpath = _safe_post_path(filename)
     if not fpath or not os.path.isfile(fpath):
+        if public:
+            return render_template('public_article_404.html'), 404
         flash('文章未找到。', 'error')
         return redirect(url_for('uploader.articles'))
     actual_filename = os.path.basename(fpath)
@@ -1787,7 +1829,9 @@ def view_article(filename):
                            actual_filename=actual_filename,
                            body_html=body_html, github_url=github_url,
                            pages_url=pages_url, read_time=read_time,
-                           accent_color=accent_color)
+                           accent_color=accent_color,
+                           is_public=public,
+                           can_manage=bool(session.get('user_id')))
 
 
 @uploader_bp.route('/articles/<filename>/edit', methods=['GET', 'POST'])

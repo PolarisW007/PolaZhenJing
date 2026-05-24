@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}AI 文章{% endblock %}
+{% block nav_logo %}织梦空间 · AI 文章{% endblock %}
+{% block card_class %}card-full{% endblock %}
+{% block content %}
+<div class="public-article-head">
+  <div>
+    <p class="eyebrow">AI Articles</p>
+    <h2>最近写下的 AI 思考</h2>
+  </div>
+  <a class="btn-ghost" href="/">返回织梦空间</a>
+</div>
+
+{% if posts %}
+<div class="public-article-grid">
+  {% for post in posts %}
+  <article class="public-article-card">
+    {% if post.cover %}
+    <a href="{{ post.url }}" class="public-cover">
+      <img src="{{ post.cover }}" alt="{{ post.title }}">
+    </a>
+    {% endif %}
+    <div class="public-card-body">
+      <span class="public-date">{{ post.date }}</span>
+      <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+      <p>{{ post.summary }}</p>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center; padding:3rem; color:var(--text-muted);">
+  暂无文章。
+</div>
+{% endif %}
+
+<style>
+  .public-article-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .eyebrow {
+    color: var(--gold-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .public-article-head h2 {
+    margin-bottom: 0;
+    text-align: left;
+  }
+  .public-article-grid {
+    display: grid;
+    gap: 1rem;
+  }
+  .public-article-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid rgba(228,191,122,0.22);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.045);
+  }
+  .public-cover {
+    display: block;
+    min-height: 180px;
+    background: rgba(228,191,122,0.06);
+  }
+  .public-cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .public-card-body {
+    padding: 1.25rem;
+  }
+  .public-date {
+    color: var(--gold-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .public-card-body h3 {
+    margin: 0.45rem 0 0.65rem;
+    color: var(--text-primary);
+    font-size: 1.15rem;
+    line-height: 1.45;
+  }
+  .public-card-body h3 a {
+    color: inherit;
+  }
+  .public-card-body p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  @media (max-width: 720px) {
+    .public-article-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .public-article-card {
+      grid-template-columns: 1fr;
+    }
+    .public-cover {
+      min-height: 200px;
+    }
+  }
+</style>
+{% endblock %}

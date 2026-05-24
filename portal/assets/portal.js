@@ -142,7 +142,7 @@
     featureDate.textContent = text(feature.date, "Recent");
     const featureTitle = document.createElement("h3");
     const featureLink = document.createElement("a");
-    featureLink.href = absoluteUrl(feature.url || "/PolaZhenjing/admin/articles");
+    featureLink.href = absoluteUrl(feature.url || "/articles");
     featureLink.textContent = text(feature.title, "最新文章");
     featureTitle.appendChild(featureLink);
     const featureSummary = document.createElement("p");
@@ -157,7 +157,7 @@
     list.setAttribute("data-reveal", "");
     articles.slice(1, 5).forEach((article) => {
       const link = document.createElement("a");
-      link.href = absoluteUrl(article.url || "/PolaZhenjing/admin/articles");
+      link.href = absoluteUrl(article.url || "/articles");
       const date = document.createElement("span");
       date.textContent = text(article.date, "Recent");
       const title = document.createElement("strong");
