@@ -1482,18 +1482,33 @@ def _run_generate_job(job_id: str, p: dict):
 
     # Front matter
     tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
+    summary = _generate_summary(content)
+    seo_description = (description or summary or _generate_summary(content, max_chars=160)).strip()
+    if len(seo_description) > 180:
+        seo_description = seo_description[:180].rstrip(' ，。；、,.') + '。'
+    cover_image = ''
+    for item in merged_images:
+        if item.get('role') == 'cover' and item.get('relpath'):
+            cover_image = '/' + item['relpath'].lstrip('/')
+            break
+    if not cover_image:
+        first_image_match = re.search(r'!\[[^\]]*\]\(([^)]+)\)', content)
+        if first_image_match:
+            cover_image = first_image_match.group(1).replace('{{ site.baseurl }}', '').strip()
+    if not cover_image:
+        cover_image = '/assets/images/test_cover.jpg'
+
     front_matter = f"""---
 layout: {style}
 theme: {theme}
 title: "{title}"
 date: {date_str}
+image: "{cover_image}"
 tags: [{', '.join(tag_list)}]"""
 
-    if description:
-        front_matter += f'\ndescription: "{description}"'
+    if seo_description:
+        front_matter += f'\ndescription: "{seo_description.replace(chr(34), chr(92) + chr(34))}"'
 
-    # Generate summary
-    summary = _generate_summary(content)
     if summary:
         safe_summary = summary.replace('"', '\\"')
         front_matter += f'\nsummary: "{safe_summary}"'

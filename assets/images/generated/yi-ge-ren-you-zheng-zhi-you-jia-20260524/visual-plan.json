@@ -1,0 +1,33 @@
+{
+  "cover": {
+    "alt": "一个年轻父亲坐在游泳池边的躺椅上，笔记本电脑放在腿边，他在看屏幕上的代码，不远处的小女孩在沙滩上玩沙，阳光透过棕榈树洒下斑驳的光影，远处有海平线，温馨而治愈的度假场景",
+    "prompt": "Studio Ghibli animation style, watercolor texture, natural sunlight, a young Asian father sitting on a poolside lounge chair with a laptop on his knees, coding and looking at code on screen, a little girl building sandcastles nearby in the distance, palm trees casting dappled shadows, ocean horizon in background, warm golden hour lighting, peaceful vacation atmosphere, hand-painted watercolor aesthetic, soft edges, dreamy color palette, no text no logos no watermarks"
+  },
+  "scenes": [
+    {
+      "block_index": 2,
+      "alt": "泳池边度假场景，年轻父亲在躺椅上工作，远处的女儿在沙滩上玩耍",
+      "prompt": "Studio Ghibli animation style, watercolor texture, natural lighting, a young Asian father sitting on a poolside lounge chair, laptop balanced on his lap, typing code while glancing at the screen, he just came back from swimming with wet hair, pool water sparkling with reflected sunlight, his little daughter playing in sandbox nearby, building sandcastle with small bucket and shovel, palm trees and tropical plants around the pool, lazy summer afternoon atmosphere, warm natural light filtering through leaves, soft watercolor washes, hand-painted delicate details, no text no logos"
+    },
+    {
+      "block_index": 19,
+      "alt": "代码与文档的关系可视化，AI作为朋友的理念，左边是代码世界，右边是友善的AI形象",
+      "prompt": "Studio Ghibli animation style, watercolor texture, warm natural lighting, a magical visualization showing code as the main body on the left side represented as growing tree branches and roots, documentation as small leaves and flowers around it on the right, a friendly translucent AI spirit figure standing beside the code like a helpful friend, not a subordinate or servant, the AI has soft glowing aura like Totoro's friend, the scene takes place in a cozy study room with wooden desk, books stacked naturally, warm lamp light, hand-painted watercolor aesthetic, metaphorical representation of AI as companion not tool, no text no logos no interface screenshots"
+    },
+    {
+      "block_index": 35,
+      "alt": "支付对接场景，一位微笑的印度小哥程序员通过电脑远程帮助，旁边有Dodo Payment的可爱logo鸟形象",
+      "prompt": "Studio Ghibli animation style, watercolor texture, natural daylight, a young Indian man with friendly smile sitting in front of a computer in a cozy home office, he is waving through a magical floating portal connecting to the viewer's workspace, on his desk sits a cute small bird mascot character representing the payment platform, colorful flowers and plants around both connected spaces, warm and welcoming atmosphere, the scene suggests easy and friendly payment integration like making a new friend, soft watercolor washes, hand-painted illustration style, no text no logos no interface screenshots"
+    },
+    {
+      "block_index": 56,
+      "alt": "程序员站在分岔路口，一边是复杂的React图标森林，一边是简洁的静态服务器小屋，体现选择判断力",
+      "prompt": "Studio Ghibli animation style, watercolor texture, magical forest atmosphere, a young Asian programmer standing at a crossroads in an enchanted forest, on the left path: a dense dark forest of complex React symbols and gears turning into monstrous shapes, intimidating and heavy, on the right path: a gentle slope leading to a small cozy cottage with simple static server icon, warm light glowing from its window, the programmer looks thoughtful, one hand touching his chin, small magical fireflies guiding the right path, cherry blossom petals floating, the scene represents wise judgment in choosing the right tool, hand-painted watercolor aesthetic, dreamy lighting, no text no logos"
+    },
+    {
+      "block_index": 75,
+      "alt": "一个人被很多小问题和一个大痛点击中的瞬间，痛苦转化为创造，旁边站着感激的陌生人",
+      "prompt": "Studio Ghibli animation style, watercolor texture, dramatic yet heartwarming scene, a young Asian developer standing in the center, surrounded by small floating problem bubbles and one large glowing red pain orb that directly hit his heart, his expression changes from pain to determination, from his determined heart rays of creative energy shoot out forming tool icons and code snippets, nearby a mysterious hooded stranger approaches with gratitude, bowing slightly holding a glowing comment bubble saying thanks, the pain points are visualized as thorns and heavy stones, but the tools created from them are beautiful flowers and birds, transformation metaphor, hand-painted watercolor aesthetic, emotional natural lighting from sunrise, no text no logos no interface screenshots"
+    }
+  ]
+}
