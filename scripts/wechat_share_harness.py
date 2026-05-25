@@ -82,9 +82,15 @@ def main() -> int:
     )
     assert public_resp.status_code == 200, public_resp.status_code
     public_html = public_resp.get_data(as_text=True)
+    public_og_image = _content(public_html, "og:image")
+    public_twitter_image = _content(public_html, "twitter:image", attr="name")
+    assert public_og_image.startswith("https://aipd.me/PolaZhenjing/assets/"), public_og_image
+    assert public_twitter_image == public_og_image, "Root public twitter image should match og:image"
     assert "/PolaZhenjing/assets/images/" in public_html, "Public article media should use app asset prefix"
+    assert 'href="/PolaZhenjing/assets/css/main.css"' in public_html, "Public article CSS should use app asset prefix"
     assert 'src="/assets/images/generated/' not in public_html, "Root public article should not render root generated asset URLs"
     assert 'src="/assets/images/uploads/' not in public_html, "Root public article should not render root uploaded asset URLs"
+    assert 'href="/assets/css/' not in public_html, "Root public article should not render root CSS asset URLs"
 
     admin_client = app.test_client()
     with admin_client.session_transaction(base_url="https://aipd.me") as session:

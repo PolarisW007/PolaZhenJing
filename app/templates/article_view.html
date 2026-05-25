@@ -37,13 +37,13 @@
   "publisher": {
     "@type": "Organization",
     "name": "织梦空间",
-    "logo": {"@type": "ImageObject", "url": "https://aipd.me/assets/images/test_cover.jpg"}
+    "logo": {"@type": "ImageObject", "url": {{ share_logo | tojson }}}
   }
 }
 </script>
-<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="{{ article_asset_base }}/assets/css/main.css">
 {% set layout = meta.get('layout', 'deep-technical') %}
-<link rel="stylesheet" href="/assets/css/{{ layout }}.css">
+<link rel="stylesheet" href="{{ article_asset_base }}/assets/css/{{ layout }}.css">
 <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
 {% endblock %}
 

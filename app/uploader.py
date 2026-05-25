@@ -1816,11 +1816,11 @@ def _absolute_asset_url(raw_url: str) -> str:
     if raw_url.startswith(('http://', 'https://')):
         return _force_public_https(raw_url)
     if raw_url.startswith('/assets/'):
-        return _force_public_https(url_for('serve_assets', filename=raw_url[len('/assets/'):],
-                                           _external=True))
+        path = raw_url[len('/assets/'):]
+        return _force_public_https(urljoin(request.host_url, f'{_article_asset_base()}/assets/{path}'.lstrip('/')))
     if raw_url.startswith('assets/'):
-        return _force_public_https(url_for('serve_assets', filename=raw_url[len('assets/'):],
-                                           _external=True))
+        path = raw_url[len('assets/'):]
+        return _force_public_https(urljoin(request.host_url, f'{_article_asset_base()}/assets/{path}'.lstrip('/')))
     return _force_public_https(urljoin(request.url_root, raw_url.lstrip('/')))
 
 
@@ -2002,6 +2002,8 @@ def _render_article(filename: str, public: bool = False):
         meta.get('image') or meta.get('cover') or _article_first_image(body)
         or '/assets/images/test_cover.jpg'
     )
+    share_logo = _absolute_asset_url('/assets/images/test_cover.jpg')
+    article_asset_base = _article_asset_base()
     return render_template('article_view.html',
                            filename=filename, meta=meta,
                            admin_filename=admin_filename,
@@ -2012,6 +2014,8 @@ def _render_article(filename: str, public: bool = False):
                            share_title=title,
                            share_description=share_description,
                            share_image=share_image,
+                           share_logo=share_logo,
+                           article_asset_base=article_asset_base,
                            accent_color=accent_color,
                            is_public=public,
                            can_manage=_is_admin_session(),
