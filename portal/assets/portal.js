@@ -165,14 +165,6 @@
       link.append(date, title);
       list.appendChild(link);
     });
-    const action = document.createElement("a");
-    action.href = "/PolaZhenjing/admin/upload";
-    const actionLabel = document.createElement("span");
-    actionLabel.textContent = "Action";
-    const actionText = document.createElement("strong");
-    actionText.textContent = "上传文档，转换为风格化文章";
-    action.append(actionLabel, actionText);
-    list.appendChild(action);
     host.appendChild(list);
     observeOrShow(list);
   }
