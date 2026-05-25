@@ -71,6 +71,11 @@ def _get_theme() -> str:
     return 'wukong'
 
 
+def _is_admin_session() -> bool:
+    """Return whether the current session is allowed to see admin controls."""
+    return session.get('role') == 'admin'
+
+
 def _set_theme(theme_id: str):
     """Persist selected UI theme to data/theme.json."""
     os.makedirs(os.path.dirname(THEME_FILE), exist_ok=True)
@@ -1603,7 +1608,7 @@ def generate_progress(job_id):
 
 @uploader_bp.route('/articles')
 def articles():
-    if not session.get('user_id'):
+    if not _is_admin_session():
         return _render_public_articles()
 
     posts = _scan_posts()
@@ -1646,7 +1651,8 @@ def _render_public_articles():
             if len(parts) >= 3:
                 body = parts[2].strip()
         summaries.append(_post_public_summary(filename, meta, body))
-    return render_template('public_articles.html', posts=summaries)
+    return render_template('public_articles.html', posts=summaries,
+                           show_admin_nav=False)
 
 
 GITHUB_REPO = 'PolarisW007/PolaZhenJing'
@@ -1788,7 +1794,7 @@ def check_pages_url():
 @uploader_bp.route('/articles/<filename>')
 def view_article(filename):
     """Preview a single article."""
-    return _render_article(filename, public=not bool(session.get('user_id')))
+    return _render_article(filename, public=not _is_admin_session())
 
 
 @public_articles_bp.route('/articles/<filename>')
@@ -1831,7 +1837,8 @@ def _render_article(filename: str, public: bool = False):
                            pages_url=pages_url, read_time=read_time,
                            accent_color=accent_color,
                            is_public=public,
-                           can_manage=bool(session.get('user_id')))
+                           can_manage=_is_admin_session(),
+                           show_admin_nav=_is_admin_session())
 
 
 @uploader_bp.route('/articles/<filename>/edit', methods=['GET', 'POST'])
