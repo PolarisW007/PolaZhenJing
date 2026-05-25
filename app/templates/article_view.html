@@ -86,10 +86,9 @@
     {% endif %}
   </header>
 
-  {# ── Summary / TL;DR Box ── #}
-  {% if summary %}
+  {# ── Admin-only share helper ── #}
+  {% if summary and can_manage %}
   <div class="summary-box" style="--accent: {{ accent_color }};">
-    <div class="summary-label">TL;DR</div>
     <p class="summary-text">{{ summary }}</p>
     <div class="share-row">
       <button class="share-btn" id="copy-link-btn" onclick="copyArticleLink()" title="复制链接" disabled style="opacity:0.4; cursor:wait;">
@@ -374,6 +373,7 @@ const WECHAT_SHARE = {
   imgUrl: {{ share_image | tojson }}
 };
 
+{% if can_manage %}
 (function enableCopyShareLink() {
   const btn = document.getElementById('copy-link-btn');
   const label = document.getElementById('copy-link-label');
@@ -382,6 +382,7 @@ const WECHAT_SHARE = {
   btn.style.cursor = '';
   label.textContent = '复制链接';
 })();
+{% endif %}
 
 (function configureWechatShare() {
   if (!/MicroMessenger/i.test(navigator.userAgent) || !window.wx) return;
@@ -413,6 +414,7 @@ const WECHAT_SHARE = {
     .catch(() => {});
 })();
 
+{% if can_manage %}
 function copyArticleLink() {
   navigator.clipboard.writeText(PAGES_URL).then(() => {
     const btn = document.getElementById('copy-link-btn');
@@ -422,5 +424,6 @@ function copyArticleLink() {
     setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 1500);
   });
 }
+{% endif %}
 </script>
 {% endblock %}

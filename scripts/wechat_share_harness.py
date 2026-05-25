@@ -16,6 +16,12 @@ def _first_admin_filename() -> str:
     posts = sorted((ROOT / "_posts").glob("*.md"), reverse=True)
     if not posts:
         raise AssertionError("No markdown posts found")
+    for post in posts:
+        text = post.read_text(encoding="utf-8", errors="ignore")
+        if re.search(r"^summary:\s*.+", text, re.M):
+            name = post.name
+            match = re.match(r"^\d{4}-\d{2}-\d{2}-(.+\.md)$", name)
+            return match.group(1) if match else name
     name = posts[0].name
     match = re.match(r"^\d{4}-\d{2}-\d{2}-(.+\.md)$", name)
     return match.group(1) if match else name
@@ -57,6 +63,24 @@ def main() -> int:
     assert twitter_card == "summary_large_image", twitter_card
     assert "updateAppMessageShareData" in html, "WeChat app-message share hook missing"
     assert "updateTimelineShareData" in html, "WeChat timeline share hook missing"
+    assert "TL;DR" not in html, "Public article should not show TL;DR label"
+    assert "Twitter" not in html, "Public article should not show admin Twitter share button"
+    assert "LinkedIn" not in html, "Public article should not show admin LinkedIn share button"
+    assert "copy-link-btn" not in html, "Public article should not show admin copy share button"
+
+    admin_client = app.test_client()
+    with admin_client.session_transaction(base_url="https://aipd.me") as session:
+        session.update({"user_id": 1, "role": "admin"})
+    admin_response = admin_client.get(
+        f"/admin/articles/{filename}",
+        base_url="https://aipd.me",
+        headers={"X-Script-Name": "/PolaZhenjing"},
+    )
+    assert admin_response.status_code == 200, admin_response.status_code
+    admin_html = admin_response.get_data(as_text=True)
+    assert "Twitter" in admin_html, "Admin article should show Twitter share button"
+    assert "LinkedIn" in admin_html, "Admin article should show LinkedIn share button"
+    assert "TL;DR" not in admin_html, "Admin article should not show TL;DR label"
 
     config_resp = client.get(
         "/admin/api/wechat/share-config?url=https%3A%2F%2Faipd.me%2FPolaZhenjing%2Farticles%2Fdemo.md",

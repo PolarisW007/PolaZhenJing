@@ -1764,6 +1764,33 @@ def _article_first_image(body: str) -> str:
     return match.group(1).strip() if match else ''
 
 
+def _normalize_heading_text(text: str) -> str:
+    return re.sub(r'\s+', '', _strip_markdown_media(text)).lower()
+
+
+def _remove_duplicate_leading_heading(body_html: str, title: str) -> str:
+    """Drop a body-leading h1/h2 when it duplicates the page title."""
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(body_html, 'html.parser')
+        normalized_title = _normalize_heading_text(title)
+        first_content = next((node for node in soup.contents
+                              if getattr(node, 'name', None) or str(node).strip()), None)
+        candidates = []
+        if getattr(first_content, 'name', None) in {'h1', 'h2'}:
+            candidates.append(first_content)
+        candidates.extend(soup.find_all(['h1', 'h2'], limit=3))
+        for heading in candidates:
+            if _normalize_heading_text(heading.get_text(' ', strip=True)) == normalized_title:
+                heading.decompose()
+                break
+        if candidates:
+            return str(soup)
+    except Exception:
+        pass
+    return body_html
+
+
 def _force_public_https(raw_url: str) -> str:
     """Normalize public aipd.me URLs for external crawlers."""
     if raw_url.startswith('http://aipd.me/'):
@@ -1949,7 +1976,9 @@ def _render_article(filename: str, public: bool = False):
     # ReverseProxied middleware exposes it as request.script_root so image
     # URLs like /assets/images/generated/... still resolve.
     body = body.replace('{{ site.baseurl }}', request.script_root or '')
+    title = meta.get('title') or actual_filename.replace('.md', '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
+    body_html = _remove_duplicate_leading_heading(body_html, title)
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{actual_filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
     pages_url = _build_pages_url(actual_filename)
@@ -1960,7 +1989,6 @@ def _render_article(filename: str, public: bool = False):
     # Get style accent color
     layout = meta.get('layout', 'deep-technical')
     accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
-    title = meta.get('title') or actual_filename.replace('.md', '')
     share_description = _clamp_description(
         meta.get('description') or meta.get('summary') or _generate_summary(body, max_chars=160)
     )
