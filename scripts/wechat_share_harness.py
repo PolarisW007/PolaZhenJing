@@ -27,6 +27,13 @@ def _first_admin_filename() -> str:
     return match.group(1) if match else name
 
 
+def _asset_regression_filename(default: str) -> str:
+    target = ROOT / "_posts" / "2026-05-24-yi-ge-ren-you-zheng-zhi-you-jia-20260524.md"
+    if target.exists():
+        return "yi-ge-ren-you-zheng-zhi-you-jia-20260524.md"
+    return default
+
+
 def _content(html: str, name: str, attr: str = "property") -> str:
     pattern = rf'<meta\s+{attr}="{re.escape(name)}"\s+content="([^"]*)"'
     match = re.search(pattern, html)
@@ -67,6 +74,17 @@ def main() -> int:
     assert "Twitter" not in html, "Public article should not show admin Twitter share button"
     assert "LinkedIn" not in html, "Public article should not show admin LinkedIn share button"
     assert "copy-link-btn" not in html, "Public article should not show admin copy share button"
+
+    asset_filename = _asset_regression_filename(filename)
+    public_resp = client.get(
+        f"/articles/{asset_filename}",
+        base_url="https://aipd.me",
+    )
+    assert public_resp.status_code == 200, public_resp.status_code
+    public_html = public_resp.get_data(as_text=True)
+    assert "/PolaZhenjing/assets/images/" in public_html, "Public article media should use app asset prefix"
+    assert 'src="/assets/images/generated/' not in public_html, "Root public article should not render root generated asset URLs"
+    assert 'src="/assets/images/uploads/' not in public_html, "Root public article should not render root uploaded asset URLs"
 
     admin_client = app.test_client()
     with admin_client.session_transaction(base_url="https://aipd.me") as session:

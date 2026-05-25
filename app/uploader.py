@@ -84,6 +84,15 @@ def _is_admin_session() -> bool:
     return session.get('role') == 'admin'
 
 
+def _article_asset_base() -> str:
+    """Return the URL prefix for article-owned assets.
+
+    Public article pages can be exposed at root /articles/... while the
+    generated/uploaded media is served by the PolaZhenjing app prefix.
+    """
+    return request.script_root or '/PolaZhenjing'
+
+
 def _set_theme(theme_id: str):
     """Persist selected UI theme to data/theme.json."""
     os.makedirs(os.path.dirname(THEME_FILE), exist_ok=True)
@@ -1970,12 +1979,9 @@ def _render_article(filename: str, public: bool = False):
     with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
         raw = f.read()
     meta, _, body = _parse_post(raw)
-    # Render markdown to HTML
-    # Replace Jekyll's {{ site.baseurl }} with the current Flask script root.
-    # In dev (root path) this is ''. Behind Nginx at /PolaZhenjing/ the
-    # ReverseProxied middleware exposes it as request.script_root so image
-    # URLs like /assets/images/generated/... still resolve.
-    body = body.replace('{{ site.baseurl }}', request.script_root or '')
+    # Render markdown to HTML. Article media lives under the PolaZhenjing app
+    # asset route even when the public article itself is mounted at /articles/.
+    body = body.replace('{{ site.baseurl }}', _article_asset_base())
     title = meta.get('title') or actual_filename.replace('.md', '')
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     body_html = _remove_duplicate_leading_heading(body_html, title)
@@ -2071,7 +2077,7 @@ def preview_article_markdown(filename):
     if not fpath or not os.path.isfile(fpath):
         return jsonify({'ok': False, 'error': '文章未找到。'}), 404
     body = request.form.get('body', '')
-    body = body.replace('{{ site.baseurl }}', request.script_root or '')
+    body = body.replace('{{ site.baseurl }}', _article_asset_base())
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     return jsonify({'ok': True, 'html': body_html})
 
