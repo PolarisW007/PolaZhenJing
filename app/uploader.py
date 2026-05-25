@@ -7,7 +7,9 @@ import json
 import hashlib
 import logging
 import shutil
+import time
 from datetime import datetime
+from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 
@@ -58,6 +60,12 @@ THEME_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'theme.json')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
 ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'webp'}
 RICH_MEDIA_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'richtext')
+WECHAT_TICKET_CACHE = {
+    'access_token': '',
+    'access_token_expires_at': 0,
+    'jsapi_ticket': '',
+    'jsapi_ticket_expires_at': 0,
+}
 
 
 def _get_theme() -> str:
@@ -1733,6 +1741,94 @@ def _tags_input_value(meta_tags: str) -> str:
     return value
 
 
+def _strip_markdown_media(text: str) -> str:
+    """Remove markdown media and collapse text for metadata summaries."""
+    text = re.sub(r'!\[[^\]]*\]\([^)]+\)', '', text or '')
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    text = re.sub(r'[*_`>#-]+', '', text)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
+def _clamp_description(text: str, max_chars: int = 180) -> str:
+    """Keep social card descriptions compact enough for crawlers."""
+    text = _strip_markdown_media(text)
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip(' ，。；、,.') + '。'
+
+
+def _article_first_image(body: str) -> str:
+    match = re.search(r'!\[[^\]]*\]\(([^)]+)\)', body or '')
+    return match.group(1).strip() if match else ''
+
+
+def _force_public_https(raw_url: str) -> str:
+    """Normalize public aipd.me URLs for external crawlers."""
+    if raw_url.startswith('http://aipd.me/'):
+        return 'https://' + raw_url[len('http://'):]
+    return raw_url
+
+
+def _absolute_asset_url(raw_url: str) -> str:
+    """Convert article image paths to externally crawlable absolute URLs."""
+    raw_url = (raw_url or '').strip().strip('"').strip("'")
+    if not raw_url:
+        return ''
+    raw_url = raw_url.replace('{{ site.baseurl }}', '').strip()
+    if raw_url.startswith(('http://', 'https://')):
+        return _force_public_https(raw_url)
+    if raw_url.startswith('/assets/'):
+        return _force_public_https(url_for('serve_assets', filename=raw_url[len('/assets/'):],
+                                           _external=True))
+    if raw_url.startswith('assets/'):
+        return _force_public_https(url_for('serve_assets', filename=raw_url[len('assets/'):],
+                                           _external=True))
+    return _force_public_https(urljoin(request.url_root, raw_url.lstrip('/')))
+
+
+def _wechat_nonce() -> str:
+    return hashlib.sha1(f'{time.time()}:{os.urandom(8).hex()}'.encode()).hexdigest()[:16]
+
+
+def _wechat_get_json(url: str) -> dict:
+    import requests
+    resp = requests.get(url, timeout=8)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get('errcode'):
+        raise RuntimeError(data.get('errmsg') or f'WeChat API error {data.get("errcode")}')
+    return data
+
+
+def _wechat_jsapi_ticket() -> str:
+    """Fetch and cache JS-SDK ticket when official account env vars exist."""
+    now_ts = int(time.time())
+    app_id = os.getenv('WECHAT_MP_APP_ID', '').strip()
+    app_secret = os.getenv('WECHAT_MP_APP_SECRET', '').strip()
+    if not app_id or not app_secret:
+        return ''
+    if WECHAT_TICKET_CACHE['jsapi_ticket_expires_at'] > now_ts + 60:
+        return WECHAT_TICKET_CACHE['jsapi_ticket']
+    if WECHAT_TICKET_CACHE['access_token_expires_at'] <= now_ts + 60:
+        token_url = (
+            'https://api.weixin.qq.com/cgi-bin/token'
+            f'?grant_type=client_credential&appid={app_id}&secret={app_secret}'
+        )
+        token_data = _wechat_get_json(token_url)
+        WECHAT_TICKET_CACHE['access_token'] = token_data.get('access_token', '')
+        WECHAT_TICKET_CACHE['access_token_expires_at'] = now_ts + int(token_data.get('expires_in', 7200))
+    ticket_url = (
+        'https://api.weixin.qq.com/cgi-bin/ticket/getticket'
+        f'?access_token={WECHAT_TICKET_CACHE["access_token"]}&type=jsapi'
+    )
+    ticket_data = _wechat_get_json(ticket_url)
+    WECHAT_TICKET_CACHE['jsapi_ticket'] = ticket_data.get('ticket', '')
+    WECHAT_TICKET_CACHE['jsapi_ticket_expires_at'] = now_ts + int(ticket_data.get('expires_in', 7200))
+    return WECHAT_TICKET_CACHE['jsapi_ticket']
+
+
 def _build_post_markdown(form) -> str:
     """Build a Jekyll post from edit form fields."""
     layout = form.get('layout', 'deep-technical').strip() or 'deep-technical'
@@ -1791,6 +1887,38 @@ def check_pages_url():
     return jsonify({'live': live, 'url': url})
 
 
+@uploader_bp.route('/api/wechat/share-config')
+def wechat_share_config():
+    """Return optional WeChat JS-SDK signature for in-WeChat article sharing."""
+    app_id = os.getenv('WECHAT_MP_APP_ID', '').strip()
+    page_url = (request.args.get('url') or '').split('#', 1)[0].strip()
+    if not app_id:
+        return jsonify({'configured': False, 'reason': 'missing-wechat-app-id'})
+    if not page_url.startswith(('https://aipd.me/', 'http://aipd.me/')):
+        return jsonify({'configured': False, 'reason': 'invalid-url'}), 400
+    try:
+        ticket = _wechat_jsapi_ticket()
+        if not ticket:
+            return jsonify({'configured': False, 'reason': 'missing-wechat-ticket'})
+        timestamp = int(time.time())
+        nonce_str = _wechat_nonce()
+        plain = (
+            f'jsapi_ticket={ticket}&noncestr={nonce_str}'
+            f'&timestamp={timestamp}&url={page_url}'
+        )
+        signature = hashlib.sha1(plain.encode('utf-8')).hexdigest()
+        return jsonify({
+            'configured': True,
+            'appId': app_id,
+            'timestamp': timestamp,
+            'nonceStr': nonce_str,
+            'signature': signature,
+        })
+    except Exception as exc:
+        current_app.logger.warning('WeChat share config failed: %s', exc)
+        return jsonify({'configured': False, 'reason': 'wechat-api-error'}), 502
+
+
 @uploader_bp.route('/articles/<filename>')
 def view_article(filename):
     """Preview a single article."""
@@ -1825,16 +1953,31 @@ def _render_article(filename: str, public: bool = False):
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{actual_filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
     pages_url = _build_pages_url(actual_filename)
+    share_url = url_for('public_articles.public_article_view',
+                        filename=admin_filename, _external=True)
+    share_url = _force_public_https(share_url)
     read_time = _calc_read_time(body)
     # Get style accent color
     layout = meta.get('layout', 'deep-technical')
     accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
+    title = meta.get('title') or actual_filename.replace('.md', '')
+    share_description = _clamp_description(
+        meta.get('description') or meta.get('summary') or _generate_summary(body, max_chars=160)
+    )
+    share_image = _absolute_asset_url(
+        meta.get('image') or meta.get('cover') or _article_first_image(body)
+        or '/assets/images/test_cover.jpg'
+    )
     return render_template('article_view.html',
                            filename=filename, meta=meta,
                            admin_filename=admin_filename,
                            actual_filename=actual_filename,
                            body_html=body_html, github_url=github_url,
                            pages_url=pages_url, read_time=read_time,
+                           share_url=share_url,
+                           share_title=title,
+                           share_description=share_description,
+                           share_image=share_image,
                            accent_color=accent_color,
                            is_public=public,
                            can_manage=_is_admin_session(),
