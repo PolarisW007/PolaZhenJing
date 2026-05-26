@@ -79,6 +79,12 @@
     </div>
   </div>
 
+  <div class="form-group revision-advice-group">
+    <label for="revision_instruction">修改建议简述（可选）</label>
+    <textarea class="form-input compact-textarea" id="revision_instruction" name="revision_instruction" placeholder="例如：保留事实和图片，把语气改得更克制；加强第二部分的论证；删掉重复段落。"></textarea>
+    <div class="field-help">填写后，保存时会先让模型按建议调整当前 Markdown 正文，再写回文章。</div>
+  </div>
+
   <div class="editor-actions">
     <button class="btn-gold btn-sm" type="submit" name="save_mode" value="save">保存</button>
     <button class="btn-ghost" type="submit" name="save_mode" value="sync">保存并同步 GitHub</button>
@@ -156,6 +162,15 @@
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1rem;
+  }
+  .revision-advice-group {
+    margin-top: 1rem;
+  }
+  .field-help {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin-top: 0.4rem;
   }
 
   .EasyMDEContainer .CodeMirror {

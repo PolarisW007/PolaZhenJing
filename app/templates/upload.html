@@ -32,6 +32,11 @@
     font-size: 0.8rem;
     line-height: 1.65;
   }
+  .compact-textarea {
+    min-height: 92px !important;
+    font-family: inherit !important;
+    line-height: 1.65;
+  }
   .tox-tinymce {
     border-color: var(--text-ghost) !important;
     border-radius: var(--radius-md) !important;
@@ -120,13 +125,13 @@
 <h2>上传文章</h2>
 
 <div class="tab-bar">
-  <div class="tab active" onclick="switchTab(event, 'upload')">上传文件</div>
-  <div class="tab" onclick="switchTab(event, 'paste')">粘贴内容</div>
+  <div class="tab" onclick="switchTab(event, 'upload')">上传文件</div>
+  <div class="tab active" onclick="switchTab(event, 'paste')">粘贴内容</div>
   <div class="tab" onclick="switchTab(event, 'url')">输入URL</div>
 </div>
 
 <!-- Upload Tab -->
-<div id="tab-upload">
+<div id="tab-upload" style="display: none;">
   <form method="POST" enctype="multipart/form-data" id="upload-form">
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="drop-zone-icon">📄</div>
@@ -161,12 +166,16 @@
         支持 PNG / JPG / WebP。生成图文后会自动插入合适段落；若与 AI 生成图位置冲突，会优先使用上传配图。
       </div>
     </div>
+    <div class="form-group">
+      <label for="revision-instruction1">修改建议简述（可选）</label>
+      <textarea id="revision-instruction1" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把开头写得更有故事感，弱化技术术语，补充对创业者的启发。"></textarea>
+    </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
 
 <!-- Paste Tab -->
-<div id="tab-paste" style="display: none;">
+<div id="tab-paste">
   <form method="POST" enctype="multipart/form-data" id="paste-form">
     <input type="hidden" name="content_format" id="content-format" value="rich_html">
     <div class="form-group">
@@ -206,6 +215,10 @@
       <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem; line-height: 1.55;">
         支持 PNG / JPG / WebP。系统会尽量保留原图细节，仅对疑似边角水印做局部清理。
       </div>
+    </div>
+    <div class="form-group">
+      <label for="revision-instruction2">修改建议简述（可选）</label>
+      <textarea id="revision-instruction2" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把结构调整为先讲结论再讲案例，增加更锋利的判断，整体更像公众号长文。"></textarea>
     </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
@@ -247,6 +260,10 @@
       <div style="font-size: 0.85rem; color: #888; margin-top: 0.35rem; line-height: 1.55;">
         支持 PNG / JPG / WebP。上传配图会参与最终排版，并优先于相邻 AI 生成图。
       </div>
+    </div>
+    <div class="form-group">
+      <label for="revision-instruction3">修改建议简述（可选）</label>
+      <textarea id="revision-instruction3" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：保留原文事实，但改成更克制、更有洞察力的叙事。"></textarea>
     </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
@@ -389,11 +406,24 @@ document.querySelectorAll('input[name="editor_mode"]').forEach(input => {
 
 document.getElementById('paste-form').addEventListener('submit', () => {
   const activeMode = document.getElementById('content-format').value;
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
   if (activeMode === 'rich_html' && window.tinymce && tinymce.get('rich-content')) {
     tinymce.triggerSave();
+  }
+  if (activeMode === 'markdown') {
+    if (!markdown.value.trim() && rich.value.trim()) {
+      markdown.value = rich.value;
+    }
+    rich.disabled = true;
+    markdown.disabled = false;
+  } else {
+    markdown.disabled = true;
+    rich.disabled = false;
   }
 });
 
 initRichEditor();
+setEditorMode('rich');
 </script>
 {% endblock %}

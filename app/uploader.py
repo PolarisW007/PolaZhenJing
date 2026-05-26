@@ -242,7 +242,8 @@ def _get_minimax_api_key() -> str | None:
     return os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY') or None
 
 
-def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | None:
+def _call_llm_rewrite(content: str, title: str, system_prompt: str,
+                      revision_instruction: str = '') -> str | None:
     """Call MiniMax LLM to rewrite content using the given skill prompt.
 
     Returns rewritten content string, or None on failure.
@@ -252,10 +253,16 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str) -> str | Non
         logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping LLM rewrite')
         return None
 
+    instruction = (revision_instruction or '').strip()
+    instruction_text = (
+        f'\n\n额外修改建议：\n{instruction}\n\n请在不改变事实和核心主题的前提下，优先落实这些修改建议。'
+        if instruction else ''
+    )
     user_msg = (
         f'请根据以下素材，以你的风格写一篇公众号长文。必须严格围绕素材的实际论点与主题展开，'
         f'不要自行替换主题、混入无关个人经历或凭空构造事实。如果素材是个人博客/技术解读，'
-        f'保留原文的代码例子、术语和数据。标题是「{title}」，保持标题与正文语义一致。\n\n'
+        f'保留原文的代码例子、术语和数据。标题是「{title}」，保持标题与正文语义一致。'
+        f'{instruction_text}\n\n'
         f'素材内容：\n{content}'
     )
 
@@ -798,6 +805,21 @@ def _rich_html_to_markdown(html: str, preserve_media: bool = True) -> str:
     return _clean_markdown_formatting(markdown_text).strip()
 
 
+def _looks_like_html_fragment(text: str) -> bool:
+    """Detect copied editor HTML that should be converted before generation."""
+    if not text:
+        return False
+    return bool(re.search(r'<(?:div|p|span|h[1-6]|ul|ol|li|blockquote|img|table|section)\b', text, re.I))
+
+
+def _normalize_pasted_markdown(text: str, preserve_media: bool = True) -> str:
+    """Accept real Markdown and accidental copied HTML in the Markdown editor."""
+    text = (text or '').strip()
+    if _looks_like_html_fragment(text):
+        return _rich_html_to_markdown(text, preserve_media=preserve_media)
+    return text
+
+
 _MARKDOWN_IMAGE_RE = re.compile(r'!\[[^\]]*\]\([^)]+\)')
 _RAW_MEDIA_RE = re.compile(
     r'<(?:img|iframe|video|picture)\b[\s\S]*?</(?:iframe|video|picture)>|<img\b[^>]*>',
@@ -835,6 +857,54 @@ def _ensure_original_media(content: str, media_blocks: list[str]) -> str:
     if not missing:
         return content
     return content.rstrip() + '\n\n## 原文媒体\n\n' + '\n\n'.join(missing) + '\n'
+
+
+def _apply_revision_instruction(content: str, title: str, revision_instruction: str,
+                                style: str = '') -> str | None:
+    """Ask the LLM to revise existing Markdown according to a short note."""
+    instruction = (revision_instruction or '').strip()
+    if not instruction:
+        return None
+    system_prompt = (
+        '你是一名资深中文文章编辑。请基于用户的修改建议，对现有 Markdown 文章做二次修改。'
+        '必须保留原文事实、数据、专有名词、代码块、Markdown 图片、HTML 媒体标签和 front matter 之外的正文结构。'
+        '不要输出解释说明，只输出修改后的 Markdown 正文。'
+    )
+    style_hint = f'文章当前风格是 {style}。' if style else ''
+    user_msg = (
+        f'标题：{title}\n'
+        f'{style_hint}\n'
+        f'修改建议：\n{instruction}\n\n'
+        f'原文 Markdown：\n{content}'
+    )
+    api_key = _get_minimax_api_key()
+    if not api_key:
+        logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping revision instruction')
+        return None
+    payload = json.dumps({
+        'model': MINIMAX_MODEL,
+        'messages': [
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_msg},
+        ],
+        'temperature': 0.45,
+        'max_tokens': 16000,
+    }).encode('utf-8')
+    req = Request(
+        MINIMAX_API_URL,
+        data=payload,
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}',
+        },
+    )
+    try:
+        with urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return (data['choices'][0]['message']['content'] or '').strip() or None
+    except Exception as e:
+        logger.warning('LLM revision failed: %s', e)
+        return None
 
 
 def _save_draft_illustrations(draft_id: str, files) -> list[dict]:
@@ -1122,7 +1192,7 @@ def _resolve_post_filename(filename: str) -> str | None:
 
 def _save_draft(content: str, title: str, tags: str, description: str,
                 illustration_files=None, preserve_original_media: bool = False,
-                original_media=None) -> str:
+                original_media=None, revision_instruction: str = '') -> str:
     """Save draft to temp file, return draft ID."""
     os.makedirs(DRAFT_DIR, exist_ok=True)
     draft_id = hashlib.md5(f'{title}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]
@@ -1137,6 +1207,7 @@ def _save_draft(content: str, title: str, tags: str, description: str,
             'inserted_images': inserted_images,
             'preserve_original_media': preserve_original_media,
             'original_media': original_media or [],
+            'revision_instruction': (revision_instruction or '').strip(),
         }, f, ensure_ascii=False)
     return draft_id
 
@@ -1259,6 +1330,7 @@ def upload():
         content_format = request.form.get('content_format', '').strip()
         markdown_content = request.form.get('content', '').strip()
         rich_content = request.form.get('rich_content', '').strip()
+        revision_instruction = request.form.get('revision_instruction', '').strip()
 
         # Handle file upload
         if 'file' in request.files and request.files['file'].filename:
@@ -1284,7 +1356,7 @@ def upload():
         # Handle Markdown paste explicitly. Keep this before rich text so the
         # visible editor mode is the source of truth when both fields exist.
         elif content_format == 'markdown' and markdown_content:
-            content = markdown_content
+            content = _normalize_pasted_markdown(markdown_content, preserve_media=preserve_original_media)
             if not preserve_original_media:
                 content = _strip_markdown_media(content)
             title = extract_title(content)
@@ -1300,7 +1372,7 @@ def upload():
         # Backward-compatible paste fallback. This also saves users who typed
         # into the rich editor while the old UI still showed both editors.
         elif markdown_content:
-            content = markdown_content
+            content = _normalize_pasted_markdown(markdown_content, preserve_media=preserve_original_media)
             if not preserve_original_media:
                 content = _strip_markdown_media(content)
             title = extract_title(content)
@@ -1350,7 +1422,8 @@ def upload():
                                request.form.get('description', '').strip(),
                                request.files.getlist('illustrations'),
                                preserve_original_media=preserve_original_media,
-                               original_media=original_media)
+                               original_media=original_media,
+                               revision_instruction=revision_instruction)
         session['draft_id'] = draft_id
         return redirect(url_for('uploader.style_select'))
 
@@ -1403,6 +1476,7 @@ def generate():
     tags = draft['tags']
     description = draft['description']
     inserted_images = draft.get('inserted_images') or []
+    revision_instruction = draft.get('revision_instruction', '')
     style = request.form.get('style', 'deep-technical')
 
     if not content:
@@ -1418,6 +1492,7 @@ def generate():
         'tags': tags,
         'description': description,
         'inserted_images': inserted_images,
+        'revision_instruction': revision_instruction,
         'preserve_original_media': draft.get('preserve_original_media', False),
         'original_media': draft.get('original_media') or [],
         'style': style,
@@ -1442,6 +1517,7 @@ def _run_generate_job(job_id: str, p: dict):
     tags = p['tags']
     description = p['description']
     inserted_images = p.get('inserted_images') or []
+    revision_instruction = p.get('revision_instruction', '')
     preserve_original_media = bool(p.get('preserve_original_media'))
     original_media = p.get('original_media') or []
     style = p['style']
@@ -1454,10 +1530,12 @@ def _run_generate_job(job_id: str, p: dict):
     skill_prompt = _get_style_prompt(style)
     if skill_prompt:
         jobs.update_job(job_id, stage=f'LLM 正在以「{style}」风格重写…', progress=15)
-        rewritten = _call_llm_rewrite(content, title, skill_prompt)
+        rewritten = _call_llm_rewrite(content, title, skill_prompt, revision_instruction=revision_instruction)
         if rewritten:
             content = rewritten
             jobs.append_message(job_id, 'info', f'已使用 LLM 技能重写内容（风格：{style}）。')
+            if revision_instruction:
+                jobs.append_message(job_id, 'info', '已根据「修改建议简述」调整文章。')
         else:
             jobs.append_message(job_id, 'warning', 'LLM 重写失败，将使用原始内容。')
 
@@ -2034,7 +2112,21 @@ def edit_article(filename):
     admin_filename = _article_admin_filename(actual_filename)
 
     if request.method == 'POST':
-        post_markdown = _build_post_markdown(request.form)
+        form_data = request.form.copy()
+        revision_instruction = form_data.get('revision_instruction', '').strip()
+        if revision_instruction:
+            revised_body = _apply_revision_instruction(
+                form_data.get('body', ''),
+                form_data.get('title', filename).strip() or filename,
+                revision_instruction,
+                form_data.get('layout', ''),
+            )
+            if revised_body:
+                form_data['body'] = revised_body
+                flash('已根据修改建议简述完成正文调整。', 'success')
+            else:
+                flash('修改建议未能自动应用，已保存当前正文。', 'warning')
+        post_markdown = _build_post_markdown(form_data)
         with open(fpath, 'w', encoding='utf-8') as f:
             f.write(post_markdown)
         if request.form.get('save_mode') == 'sync':
