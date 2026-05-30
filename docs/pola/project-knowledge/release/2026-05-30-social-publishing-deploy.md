@@ -44,10 +44,19 @@
 
 ## 发布后验证
 
-- `systemctl is-active polazj.service`。
-- `GET https://aipd.me/PolaZhenjing/admin/social/` 未登录返回登录流程。
-- 云端 `curl https://api.ipify.org` 获取固定出口 IP。
-- 云端调用微信 token 接口：若白名单未配置，记录微信返回的 IP；加入白名单后重试。
+- `systemctl is-active polazj.service`：active。
+- `GET https://aipd.me/PolaZhenjing/admin/social/` 未登录返回 302 到 `/PolaZhenjing/admin/login`。
+- 云端出口 IP：`42.121.164.11`。
+- 云端调用微信 token 接口：配置读取成功，但微信返回 `42.121.164.11` 不在公众号接口 IP 白名单。
+
+## 发布结果
+
+- GitHub：`main` 已推送到 `3df5bcf feat: 新增文章多平台发布中心`。
+- 云服务器：因 `/PolaZhenjing` 存在既有未提交改动，本次未执行 `git pull`；采用 rsync 精确同步发布中心相关文件。
+- 备份：
+  - 文件备份：`/opt/backups/polazj-social-publish-20260530213433`
+  - 环境变量备份：`/opt/backups/polazj-env-before-wechat-20260530213519`
+- 阻塞项：需在微信公众平台将 `42.121.164.11` 加入 IP 白名单后，再重试 token 和草稿接口。
 
 ## 回滚方案
 

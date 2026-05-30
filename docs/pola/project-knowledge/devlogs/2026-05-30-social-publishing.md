@@ -31,6 +31,11 @@
 - Flask test client：`/admin/social/` 和 `/admin/social/articles/<filename>` 均返回 200，发布提交/查询按钮模板渲染通过。
 - 本地开发服务 smoke：`http://127.0.0.1:5057/admin/social/` 未登录时返回 302 到 `/admin/login`。
 - 微信 token 调用：本地配置已读取成功，但微信返回当前出口 IP `122.214.242.68` 不在公众号接口 IP 白名单内；需到微信公众平台后台添加该 IP 后再重试。
+- Git：已提交 `3df5bcf feat: 新增文章多平台发布中心` 并推送到 `origin/main`。
+- 云端部署：服务器 `/PolaZhenjing` 存在既有未提交改动，未执行 `git pull`，改用精确 rsync 发布本次相关文件；覆盖前备份到 `/opt/backups/polazj-social-publish-20260530213433`。
+- 云端配置：已写入 `/PolaZhenjing/.env`，原 `.env` 备份到 `/opt/backups/polazj-env-before-wechat-20260530213519`。
+- 云端验证：`tests/test_social_publish.py` 4 passed，`polazj.service` active，线上 `/PolaZhenjing/admin/social/` 未登录返回 302 到 `/PolaZhenjing/admin/login`。
+- 云端出口 IP：`42.121.164.11`；微信 token 调用返回该 IP 不在公众号白名单，需要添加后重试。
 
 ## 风险
 
