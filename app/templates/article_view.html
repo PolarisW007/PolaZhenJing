@@ -58,6 +58,7 @@
   <div class="article-topbar-right">
     {% if can_manage %}
     <a href="{{ url_for('uploader.edit_article', filename=filename) }}" class="btn-ghost" style="font-size: 0.8rem; color: var(--gold-primary);">编辑</a>
+    <a href="{{ url_for('social_publish.article', filename=filename) }}" class="btn-ghost" style="font-size: 0.8rem; color: var(--gold-primary);">同步发布</a>
     {% endif %}
     <a href="{{ pages_url }}" target="_blank" rel="noopener" class="btn-ghost" style="font-size: 0.8rem; color: var(--gold-primary);">查看 ↗</a>
   </div>
@@ -129,6 +130,7 @@
   <div class="article-bottom-bar">
     {% if can_manage %}
     <a href="{{ url_for('uploader.edit_article', filename=filename) }}" class="btn-ghost" style="font-size: 0.8rem;">编辑文章</a>
+    <a href="{{ url_for('social_publish.article', filename=filename) }}" class="btn-ghost" style="font-size: 0.8rem;">同步发布</a>
     {% endif %}
     <a href="{{ pages_url }}" target="_blank" rel="noopener" class="btn-gold btn-sm" style="font-size: 0.8rem;">查看文章页 ↗</a>
     {% if can_manage %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}发布中{% endblock %}
+{% block card_class %}card-wide{% endblock %}
+{% block content %}
+<h2 id="page-title">正在同步发布</h2>
+
+<p style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+  任务号：<span style="color:var(--gold-primary); font-family:monospace;">{{ job_id }}</span>
+</p>
+
+<div style="font-size:1rem; color:var(--text-secondary); margin-bottom:0.75rem; text-align:center;" id="stage-text">
+  {{ job.stage or '排队中…' }}
+</div>
+
+<div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin-bottom:0.5rem;">
+  <div id="progress-bar" style="height:100%; width:{{ job.progress or 0 }}%; background:linear-gradient(90deg, #f4a261, #e8c547); transition:width 0.6s ease; border-radius:4px;"></div>
+</div>
+<div style="text-align:right; font-size:0.75rem; color:var(--text-muted);" id="progress-pct">{{ job.progress or 0 }}%</div>
+
+<div id="messages" style="margin-top:1.5rem;"></div>
+
+<div id="actions" style="margin-top:1.5rem; display:none; justify-content:center; gap:0.75rem;">
+  <a href="{{ url_for('social_publish.index') }}" class="btn-gold btn-sm">返回发布中心 →</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var progressUrl = {{ url_for('social_publish.job_progress', job_id=job_id)|tojson }};
+  var $bar = document.getElementById('progress-bar');
+  var $pct = document.getElementById('progress-pct');
+  var $stage = document.getElementById('stage-text');
+  var $title = document.getElementById('page-title');
+  var $msgs = document.getElementById('messages');
+  var $actions = document.getElementById('actions');
+
+  function renderMessages(msgs) {
+    $msgs.innerHTML = '';
+    (msgs || []).forEach(function(m) {
+      var div = document.createElement('div');
+      div.className = 'flash flash-' + (m.level || 'info');
+      div.textContent = m.text;
+      $msgs.appendChild(div);
+    });
+  }
+
+  function poll() {
+    fetch(progressUrl, {credentials: 'same-origin'})
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (typeof data.progress === 'number') {
+          $bar.style.width = data.progress + '%';
+          $pct.textContent = data.progress + '%';
+        }
+        if (data.stage) $stage.textContent = data.stage;
+        renderMessages(data.messages);
+        if (data.status === 'done') {
+          $title.textContent = '同步完成';
+          $stage.textContent = '已完成';
+          $actions.style.display = 'flex';
+          setTimeout(function() { window.location.href = data.social_url; }, 1600);
+          return;
+        }
+        if (data.status === 'failed') {
+          $title.textContent = '同步失败';
+          $stage.textContent = data.error || '未知错误';
+          $stage.style.color = '#ff6b6b';
+          $bar.style.background = '#e63946';
+          $actions.style.display = 'flex';
+          return;
+        }
+        setTimeout(poll, 2000);
+      })
+      .catch(function() {
+        setTimeout(poll, 4000);
+      });
+  }
+
+  poll();
+})();
+</script>
+{% endblock %}

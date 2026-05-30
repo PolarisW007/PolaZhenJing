@@ -127,15 +127,19 @@ def create_app():
     # Initialize async jobs table
     from . import jobs
     jobs.init_schema()
+    from .social_publish import init_schema as init_social_publish_schema
+    init_social_publish_schema()
 
     # Register blueprints
     from .auth import auth_bp
     from .uploader import public_articles_bp, uploader_bp
+    from .social_publish import social_publish_bp
     from .skillhub import skillhub_bp
     from .agent import agent_admin_bp, agent_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(public_articles_bp)
     app.register_blueprint(uploader_bp)
+    app.register_blueprint(social_publish_bp)
     app.register_blueprint(skillhub_bp)
     app.register_blueprint(agent_bp)
     app.register_blueprint(agent_admin_bp)

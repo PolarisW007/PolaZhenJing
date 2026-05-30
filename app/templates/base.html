@@ -273,6 +273,7 @@
       {% if session.get('user_id') %}
       <li><a href="{{ url_for('uploader.upload') }}">上传</a></li>
       <li><a href="{{ url_for('uploader.articles') }}">文章</a></li>
+      <li><a href="{{ url_for('social_publish.index') }}">发布</a></li>
       <li><a href="{{ url_for('skillhub.index') }}">Skills</a></li>
       <li><a href="{{ url_for('agent_admin.memory_workbench') }}">小王记忆</a></li>
       <li><a href="{{ url_for('uploader.theme_select_page') }}">主题</a></li>

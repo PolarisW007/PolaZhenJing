@@ -19,6 +19,7 @@ data/uploads/
 
 # Environment
 .env
+.env.bak-*
 *.env.local
 
 # IDE

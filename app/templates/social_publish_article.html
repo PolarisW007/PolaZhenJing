@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}同步发布{% endblock %}
+{% block card_class %}card-full{% endblock %}
+{% block content %}
+<h2>同步发布</h2>
+
+<div class="action-bar">
+  <a href="{{ url_for('uploader.view_article', filename=ctx.admin_filename) }}" class="btn-ghost">返回文章</a>
+  <a href="{{ url_for('social_publish.index') }}" class="btn-ghost">发布中心</a>
+  <a href="{{ ctx.public_url }}" target="_blank" rel="noopener" class="btn-ghost">公开页 ↗</a>
+</div>
+
+<section class="publish-head">
+  <div>
+    <div class="publish-kicker">{{ ctx.meta.get('date', '') }}</div>
+    <h3>{{ ctx.title }}</h3>
+    <p>{{ ctx.description }}</p>
+  </div>
+  {% if ctx.cover_url %}
+  <img src="{{ ctx.cover_url }}" alt="{{ ctx.title }}">
+  {% endif %}
+</section>
+
+<div class="publish-grid">
+  <section class="publish-panel">
+    <div class="publish-panel-head">
+      <h3>微信公众号</h3>
+      {% set wechat_latest = latest.get('wechat_mp') %}
+      <span class="style-badge">{{ wechat_latest.status if wechat_latest else '未处理' }}</span>
+    </div>
+    <p>{{ platforms.wechat_mp.hint }}</p>
+    {% if wechat_config.configured %}
+    <form method="POST" action="{{ url_for('social_publish.wechat_draft', filename=ctx.admin_filename) }}">
+      <button type="submit" class="btn-gold btn-sm">同步到草稿箱</button>
+    </form>
+    <div class="form-help">当前 AppID 尾号：{{ wechat_config.app_id_tail }}。发布前请在公众号后台检查排版。</div>
+    {% else %}
+    <div class="flash flash-warning">未配置：{{ wechat_config.missing | join(', ') }}。配置后需把服务器 IP 加入公众号后台白名单。</div>
+    <form method="POST" action="{{ url_for('social_publish.wechat_draft', filename=ctx.admin_filename) }}">
+      <button type="submit" class="btn-ghost">记录未配置状态</button>
+    </form>
+    {% endif %}
+    {% if wechat_latest and wechat_latest.external_id %}
+    <div class="form-help">草稿 media_id：<code>{{ wechat_latest.external_id }}</code></div>
+    {% endif %}
+    {% if wechat_latest and wechat_latest.status == 'draft_created' %}
+    <form method="POST" action="{{ url_for('social_publish.wechat_publish', publication_id=wechat_latest.id) }}" style="margin-top:0.75rem;" onsubmit="return confirm('确认提交微信公众号发布？提交后仍可能需要等待平台处理。')">
+      <button type="submit" class="btn-ghost">确认发布</button>
+    </form>
+    {% endif %}
+    {% if wechat_latest and wechat_latest.status in ['publish_submitted', 'publish_checked'] or (wechat_latest and wechat_latest.status and wechat_latest.status.startswith('publish_status_')) %}
+    <form method="POST" action="{{ url_for('social_publish.wechat_check', publication_id=wechat_latest.id) }}" style="margin-top:0.75rem;">
+      <button type="submit" class="btn-ghost">查询发布状态</button>
+    </form>
+    {% endif %}
+    {% if wechat_latest and wechat_latest.external_url %}
+    <div class="form-help">公众号文章：<a href="{{ wechat_latest.external_url }}" target="_blank" rel="noopener">{{ wechat_latest.external_url }}</a></div>
+    {% endif %}
+  </section>
+
+  {% for platform in ['xiaohongshu', 'toutiao'] %}
+  {% set item = latest.get(platform) %}
+  {% set package = item.payload if item and item.payload else packages.get(platform) %}
+  <section class="publish-panel">
+    <div class="publish-panel-head">
+      <h3>{{ platforms[platform].name }}</h3>
+      <span class="style-badge">{{ item.status if item else '未处理' }}</span>
+    </div>
+    <p>{{ platforms[platform].hint }}</p>
+    <form method="POST" action="{{ url_for('social_publish.create_package', filename=ctx.admin_filename, platform=platform) }}">
+      <button type="submit" class="btn-gold btn-sm">生成发布包</button>
+      {% if package.console_url %}
+      <a href="{{ package.console_url }}" target="_blank" rel="noopener" class="btn-ghost">打开后台 ↗</a>
+      {% endif %}
+    </form>
+    {% if package %}
+    <div class="package-box">
+      <label>标题</label>
+      <input class="form-input" value="{{ package.title }}" readonly onclick="this.select()">
+      <label>摘要</label>
+      <textarea class="form-input compact" readonly onclick="this.select()">{{ package.description }}</textarea>
+      <label>正文</label>
+      <textarea class="form-input package-body" readonly onclick="this.select()">{{ package.body }}</textarea>
+      {% if package.tags %}
+      <div class="form-help">标签：{{ package.tags | join('、') }}</div>
+      {% endif %}
+      {% if package.cover %}
+      <div class="form-help">封面：{{ package.cover }}</div>
+      {% endif %}
+      {% if package.checklist %}
+      <ul class="publish-checklist">
+        {% for step in package.checklist %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if item %}
+    <form method="POST" action="{{ url_for('social_publish.manual_url', publication_id=item.id) }}" class="manual-url-form">
+      <input type="hidden" name="filename" value="{{ ctx.admin_filename }}">
+      <input class="form-input" type="url" name="external_url" placeholder="粘贴发布后的平台链接" value="{{ item.external_url or '' }}">
+      <button type="submit" class="btn-ghost">记录链接</button>
+    </form>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+
+{% if events %}
+<h3 class="subhead">最近事件</h3>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>平台</th><th>事件</th><th>说明</th><th>时间</th></tr></thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{ platforms[event.platform].name if event.platform in platforms else event.platform }}</td>
+        <td>{{ event.event_type }}</td>
+        <td>{{ event.message }}</td>
+        <td>{{ event.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<style>
+  .publish-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    background: rgba(255,255,255,0.03);
+  }
+  .publish-head h3 { color: var(--text-primary); margin: 0.25rem 0 0.5rem; font-size: 1.2rem; }
+  .publish-head p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; }
+  .publish-head img { width: 180px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
+  .publish-kicker { color: var(--gold-primary); font-size: 0.75rem; }
+  .publish-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .publish-panel {
+    border: 1px solid var(--text-ghost);
+    border-radius: 10px;
+    padding: 1rem;
+    background: rgba(255,255,255,0.03);
+  }
+  .publish-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .publish-panel h3 { color: var(--text-primary); font-size: 1rem; margin: 0; }
+  .publish-panel p { color: var(--text-muted); font-size: 0.8rem; line-height: 1.6; margin-bottom: 0.85rem; }
+  .package-box { margin-top: 1rem; display: grid; gap: 0.65rem; }
+  .package-box label { color: var(--text-muted); font-size: 0.72rem; }
+  textarea.compact { min-height: 72px; }
+  .package-body { min-height: 220px; font-size: 0.8rem; }
+  .publish-checklist { color: var(--text-muted); padding-left: 1.2rem; font-size: 0.78rem; line-height: 1.7; }
+  .manual-url-form { display: grid; gap: 0.65rem; margin-top: 1rem; }
+  .subhead { color: var(--text-primary); font-size: 1rem; margin: 1.5rem 0 0.75rem; }
+  @media (max-width: 900px) {
+    .publish-grid { grid-template-columns: 1fr; }
+    .publish-head { grid-template-columns: 1fr; }
+    .publish-head img { width: 100%; }
+  }
+</style>
+{% endblock %}

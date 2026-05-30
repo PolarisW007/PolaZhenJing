@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}发布中心{% endblock %}
+{% block card_class %}card-full{% endblock %}
+{% block content %}
+<h2>多平台发布中心</h2>
+
+<div class="action-bar">
+  <a href="{{ url_for('uploader.articles') }}" class="btn-ghost">返回文章</a>
+  <a href="{{ url_for('uploader.upload') }}" class="btn-gold btn-sm">+ 新建文章</a>
+</div>
+
+{% if posts %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>文章</th>
+        <th>微信</th>
+        <th>小红书</th>
+        <th>今日头条</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for post in posts %}
+      {% set latest = all_latest.get(post.filename, {}) %}
+      <tr>
+        <td>
+          <a href="{{ url_for('uploader.view_article', filename=post.admin_filename or post.filename) }}">{{ post.title }}</a>
+          <div style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem;">{{ post.date or '' }}</div>
+        </td>
+        {% for platform in ['wechat_mp', 'xiaohongshu', 'toutiao'] %}
+        {% set item = latest.get(platform) %}
+        <td>
+          {% if item %}
+          <span class="style-badge">{{ item.status }}</span>
+          {% else %}
+          <span style="color:var(--text-muted); font-size:0.8rem;">未处理</span>
+          {% endif %}
+        </td>
+        {% endfor %}
+        <td>
+          <a class="btn-ghost" href="{{ url_for('social_publish.article', filename=post.admin_filename or post.filename) }}">发布</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p style="text-align:center; color:var(--text-muted);">暂无文章。</p>
+{% endif %}
+{% endblock %}
