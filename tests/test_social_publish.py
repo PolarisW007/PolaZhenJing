@@ -3,7 +3,9 @@ import sqlite3
 from app import social_publish
 from app.social_publish import (build_manual_package, build_wechat_html,
                                 summarize_wechat_publish_result,
-                                _wechat_clamp_text)
+                                _wechat_content_source_url,
+                                _wechat_clamp_text,
+                                _wechat_uploadable_image)
 
 
 def sample_context():
@@ -83,3 +85,22 @@ def test_wechat_clamp_text_limits_utf8_bytes():
 
     assert len(result.encode("utf-8")) <= 54
     assert result
+
+
+def test_wechat_uploadable_image_accepts_png(tmp_path):
+    path = tmp_path / "cover.png"
+    path.write_bytes(b"not-real-but-extension-is-ok")
+
+    upload_path, temporary = _wechat_uploadable_image(path)
+
+    assert upload_path == path
+    assert temporary is False
+
+
+def test_wechat_content_source_url_skips_localhost():
+    ctx = {
+        "public_url": "http://localhost/articles/demo.md",
+        "pages_url": "https://polarisw007.github.io/PolaZhenJing/demo/",
+    }
+
+    assert _wechat_content_source_url(ctx) == ctx["pages_url"]

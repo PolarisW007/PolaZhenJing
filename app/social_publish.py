@@ -11,10 +11,12 @@ import json
 import os
 import re
 import sqlite3
+import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import markdown as md_lib
 import requests
@@ -428,7 +430,8 @@ def _wechat_post_json(path: str, payload: dict) -> dict:
     resp = requests.post(
         f"https://api.weixin.qq.com/cgi-bin/{path}",
         params={"access_token": token},
-        json=payload,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json; charset=utf-8"},
         timeout=20,
     )
     data = resp.json()
@@ -466,6 +469,39 @@ def summarize_wechat_publish_result(data: dict[str, Any]) -> dict[str, str]:
     return {"status": status, "article_url": article_url}
 
 
+def _wechat_content_source_url(ctx: dict[str, Any]) -> str:
+    for key in ("public_url", "pages_url"):
+        value = (ctx.get(key) or "").strip()
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            continue
+        if parsed.hostname in {"localhost", "127.0.0.1", "::1"}:
+            continue
+        return value
+    return ""
+
+
+def _wechat_uploadable_image(path: Path) -> tuple[Path, bool]:
+    """Return a WeChat-compatible image path, converting raster formats if needed."""
+    suffix = path.suffix.lower()
+    if suffix in {".jpg", ".jpeg", ".png", ".gif"}:
+        return path, False
+    try:
+        from PIL import Image
+    except Exception as exc:
+        raise RuntimeError(f"微信不支持该图片格式且 Pillow 不可用：{path.name}") from exc
+    try:
+        with Image.open(path) as image:
+            image.load()
+            converted = image.convert("RGB")
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+            tmp.close()
+            converted.save(tmp.name, format="PNG")
+            return Path(tmp.name), True
+    except Exception as exc:
+        raise RuntimeError(f"微信不支持该图片格式且无法转换：{path.name}") from exc
+
+
 def _wechat_upload_image(path: Path, *, permanent: bool) -> dict:
     token = _wechat_access_token()
     if permanent:
@@ -474,8 +510,16 @@ def _wechat_upload_image(path: Path, *, permanent: bool) -> dict:
     else:
         url = "https://api.weixin.qq.com/cgi-bin/media/uploadimg"
         params = {"access_token": token}
-    with path.open("rb") as f:
-        resp = requests.post(url, params=params, files={"media": f}, timeout=60)
+    upload_path, temporary = _wechat_uploadable_image(path)
+    try:
+        with upload_path.open("rb") as f:
+            resp = requests.post(url, params=params, files={"media": f}, timeout=60)
+    finally:
+        if temporary:
+            try:
+                upload_path.unlink(missing_ok=True)
+            except Exception:
+                pass
     data = resp.json()
     if data.get("errcode"):
         raise RuntimeError(data.get("errmsg") or f"WeChat upload error {data.get('errcode')}")
@@ -515,9 +559,12 @@ def _create_wechat_draft(ctx: dict[str, Any]) -> dict[str, Any]:
         local_path = _asset_local_path(src)
         if not local_path:
             continue
-        data = _wechat_upload_image(local_path, permanent=False)
-        if data.get("url"):
-            replacements[src] = data["url"]
+        try:
+            data = _wechat_upload_image(local_path, permanent=False)
+            if data.get("url"):
+                replacements[src] = data["url"]
+        except RuntimeError:
+            continue
 
     content_html = build_wechat_html(ctx, replacements)
     digest = _wechat_clamp_text(
@@ -530,7 +577,7 @@ def _create_wechat_draft(ctx: dict[str, Any]) -> dict[str, Any]:
                 "title": _wechat_clamp_text(ctx["title"], 64),
                 "digest": digest,
                 "content": content_html,
-                "content_source_url": ctx.get("public_url") or ctx.get("pages_url") or "",
+                "content_source_url": _wechat_content_source_url(ctx),
                 "thumb_media_id": thumb_media_id,
                 "need_open_comment": 1,
                 "only_fans_can_comment": 0,
