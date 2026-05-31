@@ -307,6 +307,20 @@ def _plain_text(markdown_text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _wechat_clamp_text(value: str, max_bytes: int) -> str:
+    """Clamp text by UTF-8 bytes for strict WeChat draft fields."""
+    value = re.sub(r"\s+", " ", value or "").strip()
+    out = []
+    used = 0
+    for ch in value:
+        size = len(ch.encode("utf-8"))
+        if used + size > max_bytes:
+            break
+        out.append(ch)
+        used += size
+    return "".join(out).rstrip()
+
+
 def _first_markdown_image(markdown_text: str) -> str:
     match = re.search(r"!\[[^\]]*\]\(([^)]+)\)", markdown_text or "")
     return match.group(1).strip() if match else ""
@@ -506,12 +520,14 @@ def _create_wechat_draft(ctx: dict[str, Any]) -> dict[str, Any]:
             replacements[src] = data["url"]
 
     content_html = build_wechat_html(ctx, replacements)
-    digest = (ctx.get("description") or ctx.get("summary") or ctx["plain_body"][:120])[:120]
+    digest = _wechat_clamp_text(
+        ctx.get("description") or ctx.get("summary") or ctx["plain_body"],
+        54,
+    )
     payload = {
         "articles": [
             {
-                "title": ctx["title"][:64],
-                "author": "炽驹 Polaris",
+                "title": _wechat_clamp_text(ctx["title"], 64),
                 "digest": digest,
                 "content": content_html,
                 "content_source_url": ctx.get("public_url") or ctx.get("pages_url") or "",

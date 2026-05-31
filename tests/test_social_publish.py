@@ -2,7 +2,8 @@ import sqlite3
 
 from app import social_publish
 from app.social_publish import (build_manual_package, build_wechat_html,
-                                summarize_wechat_publish_result)
+                                summarize_wechat_publish_result,
+                                _wechat_clamp_text)
 
 
 def sample_context():
@@ -74,3 +75,11 @@ def test_summarize_wechat_publish_result_extracts_article_url():
 
     assert result["status"] == "published"
     assert result["article_url"] == "https://mp.weixin.qq.com/s/demo"
+
+
+def test_wechat_clamp_text_limits_utf8_bytes():
+    text = "中文" * 80
+    result = _wechat_clamp_text(text, 54)
+
+    assert len(result.encode("utf-8")) <= 54
+    assert result

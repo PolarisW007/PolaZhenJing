@@ -36,6 +36,10 @@
 - 云端配置：已写入 `/PolaZhenjing/.env`，原 `.env` 备份到 `/opt/backups/polazj-env-before-wechat-20260530213519`。
 - 云端验证：`tests/test_social_publish.py` 4 passed，`polazj.service` active，线上 `/PolaZhenjing/admin/social/` 未登录返回 302 到 `/PolaZhenjing/admin/login`。
 - 云端出口 IP：`42.121.164.11`；微信 token 调用返回该 IP 不在公众号白名单，需要添加后重试。
+- 2026-05-31 白名单更新后：云端 `access_token` 获取成功；首次草稿创建打到微信接口，但返回 `description size out of limit`，需将微信草稿摘要按 UTF-8 字节限制截断后重试。
+- 2026-05-31 摘要按 120 字节截断后微信仍返回 `description size out of limit`；继续收紧到 54 字节安全长度。
+- 2026-05-31 摘要限制通过后，微信返回 `author size out of limit`；作者字段为可选项，改为不传，由公众号后台默认处理。
+- 2026-05-31 云端重试成功：最新文章 `2026-05-31-claude-code-claude-md-20260531.md` 已创建微信公众号草稿，发布记录 `publication_id=4`，正文图片上传 `6` 张。
 
 ## 风险
 
