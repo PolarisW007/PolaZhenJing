@@ -2,10 +2,12 @@ import sqlite3
 
 from app import social_publish
 from app.social_publish import (build_manual_package, build_wechat_html,
+                                build_x_post_text,
                                 summarize_wechat_publish_result,
                                 _wechat_content_source_url,
                                 _wechat_clamp_text,
-                                _wechat_uploadable_image)
+                                _wechat_uploadable_image,
+                                _x_config_status)
 
 
 def sample_context():
@@ -104,3 +106,23 @@ def test_wechat_content_source_url_skips_localhost():
     }
 
     assert _wechat_content_source_url(ctx) == ctx["pages_url"]
+
+
+def test_build_x_post_text_keeps_within_limit():
+    ctx = sample_context()
+    ctx["description"] = "这是一段很长的摘要。" * 80
+
+    text = build_x_post_text(ctx)
+
+    assert len(text) <= 280
+    assert ctx["title"] in text
+    assert ctx["public_url"] in text
+
+
+def test_x_config_status_reads_env(monkeypatch):
+    monkeypatch.setenv("X_USER_ACCESS_TOKEN", "x-user-token-demo")
+
+    status = _x_config_status()
+
+    assert status["configured"] is True
+    assert status["token_tail"] == "n-demo"

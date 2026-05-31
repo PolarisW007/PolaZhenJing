@@ -20,6 +20,7 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 - Blueprints：
   - `app/auth.py`：登录、注册、邮箱验证、密码修改、账户管理、`/admin/api/me`。
   - `app/uploader.py`：文章上传、生成、编辑、列表、展示。
+  - `app/social_publish.py`：文章多平台发布中心，复用 `_posts` 解析、`jobs` 异步任务和 SQLite 发布记录；微信公众号和 X 使用官方 API，未接官方 API 的平台生成人工发布包。
   - `app/skillhub.py`：Skill 列表、上传、GitHub 导入、下载。
   - `app/agent.py`：超级小王 Agent API、记忆库查询。
 - 运行方式：服务器 `/PolaZhenjing/.venv/bin/gunicorn`，systemd 服务 `polazj.service`，监听 `127.0.0.1:5000`。
@@ -36,6 +37,7 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 
 - 当前主数据库：`data/wiki.db` SQLite，WAL 模式。
 - 当前 `users` 表字段：`id`、`username`、`email`、`password_hash`、`email_verified`、`created_at`、`nickname`、`avatar_url`、`role`。
+- 发布中心状态表：`social_publications` 和 `social_publication_events`，记录每篇文章在各平台的状态、外部 ID/URL、payload、错误和事件轨迹；第三方 token 不写入表内。
 - 头像文件：`assets/avatars/`，URL 为 `/PolaZhenjing/assets/avatars/<file>`。
 - 当前权限：`user_payload()` 以 role 生成基础权限列表，admin 用户扩展管理权限。
 
@@ -58,4 +60,3 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 - 不一次性强迁移所有应用账号，优先兼容现有本地 token/session。
 - 跨应用权限必须由服务端校验，不能只依赖前端隐藏入口。
 - 头像、昵称、主题、字体等用户基础资料必须以统一账号服务为准。
-

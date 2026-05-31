@@ -58,6 +58,36 @@
     {% endif %}
   </section>
 
+  <section class="publish-panel">
+    <div class="publish-panel-head">
+      <h3>X</h3>
+      {% set x_latest = latest.get('x') %}
+      <span class="style-badge">{{ x_latest.status if x_latest else '未处理' }}</span>
+    </div>
+    <p>{{ platforms.x.hint }}</p>
+    {% if x_config.configured %}
+    <form method="POST" action="{{ url_for('social_publish.x_post', filename=ctx.admin_filename) }}" onsubmit="return confirm('确认发布到 X？系统会避免同一篇文章重复发布。')">
+      <button type="submit" class="btn-gold btn-sm">发布到 X</button>
+      <a href="{{ platforms.x.console_url }}" target="_blank" rel="noopener" class="btn-ghost">开发者后台 ↗</a>
+    </form>
+    <div class="form-help">当前 X token 尾号：{{ x_config.token_tail }}。发帖会优先带封面图。</div>
+    {% else %}
+    <div class="flash flash-warning">未配置：{{ x_config.missing | join(', ') }}。需要在服务端环境变量写入 X OAuth 用户访问令牌。</div>
+    <form method="POST" action="{{ url_for('social_publish.x_post', filename=ctx.admin_filename) }}">
+      <button type="submit" class="btn-ghost">记录未配置状态</button>
+    </form>
+    {% endif %}
+    {% if x_latest and x_latest.payload and x_latest.payload.get('x') %}
+    <div class="package-box">
+      <label>X 文案</label>
+      <textarea class="form-input compact" readonly onclick="this.select()">{{ x_latest.payload.x.text }}</textarea>
+    </div>
+    {% endif %}
+    {% if x_latest and x_latest.external_url %}
+    <div class="form-help">X 链接：<a href="{{ x_latest.external_url }}" target="_blank" rel="noopener">{{ x_latest.external_url }}</a></div>
+    {% endif %}
+  </section>
+
   {% for platform in ['xiaohongshu', 'toutiao'] %}
   {% set item = latest.get(platform) %}
   {% set package = item.payload if item and item.payload else packages.get(platform) %}
@@ -142,7 +172,7 @@
   .publish-head p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.7; }
   .publish-head img { width: 180px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; }
   .publish-kicker { color: var(--gold-primary); font-size: 0.75rem; }
-  .publish-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .publish-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
   .publish-panel {
     border: 1px solid var(--text-ghost);
     border-radius: 10px;

@@ -16,6 +16,7 @@
       <tr>
         <th>文章</th>
         <th>微信</th>
+        <th>X</th>
         <th>小红书</th>
         <th>今日头条</th>
         <th>操作</th>
@@ -29,7 +30,7 @@
           <a href="{{ url_for('uploader.view_article', filename=post.admin_filename or post.filename) }}">{{ post.title }}</a>
           <div style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem;">{{ post.date or '' }}</div>
         </td>
-        {% for platform in ['wechat_mp', 'xiaohongshu', 'toutiao'] %}
+        {% for platform in ['wechat_mp', 'x', 'xiaohongshu', 'toutiao'] %}
         {% set item = latest.get(platform) %}
         <td>
           {% if item %}

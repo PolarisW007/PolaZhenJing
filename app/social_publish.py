@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import functools
 import json
+import mimetypes
 import os
 import re
 import sqlite3
@@ -37,11 +38,19 @@ WECHAT_TOKEN_CACHE = {
     "expires_at": 0,
 }
 
+X_POST_CHAR_LIMIT = 280
+
 PLATFORMS = {
     "wechat_mp": {
         "name": "微信公众号",
         "mode": "official_api",
         "hint": "官方 API，同步到草稿箱后再确认发布。",
+    },
+    "x": {
+        "name": "X",
+        "mode": "official_api",
+        "hint": "官方 API，发布短帖并记录 X post ID。",
+        "console_url": "https://developer.x.com/",
     },
     "xiaohongshu": {
         "name": "小红书",
@@ -255,6 +264,26 @@ def _publication_events(publication_ids: list[int]) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def _latest_successful_publication(filename: str, platform: str, statuses: set[str]) -> dict[str, Any] | None:
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM social_publications
+            WHERE filename = ? AND platform = ? AND external_id IS NOT NULL
+            ORDER BY datetime(updated_at) DESC, id DESC
+            """,
+            (filename, platform),
+        ).fetchall()
+    finally:
+        conn.close()
+    for row in rows:
+        item = _row_to_dict(row)
+        if item and item.get("status") in statuses:
+            return item
+    return None
+
+
 def _post_context(filename: str) -> dict[str, Any]:
     from .uploader import (_absolute_asset_url, _article_admin_filename,
                            _build_pages_url, _parse_post, _safe_post_path)
@@ -386,6 +415,18 @@ def _asset_local_path(src: str) -> Path | None:
     return None
 
 
+def _public_source_url(ctx: dict[str, Any]) -> str:
+    for key in ("public_url", "pages_url"):
+        value = (ctx.get(key) or "").strip()
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            continue
+        if parsed.hostname in {"localhost", "127.0.0.1", "::1"}:
+            continue
+        return value
+    return ""
+
+
 def _wechat_config_status() -> dict[str, Any]:
     app_id = os.getenv("WECHAT_MP_APP_ID", "").strip()
     app_secret = os.getenv("WECHAT_MP_APP_SECRET", "").strip()
@@ -470,15 +511,7 @@ def summarize_wechat_publish_result(data: dict[str, Any]) -> dict[str, str]:
 
 
 def _wechat_content_source_url(ctx: dict[str, Any]) -> str:
-    for key in ("public_url", "pages_url"):
-        value = (ctx.get(key) or "").strip()
-        parsed = urlparse(value)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-            continue
-        if parsed.hostname in {"localhost", "127.0.0.1", "::1"}:
-            continue
-        return value
-    return ""
+    return _public_source_url(ctx)
 
 
 def _wechat_uploadable_image(path: Path) -> tuple[Path, bool]:
@@ -618,6 +651,161 @@ def _run_wechat_draft_job(job_id: str, publication_id: int, ctx: dict[str, Any])
     jobs.update_job(job_id, status=jobs.DONE, stage="已完成", progress=100, result_filename=ctx["admin_filename"])
 
 
+def _x_config_status() -> dict[str, Any]:
+    token = os.getenv("X_USER_ACCESS_TOKEN", "").strip()
+    return {
+        "configured": bool(token),
+        "missing": [] if token else ["X_USER_ACCESS_TOKEN"],
+        "token_tail": token[-6:] if token else "",
+    }
+
+
+def build_x_post_text(ctx: dict[str, Any]) -> str:
+    title = re.sub(r"\s+", " ", ctx.get("title") or "").strip()
+    summary = re.sub(r"\s+", " ", ctx.get("description") or ctx.get("summary") or "").strip()
+    source_url = _public_source_url(ctx)
+    parts = [part for part in [title, summary, source_url] if part]
+    text = "\n\n".join(parts)
+    if len(text) <= X_POST_CHAR_LIMIT:
+        return text
+
+    fixed_parts = [part for part in [title, source_url] if part]
+    fixed_text = "\n\n".join(fixed_parts)
+    separator_size = 4 if fixed_text and summary else 0
+    budget = X_POST_CHAR_LIMIT - len(fixed_text) - separator_size
+    if budget > 1 and summary:
+        summary = summary[: max(0, budget - 1)].rstrip() + "…"
+        return "\n\n".join(part for part in [title, summary, source_url] if part)[:X_POST_CHAR_LIMIT]
+    return fixed_text[:X_POST_CHAR_LIMIT]
+
+
+def _x_bearer_headers() -> dict[str, str]:
+    token = os.getenv("X_USER_ACCESS_TOKEN", "").strip()
+    if not token:
+        raise RuntimeError("X 未配置 X_USER_ACCESS_TOKEN。")
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _x_post_json(path: str, payload: dict) -> dict:
+    resp = requests.post(
+        f"https://api.x.com/2/{path.lstrip('/')}",
+        headers={**_x_bearer_headers(), "Content-Type": "application/json"},
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        timeout=20,
+    )
+    try:
+        data = resp.json()
+    except Exception:
+        data = {}
+    if resp.status_code >= 400 or data.get("errors"):
+        message = data.get("detail") or data.get("title") or resp.text[:200] or f"X API HTTP {resp.status_code}"
+        raise RuntimeError(message)
+    return data
+
+
+def _x_upload_media(path: Path) -> str:
+    upload_path, temporary = _wechat_uploadable_image(path)
+    media_type = mimetypes.guess_type(str(upload_path))[0] or "image/png"
+    try:
+        with upload_path.open("rb") as f:
+            resp = requests.post(
+                "https://api.x.com/2/media/upload",
+                headers=_x_bearer_headers(),
+                data={"media_category": "tweet_image", "media_type": media_type},
+                files={"media": f},
+                timeout=60,
+            )
+    finally:
+        if temporary:
+            try:
+                upload_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+    try:
+        data = resp.json()
+    except Exception:
+        data = {}
+    if resp.status_code >= 400 or data.get("errors"):
+        message = data.get("detail") or data.get("title") or resp.text[:200] or f"X media upload HTTP {resp.status_code}"
+        raise RuntimeError(message)
+    media_id = str((data.get("data") or {}).get("id") or data.get("media_id") or "")
+    if not media_id:
+        raise RuntimeError("X 媒体上传成功但未返回 media id。")
+    return media_id
+
+
+def _create_x_post(ctx: dict[str, Any]) -> dict[str, Any]:
+    text = build_x_post_text(ctx)
+    if not text:
+        raise RuntimeError("没有可发布到 X 的文本内容。")
+    payload: dict[str, Any] = {"text": text}
+    uploaded_media_id = ""
+    cover_path = _asset_local_path(ctx.get("cover") or "")
+    if cover_path:
+        uploaded_media_id = _x_upload_media(cover_path)
+        payload["media"] = {"media_ids": [uploaded_media_id]}
+    data = _x_post_json("tweets", payload)
+    post = data.get("data") or {}
+    post_id = str(post.get("id") or "")
+    if not post_id:
+        raise RuntimeError("X 发帖接口未返回 post id。")
+    return {
+        "post_id": post_id,
+        "text": text,
+        "media_id": uploaded_media_id,
+        "raw": data,
+        "url": f"https://x.com/i/web/status/{post_id}",
+    }
+
+
+def _run_x_post_job(job_id: str, publication_id: int, ctx: dict[str, Any]) -> None:
+    try:
+        jobs.update_job(job_id, status=jobs.RUNNING, stage="检查 X 重复发布记录…", progress=10)
+        existing = _latest_successful_publication(ctx["filename"], "x", {"posted"})
+        if existing:
+            _update_publication(
+                publication_id,
+                status="skipped_duplicate",
+                payload={"duplicate_of": existing["id"], "external_id": existing.get("external_id")},
+                external_id=existing.get("external_id") or "",
+                external_url=existing.get("external_url") or "",
+                event_message="X 已存在成功发布记录，跳过重复发送。",
+            )
+            jobs.append_message(job_id, "info", "X 已存在成功发布记录，已跳过重复发送。")
+            jobs.update_job(job_id, status=jobs.DONE, stage="已跳过", progress=100, result_filename=ctx["admin_filename"])
+            return
+
+        jobs.update_job(job_id, stage="生成 X 文案并上传封面…", progress=35)
+        result = _create_x_post(ctx)
+        jobs.update_job(job_id, stage="写入 X 发布记录…", progress=80)
+        _update_publication(
+            publication_id,
+            status="posted",
+            payload={
+                "x": {
+                    "post_id": result["post_id"],
+                    "media_id": result["media_id"],
+                    "text": result["text"],
+                },
+                "title": ctx["title"],
+                "source_url": _public_source_url(ctx),
+            },
+            external_id=result["post_id"],
+            external_url=result["url"],
+            event_message="X post 已发布。",
+        )
+        jobs.append_message(job_id, "success", "X post 已发布。")
+        jobs.update_job(job_id, status=jobs.DONE, stage="已完成", progress=100, result_filename=ctx["admin_filename"])
+    except Exception as exc:
+        _update_publication(
+            publication_id,
+            status="failed",
+            error=str(exc),
+            event_message="X 发布失败。",
+        )
+        raise
+
+
 def _run_wechat_publish_job(job_id: str, publication_id: int, filename: str, media_id: str) -> None:
     jobs.update_job(job_id, status=jobs.RUNNING, stage="提交微信公众号发布…", progress=20)
     data = _wechat_post_json("freepublish/submit", {"media_id": media_id})
@@ -705,6 +893,7 @@ def article(filename):
         events=events,
         packages=packages,
         wechat_config=_wechat_config_status(),
+        x_config=_x_config_status(),
     )
 
 
@@ -731,6 +920,32 @@ def wechat_draft(filename):
     pub_id = _create_publication(ctx["filename"], "wechat_mp", "pending", mode="draft")
     job_id = jobs.create_job(kind="social_publish_wechat", user_id=session.get("user_id"), title=ctx["title"])
     jobs.submit(_run_wechat_draft_job, job_id, pub_id, ctx)
+    return redirect(url_for("social_publish.job_status", job_id=job_id))
+
+
+@social_publish_bp.route("/articles/<filename>/x/post", methods=["POST"])
+@login_required
+@admin_required
+def x_post(filename):
+    try:
+        ctx = _post_context(filename)
+    except FileNotFoundError:
+        flash("文章未找到。", "error")
+        return redirect(url_for("uploader.articles"))
+    if not _x_config_status()["configured"]:
+        pub_id = _create_publication(
+            ctx["filename"],
+            "x",
+            "not_configured",
+            mode="post",
+            error="缺少 X_USER_ACCESS_TOKEN。",
+        )
+        flash(f"X 未配置，已记录发布项 #{pub_id}。", "warning")
+        return redirect(url_for("social_publish.article", filename=ctx["admin_filename"]))
+
+    pub_id = _create_publication(ctx["filename"], "x", "pending", mode="post")
+    job_id = jobs.create_job(kind="social_publish_x", user_id=session.get("user_id"), title=ctx["title"])
+    jobs.submit(_run_x_post_job, job_id, pub_id, ctx)
     return redirect(url_for("social_publish.job_status", job_id=job_id))
 
 
