@@ -12,6 +12,7 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 - 管理后台：Flask Jinja 模板，主模板位于 `app/templates/base.html`，页面模板按功能拆分。
 - 统一登录态展示：根门户 `portal/assets/portal.js` 调用 `/PolaZhenjing/admin/api/me`，根据返回的昵称和头像渲染登录/注册或用户入口。
 - 样式：根门户使用黑金视觉体系，后台页面使用 `app/templates/base.html` 内联 CSS 变量与卡片式表单。
+- 后台富文本编辑器：上传页使用本地 vendor 的 TinyMCE 运行资源，路径为 `assets/vendor/tinymce/`，避免核心编辑能力依赖外部 CDN。
 
 ## 后端架构
 

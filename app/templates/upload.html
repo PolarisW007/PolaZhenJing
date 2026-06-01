@@ -32,6 +32,17 @@
     font-size: 0.8rem;
     line-height: 1.65;
   }
+  .editor-load-warning {
+    display: none;
+    margin-top: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid rgba(192,123,76,0.35);
+    border-radius: var(--radius-md);
+    color: #c07b4c;
+    background: rgba(192,123,76,0.08);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
   .compact-textarea {
     min-height: 92px !important;
     font-family: inherit !important;
@@ -186,6 +197,9 @@
       </div>
       <textarea id="rich-content" name="rich_content" class="form-input" placeholder="可以直接粘贴富文本内容，支持图片、视频、表格和链接..."></textarea>
       <textarea id="content" name="content" class="form-input" style="display:none;" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
+      <div id="editor-load-warning" class="editor-load-warning">
+        富文本编辑器资源加载失败，已自动切换为基础文本框；内容仍可正常提交。
+      </div>
       <div class="rich-editor-help">
         富文本模式支持从网页、文档和公众号后台粘贴内容；粘贴/拖入图片会先上传到服务器，再进入生成流程。
       </div>
@@ -271,8 +285,10 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="{{ url_for('serve_assets', filename='vendor/tinymce/tinymce.min.js') }}"></script>
 <script>
+const TINYMCE_BASE_URL = '{{ url_for("serve_assets", filename="vendor/tinymce") }}';
+
 function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-upload').style.display = tab === 'upload' ? 'block' : 'none';
@@ -292,6 +308,7 @@ dz.addEventListener('drop', ev => { fi.files = ev.dataTransfer.files; dt.textCon
 fi.addEventListener('change', () => { if (fi.files.length) dt.textContent = fi.files[0].name; });
 
 let richEditorReady = false;
+let richEditorFallbackShown = false;
 
 function themeVar(name, fallback) {
   return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
@@ -398,19 +415,26 @@ function uploadEditorImage(file, filename, progress) {
 }
 
 function initRichEditor() {
-  if (richEditorReady || !window.tinymce) return;
+  if (richEditorReady) return;
+  if (!window.tinymce) {
+    showEditorFallback();
+    return;
+  }
   richEditorReady = true;
   tinymce.init({
     selector: '#rich-content',
-    base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6.8.5',
+    base_url: TINYMCE_BASE_URL,
     suffix: '.min',
     skin: editorSkin(),
     content_css: false,
-    height: 420,
+    height: 480,
+    min_height: 360,
+    max_height: 720,
+    resize: true,
     menubar: false,
     branding: false,
     promotion: false,
-    plugins: 'autoresize code fullscreen image link lists media preview table wordcount',
+    plugins: 'code fullscreen image link lists media preview table wordcount',
     toolbar: [
       'undo redo | blocks bold italic underline blockquote | bullist numlist |',
       'link image media table | removeformat code fullscreen preview'
@@ -463,7 +487,23 @@ function initRichEditor() {
         }
       }
     }
+  }).catch(error => {
+    console.error('TinyMCE init failed', error);
+    richEditorReady = false;
+    showEditorFallback();
   });
+}
+
+function showEditorFallback() {
+  if (richEditorFallbackShown) return;
+  richEditorFallbackShown = true;
+  const warning = document.getElementById('editor-load-warning');
+  const rich = document.getElementById('rich-content');
+  if (warning) warning.style.display = 'block';
+  if (rich) {
+    rich.style.display = 'block';
+    rich.style.minHeight = '420px';
+  }
 }
 
 function setEditorMode(mode) {

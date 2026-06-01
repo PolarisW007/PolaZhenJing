@@ -1,6 +1,7 @@
 import sqlite3
 
 from app import social_publish
+from app import create_app
 from app.social_publish import (build_manual_package, build_wechat_html,
                                 build_x_post_text,
                                 summarize_wechat_publish_result,
@@ -126,3 +127,25 @@ def test_x_config_status_reads_env(monkeypatch):
 
     assert status["configured"] is True
     assert status["token_tail"] == "n-demo"
+
+
+def test_upload_page_uses_local_tinymce_assets():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+
+    response = client.get("/admin/upload")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "cdn.jsdelivr.net/npm/tinymce" not in body
+    assert "/assets/vendor/tinymce/tinymce.min.js" in body
+    assert "fonts.googleapis.com/css2" in body
+    assert 'rel="preload" as="style"' in body
+
+    asset_response = client.get("/assets/vendor/tinymce/tinymce.min.js")
+    assert asset_response.status_code == 200
+    assert asset_response.content_length and asset_response.content_length > 100_000
