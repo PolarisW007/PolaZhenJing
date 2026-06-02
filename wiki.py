@@ -7,13 +7,16 @@ Usage:
     python wiki.py admin          Run Flask management server
     python wiki.py new "Title"    Create a new post
     python wiki.py list           List all posts
-    python wiki.py deploy         Git add + commit + push
+    python wiki.py deploy         Safely commit article files + push
+    python wiki.py deploy --dry-run
 """
 import os
 import re
 import subprocess
 import sys
 from datetime import datetime
+
+from git_safety import GitSafetyError, guarded_commit_and_push, split_stage_candidates
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 POSTS_DIR = os.path.join(PROJECT_ROOT, '_posts')
@@ -114,19 +117,24 @@ def cmd_list():
         print(f'  [{style}] {f}')
 
 
-def cmd_deploy():
-    """Git add, commit, and push."""
+def cmd_deploy(dry_run: bool = False):
+    """Safely commit and push article changes."""
     print('[wiki] Deploying...')
-    subprocess.run(['git', 'add', '-A'], cwd=PROJECT_ROOT)
     msg = f'Update articles - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
-    subprocess.run(['git', 'commit', '-m', msg], cwd=PROJECT_ROOT)
-    result = subprocess.run(['git', 'push'], cwd=PROJECT_ROOT,
-                            capture_output=True, text=True)
-    if result.returncode == 0:
+    try:
+        allowed, denied = split_stage_candidates(PROJECT_ROOT)
+        print(f'[wiki] Allowed paths: {", ".join(allowed) if allowed else "(none)"}')
+        print(f'[wiki] Denied paths: {", ".join(denied) if denied else "(none)"}')
+        result = guarded_commit_and_push(PROJECT_ROOT, msg, dry_run=dry_run)
+    except GitSafetyError as exc:
+        print(f'[wiki] Deploy blocked: {exc}')
+        sys.exit(1)
+    if dry_run:
+        print('[wiki] Dry-run complete; no files were staged, committed, or pushed.')
+    elif result.pushed:
         print('[wiki] Pushed to remote successfully.')
     else:
-        print(f'[wiki] Push failed: {result.stderr}')
-        sys.exit(1)
+        print('[wiki] No article changes to deploy.')
 
 
 def main():
@@ -153,7 +161,7 @@ def main():
     elif command == 'list':
         cmd_list()
     elif command == 'deploy':
-        cmd_deploy()
+        cmd_deploy(dry_run='--dry-run' in sys.argv)
     else:
         print(f'[wiki] Unknown command: {command}')
         print(__doc__)

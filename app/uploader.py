@@ -22,6 +22,7 @@ from flask import (Blueprint, flash, jsonify, redirect, render_template,
 from .auth import login_required
 from .converter import (_clean_markdown_formatting, detect_and_convert, extract_title,
                         fetch_url_as_markdown, URLFetchBlocked)
+from git_safety import GitSafetyError, guarded_commit_and_push
 from . import jobs
 
 logger = logging.getLogger(__name__)
@@ -1507,7 +1508,7 @@ def generate():
 
 
 def _run_generate_job(job_id: str, p: dict):
-    """Background worker: LLM rewrite → build post → write file → git push.
+    """Background worker: LLM rewrite → build post → write file → safe git sync.
 
     Runs in a daemon thread, owns no Flask context, updates job state via
     the `jobs` module for the polling UI.
@@ -1643,20 +1644,20 @@ tags: [{', '.join(tag_list)}]"""
     # Auto-sync to GitHub
     jobs.update_job(job_id, stage='正在同步到 GitHub…', progress=85)
     try:
-        subprocess.run(['git', 'add', '-A'], cwd=project_root,
-                       capture_output=True, timeout=30)
         commit_msg = f'Add article: {title} - {date_str}'
-        subprocess.run(['git', 'commit', '-m', commit_msg], cwd=project_root,
-                       capture_output=True, timeout=30)
-        push_result = subprocess.run(
-            ['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
-            capture_output=True, timeout=120, text=True)
-        if push_result.returncode == 0:
+        deploy_result = guarded_commit_and_push(
+            project_root,
+            commit_msg,
+            push_args=['push', '-u', 'origin', 'main'],
+        )
+        if deploy_result.pushed:
             jobs.append_message(job_id, 'success',
                                 f'文章「{title}」已以 {style} 风格创建，并已同步到 GitHub。')
         else:
-            jobs.append_message(job_id, 'warning',
-                                f'文章「{title}」已创建，但推送失败：{push_result.stderr}')
+            jobs.append_message(job_id, 'info',
+                                f'文章「{title}」已创建，无需同步新的文章文件。')
+    except GitSafetyError as e:
+        jobs.append_message(job_id, 'warning', f'文章「{title}」已创建，但同步被安全规则阻止：{e}')
     except Exception as e:
         jobs.append_message(job_id, 'warning', f'文章「{title}」已创建，但同步出错：{e}')
 
@@ -2194,20 +2195,21 @@ def delete_article(filename):
 @uploader_bp.route('/sync', methods=['POST'])
 @login_required
 def sync():
-    """Git add + commit + push to deploy."""
+    """Safely commit article assets and push to deploy."""
     project_root = os.path.join(os.path.dirname(__file__), '..')
     try:
-        subprocess.run(['git', 'add', '-A'], cwd=project_root,
-                       capture_output=True, timeout=30)
         msg = f'Update articles - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
-        subprocess.run(['git', 'commit', '-m', msg], cwd=project_root,
-                       capture_output=True, timeout=30)
-        result = subprocess.run(['git', 'push', '-u', 'origin', 'main'], cwd=project_root,
-                                capture_output=True, timeout=120, text=True)
-        if result.returncode == 0:
+        result = guarded_commit_and_push(
+            project_root,
+            msg,
+            push_args=['push', '-u', 'origin', 'main'],
+        )
+        if result.pushed:
             flash('已成功同步到 GitHub。', 'success')
         else:
-            flash(f'推送失败：{result.stderr}', 'error')
+            flash('没有可同步的文章或图片变更。', 'info')
+    except GitSafetyError as e:
+        flash(f'同步被安全规则阻止：{e}', 'error')
     except Exception as e:
         flash(f'同步错误：{e}', 'error')
     return redirect(url_for('uploader.articles'))
