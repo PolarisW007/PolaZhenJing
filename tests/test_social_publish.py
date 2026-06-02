@@ -143,9 +143,16 @@ def test_upload_page_uses_local_tinymce_assets():
     assert response.status_code == 200
     assert "cdn.jsdelivr.net/npm/tinymce" not in body
     assert "/assets/vendor/tinymce/tinymce.min.js" in body
+    assert "langs/zh-Hans.js" in body
+    assert "language: 'zh-Hans'" in body
+    assert "upload-card" in body
     assert "fonts.googleapis.com/css2" in body
     assert 'rel="preload" as="style"' in body
 
     asset_response = client.get("/assets/vendor/tinymce/tinymce.min.js")
     assert asset_response.status_code == 200
     assert asset_response.content_length and asset_response.content_length > 100_000
+
+    lang_response = client.get("/assets/vendor/tinymce/langs/zh-Hans.js")
+    assert lang_response.status_code == 200
+    assert "tinymce.addI18n" in lang_response.get_data(as_text=True)

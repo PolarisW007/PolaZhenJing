@@ -36,6 +36,9 @@
 - 已跑浏览器 smoke：本地 `/admin/upload` 使用临时 admin session 打开，`.tox-tinymce` 221ms 出现；无 jsDelivr 请求；本地 TinyMCE 资源 14 个；失败请求 0；编辑器初始高度 480px。
 - 云端部署：已精确同步本次相关文件到 `/PolaZhenjing`，云端 `tests/test_social_publish.py` 10 passed，`polazj.service` 为 `active`。
 - 线上验证：`/PolaZhenjing/admin/upload` 未登录 302 到登录页；`/PolaZhenjing/assets/vendor/tinymce/tinymce.min.js` 返回 200；云端 Flask test client 验证上传页包含本地 TinyMCE、不包含 jsDelivr TinyMCE、字体链接为非阻塞 preload。
+- 2026-06-02 用户反馈第一次修复“比原来更难用”：复查发现体验回归点包括上传页仍被 `.card-wide` 限制为窄卡片、TinyMCE 本地化后缺少中文语言包导致工具栏英文、固定 480px 高度不适合长文编辑。
+- 2026-06-02 二次修复：上传页改为 `upload-card` 宽屏工作台，卡片宽度 1280px，表单区 1120px；新增本地 TinyMCE `zh-Hans` 语言包；编辑器初始高度提高到 680px，最小 520px，最大 900px。
+- 2026-06-02 二次本地浏览器 smoke：`.tox-tinymce` 161ms 出现；卡片 1280px；编辑器 1120px x 680px；语言包 `/assets/vendor/tinymce/langs/zh-Hans.js` 成功加载；格式下拉显示“段落”；TinyMCE CDN 请求 0；失败请求 0；console error 0。
 
 ## 风险
 

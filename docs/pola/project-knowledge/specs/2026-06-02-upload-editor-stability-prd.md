@@ -38,7 +38,9 @@ flowchart TD
 - 富文本模式仍使用 TinyMCE，支持图片、视频、表格、链接、代码和预览。
 - Markdown 模式仍切换到源码 textarea。
 - TinyMCE 资源从 `/assets/vendor/tinymce/tinymce.min.js` 加载。
-- 编辑器初始高度固定为 480px，可手动拖拽调整，最大 720px。
+- 上传页使用宽屏 `upload-card` 工作区，桌面端卡片最大 1280px，表单区最大 1120px。
+- TinyMCE 使用本地 `zh-Hans` 语言包，工具栏和下拉项显示中文。
+- 编辑器初始高度为 680px，可手动拖拽调整，最大 900px。
 - 初始化失败时展示提示：富文本编辑器资源加载失败，已自动切换为基础文本框；内容仍可正常提交。
 
 ## 验收
@@ -46,5 +48,5 @@ flowchart TD
 - 页面 HTML 不包含 `cdn.jsdelivr.net/npm/tinymce`。
 - 本地 TinyMCE 主脚本可返回 200。
 - 浏览器 smoke 中无 jsDelivr 请求，无失败资源请求。
-- 浏览器 smoke 中 `.tox-tinymce` 出现，初始高度约 480px。
+- 浏览器 smoke 中 `.tox-tinymce` 出现，桌面端宽度约 1120px，高度约 680px，格式下拉显示“段落”。
 - 上传页未登录仍跳转登录，不改变权限。

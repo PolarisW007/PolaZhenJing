@@ -32,6 +32,14 @@
   - 页面包含 `/assets/vendor/tinymce/tinymce.min.js`。
   - 页面不包含 `cdn.jsdelivr.net/npm/tinymce`。
   - Google Fonts 链接为非阻塞 preload。
+- 二次体验修复后线上 Playwright smoke：
+  - `.upload-card` 宽度 1280px。
+  - `.tox-tinymce` 宽度 1120px，高度 680px。
+  - 本地 TinyMCE 资源 15 个。
+  - 语言包 `/assets/vendor/tinymce/langs/zh-Hans.js` 已加载。
+  - 格式下拉显示“段落”。
+  - TinyMCE CDN 请求 0，失败请求 0，console error 0。
+  - 富文本写入和 Markdown 模式切换均通过。
 
 ## 回滚
 

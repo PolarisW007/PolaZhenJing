@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 {% block title %}上传{% endblock %}
-{% block card_class %}card-wide{% endblock %}
+{% block card_class %}upload-card{% endblock %}
 {% block head_extra %}
 <style>
+  .card.upload-card {
+    width: min(1280px, calc(100vw - 4rem));
+    max-width: min(1280px, calc(100vw - 4rem)) !important;
+  }
+  .upload-card .tab-bar,
+  .upload-card .form-group,
+  .upload-card .btn-gold {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .upload-card .btn-gold {
+    display: block;
+  }
   .editor-mode-switch,
   .media-policy {
     display: flex;
@@ -427,10 +441,12 @@ function initRichEditor() {
     suffix: '.min',
     skin: editorSkin(),
     content_css: false,
-    height: 480,
-    min_height: 360,
-    max_height: 720,
+    height: 680,
+    min_height: 520,
+    max_height: 900,
     resize: true,
+    language: 'zh-Hans',
+    language_url: `${TINYMCE_BASE_URL}/langs/zh-Hans.js`,
     menubar: false,
     branding: false,
     promotion: false,

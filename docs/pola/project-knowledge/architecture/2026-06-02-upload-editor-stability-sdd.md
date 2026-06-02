@@ -32,6 +32,7 @@
 
 - `assets/vendor/tinymce/tinymce.min.js`
 - `assets/vendor/tinymce/icons/default/icons.min.js`
+- `assets/vendor/tinymce/langs/zh-Hans.js`
 - `assets/vendor/tinymce/models/dom/model.min.js`
 - `assets/vendor/tinymce/themes/silver/theme.min.js`
 - `assets/vendor/tinymce/plugins/{code,fullscreen,image,link,lists,media,preview,table,wordcount}/plugin.min.js`
@@ -45,6 +46,7 @@
 | --- | --- | --- | --- |
 | `app/templates/base.html` | Google Fonts 改为 preload + onload stylesheet，保留 noscript | 避免样式表阻塞脚本执行 | 首屏可能先用系统字体 |
 | `app/templates/upload.html` | TinyMCE 改用本地资源，移除 autoresize，加入兜底提示 | 修复加载慢和高度异常 | 插件列表需和 vendor 文件一致 |
+| `app/templates/upload.html` | 新增 `upload-card` 宽屏布局和 `zh-Hans` 语言包配置 | 恢复长文编辑可用面积和中文工具栏 | 需兼容移动端宽度约束 |
 | `assets/vendor/tinymce/` | 新增 TinyMCE 运行资源 | 消除上传页编辑器 CDN 依赖 | 增加约 1.4MB 静态资源 |
 | `tests/test_social_publish.py` | 增加上传页资源回归测试 | 防止重新引入 CDN | 测试位置后续可拆分 |
 
