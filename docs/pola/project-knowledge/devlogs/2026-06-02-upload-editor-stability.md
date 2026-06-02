@@ -39,6 +39,8 @@
 - 2026-06-02 用户反馈第一次修复“比原来更难用”：复查发现体验回归点包括上传页仍被 `.card-wide` 限制为窄卡片、TinyMCE 本地化后缺少中文语言包导致工具栏英文、固定 480px 高度不适合长文编辑。
 - 2026-06-02 二次修复：上传页改为 `upload-card` 宽屏工作台，卡片宽度 1280px，表单区 1120px；新增本地 TinyMCE `zh-Hans` 语言包；编辑器初始高度提高到 680px，最小 520px，最大 900px。
 - 2026-06-02 二次本地浏览器 smoke：`.tox-tinymce` 161ms 出现；卡片 1280px；编辑器 1120px x 680px；语言包 `/assets/vendor/tinymce/langs/zh-Hans.js` 成功加载；格式下拉显示“段落”；TinyMCE CDN 请求 0；失败请求 0；console error 0。
+- 2026-06-02 性能复查：线上原版本 DOMContentLoaded 约 1168ms，TinyMCE 资源 15 个；113KB 真实 paste event 约 1290ms，845KB setContent/save/toggle 约 872ms。
+- 2026-06-02 三次性能优化：TinyMCE 改为异步脚本加载，基础 textarea 立即可输入；插件从 9 个减到 5 个，移除 code/fullscreen/media/preview；新增加载状态提示。二次本地性能 smoke：DOMContentLoaded 74ms，编辑器 ready 188ms，TinyMCE 资源 11 个；845KB 长文处理总耗时 872ms。
 
 ## 风险
 

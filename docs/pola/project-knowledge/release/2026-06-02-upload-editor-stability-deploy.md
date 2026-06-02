@@ -40,6 +40,12 @@
   - 格式下拉显示“段落”。
   - TinyMCE CDN 请求 0，失败请求 0，console error 0。
   - 富文本写入和 Markdown 模式切换均通过。
+- 三次性能优化后线上 Playwright smoke：
+  - DOMContentLoaded 约 498ms。
+  - TinyMCE ready 约 813ms。
+  - TinyMCE 本地资源从 15 个降为 11 个。
+  - CDN 请求 0，失败请求 0，console error 0。
+  - 845KB 长文处理：setContent 147ms，triggerSave 265ms，富文本/Markdown 切换 448ms，总计 861ms。
 
 ## 回滚
 
