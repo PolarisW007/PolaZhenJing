@@ -1,5 +1,7 @@
 # X token 生产配置 Runbook
 
+> 仅供历史/已废弃方案参考：2026-06-02 已按用户要求去除 X API 对接，当前不再需要配置 `X_USER_ACCESS_TOKEN`，生产中的 `scripts/x_token_config.py` 已移除。
+
 - 日期：2026-06-02
 - 需求：PolaZhenJing 发布中心生产收口
 - 范围：生产环境 `X_USER_ACCESS_TOKEN` 安全配置、X smoke 真实发帖前置检查

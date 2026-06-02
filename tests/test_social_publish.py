@@ -7,8 +7,7 @@ from app.social_publish import (build_manual_package, build_wechat_html,
                                 summarize_wechat_publish_result,
                                 _wechat_content_source_url,
                                 _wechat_clamp_text,
-                                _wechat_uploadable_image,
-                                _x_config_status)
+                                _wechat_uploadable_image)
 
 
 def sample_context():
@@ -120,13 +119,37 @@ def test_build_x_post_text_keeps_within_limit():
     assert ctx["public_url"] in text
 
 
-def test_x_config_status_reads_env(monkeypatch):
-    monkeypatch.setenv("X_USER_ACCESS_TOKEN", "x-user-token-demo")
+def test_build_x_manual_package_is_copyable_and_limited():
+    ctx = sample_context()
+    ctx["description"] = "这是一段很长的摘要。" * 80
 
-    status = _x_config_status()
+    package = build_manual_package(ctx, "x")
 
-    assert status["configured"] is True
-    assert status["token_tail"] == "n-demo"
+    assert package["platform"] == "x"
+    assert package["platform_name"] == "X"
+    assert len(package["body"]) <= 280
+    assert package["body"] == build_x_post_text(ctx)
+    assert package["console_url"].startswith("https://x.com/")
+    assert "手动发布" in " ".join(package["checklist"])
+
+
+def test_social_publish_x_uses_manual_package_ui():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+
+    response = client.get("/admin/social/articles/2026-05-24-yi-ge-ren-you-zheng-zhi-you-jia-20260524.md")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "生成发布包" in body
+    assert "https://x.com/compose/post" in body
+    assert "X_USER_ACCESS_TOKEN" not in body
+    assert "发布到 X" not in body
+    assert "/x/post" not in body
 
 
 def test_upload_page_uses_local_tinymce_assets():

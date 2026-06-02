@@ -1,5 +1,7 @@
 # PolaZhenJing X 真实发帖 Smoke 入口开发日志
 
+> 仅供历史/已废弃方案参考：2026-06-02 已按用户要求去除 X API 对接，当前 X 改为内容生成 + 手动发布模式，本文件中的 token/API smoke 不再作为上线方案。
+
 ## 目标
 
 继续推进需求池 `XhcYwKVYha`，在生产 `X_USER_ACCESS_TOKEN` 尚未配置前，补齐真实发帖的可执行验收脚本，确保 token 一旦配置即可一键完成 A2 并记录 post id。

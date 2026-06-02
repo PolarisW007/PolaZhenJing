@@ -1,5 +1,7 @@
 # PolaZhenJing X 真实发帖 Smoke 测试报告
 
+> 仅供历史/已废弃方案参考：2026-06-02 已按用户要求去除 X API 对接，当前 X 改为内容生成 + 手动发布模式，本测试不再作为当前上线验收口径。
+
 ## 目标
 
 为需求 `XhcYwKVYha` 的 A2 “配置 `X_USER_ACCESS_TOKEN` 后完成一篇真实 X 发帖并记录 post id”补齐可执行 smoke 入口。

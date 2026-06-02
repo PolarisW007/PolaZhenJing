@@ -1,5 +1,7 @@
 # X token 配置工具测试记录
 
+> 仅供历史/已废弃方案参考：2026-06-02 已按用户要求去除 X API 对接，当前不再需要配置 `X_USER_ACCESS_TOKEN`。
+
 - 日期：2026-06-02
 - 需求：PolaZhenJing 发布中心生产收口
 - 对象：`scripts/x_token_config.py`
