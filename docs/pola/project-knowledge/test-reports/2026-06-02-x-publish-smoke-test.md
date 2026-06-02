@@ -32,3 +32,7 @@ PYTHONPATH=. .venv/bin/pytest tests/test_social_publish.py -q
 - `.venv/bin/python scripts/x_publish_smoke.py --json --require-token`：退出码 `2`，作为缺 token 的生产发帖门禁。
 - `PYTHONPATH=. .venv/bin/pytest tests/test_social_publish.py -q`：10 passed。
 - 真实发帖未执行，因为当前本地和已记录的生产配置均缺少 `X_USER_ACCESS_TOKEN`。
+- 生产服务器 follow-up：
+  - `ssh pola-server 'cd /PolaZhenjing && .venv/bin/python -m py_compile scripts/x_publish_smoke.py'`：通过。
+  - 远端 `.venv/bin/python scripts/x_publish_smoke.py --json`：退出码 `0`，`configured=false`，`blocked_by=["X_USER_ACCESS_TOKEN"]`，未真实发帖。
+  - 远端 `.venv/bin/python scripts/x_publish_smoke.py --json --require-token`：退出码 `2`，确认生产 token 仍缺失且门禁生效。
