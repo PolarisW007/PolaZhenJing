@@ -25,4 +25,4 @@
 
 ## Commit
 
-待提交后回填。
+主提交：`caa6e36 test: 增加 X 发布 smoke 门禁`
