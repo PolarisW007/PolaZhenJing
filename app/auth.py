@@ -51,11 +51,13 @@ PERMISSION_CATALOG = {
     'articles.manage': {'name': '管理文章', 'app': 'PolaZhenjing'},
     'skills.read': {'name': '查看 Skills', 'app': 'Skill Hub'},
     'skills.manage': {'name': '管理 Skills', 'app': 'Skill Hub'},
+    'polareference.use': {'name': '使用 PolaReference', 'app': 'PolaReference'},
     'polaread.use': {'name': '使用 PolaRead', 'app': 'PolaRead'},
+    'poladiting.use': {'name': '使用 PolaDiting', 'app': 'PolaDiting'},
     'polanews.use': {'name': '使用 PolaNews', 'app': 'PolaNews'},
     'agent.use': {'name': '使用 AI 分身', 'app': 'AI Avatar'},
-    'projects.manage': {'name': '管理项目', 'app': 'AIPD'},
-    'users.manage': {'name': '管理用户与权限', 'app': 'AIPD'},
+    'projects.manage': {'name': '管理项目', 'app': 'PolaUUH'},
+    'users.manage': {'name': '管理用户与权限', 'app': 'PolaUUH'},
 }
 
 DEFAULT_USER_PERMISSIONS = {
@@ -622,11 +624,14 @@ def api_sso_check():
         session.clear()
         return jsonify({'ok': False, 'authenticated': False, 'authorized': False}), 401
     payload = request.get_json(silent=True) or {}
+    app_id = (payload.get('app_id') or 'PolaUUH').strip()
     permission = (payload.get('permission') or '').strip()
     profile = user_payload(user)
     authorized = not permission or permission in profile['permissions']
     return jsonify({
         'ok': True,
+        'provider': 'PolaUUH',
+        'app_id': app_id,
         'authenticated': True,
         'authorized': authorized,
         'user': profile,
