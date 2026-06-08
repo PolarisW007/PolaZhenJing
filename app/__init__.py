@@ -1,9 +1,18 @@
+import json
 import os
 import sqlite3
+from functools import lru_cache
 from flask import Flask, g, redirect, url_for, session, send_from_directory
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+TINYMCE_MANIFEST_PATH = os.path.join(
+    PROJECT_ROOT, 'assets', 'vendor', 'tinymce', 'tinymce-manifest.json'
+)
+DEFAULT_TINYMCE_ASSET_VERSION = '6.8.5-pzj-20260602'
 
 
 class ReverseProxied:
@@ -38,6 +47,29 @@ def close_db(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+
+@lru_cache(maxsize=1)
+def get_tinymce_asset_manifest():
+    """Return TinyMCE vendor metadata used for cache-busted asset URLs."""
+    fallback = {
+        'name': 'tinymce',
+        'version': '6.8.5',
+        'asset_version': DEFAULT_TINYMCE_ASSET_VERSION,
+    }
+    try:
+        with open(TINYMCE_MANIFEST_PATH, 'r', encoding='utf-8') as manifest_file:
+            manifest = json.load(manifest_file)
+    except (OSError, json.JSONDecodeError):
+        return fallback
+    if not isinstance(manifest, dict):
+        return fallback
+    asset_version = str(
+        manifest.get('asset_version')
+        or manifest.get('version')
+        or DEFAULT_TINYMCE_ASSET_VERSION
+    )
+    return {**manifest, 'asset_version': asset_version}
 
 
 def init_db(app):
@@ -121,6 +153,12 @@ def create_app():
     # Register teardown
     app.teardown_appcontext(close_db)
 
+    @app.context_processor
+    def inject_vendor_manifests():
+        return {
+            'tinymce_asset_manifest': get_tinymce_asset_manifest,
+        }
+
     # Initialize database
     init_db(app)
 
@@ -145,7 +183,7 @@ def create_app():
     app.register_blueprint(agent_admin_bp)
 
     # Serve static assets (CSS, images, etc.) from project root /assets/
-    assets_dir = os.path.join(os.path.dirname(__file__), '..', 'assets')
+    assets_dir = os.path.join(PROJECT_ROOT, 'assets')
 
     @app.route('/assets/<path:filename>')
     def serve_assets(filename):

@@ -1,0 +1,15 @@
+{
+  "name": "tinymce",
+  "version": "6.8.5",
+  "asset_version": "6.8.5-pzj-20260602",
+  "entry": "tinymce.min.js",
+  "base_path": "assets/vendor/tinymce",
+  "plugins": [
+    "image",
+    "link",
+    "lists",
+    "table",
+    "wordcount"
+  ],
+  "purpose": "Local TinyMCE runtime for the PolaZhenjing upload editor."
+}

@@ -165,9 +165,12 @@ def test_upload_page_uses_local_tinymce_assets():
 
     assert response.status_code == 200
     assert "cdn.jsdelivr.net/npm/tinymce" not in body
-    assert "/assets/vendor/tinymce/tinymce.min.js" in body
+    assert "/assets/vendor/tinymce/tinymce.min.js?v=6.8.5-pzj-20260602" in body
+    assert "cache_suffix: TINYMCE_CACHE_SUFFIX" in body
     assert "langs/zh-Hans.js" in body
     assert "language: 'zh-Hans'" in body
+    assert "display: flex !important" in body
+    assert "min-height: 360px !important" in body
     assert "upload-card" in body
     assert "fonts.googleapis.com/css2" in body
     assert 'rel="preload" as="style"' in body
@@ -179,3 +182,28 @@ def test_upload_page_uses_local_tinymce_assets():
     lang_response = client.get("/assets/vendor/tinymce/langs/zh-Hans.js")
     assert lang_response.status_code == 200
     assert "tinymce.addI18n" in lang_response.get_data(as_text=True)
+
+    manifest_response = client.get("/assets/vendor/tinymce/tinymce-manifest.json")
+    assert manifest_response.status_code == 200
+    assert manifest_response.get_json()["asset_version"] == "6.8.5-pzj-20260602"
+
+
+def test_admin_links_respect_script_name_prefix():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+
+    response = client.get(
+        "/admin/articles",
+        headers={"X-Script-Name": "/PolaZhenjing"},
+    )
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert 'href="/PolaZhenjing/admin/upload"' in body
+    assert 'href="/PolaZhenjing/admin/articles"' in body
+    assert 'href="/admin/upload"' not in body
+    assert 'href="/admin/articles"' not in body

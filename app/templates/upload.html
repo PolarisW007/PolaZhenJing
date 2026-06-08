@@ -70,11 +70,21 @@
     line-height: 1.65;
   }
   .tox-tinymce {
+    display: flex !important;
+    flex-direction: column !important;
     border-color: var(--text-ghost) !important;
     border-radius: var(--radius-md) !important;
     overflow: hidden;
     background: rgba(255,255,255,0.035) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tox .tox-editor-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+  .tox .tox-edit-area {
+    flex: 1 1 auto !important;
+    min-height: 360px !important;
   }
   .tox .tox-editor-header,
   .tox .tox-toolbar-overlord,
@@ -114,6 +124,7 @@
   }
   .tox .tox-edit-area__iframe {
     background: color-mix(in srgb, var(--bg-deepest) 88%, var(--bg-card-hover)) !important;
+    height: 100% !important;
   }
   .tox .tox-statusbar {
     color: var(--text-muted) !important;
@@ -310,8 +321,11 @@
 
 {% block scripts %}
 <script>
+{% set tinymce_manifest = tinymce_asset_manifest() %}
 const TINYMCE_BASE_URL = '{{ url_for("serve_assets", filename="vendor/tinymce") }}';
-const TINYMCE_SCRIPT_URL = '{{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js") }}';
+const TINYMCE_ASSET_VERSION = {{ tinymce_manifest.asset_version|tojson }};
+const TINYMCE_CACHE_SUFFIX = `?v=${encodeURIComponent(TINYMCE_ASSET_VERSION)}`;
+const TINYMCE_SCRIPT_URL = {{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js", v=tinymce_manifest.asset_version)|tojson }};
 
 function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -469,6 +483,7 @@ function initRichEditor() {
   tinymce.init({
     selector: '#rich-content',
     base_url: TINYMCE_BASE_URL,
+    cache_suffix: TINYMCE_CACHE_SUFFIX,
     suffix: '.min',
     skin: editorSkin(),
     content_css: false,

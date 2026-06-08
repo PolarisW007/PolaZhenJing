@@ -46,6 +46,16 @@
   - TinyMCE 本地资源从 15 个降为 11 个。
   - CDN 请求 0，失败请求 0，console error 0。
   - 845KB 长文处理：setContent 147ms，triggerSave 265ms，富文本/Markdown 切换 448ms，总计 861ms。
+- 四次编辑区塌陷修复后本地 Playwright smoke：
+  - 原始复现：`.tox-tinymce` 外壳高度 680px，但 `.tox-edit-area` 和 iframe 均为 0px，状态栏贴在工具栏下方。
+  - 修复后：`.tox-edit-area` 1116px x 604px，iframe 1116px x 604px，statusbar 位于底部。
+  - 真实交互：点击 iframe 后键盘输入 `keyboard input probe` 成功，TinyMCE 资源 11 个，失败请求 0。
+  - 自动化：`python3 -m py_compile app/__init__.py app/uploader.py` 通过；`PYTHONPATH=. .venv/bin/pytest tests/test_social_publish.py -q` 10 passed；`PYTHONPATH=. .venv/bin/pytest tests -q` 23 passed；`git diff --check` 通过。
+- 四次编辑区塌陷修复后云端发布：
+  - 备份：`/opt/backups/polazj-upload-editor-layout-20260602115124`。
+  - 云端验证：`python3 -m py_compile app/__init__.py app/uploader.py` 通过；`PYTHONPATH=. .venv/bin/pytest tests/test_social_publish.py -q` 10 passed。
+  - 线上状态：`polazj.service` 为 `active`；`/PolaZhenjing/assets/vendor/tinymce/tinymce-manifest.json` 返回 200；`/PolaZhenjing/admin/upload` 未登录返回 302 到登录页。
+  - 用户 Chrome 可访问树已显示 `富文本区域` iframe 和 `文本输入区`，不再只有工具栏和状态栏。
 
 ## 回滚
 

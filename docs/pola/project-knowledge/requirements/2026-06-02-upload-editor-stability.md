@@ -28,10 +28,13 @@
 - A4 非阻塞：后台基础字体 CSS 不再阻塞脚本执行。
 - A5 UI：富文本编辑器在浏览器中可见，初始高度稳定，不再撑出超大空白区域。
 - A6 兜底：TinyMCE 初始化失败时保留基础文本框并提示用户仍可提交。
-- A7 测试：相关单测、语法检查和浏览器 smoke 通过。
+- A7 缓存版本：TinyMCE 本地资源必须有 manifest 记录版本，并在主脚本、语言包和 TinyMCE 自动加载资源上带统一版本参数，避免线上升级后浏览器继续使用旧缓存。
+- A8 可编辑区：TinyMCE 初始化完成后 `.tox-edit-area` 和 iframe 不能为 0px，高度需足够支持点击、输入和粘贴。
+- A9 测试：相关单测、语法检查和浏览器 smoke 通过。
 
 ## 风险
 
 - R1 本地 vendor TinyMCE 需要和模板插件列表保持同步。
 - R2 如果后续上传页新增 TinyMCE 插件，需要同步补充对应本地插件文件。
-- R3 字体改为非阻塞加载后，首次渲染可能先使用系统字体，再切换到 Noto Serif SC。
+- R3 更新 TinyMCE vendor 文件时必须同步更新 `assets/vendor/tinymce/tinymce-manifest.json` 的 `asset_version`，否则线上浏览器可能继续命中旧缓存。
+- R4 字体改为非阻塞加载后，首次渲染可能先使用系统字体，再切换到 Noto Serif SC。
