@@ -2169,14 +2169,23 @@ def edit_article(filename):
 @uploader_bp.route('/articles/<filename>/preview', methods=['POST'])
 @login_required
 def preview_article_markdown(filename):
-    """Render edited Markdown body for the split preview panel."""
+    """Render the edited body for the article edit page preview panel.
+
+    Honors the new content_format flag: rich_html is returned as-is
+    (TinyMCE already produced trusted HTML) while markdown continues to
+    be rendered through python-markdown with the same {{ site.baseurl }}
+    rewriting as before.
+    """
     fpath = _safe_post_path(filename)
     if not fpath or not os.path.isfile(fpath):
         return jsonify({'ok': False, 'error': '文章未找到。'}), 404
     body = request.form.get('body', '')
+    content_format = (request.form.get('content_format') or 'markdown').strip().lower()
+    if content_format == 'rich_html':
+        return jsonify({'ok': True, 'html': body, 'format': 'rich_html'})
     body = body.replace('{{ site.baseurl }}', _article_asset_base())
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
-    return jsonify({'ok': True, 'html': body_html})
+    return jsonify({'ok': True, 'html': body_html, 'format': 'markdown'})
 
 
 @uploader_bp.route('/articles/<filename>/delete', methods=['POST'])

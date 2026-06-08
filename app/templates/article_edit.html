@@ -3,7 +3,84 @@
 {% block card_class %}card-full editor-card{% endblock %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<style>
+  .editor-mode-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 0.6rem;
+  }
+  .editor-mode-switch label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.035);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .editor-mode-switch input { accent-color: var(--gold-primary); }
+  .editor-load-warning {
+    display: none;
+    margin-top: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid rgba(192,123,76,0.35);
+    border-radius: var(--radius-md);
+    color: #c07b4c;
+    background: rgba(192,123,76,0.08);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .editor-load-status {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+  .body-markdown-textarea {
+    width: 100%;
+    min-height: 520px;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.72;
+    color: var(--text-secondary);
+    background: rgba(0,0,0,0.34);
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.1rem;
+    resize: vertical;
+  }
+  .body-markdown-textarea:focus { outline: none; border-color: var(--gold-primary); }
+  .tox-tinymce {
+    display: flex !important;
+    flex-direction: column !important;
+    border-color: var(--text-ghost) !important;
+    border-radius: var(--radius-md) !important;
+    overflow: hidden;
+    background: rgba(255,255,255,0.035) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tox-tinymce .tox-editor-container {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .tox-tinymce .tox-edit-area {
+    flex: 1 1 auto !important;
+    min-height: 360px !important;
+    display: flex !important;
+  }
+  .tox-tinymce iframe {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 360px;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -62,14 +139,24 @@
     <textarea class="form-input compact-textarea" name="extra_front_matter" placeholder="permalink: /custom/path/&#10;cover: /assets/cover.png">{{ extra_front_matter or '' }}</textarea>
   </details>
 
-  <div class="editor-workspace">
-    <div class="editor-pane">
-      <div class="pane-head">
-        <span>Markdown 正文</span>
-        <small>保留 Jekyll 图片语法和 Markdown 原文</small>
-      </div>
-      <textarea id="body" name="body">{{ body }}</textarea>
+  <div class="form-group">
+    <label>正文编辑</label>
+    <div class="editor-mode-switch">
+      <label><input type="radio" name="editor_mode" value="rich" checked> 富文本编辑</label>
+      <label><input type="radio" name="editor_mode" value="markdown"> Markdown 源码</label>
     </div>
+    <input type="hidden" id="content-format" name="content_format" value="rich_html">
+    <textarea id="rich-content" name="rich_content" class="form-input" style="display:none;">{{ body }}</textarea>
+    <textarea id="content" name="content" class="form-input body-markdown-textarea" style="display:none;" placeholder="# 标题&#10;&#10;在这里用 Markdown 编写内容...">{{ body }}</textarea>
+    <div id="editor-load-status" class="editor-load-status">
+      富文本工具正在加载，当前文本框可直接输入或粘贴。
+    </div>
+    <div id="editor-load-warning" class="editor-load-warning">
+      富文本编辑器资源加载失败，已自动切换为基础文本框；内容仍可正常提交。
+    </div>
+  </div>
+
+  <div class="editor-workspace">
     <div class="preview-pane">
       <div class="pane-head">
         <span>渲染预览</span>
@@ -123,11 +210,11 @@
   }
   .editor-workspace {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     align-items: stretch;
+    margin-bottom: 1rem;
   }
-  .editor-pane,
   .preview-pane {
     min-width: 0;
     border: 1px solid var(--text-ghost);
@@ -172,37 +259,9 @@
     line-height: 1.6;
     margin-top: 0.4rem;
   }
-
-  .EasyMDEContainer .CodeMirror {
-    min-height: 680px;
-    background: rgba(0,0,0,0.34);
-    color: var(--text-secondary);
-    border: 0;
-    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    font-size: 14px;
-    line-height: 1.72;
-  }
-  .EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--gold-primary); }
-  .EasyMDEContainer .editor-toolbar {
-    border: 0;
-    border-bottom: 1px solid var(--text-ghost);
-    background: rgba(0,0,0,0.22);
-    opacity: 1;
-  }
-  .EasyMDEContainer .editor-toolbar button {
-    color: var(--text-muted) !important;
-  }
-  .EasyMDEContainer .editor-toolbar button:hover,
-  .EasyMDEContainer .editor-toolbar button.active {
-    background: rgba(228,191,122,0.1);
-    border-color: rgba(228,191,122,0.25);
-    color: var(--gold-primary) !important;
-  }
-  .EasyMDEContainer .editor-statusbar {
-    color: var(--text-muted);
-  }
   .article-preview {
-    height: 742px;
+    min-height: 360px;
+    max-height: 720px;
     overflow: auto;
     padding: 1.25rem;
     color: var(--text-secondary);
@@ -248,59 +307,375 @@
     .editor-workspace {
       grid-template-columns: 1fr;
     }
-    .article-preview,
-    .EasyMDEContainer .CodeMirror {
-      min-height: 460px;
-      height: 460px;
-    }
+    .body-markdown-textarea { min-height: 460px; }
   }
 </style>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script>
-  const textarea = document.getElementById('body');
-  const preview = document.getElementById('article-preview');
-  const easyMDE = new EasyMDE({
-    element: textarea,
-    spellChecker: false,
-    autofocus: true,
-    autosave: {
-      enabled: true,
-      uniqueId: 'article-edit-{{ filename }}',
-      delay: 1200
-    },
-    status: ['autosave', 'lines', 'words'],
-    toolbar: [
-      'bold', 'italic', 'heading', '|',
-      'quote', 'unordered-list', 'ordered-list', '|',
-      'link', 'image', 'table', 'code', '|',
-      'side-by-side', 'fullscreen', '|',
-      'guide'
-    ]
-  });
+{% set tinymce_manifest = tinymce_asset_manifest() %}
+const TINYMCE_BASE_URL = '{{ url_for("serve_assets", filename="vendor/tinymce") }}';
+const TINYMCE_ASSET_VERSION = {{ tinymce_manifest.asset_version|tojson }};
+const TINYMCE_CACHE_SUFFIX = `?v=${encodeURIComponent(TINYMCE_ASSET_VERSION)}`;
+const TINYMCE_SCRIPT_URL = {{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js", v=tinymce_manifest.asset_version)|tojson }};
 
-  async function refreshPreview() {
-    preview.innerHTML = '<p style="color: var(--text-muted);">预览生成中…</p>';
-    const formData = new FormData();
-    formData.append('body', easyMDE.value());
-    try {
-      const response = await fetch('{{ url_for("uploader.preview_article_markdown", filename=filename) }}', {
-        method: 'POST',
-        body: formData
+function themeVar(name, fallback) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
+}
+
+function editorContentStyle() {
+  const bg = themeVar('--bg-deepest', '#050508');
+  const card = themeVar('--bg-card-hover', 'rgba(255,255,255,0.12)');
+  const primary = themeVar('--text-primary', '#fff');
+  const secondary = themeVar('--text-secondary', 'rgba(255,255,255,0.80)');
+  const muted = themeVar('--text-muted', 'rgba(255,255,255,0.45)');
+  const ghost = themeVar('--text-ghost', 'rgba(255,255,255,0.12)');
+  const gold = themeVar('--gold-primary', '#E4BF7A');
+  return [
+    `html{background:${bg};}`,
+    `body{margin:0;padding:18px 20px;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;font-size:16px;line-height:1.75;color:${secondary};background:linear-gradient(135deg, ${card}, ${bg});}`,
+    `body.mce-content-body{min-height:360px;}`,
+    `p{margin:0 0 1em;color:${secondary};}`,
+    `h1,h2,h3,h4{color:${primary};font-family:"Noto Serif SC","PingFang SC",serif;line-height:1.35;margin:1.15em 0 .55em;}`,
+    `a{color:${gold};text-decoration:none;}`,
+    `img,video,iframe{max-width:100%;height:auto;border-radius:10px;border:1px solid ${ghost};}`,
+    `blockquote{border-left:4px solid ${gold};margin:1em 0;padding:.45em 1em;color:${secondary};background:rgba(228,191,122,.08);border-radius:0 10px 10px 0;}`,
+    `table{border-collapse:collapse;width:100%;margin:1em 0;color:${secondary};}`,
+    `td,th{border:1px solid ${ghost};padding:.55em .7em;}`,
+    `th{color:${gold};background:rgba(228,191,122,.08);}`,
+    `code,pre{color:${primary};background:rgba(255,255,255,.06);border:1px solid ${ghost};border-radius:8px;}`,
+    `pre{padding:1em;overflow:auto;}`,
+    `::selection{background:rgba(228,191,122,.28);}`,
+    `.mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before{color:${muted};}`
+  ].join('');
+}
+
+function editorSkin() {
+  const theme = document.body.dataset.theme || '';
+  return theme === 'claude' || theme === 'pmframe' ? 'oxide' : 'oxide-dark';
+}
+
+function firstSrcsetUrl(srcset) {
+  if (!srcset) return '';
+  const first = srcset.split(',').map(item => item.trim()).find(Boolean) || '';
+  return first.split(/\s+/)[0] || '';
+}
+
+function usableImageSrc(src) {
+  if (!src) return '';
+  const value = String(src).trim();
+  if (!value || value === '#' || value === 'about:blank') return '';
+  if (/^data:image\/(?:gif|png);base64,R0lGODlhAQAB/i.test(value)) return '';
+  return value;
+}
+
+function escapeAttr(value) {
+  return String(value || '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+function normalizePastedImages(html) {
+  if (!html || !/<img[\s>]/i.test(html)) return html;
+  const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
+  doc.querySelectorAll('img').forEach(img => {
+    const candidates = [
+      img.getAttribute('src'),
+      img.getAttribute('data-src'),
+      img.getAttribute('data-original'),
+      img.getAttribute('data-url'),
+      img.getAttribute('data-image-src'),
+      img.getAttribute('data-actualsrc'),
+      img.getAttribute('data-lazy-src'),
+      firstSrcsetUrl(img.getAttribute('srcset')),
+      firstSrcsetUrl(img.getAttribute('data-srcset'))
+    ].map(usableImageSrc).filter(Boolean);
+    if (candidates.length) {
+      img.setAttribute('src', candidates[0].replace(/^http:\/\//i, 'https://'));
+      img.setAttribute('loading', 'lazy');
+      img.removeAttribute('srcset');
+      img.removeAttribute('data-srcset');
+    } else {
+      img.remove();
+    }
+  });
+  return doc.body.firstElementChild ? doc.body.firstElementChild.innerHTML : html;
+}
+
+function uploadEditorImage(file, filename, progress) {
+  const formData = new FormData();
+  formData.append('file', file, filename || file.name || 'pasted-image.png');
+  return fetch('{{ url_for("uploader.upload_richtext_media") }}', {
+    method: 'POST',
+    body: formData,
+    credentials: 'same-origin'
+  }).then(async response => {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.location) {
+      throw new Error(data.error || `图片上传失败（${response.status}）`);
+    }
+    if (progress) progress(100);
+    return data.location;
+  });
+}
+
+const preview = document.getElementById('article-preview');
+const contentFormatField = document.getElementById('content-format');
+const initialBody = {{ body|tojson }};
+const initialLooksHtml = (() => {
+  const trimmed = String(initialBody || '').trimStart();
+  if (!trimmed) return false;
+  if (/^</.test(trimmed) && /<\/?[a-z][^>]*>/i.test(trimmed)) return true;
+  if (/<(?:p|h[1-6]|ul|ol|table|img|blockquote|figure|div|section|article|video|iframe|hr|pre)\b/i.test(trimmed)) return true;
+  return false;
+})();
+
+let richEditorReady = false;
+let richEditorFallbackShown = false;
+let tinymceLoadingPromise = null;
+
+function loadTinyMCE() {
+  if (window.tinymce) return Promise.resolve(window.tinymce);
+  if (tinymceLoadingPromise) return tinymceLoadingPromise;
+  tinymceLoadingPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = TINYMCE_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve(window.tinymce);
+    script.onerror = () => reject(new Error('TinyMCE 资源加载失败'));
+    document.head.appendChild(script);
+  });
+  return tinymceLoadingPromise;
+}
+
+function showEditorFallback() {
+  if (richEditorFallbackShown) return;
+  richEditorFallbackShown = true;
+  const warning = document.getElementById('editor-load-warning');
+  const rich = document.getElementById('rich-content');
+  if (warning) warning.style.display = 'block';
+  if (rich) {
+    rich.style.display = 'block';
+    rich.style.minHeight = '420px';
+  }
+  setEditorMode('markdown');
+}
+
+function initRichEditor() {
+  if (richEditorReady) return;
+  if (!window.tinymce) {
+    loadTinyMCE()
+      .then(() => initRichEditor())
+      .catch(error => {
+        console.error('TinyMCE load failed', error);
+        showEditorFallback();
       });
-      const data = await response.json();
-      preview.innerHTML = data.ok ? data.html : '<p>预览失败。</p>';
-    } catch (error) {
-      preview.innerHTML = '<p>预览失败，请检查网络。</p>';
+    return;
+  }
+  richEditorReady = true;
+  const status = document.getElementById('editor-load-status');
+  tinymce.init({
+    selector: '#rich-content',
+    base_url: TINYMCE_BASE_URL,
+    cache_suffix: TINYMCE_CACHE_SUFFIX,
+    suffix: '.min',
+    skin: editorSkin(),
+    content_css: false,
+    height: 680,
+    min_height: 520,
+    max_height: 900,
+    resize: true,
+    language: 'zh-Hans',
+    language_url: `${TINYMCE_BASE_URL}/langs/zh-Hans.js`,
+    menubar: false,
+    branding: false,
+    promotion: false,
+    plugins: 'image link lists table wordcount',
+    toolbar: [
+      'undo redo | blocks bold italic underline blockquote | bullist numlist |',
+      'link image table | removeformat'
+    ].join(' '),
+    block_formats: '段落=p; 标题 1=h1; 标题 2=h2; 标题 3=h3; 引用=blockquote; 代码=pre',
+    paste_data_images: true,
+    automatic_uploads: true,
+    images_upload_url: '{{ url_for("uploader.upload_richtext_media") }}',
+    images_upload_credentials: true,
+    images_upload_handler: (blobInfo, progress) => {
+      return uploadEditorImage(blobInfo.blob(), blobInfo.filename(), progress);
+    },
+    images_file_types: 'jpeg,jpg,png,webp',
+    convert_urls: false,
+    relative_urls: false,
+    remove_script_host: false,
+    content_style: editorContentStyle(),
+    paste_preprocess: (plugin, args) => {
+      args.content = normalizePastedImages(args.content);
+    },
+    setup: editor => {
+      editor.on('paste', event => {
+        const items = Array.from(event.clipboardData ? event.clipboardData.items || [] : []);
+        const imageItems = items.filter(item => item.type && item.type.startsWith('image/'));
+        const hasTextPayload = items.some(item => item.type === 'text/html' || item.type === 'text/plain');
+        if (!imageItems.length || hasTextPayload) return;
+        event.preventDefault();
+        imageItems.forEach((item, index) => {
+          const file = item.getAsFile();
+          if (!file) return;
+          uploadEditorImage(file, file.name || `clipboard-${Date.now()}-${index}.png`)
+            .then(location => {
+              editor.insertContent(`<p><img src="${escapeAttr(location)}" alt="粘贴图片" loading="lazy"></p>`);
+            })
+            .catch(error => {
+              editor.notificationManager.open({
+                text: error.message || '图片上传失败，请改用插入配图上传。',
+                type: 'error',
+                timeout: 5000
+              });
+            });
+        });
+      });
+      editor.on('input change keyup', () => {
+        schedulePreviewRefresh();
+      });
+    },
+    init_instance_callback: editor => {
+      if (status) status.style.display = 'none';
+      if (document.querySelector('input[name="editor_mode"]:checked').value === 'markdown') {
+        editor.hide();
+        if (editor.getContainer()) {
+          editor.getContainer().style.display = 'none';
+        }
+      }
+      schedulePreviewRefresh();
+    }
+  }).catch(error => {
+    console.error('TinyMCE init failed', error);
+    richEditorReady = false;
+    showEditorFallback();
+  });
+}
+
+function setEditorMode(mode) {
+  const contentFormat = document.getElementById('content-format');
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (mode === 'markdown') {
+    contentFormat.value = 'markdown';
+    if (editor) {
+      editor.save();
+      if (markdown && !markdown.value.trim() && rich && rich.value.trim()) {
+        markdown.value = rich.value;
+      }
+      editor.hide();
+      if (editor.getContainer()) {
+        editor.getContainer().style.display = 'none';
+      }
+    } else {
+      if (rich) rich.style.display = 'none';
+    }
+    if (markdown) markdown.style.display = 'block';
+  } else {
+    contentFormat.value = 'rich_html';
+    if (markdown) markdown.style.display = 'none';
+    initRichEditor();
+    const activeEditor = window.tinymce ? tinymce.get('rich-content') : null;
+    if (activeEditor) {
+      if (activeEditor.getContainer()) {
+        activeEditor.getContainer().style.display = '';
+      }
+      activeEditor.show();
+    } else {
+      if (rich) rich.style.display = 'block';
     }
   }
+  schedulePreviewRefresh();
+}
 
-  document.getElementById('refresh-preview').addEventListener('click', refreshPreview);
-  document.getElementById('article-edit-form').addEventListener('submit', function () {
-    easyMDE.toTextArea();
-  });
-  refreshPreview();
+document.querySelectorAll('input[name="editor_mode"]').forEach(input => {
+  input.addEventListener('change', () => setEditorMode(input.value));
+});
+
+let previewTimer = null;
+function schedulePreviewRefresh() {
+  if (previewTimer) clearTimeout(previewTimer);
+  previewTimer = setTimeout(refreshPreview, 350);
+}
+
+async function refreshPreview() {
+  if (!preview) return;
+  const contentFormat = contentFormatField ? contentFormatField.value : 'rich_html';
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
+  let body = '';
+  if (contentFormat === 'rich_html') {
+    const editor = window.tinymce ? tinymce.get('rich-content') : null;
+    body = editor ? editor.getContent() : (rich ? rich.value : '');
+  } else {
+    body = markdown ? markdown.value : '';
+  }
+  if (!body.trim()) {
+    preview.innerHTML = '<p style="color: var(--text-muted);">正文为空，等待输入…</p>';
+    return;
+  }
+  preview.innerHTML = '<p style="color: var(--text-muted);">预览生成中…</p>';
+  const formData = new FormData();
+  formData.append('body', body);
+  formData.append('content_format', contentFormat);
+  try {
+    const response = await fetch('{{ url_for("uploader.preview_article_markdown", filename=filename) }}', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await response.json();
+    preview.innerHTML = data.ok ? data.html : '<p>预览失败。</p>';
+  } catch (error) {
+    preview.innerHTML = '<p>预览失败，请检查网络。</p>';
+  }
+}
+
+document.getElementById('refresh-preview').addEventListener('click', refreshPreview);
+document.getElementById('content').addEventListener('input', schedulePreviewRefresh);
+
+document.getElementById('article-edit-form').addEventListener('submit', function () {
+  const contentFormat = document.getElementById('content-format');
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
+  const activeMode = contentFormat ? contentFormat.value : 'rich_html';
+  if (activeMode === 'rich_html' && window.tinymce && tinymce.get('rich-content')) {
+    tinymce.triggerSave();
+  }
+  // Mirror the active mode's content into the canonical body field for the
+  // existing /admin/articles/.../edit backend, which still reads form.get('body').
+  let payload = '';
+  if (activeMode === 'rich_html') {
+    payload = rich ? rich.value : '';
+  } else {
+    payload = markdown ? markdown.value : '';
+    if (!payload.trim() && rich && rich.value.trim()) {
+      payload = rich.value;
+    }
+  }
+  let bodyField = document.querySelector('#article-edit-form [name="body"]');
+  if (!bodyField) {
+    bodyField = document.createElement('input');
+    bodyField.type = 'hidden';
+    bodyField.name = 'body';
+    this.appendChild(bodyField);
+  }
+  bodyField.value = payload;
+});
+
+const initialMode = initialLooksHtml ? 'rich' : 'markdown';
+const initialRadio = document.querySelector(`input[name="editor_mode"][value="${initialMode}"]`);
+if (initialRadio) initialRadio.checked = true;
+initRichEditor();
+setEditorMode(initialMode);
+refreshPreview();
 </script>
 {% endblock %}
