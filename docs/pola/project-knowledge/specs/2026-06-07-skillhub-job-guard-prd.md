@@ -23,4 +23,3 @@
 - registry 更新后立即清空缓存。
 - GitHub zip 没有 Content-Length 时按读取累计字节数限制。
 - zip 包路径穿越仍按原逻辑拒绝。
-

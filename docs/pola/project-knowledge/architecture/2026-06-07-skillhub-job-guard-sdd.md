@@ -34,4 +34,3 @@
 - `py_compile` 覆盖 `app/skillhub.py`、`app/jobs.py` 和新增测试。
 - pytest 覆盖 zip guard 和 executor guard。
 - `git diff --check` 确认 diff 卫生。
-
