@@ -16,12 +16,15 @@ import sqlite3
 import logging
 import threading
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 # Resolve DB path once — same as app.get_db()
 _DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'wiki.db')
+_MAX_WORKERS = max(int(os.environ.get('POLAZJ_JOB_MAX_WORKERS', '2')), 1)
+_EXECUTOR = ThreadPoolExecutor(max_workers=_MAX_WORKERS, thread_name_prefix='polazj-job')
 
 # Status constants
 PENDING = 'pending'
@@ -161,11 +164,10 @@ def list_active_jobs(kind: str | None = None, limit: int = 50) -> list[dict]:
 
 
 def submit(target, *args, **kwargs) -> None:
-    """Spawn a daemon thread running `target(*args, **kwargs)`.
+    """Queue `target(*args, **kwargs)` on the bounded in-process executor.
     The target function is expected to manage its own job state via update_job().
     """
-    t = threading.Thread(target=_safe_run, args=(target, args, kwargs), daemon=True)
-    t.start()
+    _EXECUTOR.submit(_safe_run, target, args, kwargs)
 
 
 def _safe_run(target, args, kwargs):

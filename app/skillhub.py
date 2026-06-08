@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import tempfile
+import time
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +35,13 @@ SKILLHUB_DIR = PROJECT_ROOT / 'data' / 'skillhub'
 SKILL_STORE_DIR = SKILLHUB_DIR / 'skills'
 REGISTRY_FILE = SKILLHUB_DIR / 'registry.json'
 ALLOWED_ARCHIVE_EXT = {'zip'}
+SKILLHUB_CACHE_TTL_SECONDS = int(os.environ.get('SKILLHUB_CACHE_TTL_SECONDS', '300'))
+SKILLHUB_MAX_ZIP_BYTES = int(os.environ.get('SKILLHUB_MAX_ZIP_BYTES', str(25 * 1024 * 1024)))
+SKILLHUB_MAX_ZIP_FILES = int(os.environ.get('SKILLHUB_MAX_ZIP_FILES', '500'))
+SKILLHUB_MAX_EXTRACTED_BYTES = int(os.environ.get('SKILLHUB_MAX_EXTRACTED_BYTES', str(50 * 1024 * 1024)))
+SKILLHUB_MAX_DOWNLOAD_BYTES = int(os.environ.get('SKILLHUB_MAX_DOWNLOAD_BYTES', str(25 * 1024 * 1024)))
+SKILLHUB_MAX_DOWNLOAD_FILES = int(os.environ.get('SKILLHUB_MAX_DOWNLOAD_FILES', '500'))
+_SKILL_CACHE = {'expires_at': 0.0, 'items': []}
 
 DEFAULT_SKILL_ROOTS = [
     Path('/Users/wangchang/.codex/skills'),
@@ -123,6 +131,7 @@ def _save_registry(entries: list[dict]) -> None:
         json.dumps(entries, ensure_ascii=False, indent=2),
         encoding='utf-8',
     )
+    _clear_skill_cache()
 
 
 def _entry_from_skill_md(skill_md: Path, source_type: str = 'local',
@@ -157,8 +166,18 @@ def _scan_skill_roots() -> list[dict]:
     return entries
 
 
+def _clear_skill_cache() -> None:
+    """Invalidate in-process Skill Hub scan cache."""
+    _SKILL_CACHE['expires_at'] = 0.0
+    _SKILL_CACHE['items'] = []
+
+
 def _all_skills() -> list[dict]:
     """Merge persistent registry and live filesystem scan."""
+    now = time.monotonic()
+    if _SKILL_CACHE['expires_at'] > now:
+        return list(_SKILL_CACHE['items'])
+
     merged = {}
     for entry in _scan_skill_roots() + _load_registry():
         skill_md = Path(entry.get('skill_md', ''))
@@ -175,7 +194,10 @@ def _all_skills() -> list[dict]:
             index += 1
         entry['id'] = unique_id
         merged[unique_id] = entry
-    return sorted(merged.values(), key=lambda item: item.get('name', '').lower())
+    items = sorted(merged.values(), key=lambda item: item.get('name', '').lower())
+    _SKILL_CACHE['items'] = items
+    _SKILL_CACHE['expires_at'] = now + SKILLHUB_CACHE_TTL_SECONDS
+    return list(items)
 
 
 def _is_skill_admin() -> bool:
@@ -216,7 +238,15 @@ def _require_skill_admin() -> None:
 def _safe_extract_zip(zip_path: Path, destination: Path) -> None:
     """Extract a zip archive without allowing path traversal."""
     destination.mkdir(parents=True, exist_ok=True)
+    if zip_path.stat().st_size > SKILLHUB_MAX_ZIP_BYTES:
+        raise ValueError('压缩包过大。')
     with zipfile.ZipFile(zip_path) as archive:
+        members = archive.infolist()
+        if len(members) > SKILLHUB_MAX_ZIP_FILES:
+            raise ValueError('压缩包文件数量过多。')
+        total_size = sum(max(member.file_size, 0) for member in members)
+        if total_size > SKILLHUB_MAX_EXTRACTED_BYTES:
+            raise ValueError('压缩包解压后过大。')
         for member in archive.infolist():
             target = (destination / member.filename).resolve()
             if not str(target).startswith(str(destination.resolve())):
@@ -261,7 +291,16 @@ def _fetch_github_repo(repo_url: str, destination: Path) -> tuple[Path, str]:
     request_obj = Request(zip_url, headers={'User-Agent': 'PolaZhenjing-SkillHub'})
     zip_path = destination / 'repo.zip'
     with urlopen(request_obj, timeout=30) as response:
-        zip_path.write_bytes(response.read())
+        written = 0
+        with zip_path.open('wb') as fh:
+            while True:
+                chunk = response.read(1024 * 256)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > SKILLHUB_MAX_ZIP_BYTES:
+                    raise ValueError('GitHub zip 包过大。')
+                fh.write(chunk)
     extract_dir = destination / 'extract'
     _safe_extract_zip(zip_path, extract_dir)
     children = [child for child in extract_dir.iterdir() if child.is_dir()]
@@ -359,9 +398,17 @@ def download(skill_id):
     if not package_dir.is_dir():
         abort(404)
     buffer = io.BytesIO()
+    total_size = 0
+    file_count = 0
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as archive:
         for path in package_dir.rglob('*'):
             if path.is_file():
+                file_count += 1
+                if file_count > SKILLHUB_MAX_DOWNLOAD_FILES:
+                    abort(413)
+                total_size += path.stat().st_size
+                if total_size > SKILLHUB_MAX_DOWNLOAD_BYTES:
+                    abort(413)
                 archive.write(path, arcname=str(Path(package_dir.name) / path.relative_to(package_dir)))
     buffer.seek(0)
     return send_file(
