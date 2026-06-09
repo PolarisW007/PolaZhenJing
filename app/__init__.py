@@ -146,6 +146,10 @@ def create_app():
 
     app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-change-me')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB upload limit
+    # Werkzeug 3.x 默认 max_form_memory_size = 500KB,富文本编辑后的 body
+    # 经常 1.5-2x 膨胀,粘贴图片 / 重排样式后超过 500KB 即触发 413。
+    # 提到 16MB,和 MAX_CONTENT_LENGTH 对齐,允许一篇文章最大 16MB 富文本。
+    app.config['MAX_FORM_MEMORY_SIZE'] = 16 * 1024 * 1024  # 16 MB form field
 
     # Apply reverse proxy middleware for sub-path deployment
     app.wsgi_app = ReverseProxied(app.wsgi_app)

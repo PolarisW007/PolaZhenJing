@@ -650,6 +650,14 @@ document.getElementById('article-edit-form').addEventListener('submit', function
   if (activeMode === 'rich_html' && window.tinymce && tinymce.get('rich-content')) {
     tinymce.triggerSave();
   }
+  // Disable both the markdown and the rich-mode textareas so the browser does
+  // not send 2-3 copies of the body in the form submission. Without this, a
+  // long article (e.g. 8KB markdown -> 500KB+ TinyMCE HTML) trips Werkzeug's
+  // 500KB max_form_memory_size and returns 413 before the canonical body
+  // hidden field is even inspected. The canonical body hidden field below
+  // already carries the active mode's content.
+  if (markdown) markdown.disabled = true;
+  if (rich) rich.disabled = true;
   // Mirror the active mode's content into the canonical body field for the
   // existing /admin/articles/.../edit backend, which still reads form.get('body').
   let payload = '';
