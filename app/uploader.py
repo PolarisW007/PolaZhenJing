@@ -213,7 +213,7 @@ def _get_style_prompt(style: str) -> str | None:
     return STYLE_SKILL_MAP.get(style, _GENERIC_REWRITE_PROMPT)
 
 MINIMAX_API_URL = 'https://api.minimax.chat/v1/chat/completions'
-MINIMAX_MODEL = 'MiniMax-M2.7'
+MINIMAX_MODEL = 'MiniMax-M3'
 
 # ── MiniMax Text-to-Image (Ghibli-style illustrations) ──────────────
 # T2I endpoint. The API key domain must match this URL:

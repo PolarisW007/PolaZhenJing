@@ -32,7 +32,7 @@ agent_bp = Blueprint("agent", __name__, url_prefix="/admin/api/agent")
 agent_admin_bp = Blueprint("agent_admin", __name__, url_prefix="/admin/agent")
 
 MINIMAX_API_URL = "https://api.minimax.chat/v1/chat/completions"
-MINIMAX_MODEL = os.environ.get("POLA_AGENT_MODEL", "MiniMax-M2.7")
+MINIMAX_MODEL = os.environ.get("POLA_AGENT_MODEL", "MiniMax-M3")
 
 
 SYSTEM_PROMPT = """你是「织梦空间」里的在线 Agent，名字叫「超级小王」。
