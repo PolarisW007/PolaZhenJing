@@ -1,5 +1,22 @@
 # 2026-06-06 PolaUUH 统一用户中心需求文档
 
+## 2026-06-11 更新：全量 Pola 登录注册接入
+
+- 本次追加范围：
+  - 新接入：`PolaNews`、`PolaLuna`。
+  - 已接入复核：`PolaRead`、`PolaReference`、`PolaDiting`。
+  - Provider 权限目录同步：`PolaUUH` 新仓库与线上仍承载 `/PolaUUH/admin/*` 的 `PolaZhenJing` 旧实现都必须包含 `polaluna.use`。
+- 线上路径事实：
+  - `https://aipd.me/PolaUUH/admin/login` 返回 200。
+  - `https://aipd.me/PolaUUH/login` 返回 404。
+  - `POST https://aipd.me/PolaUUH/admin/api/sso/check` 未登录返回 401，符合匿名 smoke 预期。
+  - `POST https://aipd.me/PolaUUH/api/sso/check` 返回 404。
+- 新验收标准：
+  - Pola 系列用户可见登录/注册入口默认走 `PolaUUH`。
+  - 业务应用不得默认暴露本地密码注册/登录；确需保留时必须由显式本地开发或救援环境变量开启。
+  - 新接入应用 SSO 默认路径统一为 `/PolaUUH/admin/login`、`/PolaUUH/admin/register`、`/PolaUUH/admin/api/sso/check`。
+  - 权限目录至少覆盖 `polareference.use`、`polaread.use`、`poladiting.use`、`polanews.use`、`polaluna.use`。
+
 ## 需求口径
 
 - 原始需求：

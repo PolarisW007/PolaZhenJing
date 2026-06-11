@@ -1,5 +1,23 @@
 # PRD / SPEC：PolaUUH 统一用户中心与 Pola 应用接入
 
+## 2026-06-11 更新：线上 canonical 路径和应用矩阵
+
+线上 `aipd.me` 当前通过 `/PolaUUH/admin/*` 暴露统一账号中心，因此新增和复核的 Pola 应用默认必须使用：
+
+- 登录：`https://aipd.me/PolaUUH/admin/login`
+- 注册：`https://aipd.me/PolaUUH/admin/register`
+- SSO 校验：`https://aipd.me/PolaUUH/admin/api/sso/check`
+
+应用矩阵：
+
+| 应用 | 登录/注册处理 | 权限 |
+| --- | --- | --- |
+| PolaRead | 已默认 PolaUUH，保留开发 fallback | `polaread.use` |
+| PolaReference | 已默认 PolaUUH，保留开发 fallback | `polareference.use` |
+| PolaDiting | 无独立登录页，开启鉴权时跳 PolaUUH | `poladiting.use` |
+| PolaNews | 本次新增 PolaUUH 登录页、注册跳转、SSO 换 JWT，旧本地登录默认关闭 | `polanews.use` |
+| PolaLuna | 本次新增 PolaUUH 登录页、注册跳转、SSO 换 JWT，旧本地登录默认关闭 | `polaluna.use` |
+
 ## 1. 产品定位
 
 `PolaUUH` 是 Pola Unified User Hub 的统一身份产品名。它从现有 `PolaZhenjing / AIPD` 账号中心上移为 Pola 系列公共能力，负责：

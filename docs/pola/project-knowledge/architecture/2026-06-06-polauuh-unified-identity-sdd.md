@@ -1,5 +1,18 @@
 # SDD：PolaUUH 统一身份中心与多应用接入
 
+## 2026-06-11 架构更新：admin 路径标准化
+
+线上 smoke 证明 `/PolaUUH/login` 与 `/PolaUUH/api/sso/check` 当前不可用，统一账号中心实际暴露路径是 `/PolaUUH/admin/*`。因此所有新 client 默认值统一调整为：
+
+```text
+POLAUUH_BASE_URL=https://aipd.me/PolaUUH
+POLAUUH_SSO_CHECK_PATH=/admin/api/sso/check
+POLAUUH_LOGIN_URL=https://aipd.me/PolaUUH/admin/login
+POLAUUH_REGISTER_URL=https://aipd.me/PolaUUH/admin/register
+```
+
+兼容策略不变：应用仍允许通过显式 `POLAUUH_*` 环境变量覆盖路径；旧 `AIPD_*` alias 继续作为迁移兼容。新增应用 `PolaNews`、`PolaLuna` 均采用“PolaUUH cookie -> app SSO endpoint -> 本地 JWT”的 client-side gateway 模式，旧本地密码登录只允许显式救援开关打开。
+
 ## 1. 背景和目标
 
 Pola 系列已经出现多个应用级身份实现：

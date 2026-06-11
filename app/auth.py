@@ -54,6 +54,7 @@ PERMISSION_CATALOG = {
     'polareference.use': {'name': '使用 PolaReference', 'app': 'PolaReference'},
     'polaread.use': {'name': '使用 PolaRead', 'app': 'PolaRead'},
     'poladiting.use': {'name': '使用 PolaDiting', 'app': 'PolaDiting'},
+    'polaluna.use': {'name': '使用 PolaLuna', 'app': 'PolaLuna'},
     'polanews.use': {'name': '使用 PolaNews', 'app': 'PolaNews'},
     'agent.use': {'name': '使用 AI 分身', 'app': 'AI Avatar'},
     'projects.manage': {'name': '管理项目', 'app': 'PolaUUH'},
