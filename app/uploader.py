@@ -9,7 +9,7 @@ import logging
 import shutil
 import time
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 
@@ -61,6 +61,12 @@ THEME_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'theme.json')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
 ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'webp'}
 RICH_MEDIA_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'richtext')
+SHARE_IMAGE_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'share')
+SHARE_IMAGE_URL_PREFIX = '/assets/images/share'
+SHARE_IMAGE_PRESETS = {
+    'wechat': {'suffix': 'wechat', 'size': (300, 300), 'quality': 86},
+    'og': {'suffix': 'og', 'size': (1200, 630), 'quality': 88},
+}
 WECHAT_TICKET_CACHE = {
     'access_token': '',
     'access_token_expires_at': 0,
@@ -1164,6 +1170,7 @@ def _unique_post_filename(posts_dir: str, date_str: str, slug: str) -> str:
 
 
 _POST_FILENAME_RE = re.compile(r'^(\d{4})-(\d{2})-(\d{2})-(.+)\.md$')
+_SHORT_CODE_RE = re.compile(r'^[0-9a-f]{8}$')
 
 
 def _article_admin_filename(filename: str) -> str:
@@ -1189,6 +1196,41 @@ def _resolve_post_filename(filename: str) -> str | None:
         if _article_admin_filename(fname) == wanted:
             return fname
     return None
+
+
+def _article_short_code(filename: str) -> str:
+    """Return a stable short-link code for a real Jekyll post filename."""
+    normalized = (filename or '').strip()
+    digest = hashlib.sha1(f'pzj-short-link:{normalized}'.encode('utf-8')).hexdigest()
+    return digest[:8]
+
+
+def _resolve_short_code(code: str) -> str | None:
+    """Resolve a short-link code to a real Jekyll post filename."""
+    code = (code or '').strip().lower()
+    if not _SHORT_CODE_RE.match(code):
+        return None
+    if not os.path.isdir(POSTS_DIR):
+        return None
+    for fname in os.listdir(POSTS_DIR):
+        if not fname.endswith('.md'):
+            continue
+        if _article_short_code(fname) == code:
+            return fname
+    return None
+
+
+def _absolute_public_url(path: str) -> str:
+    """Build a root-domain public URL, ignoring admin reverse-proxy prefixes."""
+    return _force_public_https(urljoin(request.host_url, path.lstrip('/')))
+
+
+def _public_article_url(admin_filename: str) -> str:
+    return _absolute_public_url(f'/articles/{admin_filename}')
+
+
+def _public_short_url(short_code: str) -> str:
+    return _absolute_public_url(f'/s/{short_code}')
 
 
 def _save_draft(content: str, title: str, tags: str, description: str,
@@ -1278,6 +1320,8 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
     summary = re.sub(r'!\[[^\]]*(?:\]\([^)]+\))?', '', summary).strip()
     admin_filename = _article_admin_filename(filename)
     local_url = url_for('public_articles.public_article_view', filename=admin_filename)
+    short_code = _article_short_code(filename)
+    keywords = _article_keywords(meta.get('tags', ''))
     return {
         'filename': filename,
         'admin_filename': admin_filename,
@@ -1288,6 +1332,12 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
         'theme': meta.get('theme', ''),
         'cover': cover,
         'url': local_url,
+        'canonical_url': _public_article_url(admin_filename),
+        'short_url': _public_short_url(short_code),
+        'keywords': keywords,
+        'section': _article_section(meta.get('layout', ''), keywords),
+        'read_time': _calc_read_time(body),
+        'word_count': _article_word_count(body),
         'admin_url': url_for('uploader.view_article', filename=admin_filename),
     }
 
@@ -1829,6 +1879,22 @@ def _tags_input_value(meta_tags: str) -> str:
     return value
 
 
+def _article_keywords(meta_tags: str) -> list[str]:
+    """Return article tags as clean keyword strings."""
+    value = (meta_tags or '').strip()
+    if not value or value == '[]':
+        return []
+    if value.startswith('[') and value.endswith(']'):
+        try:
+            parsed = json.loads(value.replace("'", '"'))
+            if isinstance(parsed, list):
+                return [str(item).strip() for item in parsed if str(item).strip()]
+        except Exception:
+            inner = value[1:-1]
+            return [item.strip().strip('"').strip("'") for item in inner.split(',') if item.strip()]
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
 def _strip_markdown_media(text: str) -> str:
     """Remove markdown media and collapse text for metadata summaries."""
     text = re.sub(r'!\[[^\]]*\]\([^)]+\)', '', text or '')
@@ -1837,6 +1903,14 @@ def _strip_markdown_media(text: str) -> str:
     text = re.sub(r'<[^>]+>', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
+
+
+def _article_word_count(text: str) -> int:
+    """Estimate visible article word count for structured data."""
+    visible = _strip_markdown_media(text)
+    cjk_count = sum(1 for char in visible if '\u4e00' <= char <= '\u9fff')
+    latin_words = len(re.findall(r'[A-Za-z0-9]+', visible))
+    return cjk_count + latin_words
 
 
 def _clamp_description(text: str, max_chars: int = 180) -> str:
@@ -1901,6 +1975,243 @@ def _absolute_asset_url(raw_url: str) -> str:
         path = raw_url[len('assets/'):]
         return _force_public_https(urljoin(request.host_url, f'{_article_asset_base()}/assets/{path}'.lstrip('/')))
     return _force_public_https(urljoin(request.url_root, raw_url.lstrip('/')))
+
+
+def _local_asset_path(raw_url: str) -> str | None:
+    """Resolve a public article image URL/path to a local file under assets/."""
+    raw_url = (raw_url or '').strip().strip('"').strip("'")
+    if not raw_url:
+        return None
+    raw_url = raw_url.replace('{{ site.baseurl }}', '').strip()
+    parsed_path = urlparse(raw_url).path if raw_url.startswith(('http://', 'https://')) else raw_url
+    if parsed_path.startswith('/PolaZhenjing/assets/'):
+        rel = parsed_path[len('/PolaZhenjing/assets/'):]
+    elif parsed_path.startswith('/assets/'):
+        rel = parsed_path[len('/assets/'):]
+    elif parsed_path.startswith('assets/'):
+        rel = parsed_path[len('assets/'):]
+    else:
+        return None
+    rel = rel.lstrip('/')
+    asset_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
+    candidate = os.path.abspath(os.path.join(asset_root, rel))
+    if not candidate.startswith(asset_root + os.sep):
+        return None
+    return candidate if os.path.isfile(candidate) else None
+
+
+def _article_section(layout: str, keywords: list[str]) -> str:
+    """Return a stable article section label for JSON-LD and feeds."""
+    if keywords:
+        return keywords[0]
+    return layout or 'AI Articles'
+
+
+def _share_image_url(raw_url: str, actual_filename: str, preset_name: str) -> str:
+    """Return a generated JPEG share image URL for the requested preset."""
+    preset = SHARE_IMAGE_PRESETS[preset_name]
+    source_path = _local_asset_path(raw_url)
+    if not source_path:
+        return _absolute_asset_url(raw_url)
+    short_code = _article_short_code(actual_filename)
+    out_name = f'{os.path.splitext(actual_filename)[0]}-{short_code}-{preset["suffix"]}.jpg'
+    out_path = os.path.join(SHARE_IMAGE_DIR, out_name)
+    try:
+        should_generate = (
+            not os.path.isfile(out_path)
+            or os.path.getmtime(out_path) < os.path.getmtime(source_path)
+        )
+        if should_generate:
+            from PIL import Image, ImageOps
+            os.makedirs(SHARE_IMAGE_DIR, exist_ok=True)
+            with Image.open(source_path) as image:
+                image = ImageOps.exif_transpose(image).convert('RGB')
+                resample = getattr(getattr(Image, 'Resampling', Image), 'LANCZOS')
+                thumb = ImageOps.fit(image, preset['size'], method=resample, centering=(0.5, 0.5))
+                thumb.save(
+                    out_path,
+                    format='JPEG',
+                    quality=preset['quality'],
+                    optimize=True,
+                    progressive=True,
+                )
+        return _absolute_asset_url(f'{SHARE_IMAGE_URL_PREFIX}/{out_name}')
+    except Exception as exc:
+        current_app.logger.warning('Share thumbnail generation failed: %s', exc)
+        return _absolute_asset_url(raw_url)
+
+
+def _wechat_share_image_url(raw_url: str, actual_filename: str) -> str:
+    """Return the WeChat-friendly square share image."""
+    return _share_image_url(raw_url, actual_filename, 'wechat')
+
+
+def _og_share_image_url(raw_url: str, actual_filename: str) -> str:
+    """Return the Open Graph large-card share image."""
+    return _share_image_url(raw_url, actual_filename, 'og')
+
+
+def _article_modified_time(path: str) -> str:
+    try:
+        return datetime.fromtimestamp(os.path.getmtime(path)).astimezone().isoformat()
+    except OSError:
+        return ''
+
+
+def _public_article_records(limit: int | None = None) -> list[dict]:
+    """Build public article records for sitemap and llms.txt."""
+    records = []
+    for post in _scan_posts():
+        filename = post.get('filename', '')
+        fpath = post.get('path', '')
+        if not filename or not fpath or not os.path.isfile(fpath):
+            continue
+        try:
+            with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
+                raw = f.read()
+        except OSError:
+            continue
+        meta, _, body = _parse_post(raw)
+        meta = {**post, **meta}
+        admin_filename = _article_admin_filename(filename)
+        short_code = _article_short_code(filename)
+        title = meta.get('title') or filename.replace('.md', '')
+        summary = _clamp_description(
+            meta.get('share_summary') or meta.get('description')
+            or meta.get('summary') or _generate_summary(body, max_chars=160)
+        )
+        keywords = _article_keywords(meta.get('tags', ''))
+        lastmod = _article_modified_time(fpath) or meta.get('date') or filename[:10]
+        records.append({
+            'filename': filename,
+            'admin_filename': admin_filename,
+            'title': title,
+            'date': meta.get('date') or filename[:10],
+            'summary': summary,
+            'canonical_url': _public_article_url(admin_filename),
+            'short_url': _public_short_url(short_code),
+            'lastmod': lastmod[:10],
+            'lastmod_iso': lastmod,
+            'keywords': keywords,
+            'section': _article_section(meta.get('layout', ''), keywords),
+            'read_time': _calc_read_time(body),
+            'word_count': _article_word_count(body),
+        })
+        if limit and len(records) >= limit:
+            break
+    return records
+
+
+def _article_json_ld_graph(
+        *,
+        title: str,
+        description: str,
+        canonical_url: str,
+        short_url: str,
+        og_image: str,
+        wechat_image: str,
+        keywords: list[str],
+        section: str,
+        date_published: str,
+        date_modified: str,
+        word_count: int,
+        read_time: int) -> dict:
+    """Build article JSON-LD as a graph, so crawlers see page/site/author context."""
+    site_url = _absolute_public_url('/')
+    about_url = _absolute_public_url('/about.html')
+    website_id = f'{site_url}#website'
+    organization_id = f'{site_url}#organization'
+    person_id = f'{about_url}#person'
+    webpage_id = f'{canonical_url}#webpage'
+    article_id = f'{canonical_url}#article'
+    breadcrumb_id = f'{canonical_url}#breadcrumb'
+    image_objects = [
+        {'@type': 'ImageObject', 'url': og_image, 'width': 1200, 'height': 630},
+        {'@type': 'ImageObject', 'url': wechat_image, 'width': 300, 'height': 300},
+    ]
+    return {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'WebSite',
+                '@id': website_id,
+                'url': site_url,
+                'name': '织梦空间 / PolaZhenJing',
+                'alternateName': ['织梦空间', 'Pola 真经'],
+                'inLanguage': 'zh-CN',
+                'publisher': {'@id': organization_id},
+            },
+            {
+                '@type': 'Organization',
+                '@id': organization_id,
+                'name': '织梦空间',
+                'url': site_url,
+                'logo': {'@type': 'ImageObject', 'url': _absolute_asset_url('/assets/images/test_cover.jpg')},
+            },
+            {
+                '@type': 'Person',
+                '@id': person_id,
+                'name': '炽驹 Polaris',
+                'url': about_url,
+                'affiliation': {'@id': organization_id},
+            },
+            {
+                '@type': 'BreadcrumbList',
+                '@id': breadcrumb_id,
+                'itemListElement': [
+                    {
+                        '@type': 'ListItem',
+                        'position': 1,
+                        'name': '织梦空间',
+                        'item': site_url,
+                    },
+                    {
+                        '@type': 'ListItem',
+                        'position': 2,
+                        'name': '文章',
+                        'item': _absolute_public_url('/articles'),
+                    },
+                    {
+                        '@type': 'ListItem',
+                        'position': 3,
+                        'name': title,
+                        'item': canonical_url,
+                    },
+                ],
+            },
+            {
+                '@type': 'WebPage',
+                '@id': webpage_id,
+                'url': canonical_url,
+                'name': title,
+                'description': description,
+                'isPartOf': {'@id': website_id},
+                'breadcrumb': {'@id': breadcrumb_id},
+                'primaryImageOfPage': image_objects[0],
+                'inLanguage': 'zh-CN',
+            },
+            {
+                '@type': 'Article',
+                '@id': article_id,
+                'headline': title,
+                'description': description,
+                'url': canonical_url,
+                'mainEntityOfPage': {'@id': webpage_id},
+                'sameAs': [short_url],
+                'image': image_objects,
+                'inLanguage': 'zh-CN',
+                'datePublished': date_published,
+                'dateModified': date_modified,
+                'keywords': keywords,
+                'articleSection': section,
+                'wordCount': word_count,
+                'timeRequired': f'PT{read_time}M',
+                'author': {'@id': person_id},
+                'publisher': {'@id': organization_id},
+                'about': [{'@type': 'Thing', 'name': keyword} for keyword in keywords],
+            },
+        ],
+    }
 
 
 def _wechat_nonce() -> str:
@@ -2034,6 +2345,35 @@ def wechat_share_config():
         return jsonify({'configured': False, 'reason': 'wechat-api-error'}), 502
 
 
+@uploader_bp.route('/api/wechat/share-diagnostics', methods=['POST'])
+def wechat_share_diagnostics():
+    """Record non-sensitive JS-SDK share status from real WeChat webviews."""
+    payload = request.get_json(silent=True) or {}
+
+    def _clip(value: object, max_chars: int = 240) -> str:
+        text = str(value or '').strip()
+        return text[:max_chars]
+
+    page_url = _clip(payload.get('page_url'))
+    share_url = _clip(payload.get('share_url'))
+    if not page_url.startswith(('https://aipd.me/', 'http://aipd.me/')):
+        return jsonify({'ok': False, 'reason': 'invalid-page-url'}), 400
+    if share_url and not share_url.startswith(('https://aipd.me/', 'http://aipd.me/')):
+        return jsonify({'ok': False, 'reason': 'invalid-share-url'}), 400
+
+    status = _clip(payload.get('status'), 32)
+    log_method = current_app.logger.info if status == 'ready' else current_app.logger.warning
+    log_method(
+        'WeChat share diagnostics status=%s page=%s share=%s err=%s ua=%s',
+        status,
+        page_url,
+        share_url,
+        _clip(payload.get('err_msg')),
+        _clip(request.headers.get('User-Agent'), 160),
+    )
+    return jsonify({'ok': True})
+
+
 @uploader_bp.route('/articles/<filename>')
 def view_article(filename):
     """Preview a single article."""
@@ -2044,6 +2384,197 @@ def view_article(filename):
 def public_article_view(filename):
     """Public read-only article detail."""
     return _render_article(filename, public=True)
+
+
+@public_articles_bp.route('/s/<code>')
+def public_article_short_link(code):
+    """Render a public article from its stable short-link code."""
+    actual_filename = _resolve_short_code(code)
+    if not actual_filename:
+        return render_template('public_article_404.html'), 404
+    return _render_article(_article_admin_filename(actual_filename), public=True)
+
+
+@public_articles_bp.route('/sitemap.xml')
+def public_sitemap():
+    """Dynamic sitemap including public articles from the current server posts."""
+    from xml.sax.saxutils import escape as xml_escape
+
+    static_urls = [
+        {'loc': _absolute_public_url('/'), 'changefreq': 'weekly', 'priority': '1.0'},
+        {'loc': _absolute_public_url('/agent.html'), 'changefreq': 'weekly', 'priority': '0.8'},
+        {'loc': _absolute_public_url('/about.html'), 'changefreq': 'monthly', 'priority': '0.7'},
+        {'loc': _absolute_public_url('/articles'), 'changefreq': 'daily', 'priority': '0.8'},
+        {'loc': _absolute_public_url('/feed.xml'), 'changefreq': 'daily', 'priority': '0.4'},
+        {'loc': _absolute_public_url('/articles.json'), 'changefreq': 'daily', 'priority': '0.4'},
+        {'loc': _absolute_public_url('/llms.txt'), 'changefreq': 'daily', 'priority': '0.3'},
+    ]
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for item in static_urls:
+        lines.extend([
+            '  <url>',
+            f'    <loc>{xml_escape(item["loc"])}</loc>',
+            f'    <changefreq>{item["changefreq"]}</changefreq>',
+            f'    <priority>{item["priority"]}</priority>',
+            '  </url>',
+        ])
+    for article in _public_article_records():
+        lines.extend([
+            '  <url>',
+            f'    <loc>{xml_escape(article["canonical_url"])}</loc>',
+            f'    <lastmod>{xml_escape(article["lastmod"])}</lastmod>',
+            '    <changefreq>monthly</changefreq>',
+            '    <priority>0.7</priority>',
+            '  </url>',
+        ])
+    lines.append('</urlset>')
+    return current_app.response_class('\n'.join(lines) + '\n', mimetype='application/xml')
+
+
+@public_articles_bp.route('/robots.txt')
+def public_robots_txt():
+    """Dynamic robots.txt with sitemap and admin exclusions."""
+    lines = [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin/',
+        'Disallow: /PolaZhenjing/admin/',
+        '',
+        f'Sitemap: {_absolute_public_url("/sitemap.xml")}',
+        '',
+    ]
+    return current_app.response_class('\n'.join(lines), mimetype='text/plain; charset=utf-8')
+
+
+@public_articles_bp.route('/feed.xml')
+def public_feed_xml():
+    """RSS feed for recent public articles."""
+    from xml.sax.saxutils import escape as xml_escape
+
+    articles = _public_article_records(limit=50)
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<rss version="2.0">',
+        '  <channel>',
+        '    <title>织梦空间 / PolaZhenJing</title>',
+        f'    <link>{xml_escape(_absolute_public_url("/articles"))}</link>',
+        '    <description>AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。</description>',
+        '    <language>zh-CN</language>',
+        f'    <lastBuildDate>{datetime.now().astimezone().strftime("%a, %d %b %Y %H:%M:%S %z")}</lastBuildDate>',
+    ]
+    for item in articles:
+        lines.extend([
+            '    <item>',
+            f'      <title>{xml_escape(item["title"])}</title>',
+            f'      <link>{xml_escape(item["canonical_url"])}</link>',
+            f'      <guid isPermaLink="true">{xml_escape(item["canonical_url"])}</guid>',
+            f'      <description>{xml_escape(item["summary"])}</description>',
+            f'      <pubDate>{xml_escape(item["date"])}</pubDate>',
+        ])
+        for keyword in item.get('keywords') or []:
+            lines.append(f'      <category>{xml_escape(keyword)}</category>')
+        lines.extend([
+            '    </item>',
+        ])
+    lines.extend(['  </channel>', '</rss>'])
+    return current_app.response_class('\n'.join(lines) + '\n', mimetype='application/rss+xml')
+
+
+@public_articles_bp.route('/articles.json')
+def public_articles_json_feed():
+    """Machine-readable article feed for agents and content discovery."""
+    articles = _public_article_records(limit=80)
+    payload = {
+        'version': 'https://jsonfeed.org/version/1.1',
+        'title': '织梦空间 / PolaZhenJing',
+        'home_page_url': _absolute_public_url('/'),
+        'feed_url': _absolute_public_url('/articles.json'),
+        'description': 'AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。',
+        'language': 'zh-CN',
+        'items': [
+            {
+                'id': item['canonical_url'],
+                'url': item['canonical_url'],
+                'external_url': item['short_url'],
+                'title': item['title'],
+                'summary': item['summary'],
+                'date_published': item['date'],
+                'date_modified': item['lastmod_iso'],
+                'tags': item.get('keywords') or [],
+                'section': item.get('section') or '',
+                'reading_time_minutes': item.get('read_time') or 1,
+                'word_count': item.get('word_count') or 0,
+            }
+            for item in articles
+        ],
+    }
+    return jsonify(payload)
+
+
+@public_articles_bp.route('/llms.txt')
+def public_llms_txt():
+    """Dynamic llms.txt for AI search and generative engine discovery."""
+    articles = _public_article_records(limit=30)
+    lines = [
+        '# 织梦空间 / PolaZhenJing',
+        '',
+        '> AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。',
+        '',
+        '## Canonical Entry Points',
+        '',
+        f'- Home: {_absolute_public_url("/")}',
+        f'- Articles: {_absolute_public_url("/articles")}',
+        f'- Agent: {_absolute_public_url("/agent.html")}',
+        f'- About: {_absolute_public_url("/about.html")}',
+        f'- Sitemap: {_absolute_public_url("/sitemap.xml")}',
+        f'- RSS Feed: {_absolute_public_url("/feed.xml")}',
+        f'- JSON Feed: {_absolute_public_url("/articles.json")}',
+        f'- Robots: {_absolute_public_url("/robots.txt")}',
+        '',
+        '## Site Identity',
+        '',
+        '- Name: 织梦空间 / PolaZhenJing',
+        '- Language: zh-CN',
+        '- Author: 炽驹 Polaris',
+        '- Topics: AI 产品, Agent 工作流, 企业软件, 数据基础设施, 个人知识生产',
+        '',
+        '## Share Metadata Contract',
+        '',
+        '- Canonical URLs under `/articles/*.md` are preferred for citation and indexing.',
+        '- Shortlinks under `/s/<code>` are preferred for human sharing and social cards.',
+        '- WeChat uses a 300x300 JPEG share image through JS-SDK `imgUrl`.',
+        '- Jike, X, and generic crawlers should use Open Graph `og:title`, `og:description`, and 1200x630 `og:image`.',
+        '',
+        '## Article Index',
+        '',
+    ]
+    for item in articles:
+        keywords = ', '.join(item.get('keywords') or [])
+        lines.extend([
+            f'### {item["title"]}',
+            '',
+            f'- Date: {item["date"]}',
+            f'- Canonical: {item["canonical_url"]}',
+            f'- Shortlink: {item["short_url"]}',
+            f'- Summary: {item["summary"]}',
+            f'- Section: {item["section"]}',
+            f'- Reading time: {item["read_time"]} minutes',
+        ])
+        if keywords:
+            lines.append(f'- Keywords: {keywords}')
+        lines.append('')
+    lines.extend([
+        '## AI Agent Guidance',
+        '',
+        '- Prefer canonical URLs for citation and shortlinks for human sharing.',
+        '- Treat `/PolaZhenjing/admin/*` as authenticated admin content, not public content.',
+        '- Use article summaries and JSON-LD metadata before inferring unstated claims.',
+        '',
+    ])
+    return current_app.response_class('\n'.join(lines), mimetype='text/plain; charset=utf-8')
 
 
 def _render_article(filename: str, public: bool = False):
@@ -2062,39 +2593,77 @@ def _render_article(filename: str, public: bool = False):
     # asset route even when the public article itself is mounted at /articles/.
     body = body.replace('{{ site.baseurl }}', _article_asset_base())
     title = meta.get('title') or actual_filename.replace('.md', '')
+    share_title = meta.get('share_title') or title
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     body_html = _remove_duplicate_leading_heading(body_html, title)
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{actual_filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
     pages_url = _build_pages_url(actual_filename)
-    share_url = url_for('public_articles.public_article_view',
-                        filename=admin_filename, _external=True)
-    share_url = _force_public_https(share_url)
+    short_code = _article_short_code(actual_filename)
+    canonical_url = _public_article_url(admin_filename)
+    short_url = _public_short_url(short_code)
+    share_url = short_url
     read_time = _calc_read_time(body)
     # Get style accent color
     layout = meta.get('layout', 'deep-technical')
     accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
     share_description = _clamp_description(
-        meta.get('description') or meta.get('summary') or _generate_summary(body, max_chars=160)
+        meta.get('share_summary') or meta.get('description')
+        or meta.get('summary') or _generate_summary(body, max_chars=160)
     )
-    share_image = _absolute_asset_url(
-        meta.get('image') or meta.get('cover') or _article_first_image(body)
+    raw_share_image = (
+        meta.get('share_image') or meta.get('image') or meta.get('cover') or _article_first_image(body)
         or '/assets/images/test_cover.jpg'
     )
+    wechat_share_image = _wechat_share_image_url(raw_share_image, actual_filename)
+    og_share_image = _og_share_image_url(raw_share_image, actual_filename)
+    wechat_share_config_url = _absolute_public_url('/PolaZhenjing/admin/api/wechat/share-config')
+    wechat_share_diagnostics_url = _absolute_public_url('/PolaZhenjing/admin/api/wechat/share-diagnostics')
     share_logo = _absolute_asset_url('/assets/images/test_cover.jpg')
     article_asset_base = _article_asset_base()
+    article_keywords = _article_keywords(meta.get('tags', ''))
+    article_section = _article_section(layout, article_keywords)
+    article_published_time = meta.get('date') or actual_filename[:10]
+    article_modified_time = _article_modified_time(fpath) or article_published_time
+    article_word_count = _article_word_count(body)
+    article_json_ld = _article_json_ld_graph(
+        title=share_title,
+        description=share_description,
+        canonical_url=canonical_url,
+        short_url=short_url,
+        og_image=og_share_image,
+        wechat_image=wechat_share_image,
+        keywords=article_keywords,
+        section=article_section,
+        date_published=article_published_time,
+        date_modified=article_modified_time,
+        word_count=article_word_count,
+        read_time=read_time,
+    )
     return render_template('article_view.html',
                            filename=filename, meta=meta,
                            admin_filename=admin_filename,
                            actual_filename=actual_filename,
                            body_html=body_html, github_url=github_url,
                            pages_url=pages_url, read_time=read_time,
+                           canonical_url=canonical_url,
+                           short_code=short_code,
+                           short_url=short_url,
                            share_url=share_url,
-                           share_title=title,
+                           share_title=share_title,
                            share_description=share_description,
-                           share_image=share_image,
+                           wechat_share_image=wechat_share_image,
+                           og_share_image=og_share_image,
+                           wechat_share_config_url=wechat_share_config_url,
+                           wechat_share_diagnostics_url=wechat_share_diagnostics_url,
                            share_logo=share_logo,
+                           article_json_ld=article_json_ld,
                            article_asset_base=article_asset_base,
+                           article_keywords=article_keywords,
+                           article_section=article_section,
+                           article_published_time=article_published_time,
+                           article_modified_time=article_modified_time,
+                           article_word_count=article_word_count,
                            accent_color=accent_color,
                            is_public=public,
                            can_manage=_is_admin_session(),

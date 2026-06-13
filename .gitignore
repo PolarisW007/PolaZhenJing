@@ -16,6 +16,7 @@ venv/
 # Data
 data/wiki.db
 data/uploads/
+assets/images/share/
 
 # Environment
 .env

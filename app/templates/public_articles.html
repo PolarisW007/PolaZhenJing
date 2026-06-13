@@ -2,6 +2,44 @@
 {% block title %}文章列表{% endblock %}
 {% block nav_logo %}织梦空间 · 文章列表{% endblock %}
 {% block card_class %}card-full{% endblock %}
+{% block head_extra %}
+<meta name="description" content="织梦空间文章列表，聚合 AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://aipd.me/articles">
+<link rel="alternate" type="application/rss+xml" title="织梦空间文章 RSS" href="https://aipd.me/feed.xml">
+<link rel="alternate" type="application/feed+json" title="织梦空间文章 JSON Feed" href="https://aipd.me/articles.json">
+<meta property="og:site_name" content="织梦空间">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:type" content="website">
+<meta property="og:title" content="织梦空间文章列表">
+<meta property="og:description" content="AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
+<meta property="og:url" content="https://aipd.me/articles">
+<meta property="og:image" content="https://aipd.me/assets/hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="织梦空间文章列表">
+<meta name="twitter:description" content="AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
+<meta name="twitter:image" content="https://aipd.me/assets/hero.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "织梦空间文章列表",
+  "url": "https://aipd.me/articles",
+  "inLanguage": "zh-CN",
+  "itemListElement": [
+    {% for post in posts %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "url": {{ post.canonical_url | tojson }},
+      "name": {{ post.title | tojson }},
+      "description": {{ post.summary | tojson }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
 {% block content %}
 <div class="public-article-head">
   <div>

@@ -29,6 +29,8 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 ## 通信协议和路由
 
 - 根门户静态路由：`/`、`/agent.html`、`/about.html`。
+- 公开文章路由：根域 `/articles`、`/articles/<filename>.md` 由 nginx 代理到 Flask 公开文章 blueprint；短链 `/s/<code>` 也应由 nginx 代理到 Flask，并在应用内解析到同一篇公开文章。
+- 公开发现路由：`/sitemap.xml`、`/robots.txt`、`/llms.txt`、`/feed.xml`、`/articles.json` 由 Flask 按服务器当前 `_posts` 动态生成，供搜索引擎、AI agent 和社交抓取器读取。
 - 统一账号基础 API：
   - `GET /PolaZhenjing/admin/api/me`：返回 `authenticated`、`user`、`permissions`。
   - 页面路由：`/PolaZhenjing/admin/login`、`/register`、`/account`、`/password`、`/logout`。

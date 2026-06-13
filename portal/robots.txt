@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /PolaZhenjing/admin/
 
 Sitemap: https://aipd.me/sitemap.xml

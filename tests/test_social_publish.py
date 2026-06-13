@@ -1,4 +1,5 @@
 import sqlite3
+from pathlib import Path
 
 from app import social_publish
 from app import create_app
@@ -8,6 +9,7 @@ from app.social_publish import (build_manual_package, build_wechat_html,
                                 _wechat_content_source_url,
                                 _wechat_clamp_text,
                                 _wechat_uploadable_image)
+from app.uploader import POSTS_DIR, _article_admin_filename, _article_short_code
 
 
 def sample_context():
@@ -207,3 +209,101 @@ def test_admin_links_respect_script_name_prefix():
     assert 'href="/PolaZhenjing/admin/articles"' in body
     assert 'href="/admin/upload"' not in body
     assert 'href="/admin/articles"' not in body
+
+
+def _sample_post_filename() -> str:
+    posts = sorted(Path(POSTS_DIR).glob("*.md"), reverse=True)
+    assert posts
+    return posts[0].name
+
+
+def test_public_article_short_link_renders_share_card_metadata():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    filename = _sample_post_filename()
+    admin_filename = _article_admin_filename(filename)
+    short_code = _article_short_code(filename)
+    short_url = f"https://aipd.me/s/{short_code}"
+    canonical_url = f"https://aipd.me/articles/{admin_filename}"
+
+    response = client.get(f"/s/{short_code}", base_url="https://aipd.me")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert f'<link rel="canonical" href="{canonical_url}">' in body
+    assert f'<meta property="og:url" content="{short_url}">' in body
+    assert f'<meta name="twitter:url" content="{short_url}">' in body
+    assert '<meta property="og:image:type" content="image/jpeg">' in body
+    assert '<meta property="og:image:width" content="1200">' in body
+    assert '<meta property="og:image:height" content="630">' in body
+    assert "/assets/images/share/" in body
+    assert "-og.jpg" in body
+    assert "-wechat.jpg" in body
+    assert '"mainEntityOfPage": ' in body
+    assert '"@graph":' in body
+    assert '"BreadcrumbList"' in body
+    assert '"wordCount"' in body
+    assert 'data-copy-shortlink' in body
+    assert "复制短链接" in body
+    assert "updateAppMessageShareData" in body
+    assert "updateTimelineShareData" in body
+    assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-config" in body
+    assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-diagnostics" in body
+    assert "wx.error" in body
+    assert "__PZJ_WECHAT_SHARE_READY" in body
+
+    long_response = client.get(f"/articles/{admin_filename}", base_url="https://aipd.me")
+    long_body = long_response.get_data(as_text=True)
+
+    assert long_response.status_code == 200
+    assert short_url in long_body
+    assert canonical_url in long_body
+
+
+def test_public_article_short_link_rejects_unknown_code():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+
+    response = client.get("/s/00000000", base_url="https://aipd.me")
+
+    assert response.status_code == 404
+
+
+def test_geo_discovery_feeds_render():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    filename = _sample_post_filename()
+    admin_filename = _article_admin_filename(filename)
+    short_code = _article_short_code(filename)
+    canonical_url = f"https://aipd.me/articles/{admin_filename}"
+    short_url = f"https://aipd.me/s/{short_code}"
+
+    robots = client.get("/robots.txt", base_url="https://aipd.me")
+    assert robots.status_code == 200
+    robots_body = robots.get_data(as_text=True)
+    assert "Disallow: /admin/" in robots_body
+    assert "Sitemap: https://aipd.me/sitemap.xml" in robots_body
+
+    feed = client.get("/feed.xml", base_url="https://aipd.me")
+    assert feed.status_code == 200
+    feed_body = feed.get_data(as_text=True)
+    assert "<rss version=\"2.0\">" in feed_body
+    assert canonical_url in feed_body
+
+    articles_json = client.get("/articles.json", base_url="https://aipd.me")
+    assert articles_json.status_code == 200
+    data = articles_json.get_json()
+    assert data["feed_url"] == "https://aipd.me/articles.json"
+    assert any(
+        item["url"] == canonical_url and item["external_url"] == short_url
+        for item in data["items"]
+    )
+
+    index = client.get("/articles", base_url="https://aipd.me")
+    assert index.status_code == 200
+    index_body = index.get_data(as_text=True)
+    assert '"@type": "ItemList"' in index_body
+    assert canonical_url in index_body

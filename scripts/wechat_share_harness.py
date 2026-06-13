@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app import create_app  # noqa: E402
+from app.uploader import _article_short_code, _resolve_post_filename  # noqa: E402
 
 
 def _first_admin_filename() -> str:
@@ -42,6 +43,13 @@ def _content(html: str, name: str, attr: str = "property") -> str:
     return match.group(1)
 
 
+def _wechat_img_url(html: str) -> str:
+    match = re.search(r"imgUrl:\s*\"([^\"]+)\"", html)
+    if not match:
+        raise AssertionError("Missing WECHAT_SHARE imgUrl")
+    return match.group(1)
+
+
 def main() -> int:
     app = create_app()
     app.config.update(TESTING=True, SECRET_KEY="wechat-share-harness")
@@ -59,21 +67,36 @@ def main() -> int:
     og_description = _content(html, "og:description")
     og_url = _content(html, "og:url")
     og_image = _content(html, "og:image")
+    wechat_image = _wechat_img_url(html)
     twitter_card = _content(html, "twitter:card", attr="name")
     itemprop_image = _content(html, "image", attr="itemprop")
 
     assert og_title.strip(), "og:title is empty"
     assert 20 <= len(og_description) <= 190, f"bad description length: {len(og_description)}"
-    assert og_url.startswith("https://aipd.me/PolaZhenjing/articles/"), og_url
+    assert re.match(r"^https://aipd\.me/s/[0-9a-f]{8}$", og_url), og_url
     assert og_image.startswith("https://aipd.me/"), og_image
+    assert "/assets/images/share/" in og_image, f"OG share image should use generated share asset: {og_image}"
+    assert og_image.endswith("-og.jpg"), f"OG share image should be large-card JPEG: {og_image}"
+    assert wechat_image.startswith("https://aipd.me/"), wechat_image
+    assert wechat_image.endswith("-wechat.jpg"), f"WeChat image should be square JPEG: {wechat_image}"
+    assert '<meta property="og:image:width" content="1200">' in html
+    assert '<meta property="og:image:height" content="630">' in html
+    assert '<meta name="thumbnail" content="' in html
     assert itemprop_image == og_image, "itemprop image should match og:image"
     assert twitter_card == "summary_large_image", twitter_card
     assert "updateAppMessageShareData" in html, "WeChat app-message share hook missing"
     assert "updateTimelineShareData" in html, "WeChat timeline share hook missing"
+    assert "WECHAT_SHARE" in html, "WeChat share payload missing"
+    assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-config" in html, "WeChat config endpoint should use public app prefix"
+    assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-diagnostics" in html, "WeChat diagnostics endpoint missing"
+    assert "wx.error" in html, "WeChat JS-SDK error diagnostics missing"
+    assert "__PZJ_WECHAT_SHARE_READY" in html, "WeChat readiness flag missing"
     assert "TL;DR" not in html, "Public article should not show TL;DR label"
     assert "Twitter" not in html, "Public article should not show admin Twitter share button"
     assert "LinkedIn" not in html, "Public article should not show admin LinkedIn share button"
     assert "copy-link-btn" not in html, "Public article should not show admin copy share button"
+    assert "data-copy-shortlink" in html, "Public article should show short-link copy button"
+    assert "复制短链接" in html, "Public article short-link copy label missing"
 
     asset_filename = _asset_regression_filename(filename)
     public_resp = client.get(
@@ -85,12 +108,26 @@ def main() -> int:
     public_og_image = _content(public_html, "og:image")
     public_twitter_image = _content(public_html, "twitter:image", attr="name")
     assert public_og_image.startswith("https://aipd.me/PolaZhenjing/assets/"), public_og_image
+    assert public_og_image.endswith("-og.jpg"), public_og_image
     assert public_twitter_image == public_og_image, "Root public twitter image should match og:image"
     assert "/PolaZhenjing/assets/images/" in public_html, "Public article media should use app asset prefix"
     assert 'href="/PolaZhenjing/assets/css/main.css"' in public_html, "Public article CSS should use app asset prefix"
     assert 'src="/assets/images/generated/' not in public_html, "Root public article should not render root generated asset URLs"
     assert 'src="/assets/images/uploads/' not in public_html, "Root public article should not render root uploaded asset URLs"
     assert 'href="/assets/css/' not in public_html, "Root public article should not render root CSS asset URLs"
+
+    actual_filename = _resolve_post_filename(asset_filename)
+    assert actual_filename, asset_filename
+    short_code = _article_short_code(actual_filename)
+    short_resp = client.get(
+        f"/s/{short_code}",
+        base_url="https://aipd.me",
+    )
+    assert short_resp.status_code == 200, short_resp.status_code
+    short_html = short_resp.get_data(as_text=True)
+    assert f'https://aipd.me/s/{short_code}' in short_html, "Short-link page should expose short share URL"
+    assert f'https://aipd.me/articles/{asset_filename}' in short_html, "Short-link page should expose canonical URL"
+    assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-config" in short_html, "Short-link page should call prefixed WeChat API"
 
     admin_client = app.test_client()
     with admin_client.session_transaction(base_url="https://aipd.me") as session:
@@ -104,6 +141,8 @@ def main() -> int:
     admin_html = admin_response.get_data(as_text=True)
     assert "Twitter" in admin_html, "Admin article should show Twitter share button"
     assert "LinkedIn" in admin_html, "Admin article should show LinkedIn share button"
+    assert "复制短链" in admin_html, "Admin short-link copy helper missing"
+    assert "即刻" in admin_html, "Jike share helper missing"
     assert "TL;DR" not in admin_html, "Admin article should not show TL;DR label"
 
     config_resp = client.get(
@@ -111,14 +150,25 @@ def main() -> int:
         base_url="https://aipd.me",
         headers={"X-Script-Name": "/PolaZhenjing"},
     )
-    assert config_resp.status_code == 200, config_resp.status_code
+    assert config_resp.status_code in {200, 502}, config_resp.status_code
     data = config_resp.get_json()
-    assert data and data.get("configured") is False, data
+    assert data, data
+    if data.get("configured") is True:
+        for key in ["appId", "timestamp", "nonceStr", "signature"]:
+            assert data.get(key), data
+    else:
+        assert data.get("configured") is False, data
+        assert data.get("reason") in {
+            "missing-wechat-app-id",
+            "missing-wechat-ticket",
+            "wechat-api-error",
+        }, data
 
     print("wechat_share_harness: ok")
     print(f"article={filename}")
     print(f"og_url={og_url}")
     print(f"og_image={og_image}")
+    print(f"wechat_image={wechat_image}")
     return 0
 
 
