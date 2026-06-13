@@ -90,6 +90,13 @@ PYTHONPATH=. .venv/bin/python -c "from app import create_app; app=create_app(); 
 - 云端 `PYTHONPATH=. .venv/bin/python scripts/wechat_share_harness.py`：通过，示例短链 `https://aipd.me/s/49c0c4e8`。
 - 云端 `PYTHONPATH=. .venv/bin/python scripts/seo_geo_harness.py`：通过，`error_count=0`。
 - 云端 `PYTHONPATH=. .venv/bin/pytest tests -q`：37 passed。
+- 微信诊断增强后：
+  - 本地 `tests/test_social_publish.py`：16 passed。
+  - 本地 `scripts/wechat_share_harness.py`：通过，覆盖 GET 图片探针。
+  - 云端 `tests/test_social_publish.py`：16 passed。
+  - 云端 `scripts/wechat_share_harness.py`：通过。
+  - 云端 `scripts/seo_geo_harness.py`：通过。
+  - 云端全量 tests：38 passed。
 - `polazj.service` restart 后 active。
 
 ### 公网验证
@@ -113,7 +120,10 @@ PYTHONPATH=. .venv/bin/python -c "from app import create_app; app=create_app(); 
 - `share-config?url=https://aipd.me/s/49c0c4e8`：返回 `configured=true`。
 - `share-diagnostics` POST：返回 `{"ok": true}`，非 ready 状态可在 journal 记录 warning。
 - `https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt`：200 OK，`Content-Type: text/plain`，`Content-Length: 16`，与用户提供文件 `cmp` 一致。
+- `share-diagnostics` GET 图片探针：公网返回 204，并在 journal 记录 `status=script-start`。
+- 短链页包含 `checkJsApi`、`showMenuItems`、`share-api-registered`、`reportWechatShareByImage`、新旧分享 API 注册逻辑。
 
 ### 剩余风险
 
-- 诊断日志捕获过真实微信客户端 `config:invalid url domain`。校验文件已配置到云服务器，仍需在微信公众平台后台点击校验/保存 JS接口安全域名后，再做微信内真机右上角分享复验。
+- 诊断日志捕获过真实微信客户端 `config:invalid url domain`。校验文件和 JS接口安全域名已配置后，需再次用微信内真机右上角分享复验。
+- PC/聊天框直接粘贴 URL 仍可能显示纯文本；可控链路是微信内 WebView 右上角 `转发给朋友` / `分享到朋友圈`。

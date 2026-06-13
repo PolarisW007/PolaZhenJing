@@ -2345,10 +2345,10 @@ def wechat_share_config():
         return jsonify({'configured': False, 'reason': 'wechat-api-error'}), 502
 
 
-@uploader_bp.route('/api/wechat/share-diagnostics', methods=['POST'])
+@uploader_bp.route('/api/wechat/share-diagnostics', methods=['GET', 'POST'])
 def wechat_share_diagnostics():
     """Record non-sensitive JS-SDK share status from real WeChat webviews."""
-    payload = request.get_json(silent=True) or {}
+    payload = request.args if request.method == 'GET' else (request.get_json(silent=True) or {})
 
     def _clip(value: object, max_chars: int = 240) -> str:
         text = str(value or '').strip()
@@ -2371,6 +2371,8 @@ def wechat_share_diagnostics():
         _clip(payload.get('err_msg')),
         _clip(request.headers.get('User-Agent'), 160),
     )
+    if request.method == 'GET':
+        return ('', 204)
     return jsonify({'ok': True})
 
 

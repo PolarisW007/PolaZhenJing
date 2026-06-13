@@ -252,6 +252,10 @@ def test_public_article_short_link_renders_share_card_metadata():
     assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-diagnostics" in body
     assert "wx.error" in body
     assert "__PZJ_WECHAT_SHARE_READY" in body
+    assert "checkJsApi" in body
+    assert "showMenuItems" in body
+    assert "share-api-registered" in body
+    assert "reportWechatShareByImage" in body
 
     long_response = client.get(f"/articles/{admin_filename}", base_url="https://aipd.me")
     long_body = long_response.get_data(as_text=True)
@@ -259,6 +263,25 @@ def test_public_article_short_link_renders_share_card_metadata():
     assert long_response.status_code == 200
     assert short_url in long_body
     assert canonical_url in long_body
+
+
+def test_wechat_share_diagnostics_supports_image_probe():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+
+    response = client.get(
+        "/admin/api/wechat/share-diagnostics",
+        base_url="https://aipd.me",
+        query_string={
+            "status": "script-start",
+            "page_url": "https://aipd.me/s/49c0c4e8",
+            "share_url": "https://aipd.me/s/49c0c4e8",
+            "err_msg": "image-probe",
+        },
+    )
+
+    assert response.status_code == 204
 
 
 def test_public_article_short_link_rejects_unknown_code():

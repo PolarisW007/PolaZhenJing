@@ -91,6 +91,10 @@ def main() -> int:
     assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-diagnostics" in html, "WeChat diagnostics endpoint missing"
     assert "wx.error" in html, "WeChat JS-SDK error diagnostics missing"
     assert "__PZJ_WECHAT_SHARE_READY" in html, "WeChat readiness flag missing"
+    assert "checkJsApi" in html, "WeChat JS API availability diagnostics missing"
+    assert "showMenuItems" in html, "WeChat share menu visibility hook missing"
+    assert "share-api-registered" in html, "WeChat share API registration diagnostics missing"
+    assert "reportWechatShareByImage" in html, "WeChat image beacon diagnostics fallback missing"
     assert "TL;DR" not in html, "Public article should not show TL;DR label"
     assert "Twitter" not in html, "Public article should not show admin Twitter share button"
     assert "LinkedIn" not in html, "Public article should not show admin LinkedIn share button"
@@ -163,6 +167,18 @@ def main() -> int:
             "missing-wechat-ticket",
             "wechat-api-error",
         }, data
+
+    diag_resp = client.get(
+        "/admin/api/wechat/share-diagnostics",
+        base_url="https://aipd.me",
+        query_string={
+            "status": "script-start",
+            "page_url": "https://aipd.me/s/49c0c4e8",
+            "share_url": "https://aipd.me/s/49c0c4e8",
+            "err_msg": "image-probe",
+        },
+    )
+    assert diag_resp.status_code == 204, diag_resp.status_code
 
     print("wechat_share_harness: ok")
     print(f"article={filename}")

@@ -85,8 +85,16 @@
   - nginx 已增加精确 location，备份为 `/opt/backups/polazj-nginx-mp-verify-20260613165812.conf`。
   - 公网 `https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt` 返回 200、`text/plain`、16 bytes，并与用户提供文件一致。
   - 项目内已保留 `portal/MP_verify_94QHBlDhbeGNvlAd.txt`，避免后续静态门户部署丢失。
+- 18:20 真机截图显示微信 WebView 可打开分享面板，但朋友圈编辑页仍只带 URL；同时服务器未收到真机 `ready/error` 诊断。
+- 已增强微信分享客户端链路：
+  - 诊断接口支持 GET 图片探针，避免 `sendBeacon/fetch` 在微信 WebView 中静默失败。
+  - 前端增加 `script-start`、`config-received`、`checkJsApi`、`menu-show`、`share-api-registered`、新旧分享 API success/fail/cancel/complete 诊断。
+  - `wx.config` 增加 `checkJsApi`、`showOptionMenu`、`showMenuItems`。
+  - 同时注册 `updateAppMessageShareData`、`updateTimelineShareData`、`onMenuShareAppMessage`、`onMenuShareTimeline`。
+  - 备份：`/opt/backups/polazj-wechat-share-diagnostics-20260613183935/`。
+  - 云端 GET 诊断探针返回 204 并进入 journal。
 - 浏览器级 Playwright 检查因当前 Node 环境缺少 `playwright` 降级为 HTTP/HTML harness。
 
 ## Commit 状态
 
-待提交；本轮云端已发布并配置微信域名校验文件，仍需在微信公众号后台点击校验/保存后做真机复验。
+待提交；本轮云端已发布、配置微信域名校验文件，并增强真机诊断。仍需用户再次从微信内打开短链并点右上角分享，根据 journal 中的新诊断状态判断是否已出卡片或继续定位。

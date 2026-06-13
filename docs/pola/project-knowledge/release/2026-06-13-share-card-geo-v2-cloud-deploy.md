@@ -95,7 +95,24 @@
   - 公网 URL：`https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt`。
   - 验证结果：200 OK，`text/plain`，16 bytes，和用户提供文件一致。
   - 项目保留：`portal/MP_verify_94QHBlDhbeGNvlAd.txt`。
+- 18:20 真机反馈：
+  - 微信 WebView 内可打开右上角分享面板。
+  - 朋友圈编辑页仍只出现 URL，没有卡片预览。
+  - 同时服务器未收到真机 `ready/error` 诊断，说明原诊断发送方式不足以判断客户端状态。
+- 微信分享诊断增强发布：
+  - 备份：`/opt/backups/polazj-wechat-share-diagnostics-20260613183935/`。
+  - `share-diagnostics` 支持 GET 图片探针。
+  - 前端增加 `script-start`、`config-received`、`checkJsApi`、`menu-show`、`share-api-registered`、各分享 API success/fail/cancel/complete 诊断。
+  - `wx.config` 增加 `checkJsApi`、`showOptionMenu`、`showMenuItems`。
+  - 公网页面已包含 `checkJsApi`、`showMenuItems`、`reportWechatShareByImage`、`share-api-registered`。
+  - 公网 GET 探针返回 204，并写入 journal。
+  - 云端 `tests/test_social_publish.py`：16 passed。
+  - 云端 `scripts/wechat_share_harness.py`：通过。
+  - 云端 `scripts/seo_geo_harness.py`：通过。
+  - 云端全量 tests：38 passed。
 
 ## 剩余风险
 
 - 实际微信客户端诊断捕获过 `config:invalid url domain`。校验文件已配置，仍需在微信公众号后台“JS接口安全域名”页面点击校验/保存，让微信侧配置生效。
+- PC/聊天输入框直接粘贴 URL 仍可能展示纯文本；网页可控的是微信内 WebView 右上角分享菜单。
+- 下一次真机复验如仍失败，应直接根据 journal 中 `script-start/config-received/ready/checkJsApi/share-api-registered/*-fail` 状态定位，而不是继续猜测服务端 meta。

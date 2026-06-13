@@ -426,67 +426,174 @@ const WECHAT_SHARE = {
 };
 
 (function configureWechatShare() {
-  if (!/MicroMessenger/i.test(navigator.userAgent) || !window.wx) return;
+  if (!/MicroMessenger/i.test(navigator.userAgent)) return;
   const pageUrl = location.href.split('#')[0];
   window.__PZJ_WECHAT_SHARE_READY = false;
 
-  function reportWechatShare(status, detail) {
-    const payload = JSON.stringify({
+  function diagnosticMessage(detail) {
+    if (!detail) return '';
+    if (typeof detail === 'string') return detail;
+    if (detail.errMsg) return detail.errMsg;
+    if (detail.message) return detail.message;
+    try { return JSON.stringify(detail); } catch (_) { return String(detail); }
+  }
+
+  function diagnosticPayload(status, detail) {
+    return {
       status,
       page_url: pageUrl,
       share_url: SHARE_URL,
-      err_msg: detail && (detail.errMsg || detail.message || String(detail))
-    });
+      err_msg: diagnosticMessage(detail).slice(0, 240)
+    };
+  }
+
+  function encodeDiagnosticParams(payload) {
+    return Object.keys(payload)
+      .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(payload[key] || ''))
+      .join('&');
+  }
+
+  function reportWechatShareByImage(payload) {
     try {
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(WECHAT_SHARE_DIAGNOSTICS_URL, new Blob([payload], { type: 'application/json' }));
-        return;
-      }
-      fetch(WECHAT_SHARE_DIAGNOSTICS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
-        keepalive: true
-      }).catch(() => {});
+      const img = new Image();
+      img.src = WECHAT_SHARE_DIAGNOSTICS_URL + '?' + encodeDiagnosticParams(payload) + '&_=' + Date.now();
     } catch (_) {}
   }
 
-  fetch(WECHAT_SHARE_CONFIG_URL + '?url=' + encodeURIComponent(pageUrl))
-    .then((resp) => resp.json())
-    .then((config) => {
-      if (!config.configured) {
-        reportWechatShare('config-unavailable', config.reason || 'not-configured');
+  function reportWechatShare(status, detail) {
+    const payload = diagnosticPayload(status, detail);
+    const body = JSON.stringify(payload);
+    try {
+      if (navigator.sendBeacon) {
+        const ok = navigator.sendBeacon(WECHAT_SHARE_DIAGNOSTICS_URL, new Blob([body], { type: 'application/json' }));
+        if (ok) return;
+      }
+      if (window.fetch) {
+        fetch(WECHAT_SHARE_DIAGNOSTICS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true
+        }).catch(() => reportWechatShareByImage(payload));
         return;
       }
-      if (wx.error) {
-        wx.error((err) => {
-          window.__PZJ_WECHAT_SHARE_READY = false;
-          reportWechatShare('error', err);
+      if (window.XMLHttpRequest) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', WECHAT_SHARE_DIAGNOSTICS_URL, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onerror = () => reportWechatShareByImage(payload);
+        xhr.send(body);
+        return;
+      }
+    } catch (_) {}
+    reportWechatShareByImage(payload);
+  }
+
+  function fetchWechatConfig(onSuccess, onError) {
+    const api = WECHAT_SHARE_CONFIG_URL + '?url=' + encodeURIComponent(pageUrl);
+    if (window.fetch) {
+      fetch(api).then((resp) => resp.json()).then(onSuccess).catch(onError);
+      return;
+    }
+    if (window.XMLHttpRequest) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', api, true);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { onSuccess(JSON.parse(xhr.responseText)); } catch (err) { onError(err); }
+        } else {
+          onError('http-' + xhr.status);
+        }
+      };
+      xhr.onerror = () => onError('xhr-error');
+      xhr.send();
+      return;
+    }
+    onError('no-fetch-or-xhr');
+  }
+
+  function withShareCallbacks(payload, channel) {
+    return Object.assign({}, payload, {
+      success: () => reportWechatShare(channel + '-success'),
+      fail: (err) => reportWechatShare(channel + '-fail', err),
+      cancel: () => reportWechatShare(channel + '-cancel'),
+      complete: (res) => reportWechatShare(channel + '-complete', res)
+    });
+  }
+
+  reportWechatShare('script-start', 'wx=' + Boolean(window.wx));
+  if (!window.wx) {
+    reportWechatShare('wx-missing');
+    return;
+  }
+
+  fetchWechatConfig((config) => {
+    if (!config.configured) {
+      reportWechatShare('config-unavailable', config.reason || 'not-configured');
+      return;
+    }
+    reportWechatShare('config-received', 'configured');
+    if (wx.error) {
+      wx.error((err) => {
+        window.__PZJ_WECHAT_SHARE_READY = false;
+        reportWechatShare('error', err);
+      });
+    }
+    wx.config({
+      debug: false,
+      appId: config.appId,
+      timestamp: config.timestamp,
+      nonceStr: config.nonceStr,
+      signature: config.signature,
+      jsApiList: [
+        'checkJsApi',
+        'showOptionMenu',
+        'showMenuItems',
+        'updateAppMessageShareData',
+        'updateTimelineShareData',
+        'onMenuShareAppMessage',
+        'onMenuShareTimeline'
+      ]
+    });
+    wx.ready(() => {
+      window.__PZJ_WECHAT_SHARE_READY = true;
+      const appMessagePayload = withShareCallbacks(WECHAT_SHARE, 'appmessage');
+      const timelinePayload = withShareCallbacks({
+        title: WECHAT_SHARE.title,
+        link: WECHAT_SHARE.link,
+        imgUrl: WECHAT_SHARE.imgUrl
+      }, 'timeline');
+
+      if (wx.showOptionMenu) wx.showOptionMenu();
+      if (wx.showMenuItems) {
+        wx.showMenuItems({
+          menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'],
+          success: () => reportWechatShare('menu-show-success'),
+          fail: (err) => reportWechatShare('menu-show-fail', err)
         });
       }
-      wx.config({
-        debug: false,
-        appId: config.appId,
-        timestamp: config.timestamp,
-        nonceStr: config.nonceStr,
-        signature: config.signature,
-        jsApiList: [
-          'updateAppMessageShareData',
-          'updateTimelineShareData',
-          'onMenuShareAppMessage',
-          'onMenuShareTimeline'
-        ]
-      });
-      wx.ready(() => {
-        window.__PZJ_WECHAT_SHARE_READY = true;
-        if (wx.updateAppMessageShareData) wx.updateAppMessageShareData(WECHAT_SHARE);
-        if (wx.updateTimelineShareData) wx.updateTimelineShareData(WECHAT_SHARE);
-        if (wx.onMenuShareAppMessage) wx.onMenuShareAppMessage(WECHAT_SHARE);
-        if (wx.onMenuShareTimeline) wx.onMenuShareTimeline(WECHAT_SHARE);
-        reportWechatShare('ready');
-      });
-    })
-    .catch((err) => reportWechatShare('fetch-error', err));
+      if (wx.checkJsApi) {
+        wx.checkJsApi({
+          jsApiList: ['updateAppMessageShareData', 'updateTimelineShareData', 'onMenuShareAppMessage', 'onMenuShareTimeline'],
+          success: (res) => reportWechatShare('checkJsApi-success', res && res.checkResult ? res.checkResult : res),
+          fail: (err) => reportWechatShare('checkJsApi-fail', err)
+        });
+      }
+
+      if (wx.updateAppMessageShareData) wx.updateAppMessageShareData(appMessagePayload);
+      else reportWechatShare('updateAppMessageShareData-missing');
+      if (wx.updateTimelineShareData) wx.updateTimelineShareData(timelinePayload);
+      else reportWechatShare('updateTimelineShareData-missing');
+      if (wx.onMenuShareAppMessage) wx.onMenuShareAppMessage(appMessagePayload);
+      else reportWechatShare('onMenuShareAppMessage-missing');
+      if (wx.onMenuShareTimeline) wx.onMenuShareTimeline(timelinePayload);
+      else reportWechatShare('onMenuShareTimeline-missing');
+
+      reportWechatShare('ready');
+      reportWechatShare('share-api-registered');
+    });
+  }, (err) => reportWechatShare('fetch-error', err));
 })();
 
 function copyArticleLink(btn) {
