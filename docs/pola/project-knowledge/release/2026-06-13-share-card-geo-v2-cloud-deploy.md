@@ -88,8 +88,14 @@
 - `/robots.txt`、`/feed.xml`、`/articles.json`：200。
 - 微信 share-config 对 `https://aipd.me/s/49c0c4e8` 返回 `configured=true`。
 - share-diagnostics POST 返回 `{"ok": true}`，非 ready 状态可进入 journal warning 日志。
+- 微信 JS接口安全域名校验文件：
+  - 服务器路径：`/var/www/html/MP_verify_94QHBlDhbeGNvlAd.txt`。
+  - nginx 备份：`/opt/backups/polazj-nginx-mp-verify-20260613165812.conf`。
+  - nginx 已增加精确 `location = /MP_verify_94QHBlDhbeGNvlAd.txt` 并 reload。
+  - 公网 URL：`https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt`。
+  - 验证结果：200 OK，`text/plain`，16 bytes，和用户提供文件一致。
+  - 项目保留：`portal/MP_verify_94QHBlDhbeGNvlAd.txt`。
 
 ## 剩余风险
 
-- 实际微信客户端诊断捕获 `config:invalid url domain`，需要检查微信公众号后台“JS接口安全域名”是否配置为 `aipd.me` 并通过校验。
-- 服务器根目录未发现 `MP_verify*.txt` 文件；如果微信后台要求下载校验文件，需要将准确文件名和内容放到站点根目录。
+- 实际微信客户端诊断捕获过 `config:invalid url domain`。校验文件已配置，仍需在微信公众号后台“JS接口安全域名”页面点击校验/保存，让微信侧配置生效。

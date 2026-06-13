@@ -112,8 +112,8 @@ PYTHONPATH=. .venv/bin/python -c "from app import create_app; app=create_app(); 
 - `/articles.json`：200，包含 canonical URL、shortlink、summary、word_count。
 - `share-config?url=https://aipd.me/s/49c0c4e8`：返回 `configured=true`。
 - `share-diagnostics` POST：返回 `{"ok": true}`，非 ready 状态可在 journal 记录 warning。
+- `https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt`：200 OK，`Content-Type: text/plain`，`Content-Length: 16`，与用户提供文件 `cmp` 一致。
 
 ### 剩余风险
 
-- 诊断日志捕获到真实微信客户端 `config:invalid url domain`，说明微信公众号后台 JS接口安全域名仍可能未配置或未通过校验。
-- 服务器根目录未发现 `MP_verify*.txt` 文件；需要在微信公众平台获得校验文件名和内容后放到站点根目录。
+- 诊断日志捕获过真实微信客户端 `config:invalid url domain`。校验文件已配置到云服务器，仍需在微信公众平台后台点击校验/保存 JS接口安全域名后，再做微信内真机右上角分享复验。

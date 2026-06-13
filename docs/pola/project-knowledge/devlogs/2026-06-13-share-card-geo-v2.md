@@ -80,9 +80,13 @@
 - 微信直接粘贴 URL 是否转换卡片受客户端策略和缓存影响；微信内右上角分享由 JS-SDK 控制，是本轮主要可控链路。
 - 云端微信 share-config 对 `https://aipd.me/s/49c0c4e8` 返回 `configured=true`。
 - 诊断接口已可写日志；实际捕获到微信客户端 `config:invalid url domain`，指向微信公众号后台 JS接口安全域名/校验文件配置风险，不是服务端签名接口不可用。
-- 服务器根目录未发现 `MP_verify*.txt` 文件，需在公众号后台获得校验文件名和内容后补齐。
+- 已配置公众号校验文件 `MP_verify_94QHBlDhbeGNvlAd.txt`：
+  - 文件已放入服务器 `/var/www/html/`。
+  - nginx 已增加精确 location，备份为 `/opt/backups/polazj-nginx-mp-verify-20260613165812.conf`。
+  - 公网 `https://aipd.me/MP_verify_94QHBlDhbeGNvlAd.txt` 返回 200、`text/plain`、16 bytes，并与用户提供文件一致。
+  - 项目内已保留 `portal/MP_verify_94QHBlDhbeGNvlAd.txt`，避免后续静态门户部署丢失。
 - 浏览器级 Playwright 检查因当前 Node 环境缺少 `playwright` 降级为 HTTP/HTML harness。
 
 ## Commit 状态
 
-待提交；本轮云端已发布，仍需用户在微信公众号后台完成 JS接口安全域名校验后做真机复验。
+待提交；本轮云端已发布并配置微信域名校验文件，仍需在微信公众号后台点击校验/保存后做真机复验。
