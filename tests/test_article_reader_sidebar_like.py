@@ -61,6 +61,8 @@ def test_article_reader_uses_side_panel_and_like_controls():
     assert 'data-like-count' in body
     assert f'data-article-id="{admin_filename}"' in body
     assert f'data-like-url="/articles/{admin_filename}/like"' in body
+    assert "max-height: calc(100vh - 2rem)" not in body
+    assert "scrollbar-width: thin" not in body
     assert body.index('class="author-footer"') < body.index('data-reader-sidebar')
 
 

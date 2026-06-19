@@ -254,9 +254,7 @@
     top: 1rem;
     align-self: start;
     width: 300px;
-    max-height: calc(100vh - 2rem);
-    overflow: auto;
-    scrollbar-width: thin;
+    overflow: visible;
   }
   .article-reader-shell.is-wide {
     grid-template-columns: minmax(0, 1fr);
@@ -676,7 +674,6 @@
     .article-side-panel {
       position: static;
       width: 100%;
-      max-height: none;
       overflow: visible;
     }
   }
