@@ -1,7 +1,9 @@
 """File conversion pipeline: PDF, DOCX, HTML → Markdown."""
+import json
 import os
 import re
 import tempfile
+from urllib.parse import urlparse
 
 
 def convert_pdf(file_path: str) -> str:
@@ -333,6 +335,91 @@ _ANTIBOT_MARKERS = (
 )
 
 
+def _is_x_public_article_url(url: str) -> bool:
+    """Return True for X/Twitter status or article URLs with public SSR data."""
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False
+    host = (parsed.hostname or '').lower().lstrip('.')
+    if host not in {'x.com', 'twitter.com'} and not host.endswith('.x.com') and not host.endswith('.twitter.com'):
+        return False
+    path = parsed.path or ''
+    return bool(re.search(r'/status/\d+', path) or re.search(r'/i/article/\d+', path))
+
+
+def _decode_js_string(value: str) -> str:
+    """Decode a JS string captured from X SSR data."""
+    if value is None:
+        return ''
+    try:
+        return json.loads(f'"{value}"')
+    except Exception:
+        return (
+            value.replace(r'\"', '"')
+            .replace(r'\\', '\\')
+            .replace(r'\n', '\n')
+            .replace(r'\u002F', '/')
+        )
+
+
+def _extract_x_public_article_markdown(html: str, source_url: str) -> tuple[str, str] | None:
+    """Extract article preview + cover image from public X SSR payloads.
+
+    X often exposes article cards and cover image URLs in the first HTML payload
+    even when the full app requires JS. This is intentionally conservative:
+    it only returns content when a title or preview is present, otherwise the
+    regular blocked-host guidance remains in place.
+    """
+    if not html:
+        return None
+    title = ''
+    preview = ''
+    article = re.search(
+        r'__typename:"ArticleEntity"[\s\S]{0,1800}?'
+        r'title:"((?:\\.|[^"\\])*)"[\s\S]{0,1800}?'
+        r'preview_text:"((?:\\.|[^"\\])*)"',
+        html,
+    )
+    if article:
+        title = _decode_js_string(article.group(1)).strip()
+        preview = _decode_js_string(article.group(2)).strip()
+    if not title:
+        meta_title = re.search(r'<meta\s+(?:property|name)="(?:og:title|title)"\s+content="([^"]+)"', html, re.I)
+        if meta_title:
+            title = _clean_title_suffix(_decode_js_string(meta_title.group(1)).strip())
+    if not preview:
+        meta_desc = re.search(r'<meta\s+(?:property|name)="(?:og:description|description)"\s+content="([^"]+)"', html, re.I)
+        if meta_desc:
+            preview = _decode_js_string(meta_desc.group(1)).strip()
+    image_url = ''
+    image_match = re.search(r'original_img_url:"(https://pbs\.twimg\.com/media/(?:\\.|[^"\\])*)"', html)
+    if image_match:
+        image_url = _decode_js_string(image_match.group(1)).strip()
+    if not image_url:
+        meta_image = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html, re.I)
+        if meta_image:
+            image_url = _decode_js_string(meta_image.group(1)).strip()
+    if not title and not preview:
+        return None
+
+    markdown_parts = []
+    if title:
+        markdown_parts.append(f'# {title}')
+    if image_url:
+        markdown_parts.append(f'![{title or "X article cover"}]({image_url})')
+    if preview:
+        markdown_parts.append(preview)
+    markdown_parts.append(f'原文链接：{source_url}')
+    return normalize_x_markdown('\n\n'.join(markdown_parts)), (title or extract_title(preview))
+
+
+def normalize_x_markdown(markdown_text: str) -> str:
+    """Normalize markdown generated from X fallback extraction."""
+    text = re.sub(r'\n{3,}', '\n\n', markdown_text or '').strip()
+    return text
+
+
 def _check_blocked_host(url: str) -> None:
     """Pre-flight: raise ``URLFetchBlocked`` if URL is a known anti-bot host.
 
@@ -340,7 +427,6 @@ def _check_blocked_host(url: str) -> None:
     LLM-rewrite + image-gen pipeline and show a friendly error immediately.
     """
     try:
-        from urllib.parse import urlparse
         host = (urlparse(url).hostname or '').lower().lstrip('.')
     except Exception:
         return
@@ -389,9 +475,6 @@ def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
     this to show a friendly error and skip the expensive LLM + image-gen
     pipeline.
     """
-    # Pre-check: fail fast on known anti-bot sites before any network call.
-    _check_blocked_host(url)
-
     try:
         import requests
     except ImportError:
@@ -408,6 +491,25 @@ def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
         'Cache-Control': 'no-cache',
         'Referer': url,
     }
+    if _is_x_public_article_url(url):
+        resp = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
+        resp.raise_for_status()
+        if not resp.encoding or resp.encoding.lower() == 'iso-8859-1':
+            resp.encoding = resp.apparent_encoding or 'utf-8'
+        extracted = _extract_x_public_article_markdown(resp.text, resp.url or url)
+        if extracted:
+            return extracted
+        raise URLFetchBlocked(
+            '该 X/Twitter 链接未暴露可抓取的公开文章摘要或图片。',
+            suggestion=(
+                '请改用「粘贴内容」标签页：在本机浏览器打开链接复制正文后粘贴，'
+                '或用 baoyu-fetch 本地抓取后粘贴。'
+            ),
+        )
+
+    # Pre-check: fail fast on known anti-bot sites before any network call.
+    _check_blocked_host(url)
+
     resp = requests.get(url, headers=headers, timeout=timeout,
                         allow_redirects=True)
     resp.raise_for_status()

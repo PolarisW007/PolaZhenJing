@@ -23,13 +23,27 @@ URL 抓取入口仍然按既有策略拒绝 X/Twitter 直接抓取，因为该�
   - 保留 `source/srcset` 和 `picture` 内 `img` 的安全属性，避免转换阶段误删图片。
 - `tests/test_article_edit_rich_editor.py`
   - 新增 X 复制格式回归：`picture/source srcset` 和 `background-image` 都能被下载成本地 richtext 图片。
+- `app/converter.py`
+  - 对公开 X/Twitter status/article 链接增加 SSR 降级提取。
+  - 能从 X 首屏 HTML 中提取文章标题、预览文本和 `pbs.twimg.com` 封面图，避免 URL 抓取入口直接失败。
+- `tests/test_converter_x_fallback.py`
+  - 新增 X status/article URL 识别和 SSR 文章卡片提取测试。
 
 ## 验证
 
 - `.venv/bin/python -m pytest tests/test_article_edit_rich_editor.py tests/test_article_content.py -q`
   - 17 passed
+- `.venv/bin/python -m pytest tests/test_converter_x_fallback.py tests/test_article_edit_rich_editor.py tests/test_article_content.py -q`
+  - 19 passed
+- `.venv/bin/python -m py_compile app/converter.py app/uploader.py app/article_content.py`
+  - passed
+- 真实链接验证：
+  - `https://x.com/heynavtoor/status/2067194761446920264?s=46`
+  - `fetch_url_as_markdown()` 输出标题 `The Stanford STORM Method: How to Make Claude Research Like a PhD in Minutes`
+  - 输出 Markdown 包含封面图 `https://pbs.twimg.com/media/HLAlQnCbgAADUcf.jpg`
 
 ## 风险与边界
 
-- 本次不改变 X/Twitter URL 直接抓取限制；直接在“输入 URL”中抓取 X 仍会提示改用粘贴内容或外部抓取工具。
+- 本次只对公开 X/Twitter status/article 链接做 SSR 降级提取；其它 X 页面仍会提示改用粘贴内容或外部抓取工具。
+- X SSR 通常只稳定暴露文章标题、预览和封面图，不保证能抓到完整长文正文。完整正文仍推荐打开页面后复制正文粘贴。
 - CSS 背景图提升只接受明显图片 URL、`twimg.com` 或带 `format=` 的媒体 URL，减少误把装饰背景保存进文章的风险。
