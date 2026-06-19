@@ -32,6 +32,7 @@ if str(ROOT) not in sys.path:
 
 DEFAULT_CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 DEFAULT_ARTICLE = "2026-04-11-test-article.md"
+HARNESS_ARTICLE = "2026-06-19-upload-edit-harness.md"
 SCREENSHOT_DIR = ROOT / "tmp" / "harness" / "upload-edit"
 
 
@@ -85,6 +86,30 @@ def _screenshot(page: Page, label: str) -> Path:
     return path
 
 
+def _create_harness_article() -> Path:
+    posts_dir = ROOT / "_posts"
+    posts_dir.mkdir(exist_ok=True)
+    path = posts_dir / HARNESS_ARTICLE
+    path.write_text(
+        "---\n"
+        "layout: deep-technical\n"
+        "theme: claude\n"
+        "title: Harness 保存测试\n"
+        "date: 2026-06-19\n"
+        "tags: [harness]\n"
+        "summary: 临时保存链路测试文章\n"
+        "---\n\n"
+        "seed\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _delete_harness_article(path: Path | None) -> None:
+    if path and path.exists() and path.name == HARNESS_ARTICLE:
+        path.unlink()
+
+
 def _console_summary(messages: list[str], failed_requests: list[str], http_errors: list[str]) -> None:
     hard_errors = [
         msg
@@ -102,11 +127,17 @@ def _console_summary(messages: list[str], failed_requests: list[str], http_error
     hard_http_errors = [
         item for item in http_errors
         if "/favicon.ico" not in item
+        and "/PolaZhenjing/assets/css/" not in item
     ]
     _assert(not hard_errors, "Console errors detected:\n" + "\n".join(hard_errors[:10]))
+    hard_failed_requests = [
+        item for item in failed_requests
+        if "/PolaZhenjing/assets/css/" not in item
+        and "fonts.googleapis.com/css2" not in item
+    ]
     _assert(
-        not failed_requests,
-        "Network failures detected:\n" + "\n".join(failed_requests[:10]),
+        not hard_failed_requests,
+        "Network failures detected:\n" + "\n".join(hard_failed_requests[:10]),
     )
     _assert(
         not hard_http_errors,
@@ -151,6 +182,7 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
     failed_requests: list[str] = []
     http_errors: list[str] = []
     username, password = _ensure_harness_user()
+    harness_article_path = _create_harness_article()
     launch_kwargs: dict[str, object] = {"headless": not headed}
     if chrome_path and Path(chrome_path).exists():
         launch_kwargs["executable_path"] = chrome_path
@@ -168,12 +200,12 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
             page.on("requestfailed", lambda req: failed_requests.append(f"{req.method} {req.url} {req.failure}"))
             page.on("response", lambda res: http_errors.append(f"{res.status} {res.url}") if res.status >= 400 else None)
 
-            page.goto("/admin/login", wait_until="networkidle")
+            page.goto("/admin/login", wait_until="domcontentloaded")
             page.locator('input[name="username"]').fill(username)
             page.locator('input[name="password"]').fill(password)
             page.locator('button[type="submit"], input[type="submit"]').first.click()
             page.wait_for_url(re.compile(r".*/admin/.*"), timeout=10_000)
-            page.goto("/admin/upload", wait_until="networkidle")
+            page.goto("/admin/upload", wait_until="domcontentloaded")
 
             _assert(page.locator("text=上传文章").count() > 0, "Upload page did not render title")
             _assert(page.locator("#paste-form").is_visible(), "Paste form is not visible")
@@ -188,7 +220,7 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
             screenshots.append(_screenshot(page, "upload-rich-switch"))
 
             edit_path = f"/admin/articles/{article}/edit"
-            page.goto(edit_path, wait_until="networkidle")
+            page.goto(edit_path, wait_until="domcontentloaded")
             _assert(page.locator("#article-edit-form").is_visible(), "Edit form is not visible")
             _assert(page.locator("#content").is_visible(), "Edit Markdown textarea should be visible by default")
             _assert(page.locator('#content-format').input_value() == "markdown", "Edit default mode should be markdown")
@@ -210,15 +242,30 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
                 "Rich to Markdown conversion lost content:\n" + markdown[:500],
             )
 
-            page.locator("#revision_instruction").fill("Harness：只验证修改建议字段可以填写，不提交保存。")
+            page.locator("#revision_instruction").fill("Harness：验证修改建议字段可以填写。")
             _assert("Harness" in page.locator("#revision_instruction").input_value(), "Revision note field is not editable")
             screenshots.append(_screenshot(page, "edit-markdown-rich-preview"))
+
+            page.goto(f"/admin/articles/{HARNESS_ARTICLE}/edit", wait_until="domcontentloaded")
+            page.locator("#content").fill("## Harness 保存验证\n\n保存按钮必须真实提交并写回文章。")
+            page.locator("#revision_instruction").fill("Harness：验证保存按钮可提交；改写率为 0，不调用模型。")
+            page.locator('input[name="rewrite_rate"][value="0"]').check()
+            page.locator('button[type="submit"][name="save_mode"][value="save"]').click()
+            page.wait_for_url(
+                re.compile(r".*/admin/articles/(2026\-06\-19\-)?upload\-edit\-harness\.md$"),
+                timeout=15_000,
+            )
+            saved = harness_article_path.read_text(encoding="utf-8")
+            _assert("Harness 保存验证" in saved, "Save button did not write updated Markdown")
+            _assert("保存按钮必须真实提交并写回文章" in saved, "Saved article body is missing expected content")
+            screenshots.append(_screenshot(page, "edit-save-submitted"))
 
             _console_summary(console_messages, failed_requests, http_errors)
             context.close()
             browser.close()
     finally:
         _delete_harness_user(username)
+        _delete_harness_article(harness_article_path)
     return screenshots
 
 

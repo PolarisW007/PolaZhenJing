@@ -38,6 +38,13 @@ def test_article_edit_page_uses_local_tinymce_assets():
     assert "showRichEditorSurface" in body
     # Editor flex layout (prevents iframe collapse) is preserved.
     assert "display: flex !important" in body
+    # Save must give immediate feedback and preserve the clicked save mode even
+    # when submit buttons are disabled to prevent duplicate submissions.
+    assert 'id="save-status"' in body
+    assert "event.submitter" in body
+    assert 'input[type="hidden"][name="save_mode"]' in body
+    assert "正在保存并按修改建议进行 AI 调整" in body
+    assert "articleEditSubmitting" in body
 
 
 def test_preview_endpoint_returns_html_for_rich_format():

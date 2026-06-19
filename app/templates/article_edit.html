@@ -210,6 +210,7 @@
     <button class="btn-gold btn-sm" type="submit" name="save_mode" value="save">保存</button>
     <button class="btn-ghost" type="submit" name="save_mode" value="sync">保存并同步 GitHub</button>
   </div>
+  <div id="save-status" class="save-status" role="status" aria-live="polite"></div>
 </form>
 
 <style>
@@ -283,6 +284,16 @@
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1rem;
+  }
+  .save-status {
+    min-height: 1.4rem;
+    margin-top: 0.7rem;
+    text-align: right;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+  }
+  .save-status.is-active {
+    color: var(--gold-primary);
   }
   .revision-advice-group {
     margin-top: 1rem;
@@ -779,11 +790,18 @@ async function refreshPreview() {
 document.getElementById('refresh-preview').addEventListener('click', refreshPreview);
 document.getElementById('content').addEventListener('input', schedulePreviewRefresh);
 
-document.getElementById('article-edit-form').addEventListener('submit', function () {
+let articleEditSubmitting = false;
+document.getElementById('article-edit-form').addEventListener('submit', function (event) {
+  if (articleEditSubmitting) {
+    event.preventDefault();
+    return;
+  }
   const contentFormat = document.getElementById('content-format');
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
   const activeMode = contentFormat ? contentFormat.value : 'rich_html';
+  const submitter = event.submitter || document.activeElement;
+  const submittedMode = submitter && submitter.name === 'save_mode' ? submitter.value : 'save';
   if (activeMode === 'rich_html' && window.tinymce && tinymce.get('rich-content')) {
     tinymce.triggerSave();
   }
@@ -814,6 +832,28 @@ document.getElementById('article-edit-form').addEventListener('submit', function
     this.appendChild(bodyField);
   }
   bodyField.value = payload;
+  let saveModeField = document.querySelector('#article-edit-form input[type="hidden"][name="save_mode"]');
+  if (!saveModeField) {
+    saveModeField = document.createElement('input');
+    saveModeField.type = 'hidden';
+    saveModeField.name = 'save_mode';
+    this.appendChild(saveModeField);
+  }
+  saveModeField.value = submittedMode;
+  articleEditSubmitting = true;
+  const buttons = this.querySelectorAll('button[type="submit"]');
+  buttons.forEach(button => {
+    button.disabled = true;
+    button.setAttribute('aria-disabled', 'true');
+  });
+  const status = document.getElementById('save-status');
+  const hasRevision = Boolean((document.getElementById('revision_instruction')?.value || '').trim());
+  if (status) {
+    status.classList.add('is-active');
+    status.textContent = hasRevision
+      ? '正在保存并按修改建议进行 AI 调整，文章较长时可能需要几十秒…'
+      : '正在保存文章…';
+  }
 });
 
 const initialRadio = document.querySelector(`input[name="editor_mode"][value="${initialMode}"]`);
