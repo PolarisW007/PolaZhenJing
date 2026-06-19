@@ -26,6 +26,11 @@
 - `.venv/bin/python -m pytest tests/test_article_edit_rich_editor.py -q`：13 passed。
 - `.venv/bin/python -m pytest tests/test_article_content.py tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_public_article_homepage.py tests/test_article_reader_roles.py tests/test_article_reader_sidebar_like.py -q`：32 passed。
 - `.venv/bin/python scripts/upload_edit_playwright_harness.py --base-url http://127.0.0.1:5019`：通过，覆盖上传页、编辑页、AI 面板默认隐藏、开启后可填写、保存写回。
+- 云服务器：`.venv/bin/python3 -m py_compile app/uploader.py scripts/upload_edit_playwright_harness.py && PYTHONPATH=. .venv/bin/pytest tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_article_content.py -q`：22 passed。
+- 云服务器重启后：`systemctl is-active polazj` 为 active。
+- 云服务器登录态 test client：编辑页 200，`enable_ai_revision` 存在，AI 面板默认 hidden。
+- 线上文章文件：585 行、9 个图片/媒体引用、0 个 `<think>`。
+- 线上公开 URL：`https://aipd.me/PolaZhenjing/articles/rolling-ai-fde-ai-20260607.md` 返回 200，未出现 `<think>`。
 
 ## 影响面
 
@@ -35,4 +40,4 @@
 ## 风险
 
 - AI 启用后的媒体补回可能把遗漏图片追加到“原文媒体”区域，图片位置不保证完全还原；但优先避免图片丢失。
-- 仍需线上部署后回归。
+- 当前已部署并完成线上 smoke；后续仍建议用户在浏览器里刷新编辑页确认默认 AI 面板隐藏。

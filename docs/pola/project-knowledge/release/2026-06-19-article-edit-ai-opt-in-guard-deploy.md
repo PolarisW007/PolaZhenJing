@@ -26,3 +26,26 @@
 - 页面 HTML 包含 `enable_ai_revision`，AI 面板默认隐藏。
 - 线上文章 `rolling-ai-fde-ai-20260607.md` 不包含 `<think>`，图片/媒体引用数量保持 9。
 
+## 发布执行记录
+
+- 本地 commit：`76fd9d1 fix: 文章编辑 AI 修改改为显式启用`。
+- 远端：`origin/main` 已推送。
+- 服务器备份：`/opt/backups/polazj-edit-ai-opt-in-20260619174439`。
+- 同步方式：`rsync -avR` 同步应用代码、模板、测试、文档到 `/PolaZhenjing`。
+- 云端测试：
+  - `.venv/bin/python3 -m py_compile app/uploader.py scripts/upload_edit_playwright_harness.py`
+  - `PYTHONPATH=. .venv/bin/pytest tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_article_content.py -q`
+  - 结果：22 passed。
+- 服务重启：`sudo systemctl restart polazj` 后 `systemctl is-active polazj` 为 active。
+- 线上 smoke：
+  - 登录态 test client 编辑页 200，包含 AI 修改开关，AI 面板默认隐藏。
+  - 文章源文件 585 行、9 个媒体引用、0 个 `<think>`。
+  - `https://aipd.me/PolaZhenjing/articles/rolling-ai-fde-ai-20260607.md` 返回 200，页面片段未出现 `<think>`。
+
+## 回滚命令
+
+```bash
+cd /PolaZhenjing
+tar -xzf /opt/backups/polazj-edit-ai-opt-in-20260619174439/code-before-edit-ai-opt-in.tgz
+sudo systemctl restart polazj
+```

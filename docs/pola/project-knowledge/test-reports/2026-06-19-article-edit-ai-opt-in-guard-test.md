@@ -11,6 +11,7 @@
 .venv/bin/python -m pytest tests/test_article_edit_rich_editor.py -q
 .venv/bin/python -m pytest tests/test_article_content.py tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_public_article_homepage.py tests/test_article_reader_roles.py tests/test_article_reader_sidebar_like.py -q
 .venv/bin/python scripts/upload_edit_playwright_harness.py --base-url http://127.0.0.1:5019
+ssh pola-server 'cd /PolaZhenjing && .venv/bin/python3 -m py_compile app/uploader.py scripts/upload_edit_playwright_harness.py && PYTHONPATH=. .venv/bin/pytest tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_article_content.py -q'
 ```
 
 结果：
@@ -19,6 +20,7 @@
 - 编辑模块 13 个测试全部通过。
 - 文章内容/编辑/上传改写率/前台列表/阅读角色/侧栏点赞相关 32 个测试全部通过。
 - Playwright 上传/编辑 harness 通过。
+- 云服务器相关测试 22 个全部通过。
 
 ## 覆盖点
 
@@ -30,6 +32,9 @@
 - 模型返回 `<think>` 时会清理。
 - 模型遗漏图片/媒体时会补回原引用。
 
-## 待补
+## 线上 smoke
 
-- 线上部署后编辑页 smoke、受影响文章图片/正文回归。
+- `systemctl is-active polazj`：active。
+- 登录态 test client 编辑页 200，包含 AI 修改开关，AI 面板默认 hidden。
+- 受影响文章源文件 585 行、9 个媒体引用、0 个 `<think>`。
+- 线上公开文章 URL 返回 200，页面片段未出现 `<think>`。
