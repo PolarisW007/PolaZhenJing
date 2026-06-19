@@ -301,6 +301,11 @@ def _parse_rewrite_rate(value, default: int = REWRITE_RATE_DEFAULT) -> int:
     return parse_rewrite_rate(value, default=default)
 
 
+def _form_flag(value) -> bool:
+    """Parse HTML form truthy values without accepting arbitrary text."""
+    return str(value or '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 def _rewrite_rate_instruction(rewrite_rate: int) -> str:
     """Return the prompt contract for the selected rewrite strength."""
     return rewrite_rate_instruction(rewrite_rate)
@@ -1084,6 +1089,11 @@ _RAW_MEDIA_RE = re.compile(
     r'<(?:img|iframe|video|picture)\b[\s\S]*?</(?:iframe|video|picture)>|<img\b[^>]*>',
     re.IGNORECASE,
 )
+_LLM_THINK_BLOCK_RE = re.compile(r'<think\b[^>]*>[\s\S]*?</think>', re.IGNORECASE)
+_LLM_META_OPENING_RE = re.compile(
+    r'^\s*(?:The user wants|I need to|Let me|Looking at the original|We need to|I should)\b',
+    re.IGNORECASE,
+)
 
 
 def _strip_markdown_media(content: str) -> str:
@@ -1118,6 +1128,18 @@ def _ensure_original_media(content: str, media_blocks: list[str]) -> str:
     return content.rstrip() + '\n\n## 原文媒体\n\n' + '\n\n'.join(missing) + '\n'
 
 
+def _clean_llm_revision_output(content: str) -> str:
+    """Keep only article Markdown from a model revision response."""
+    cleaned = _LLM_THINK_BLOCK_RE.sub('', content or '').strip()
+    if cleaned.startswith('```'):
+        cleaned = re.sub(r'^```(?:markdown|md)?\s*', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*```\s*$', '', cleaned).strip()
+    if _LLM_META_OPENING_RE.match(cleaned[:240]):
+        logger.warning('LLM revision looked like model commentary, rejecting output')
+        return ''
+    return cleaned
+
+
 def _apply_revision_instruction(content: str, title: str, revision_instruction: str,
                                 style: str = '',
                                 rewrite_rate: int = 50) -> str | None:
@@ -1128,6 +1150,7 @@ def _apply_revision_instruction(content: str, title: str, revision_instruction: 
     rewrite_rate = _parse_rewrite_rate(rewrite_rate, default=50)
     if rewrite_rate <= 0:
         return None
+    media_blocks = _extract_markdown_media_blocks(content)
     system_prompt = (
         '你是一名资深中文文章编辑。请基于用户的修改建议，对现有 Markdown 文章做二次修改。'
         '必须保留原文事实、数据、专有名词、代码块、Markdown 图片、HTML 媒体标签和 front matter 之外的正文结构。'
@@ -1166,7 +1189,10 @@ def _apply_revision_instruction(content: str, title: str, revision_instruction: 
     try:
         with urlopen(req, timeout=120) as resp:
             data = json.loads(resp.read().decode('utf-8'))
-        return (data['choices'][0]['message']['content'] or '').strip() or None
+        revised = _clean_llm_revision_output(data['choices'][0]['message']['content'] or '')
+        if not revised:
+            return None
+        return _ensure_original_media(revised, media_blocks)
     except Exception as e:
         logger.warning('LLM revision failed: %s', e)
         return None
@@ -3452,10 +3478,11 @@ def edit_article(filename):
 
     if request.method == 'POST':
         form_data = request.form.copy()
-        revision_instruction = form_data.get('revision_instruction', '').strip()
+        ai_revision_enabled = _form_flag(form_data.get('enable_ai_revision'))
+        revision_instruction = form_data.get('revision_instruction', '').strip() if ai_revision_enabled else ''
         rewrite_rate = _parse_rewrite_rate(form_data.get('rewrite_rate'), default=50)
         canonical_body = _canonical_body_from_form(form_data, preserve_media=True)
-        if revision_instruction:
+        if ai_revision_enabled and revision_instruction:
             revised_body = _apply_revision_instruction(
                 canonical_body,
                 form_data.get('title', filename).strip() or filename,
@@ -3464,7 +3491,9 @@ def edit_article(filename):
                 rewrite_rate=rewrite_rate,
             )
             if revised_body:
-                canonical_body = normalize_markdown(revised_body)
+                canonical_body = normalize_markdown(
+                    _ensure_original_media(revised_body, _extract_markdown_media_blocks(canonical_body))
+                )
                 form_data['body'] = canonical_body
                 form_data['content_format'] = 'markdown'
                 flash('已根据修改建议简述完成正文调整。', 'success')

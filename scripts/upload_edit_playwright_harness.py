@@ -224,6 +224,8 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
             _assert(page.locator("#article-edit-form").is_visible(), "Edit form is not visible")
             _assert(page.locator("#content").is_visible(), "Edit Markdown textarea should be visible by default")
             _assert(page.locator('#content-format').input_value() == "markdown", "Edit default mode should be markdown")
+            _assert(page.locator("#enable_ai_revision").is_visible(), "AI revision toggle is missing")
+            _assert(not page.locator("#ai-revision-panel").is_visible(), "AI revision panel should be hidden by default")
             _assert(page.locator('input[name="rewrite_rate"]').count() >= 5, "Edit rewrite-rate options missing")
 
             page.locator("#content").fill("# Harness 编辑测试\n\n![图](/assets/images/test_cover.jpg)\n\n**正文** 段落。")
@@ -242,14 +244,15 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
                 "Rich to Markdown conversion lost content:\n" + markdown[:500],
             )
 
+            page.locator("#enable_ai_revision").check()
+            _assert(page.locator("#ai-revision-panel").is_visible(), "AI revision panel did not appear after enabling")
             page.locator("#revision_instruction").fill("Harness：验证修改建议字段可以填写。")
             _assert("Harness" in page.locator("#revision_instruction").input_value(), "Revision note field is not editable")
             screenshots.append(_screenshot(page, "edit-markdown-rich-preview"))
 
             page.goto(f"/admin/articles/{HARNESS_ARTICLE}/edit", wait_until="domcontentloaded")
+            _assert(not page.locator("#ai-revision-panel").is_visible(), "AI revision panel should stay hidden on fresh edit page")
             page.locator("#content").fill("## Harness 保存验证\n\n保存按钮必须真实提交并写回文章。")
-            page.locator("#revision_instruction").fill("Harness：验证保存按钮可提交；改写率为 0，不调用模型。")
-            page.locator('input[name="rewrite_rate"][value="0"]').check()
             page.locator('button[type="submit"][name="save_mode"][value="save"]').click()
             page.wait_for_url(
                 re.compile(r".*/admin/articles/(2026\-06\-19\-)?upload\-edit\-harness\.md$"),

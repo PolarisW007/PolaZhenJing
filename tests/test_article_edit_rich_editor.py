@@ -1,6 +1,9 @@
 """Tests for the article edit page rich editor integration."""
 
+import json
+
 from app import create_app
+from app import uploader
 
 
 def _admin_client():
@@ -41,6 +44,13 @@ def test_article_edit_page_uses_local_tinymce_assets():
     # Save must give immediate feedback and preserve the clicked save mode even
     # when submit buttons are disabled to prevent duplicate submissions.
     assert 'id="save-status"' in body
+    assert 'id="enable_ai_revision"' in body
+    assert 'id="ai-revision-panel"' in body
+    assert 'hidden' in body
+    assert 'id="revision_instruction"' in body
+    assert 'name="revision_instruction"' in body
+    assert 'disabled' in body
+    assert "setAiRevisionEnabled(aiRevisionToggle.checked)" in body
     assert "event.submitter" in body
     assert 'input[type="hidden"][name="save_mode"]' in body
     assert "正在保存并按修改建议进行 AI 调整" in body
@@ -263,6 +273,7 @@ def test_edit_save_revision_uses_canonical_markdown_before_llm(tmp_path, monkeyp
             "date": "2026-06-14",
             "body": rich_body,
             "content_format": "rich_html",
+            "enable_ai_revision": "1",
             "rewrite_rate": "75",
             "revision_instruction": "补充一句",
             "save_mode": "save",
@@ -276,3 +287,83 @@ def test_edit_save_revision_uses_canonical_markdown_before_llm(tmp_path, monkeyp
     assert "# 正文标题" in seen["content"]
     assert "<h1>" not in seen["content"]
     assert "补充一句。" in saved
+
+
+def test_edit_save_ignores_revision_instruction_when_ai_disabled(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+
+    def fail_revision(*args, **kwargs):
+        raise AssertionError("AI revision should not run unless explicitly enabled")
+
+    monkeypatch.setattr("app.uploader._apply_revision_instruction", fail_revision)
+    markdown_body = "# 原文标题\n\n![图](/assets/images/test_cover.jpg)\n\n原文正文"
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "不启用 AI",
+            "date": "2026-06-14",
+            "body": markdown_body,
+            "content_format": "markdown",
+            "rewrite_rate": "100",
+            "revision_instruction": "删除所有图片并改写",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "# 原文标题" in saved
+    assert "![图](/assets/images/test_cover.jpg)" in saved
+    assert "删除所有图片并改写" not in saved
+
+
+def test_llm_revision_output_strips_thinking_and_preserves_media(monkeypatch):
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self):
+            payload = {
+                "choices": [
+                    {
+                        "message": {
+                            "content": "<think>I should explain this first.</think>\n\n# 新正文\n\n这里是改写后正文。"
+                        }
+                    }
+                ]
+            }
+            return json.dumps(payload).encode("utf-8")
+
+    monkeypatch.setattr("app.uploader._get_minimax_api_key", lambda: "fake-key")
+    monkeypatch.setattr("app.uploader.urlopen", lambda *args, **kwargs: FakeResponse())
+    original = "# 原文\n\n![封面](/assets/images/cover.png)\n\n正文\n\n<img src=\"/assets/a.png\">"
+
+    revised = uploader._apply_revision_instruction(
+        original,
+        "标题",
+        "重写开头",
+        "deep-technical",
+        rewrite_rate=75,
+    )
+
+    assert revised is not None
+    assert "<think>" not in revised
+    assert "I should explain" not in revised
+    assert "# 新正文" in revised
+    assert "![封面](/assets/images/cover.png)" in revised
+    assert '<img src="/assets/a.png">' in revised
+
+
+def test_llm_revision_output_rejects_model_commentary():
+    cleaned = uploader._clean_llm_revision_output(
+        "The user wants me to delete duplicate paragraphs before writing the article."
+    )
+
+    assert cleaned == ""
