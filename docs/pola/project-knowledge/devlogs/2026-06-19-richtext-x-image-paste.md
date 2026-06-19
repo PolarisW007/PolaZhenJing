@@ -26,8 +26,10 @@ URL 抓取入口仍然按既有策略拒绝 X/Twitter 直接抓取，因为该�
 - `app/converter.py`
   - 对公开 X/Twitter status/article 链接增加 SSR 降级提取。
   - 能从 X 首屏 HTML 中提取文章标题、预览文本和 `pbs.twimg.com` 封面图，避免 URL 抓取入口直接失败。
+  - 当云服务器访问 X 超时或被网络拦截时，转成带操作建议的 `URLFetchBlocked`，提示用户改用本机浏览器复制后粘贴。
 - `tests/test_converter_x_fallback.py`
   - 新增 X status/article URL 识别和 SSR 文章卡片提取测试。
+  - 新增 X 网络超时错误映射测试。
 
 ## 验证
 
@@ -41,9 +43,13 @@ URL 抓取入口仍然按既有策略拒绝 X/Twitter 直接抓取，因为该�
   - `https://x.com/heynavtoor/status/2067194761446920264?s=46`
   - `fetch_url_as_markdown()` 输出标题 `The Stanford STORM Method: How to Make Claude Research Like a PhD in Minutes`
   - 输出 Markdown 包含封面图 `https://pbs.twimg.com/media/HLAlQnCbgAADUcf.jpg`
+- 线上服务器网络验证：
+  - 云服务器访问 `x.com`、`cdn.syndication.twimg.com` 和 `pbs.twimg.com` 均出现超时；因此生产 URL 抓取对 X 仍依赖云服务器出口网络可达性。
+  - 已增加超时兜底提示，避免服务端异常暴露给用户。
 
 ## 风险与边界
 
 - 本次只对公开 X/Twitter status/article 链接做 SSR 降级提取；其它 X 页面仍会提示改用粘贴内容或外部抓取工具。
 - X SSR 通常只稳定暴露文章标题、预览和封面图，不保证能抓到完整长文正文。完整正文仍推荐打开页面后复制正文粘贴。
+- 当前云服务器出口到 X/PBS 不稳定时，URL 抓取仍可能无法成功；本机浏览器粘贴是更稳定的工作流。
 - CSS 背景图提升只接受明显图片 URL、`twimg.com` 或带 `format=` 的媒体 URL，减少误把装饰背景保存进文章的风险。

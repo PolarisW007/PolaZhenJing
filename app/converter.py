@@ -492,8 +492,17 @@ def fetch_url_as_markdown(url: str, timeout: int = 30) -> tuple[str, str]:
         'Referer': url,
     }
     if _is_x_public_article_url(url):
-        resp = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
-        resp.raise_for_status()
+        try:
+            resp = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
+            resp.raise_for_status()
+        except requests.RequestException as exc:
+            raise URLFetchBlocked(
+                '服务器访问 X/Twitter 超时或被网络拦截，无法直接抓取该链接。',
+                suggestion=(
+                    '请改用「粘贴内容」标签页：在本机浏览器打开链接复制正文后粘贴；'
+                    '如果图片在编辑器里可见，保存时会尽量保留图片引用。'
+                ),
+            ) from exc
         if not resp.encoding or resp.encoding.lower() == 'iso-8859-1':
             resp.encoding = resp.apparent_encoding or 'utf-8'
         extracted = _extract_x_public_article_markdown(resp.text, resp.url or url)
