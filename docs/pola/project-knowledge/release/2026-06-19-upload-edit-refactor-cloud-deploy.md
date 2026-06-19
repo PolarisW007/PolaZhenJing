@@ -60,22 +60,40 @@ ssh root@42.121.164.11
 cd /PolaZhenjing
 BACKUP_DIR=/opt/backups/polazj-upload-edit-refactor-<timestamp>
 tar -xzf "$BACKUP_DIR/app.tgz" -C /PolaZhenjing
-tar -xzf "$BACKUP_DIR/scripts-tests-docs.tgz" -C /PolaZhenjing
+tar -xzf "$BACKUP_DIR/scripts-tests-docs-portal.tgz" -C /PolaZhenjing
+tar -xzf "$BACKUP_DIR/var-www-portal.tgz" -C /var/www/html
 systemctl restart polazj.service
 systemctl is-active polazj.service
 ```
 
 ## 执行记录
 
-- 本地 commit：待回填。
-- 备份目录：待回填。
-- 云端 py_compile：待回填。
-- 云端 pytest：待回填。
-- 服务状态：待回填。
-- 公网 smoke：待回填。
+- 本地 commit：`9bff536 feat(editor): refactor upload edit article workflows`，已 push 到 `origin/main`。
+- 备份目录：`/opt/backups/polazj-upload-edit-refactor-20260619161952`。
+- 云端同步：
+  - `/PolaZhenjing/app/`
+  - `/PolaZhenjing/scripts/`
+  - `/PolaZhenjing/tests/`
+  - `/PolaZhenjing/docs/pola/project-knowledge/`
+  - `/PolaZhenjing/portal/`
+  - `/var/www/html/`
+- 云端 py_compile：Pass。
+- 云端 pytest：`53 passed in 2.37s`。
+- 服务状态：`polazj.service` 已重启，`systemctl is-active polazj` 返回 `active`。
+- 认证态模板 smoke：
+  - `/admin/upload`：200，命中 `AI 改写率`、`rich-content`、`convertEditorContent`、`content_format`。
+  - `/admin/articles/rolling-ai-fde-ai-20260607.md/edit`：200，命中 `AI 改写率`、`rich-content`、`convertEditorContent`、`修改建议简述`、`渲染预览`。
+  - `/admin/api/editor/convert`：Markdown -> 富文本 200，富文本 -> Markdown 200。
+- 公网 smoke：
+  - `https://aipd.me/`：200。
+  - `https://aipd.me/PolaZhenjing/admin/login`：200。
+  - `https://aipd.me/PolaZhenjing/admin/upload`：302 到登录页，符合未登录保护预期。
+  - `https://aipd.me/PolaZhenjing/articles/fde-databricks-snowflake-20260610.md`：200。
+  - `https://aipd.me/PolaZhenjing/admin/articles/rolling-ai-fde-ai-20260607.md/edit`：302 到登录页，符合未登录保护预期。
 
 ## 风险
 
 - `app/uploader.py` 承载多条历史功能链路，本次同步采用当前已通过测试的服务状态；不做单独的历史回滚切片。
 - Playwright Harness 不点击真实保存按钮，避免污染文章；保存链路由 Flask test client 和单测覆盖。
 - 云端如存在未提交运行时改动，精确 rsync 会覆盖发布范围内文件，因此发布前必须备份。
+- 线上 `journalctl` 中仍可看到历史微信 JS-SDK `permission denied` 诊断日志，属于微信分享权限链路历史观测，不影响本次上传/编辑模块发布。
