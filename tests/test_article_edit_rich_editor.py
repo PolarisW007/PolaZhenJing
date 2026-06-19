@@ -41,6 +41,10 @@ def test_article_edit_page_uses_local_tinymce_assets():
     assert "showRichEditorSurface" in body
     # Editor flex layout (prevents iframe collapse) is preserved.
     assert "display: flex !important" in body
+    # Long-form editing should keep a full workbench instead of a tiny textarea.
+    assert "height: clamp(680px, 72vh, 980px)" in body
+    assert "function editorWorkHeight()" in body
+    assert "height: editorWorkHeight()" in body
     # Save must give immediate feedback and preserve the clicked save mode even
     # when submit buttons are disabled to prevent duplicate submissions.
     assert 'id="save-status"' in body

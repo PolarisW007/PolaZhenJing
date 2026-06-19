@@ -62,7 +62,8 @@
   }
   .body-markdown-textarea {
     width: 100%;
-    min-height: 520px;
+    height: clamp(680px, 72vh, 980px);
+    min-height: 680px !important;
     font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     font-size: 14px;
     line-height: 1.72;
@@ -94,13 +95,13 @@
   }
   .tox-tinymce .tox-edit-area {
     flex: 1 1 auto !important;
-    min-height: 360px !important;
+    min-height: 560px !important;
     display: flex !important;
   }
   .tox-tinymce iframe {
     flex: 1 1 auto !important;
     height: 100% !important;
-    min-height: 360px;
+    min-height: 560px;
   }
 </style>
 {% endblock %}
@@ -392,7 +393,10 @@
     .editor-workspace {
       grid-template-columns: 1fr;
     }
-    .body-markdown-textarea { min-height: 460px; }
+    .body-markdown-textarea {
+      height: clamp(560px, 68vh, 820px);
+      min-height: 560px !important;
+    }
   }
 </style>
 {% endblock %}
@@ -519,6 +523,11 @@ let richEditorReady = false;
 let richEditorFallbackShown = false;
 let tinymceLoadingPromise = null;
 
+function editorWorkHeight() {
+  const viewport = window.innerHeight || 900;
+  return Math.min(Math.max(Math.round(viewport * 0.72), 680), 980);
+}
+
 function loadTinyMCE() {
   if (window.tinymce) return Promise.resolve(window.tinymce);
   if (tinymceLoadingPromise) return tinymceLoadingPromise;
@@ -566,9 +575,9 @@ function initRichEditor() {
     suffix: '.min',
     skin: editorSkin(),
     content_css: false,
-    height: 680,
-    min_height: 520,
-    max_height: 900,
+    height: editorWorkHeight(),
+    min_height: 680,
+    max_height: 1100,
     resize: true,
     language: 'zh-Hans',
     language_url: `${TINYMCE_BASE_URL}/langs/zh-Hans.js`,
