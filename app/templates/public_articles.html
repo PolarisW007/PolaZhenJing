@@ -1,29 +1,29 @@
 {% extends "base.html" %}
-{% block title %}文章列表{% endblock %}
-{% block nav_logo %}织梦空间 · 文章列表{% endblock %}
-{% block card_class %}card-full{% endblock %}
+{% block title %}PolaZhenjing{% endblock %}
+{% block nav_logo %}PolaZhenjing{% endblock %}
+{% block card_class %}card-full public-home-card{% endblock %}
 {% block head_extra %}
-<meta name="description" content="织梦空间文章列表，聚合 AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
+<meta name="description" content="PolaZhenjing 文章知识库,聚合 AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://aipd.me/articles">
-<link rel="alternate" type="application/rss+xml" title="织梦空间文章 RSS" href="https://aipd.me/feed.xml">
-<link rel="alternate" type="application/feed+json" title="织梦空间文章 JSON Feed" href="https://aipd.me/articles.json">
-<meta property="og:site_name" content="织梦空间">
+<link rel="alternate" type="application/rss+xml" title="PolaZhenjing RSS" href="https://aipd.me/feed.xml">
+<link rel="alternate" type="application/feed+json" title="PolaZhenjing JSON Feed" href="https://aipd.me/articles.json">
+<meta property="og:site_name" content="PolaZhenjing">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:type" content="website">
-<meta property="og:title" content="织梦空间文章列表">
+<meta property="og:title" content="PolaZhenjing 文章知识库">
 <meta property="og:description" content="AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
 <meta property="og:url" content="https://aipd.me/articles">
 <meta property="og:image" content="https://aipd.me/assets/hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="织梦空间文章列表">
+<meta name="twitter:title" content="PolaZhenjing 文章知识库">
 <meta name="twitter:description" content="AI 产品、Agent 工作流、企业软件、数据基础设施和个人知识生产实践。">
 <meta name="twitter:image" content="https://aipd.me/assets/hero.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": "织梦空间文章列表",
+  "name": "PolaZhenjing 文章知识库",
   "url": "https://aipd.me/articles",
   "inLanguage": "zh-CN",
   "itemListElement": [
@@ -41,117 +41,523 @@
 </script>
 {% endblock %}
 {% block content %}
-<div class="public-article-head">
-  <div>
-    <p class="eyebrow">AI Articles</p>
-    <h2>文章列表</h2>
-  </div>
-  <a class="btn-ghost" href="/">返回织梦空间</a>
-</div>
-
-{% if posts %}
-<div class="public-article-grid">
-  {% for post in posts %}
-  <article class="public-article-card">
-    {% if post.cover %}
-    <a href="{{ post.url }}" class="public-cover">
-      <img src="{{ post.cover }}" alt="{{ post.title }}">
-    </a>
-    {% endif %}
-    <div class="public-card-body">
-      <span class="public-date">{{ post.date }}</span>
-      <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
-      <p>{{ post.summary }}</p>
+<main class="public-home" data-public-article-home>
+  <section class="public-hero" aria-labelledby="public-home-title">
+    <div class="public-hero-copy">
+      <p class="public-eyebrow">PolaZhenjing Wiki</p>
+      <h1 id="public-home-title">文章知识库</h1>
+      <p class="public-hero-subtitle">围绕 AI 产品、Agent 工作流、数据基础设施和个人知识生产的长期笔记。</p>
+      <div class="public-hero-actions" aria-label="阅读入口">
+        <a class="btn-gold btn-sm" href="#article-timeline">开始阅读</a>
+        <a class="btn-ghost" href="https://aipd.me/feed.xml">RSS</a>
+        <a class="btn-ghost" href="https://aipd.me/articles.json">JSON</a>
+        <a class="btn-ghost" href="https://aipd.me/llms.txt">LLMs</a>
+      </div>
     </div>
-  </article>
-  {% endfor %}
-</div>
-{% else %}
-<div style="text-align:center; padding:3rem; color:var(--text-muted);">
-  暂无文章。
-</div>
-{% endif %}
+    <dl class="public-stats" aria-label="文章统计">
+      <div>
+        <dt>{{ article_stats.article_count }}</dt>
+        <dd>篇文章</dd>
+      </div>
+      <div>
+        <dt>{{ article_stats.topic_count }}</dt>
+        <dd>个主题</dd>
+      </div>
+      <div>
+        <dt>{{ article_stats.read_time_total }}</dt>
+        <dd>分钟阅读</dd>
+      </div>
+      <div>
+        <dt>{{ article_stats.word_count_total }}</dt>
+        <dd>字词沉淀</dd>
+      </div>
+    </dl>
+  </section>
+
+  {% if featured_post %}
+  <section class="public-featured" aria-labelledby="featured-title">
+    <div class="public-section-label">Featured</div>
+    <article class="featured-story">
+      {% if featured_post.cover %}
+      <a class="featured-cover" href="{{ featured_post.url }}" aria-label="阅读 {{ featured_post.title }}">
+        <img src="{{ featured_post.cover }}" alt="{{ featured_post.title }}" loading="eager">
+      </a>
+      {% endif %}
+      <div class="featured-copy">
+        <p>{{ featured_post.date }} · {{ featured_post.read_time }} 分钟阅读</p>
+        <h2 id="featured-title"><a href="{{ featured_post.url }}">{{ featured_post.title }}</a></h2>
+        <p>{{ featured_post.summary }}</p>
+        <div class="featured-meta">
+          <span>{{ featured_post.section }}</span>
+          {% for keyword in featured_post.keywords[:3] %}
+          <span>{{ keyword }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </article>
+  </section>
+  {% endif %}
+
+  <section class="public-explorer" aria-labelledby="explorer-title">
+    <div class="public-section-head">
+      <div>
+        <p class="public-eyebrow">Browse</p>
+        <h2 id="explorer-title">快速 Wiki</h2>
+      </div>
+      <a class="btn-ghost" href="https://aipd.me/articles">完整索引</a>
+    </div>
+
+    <div class="topic-strip" aria-label="主题频道">
+      <button class="filter-chip active" type="button" data-filter-topic="all">全部 <span>{{ posts|length }}</span></button>
+      {% for topic in topic_filters %}
+      <button class="filter-chip" type="button" data-filter-topic="{{ topic.id }}">{{ topic.label }} <span>{{ topic.count }}</span></button>
+      {% endfor %}
+    </div>
+
+    {% if keyword_filters %}
+    <div class="keyword-strip" aria-label="关键词">
+      {% for keyword in keyword_filters %}
+      <button class="keyword-chip" type="button" data-filter-keyword="{{ keyword.label|lower|e }}">{{ keyword.label }} <span>{{ keyword.count }}</span></button>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="article-tools">
+      <label class="search-box">
+        <span>搜索</span>
+        <input data-article-search type="search" autocomplete="off" placeholder="搜索标题、摘要或关键词">
+      </label>
+      <label class="sort-box">
+        <span>排序</span>
+        <select data-article-sort>
+          <option value="newest">最新发布</option>
+          <option value="read">阅读时长</option>
+          <option value="title">标题 A-Z</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  {% if posts %}
+  <section id="article-timeline" class="article-timeline" aria-label="文章时间线">
+    {% for post in posts %}
+    <article class="timeline-item"
+             data-article-card
+             data-topic="{{ post.section|e }}"
+             data-topic-id="{{ post.section|lower|replace(' ', '-')|e }}"
+             data-keywords="{{ post.keywords|join(' ')|lower|e }}"
+             data-date="{{ post.date|e }}"
+             data-read-time="{{ post.read_time }}"
+             data-title="{{ post.title|e }}"
+             data-search="{{ (post.title ~ ' ' ~ post.summary ~ ' ' ~ post.section ~ ' ' ~ (post.keywords|join(' ')))|lower|e }}">
+      <div class="timeline-date">
+        <time datetime="{{ post.date }}">{{ post.date }}</time>
+      </div>
+      <div class="timeline-body">
+        <div class="timeline-main">
+          <p class="timeline-meta">{{ post.section }} · {{ post.read_time }} 分钟阅读</p>
+          <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+          <p>{{ post.summary }}</p>
+          <div class="timeline-tags">
+            {% for keyword in post.keywords[:4] %}
+            <span>{{ keyword }}</span>
+            {% endfor %}
+          </div>
+          <div class="timeline-actions">
+            <a class="read-link" href="{{ post.url }}">阅读文章</a>
+            <a class="short-link" href="{{ post.short_url }}">{{ post.short_url.replace('https://', '') }}</a>
+          </div>
+        </div>
+        {% if post.cover %}
+        <a class="timeline-cover" href="{{ post.url }}" aria-label="阅读 {{ post.title }}">
+          <img src="{{ post.cover }}" alt="{{ post.title }}" loading="lazy">
+        </a>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+    <div class="empty-state" data-empty-state hidden>没有匹配的文章。</div>
+  </section>
+  {% else %}
+  <section class="empty-state">暂无文章。</section>
+  {% endif %}
+</main>
 
 <style>
-  .public-article-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  .public-home-card {
+    max-width: 1180px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
   }
-  .eyebrow {
+  .public-home {
+    width: 100%;
+  }
+  .public-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+    gap: 2rem;
+    align-items: end;
+    padding: 3rem 0 2.25rem;
+    border-bottom: 1px solid rgba(228,191,122,0.18);
+  }
+  .public-eyebrow,
+  .public-section-label {
     color: var(--gold-primary);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0;
     text-transform: uppercase;
-    margin-bottom: 0.35rem;
   }
-  .public-article-head h2 {
-    margin-bottom: 0;
-    text-align: left;
+  .public-hero h1 {
+    margin: 0.35rem 0 0.8rem;
+    color: var(--text-primary);
+    font-family: "Noto Serif SC", serif;
+    font-size: 4.8rem;
+    line-height: 1.02;
+    letter-spacing: 0;
   }
-  .public-article-grid {
+  .public-hero-subtitle {
+    max-width: 680px;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.9;
+  }
+  .public-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.35rem;
+  }
+  .public-stats {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
   }
-  .public-article-card {
-    display: grid;
-    grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
-    overflow: hidden;
-    border: 1px solid rgba(228,191,122,0.22);
-    border-radius: var(--radius-lg);
+  .public-stats div {
+    min-height: 92px;
+    padding: 1rem;
+    border: 1px solid rgba(228,191,122,0.18);
+    border-radius: var(--radius-md);
     background: rgba(255,255,255,0.045);
   }
-  .public-cover {
-    display: block;
-    min-height: 180px;
+  .public-stats dt {
+    color: var(--text-primary);
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .public-stats dd {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+  .public-featured,
+  .public-explorer,
+  .article-timeline {
+    padding: 2rem 0 0;
+  }
+  .featured-story {
+    display: grid;
+    grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+    gap: 1.4rem;
+    margin-top: 0.8rem;
+    border: 1px solid rgba(228,191,122,0.2);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.045);
+    overflow: hidden;
+  }
+  .featured-cover {
+    min-height: 260px;
     background: rgba(228,191,122,0.06);
   }
-  .public-cover img {
+  .featured-cover img,
+  .timeline-cover img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  .public-card-body {
-    padding: 1.25rem;
+  .featured-copy {
+    padding: 1.35rem 1.35rem 1.35rem 0;
+    align-self: center;
   }
-  .public-date {
+  .featured-copy > p:first-child,
+  .timeline-meta {
     color: var(--gold-primary);
     font-size: 0.78rem;
     font-weight: 700;
   }
-  .public-card-body h3 {
-    margin: 0.45rem 0 0.65rem;
+  .featured-copy h2 {
+    margin: 0.45rem 0 0.75rem;
     color: var(--text-primary);
-    font-size: 1.15rem;
-    line-height: 1.45;
+    font-family: "Noto Serif SC", serif;
+    font-size: 1.65rem;
+    line-height: 1.35;
+    text-align: left;
   }
-  .public-card-body h3 a {
+  .featured-copy h2 a,
+  .timeline-body h3 a {
     color: inherit;
   }
-  .public-card-body p {
+  .featured-copy > p:not(:first-child),
+  .timeline-body p {
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.8;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    line-height: 1.85;
   }
-  @media (max-width: 720px) {
-    .public-article-head {
+  .featured-meta,
+  .timeline-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .featured-meta span,
+  .timeline-tags span {
+    padding: 0.25rem 0.55rem;
+    border: 1px solid rgba(228,191,122,0.22);
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .public-section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .public-section-head h2 {
+    margin: 0.3rem 0 0;
+    color: var(--text-primary);
+    font-family: "Noto Serif SC", serif;
+    text-align: left;
+  }
+  .topic-strip,
+  .keyword-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+  .filter-chip,
+  .keyword-chip {
+    min-height: 38px;
+    padding: 0.55rem 0.78rem;
+    border: 1px solid rgba(228,191,122,0.2);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.84rem;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .filter-chip span,
+  .keyword-chip span {
+    color: var(--text-muted);
+    margin-left: 0.2rem;
+  }
+  .filter-chip.active,
+  .keyword-chip.active {
+    border-color: rgba(228,191,122,0.6);
+    background: rgba(228,191,122,0.12);
+    color: var(--gold-light);
+  }
+  .article-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+    gap: 0.8rem;
+    margin-top: 1.25rem;
+  }
+  .search-box,
+  .sort-box {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .search-box span,
+  .sort-box span {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .search-box input,
+  .sort-box select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(228,191,122,0.2);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+    font: inherit;
+  }
+  .search-box input:focus,
+  .sort-box select:focus {
+    outline: none;
+    border-color: rgba(228,191,122,0.65);
+  }
+  .article-timeline {
+    display: grid;
+    gap: 1rem;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .timeline-date {
+    padding-top: 1.2rem;
+    color: var(--gold-primary);
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  .timeline-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 240px);
+    gap: 1rem;
+    padding: 1.15rem;
+    border: 1px solid rgba(228,191,122,0.18);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.04);
+  }
+  .timeline-body h3 {
+    margin: 0.35rem 0 0.55rem;
+    color: var(--text-primary);
+    font-family: "Noto Serif SC", serif;
+    font-size: 1.28rem;
+    line-height: 1.4;
+  }
+  .timeline-cover {
+    min-height: 150px;
+    max-height: 190px;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: rgba(228,191,122,0.06);
+  }
+  .timeline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .read-link {
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+  .short-link {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+  .empty-state {
+    padding: 2rem;
+    border: 1px solid rgba(228,191,122,0.18);
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+    text-align: center;
+  }
+  @media (max-width: 860px) {
+    .public-hero,
+    .featured-story,
+    .article-tools,
+    .timeline-item,
+    .timeline-body {
+      grid-template-columns: 1fr;
+    }
+    .featured-copy {
+      padding: 0 1.15rem 1.15rem;
+    }
+    .timeline-date {
+      padding-top: 0;
+    }
+    .timeline-cover {
+      order: -1;
+      min-height: 190px;
+    }
+  }
+  @media (max-width: 640px) {
+    .admin-main {
+      padding: 1rem;
+    }
+    .public-hero {
+      padding-top: 1.5rem;
+    }
+    .public-hero h1 {
+      font-size: 2.55rem;
+    }
+    .public-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .public-section-head {
       align-items: flex-start;
       flex-direction: column;
     }
-    .public-article-card {
-      grid-template-columns: 1fr;
-    }
-    .public-cover {
-      min-height: 200px;
+    .public-hero-actions,
+    .topic-strip,
+    .keyword-strip,
+    .timeline-actions {
+      gap: 0.5rem;
     }
   }
 </style>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-public-article-home]');
+    if (!root) return;
+    const cards = Array.from(root.querySelectorAll('[data-article-card]'));
+    const timeline = root.querySelector('#article-timeline');
+    const empty = root.querySelector('[data-empty-state]');
+    const search = root.querySelector('[data-article-search]');
+    const sort = root.querySelector('[data-article-sort]');
+    const topicButtons = Array.from(root.querySelectorAll('[data-filter-topic]'));
+    const keywordButtons = Array.from(root.querySelectorAll('[data-filter-keyword]'));
+    let activeTopic = 'all';
+    let activeKeyword = '';
+
+    const normalizeTopic = (value) => (value || '').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-').replace(/^-+|-+$/g, '') || 'uncategorized';
+
+    const update = () => {
+      const query = (search?.value || '').trim().toLowerCase();
+      const sorted = [...cards].sort((a, b) => {
+        if (sort?.value === 'read') {
+          return Number(b.dataset.readTime || 0) - Number(a.dataset.readTime || 0);
+        }
+        if (sort?.value === 'title') {
+          return (a.dataset.title || '').localeCompare(b.dataset.title || '', 'zh-Hans-CN');
+        }
+        return (b.dataset.date || '').localeCompare(a.dataset.date || '');
+      });
+      let visibleCount = 0;
+      sorted.forEach((card) => {
+        const topicMatch = activeTopic === 'all' || normalizeTopic(card.dataset.topic) === activeTopic;
+        const keywordMatch = !activeKeyword || (card.dataset.keywords || '').toLowerCase().includes(activeKeyword.toLowerCase());
+        const searchMatch = !query || (card.dataset.search || '').includes(query);
+        const visible = topicMatch && keywordMatch && searchMatch;
+        card.hidden = !visible;
+        if (visible) visibleCount += 1;
+        timeline?.appendChild(card);
+      });
+      if (empty) empty.hidden = visibleCount !== 0;
+    };
+
+    topicButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeTopic = button.dataset.filterTopic || 'all';
+        topicButtons.forEach((item) => item.classList.toggle('active', item === button));
+        update();
+      });
+    });
+    keywordButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const next = button.dataset.filterKeyword || '';
+        activeKeyword = activeKeyword === next ? '' : next;
+        keywordButtons.forEach((item) => item.classList.toggle('active', item.dataset.filterKeyword === activeKeyword));
+        update();
+      });
+    });
+    search?.addEventListener('input', update);
+    sort?.addEventListener('change', update);
+  })();
+</script>
 {% endblock %}

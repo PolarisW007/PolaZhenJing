@@ -1,6 +1,10 @@
 """Upload and article management blueprint."""
+import base64
+import binascii
+import ipaddress
 import os
 import re
+import socket
 import subprocess
 import tempfile
 import json
@@ -19,11 +23,33 @@ from werkzeug.utils import secure_filename
 from flask import (Blueprint, flash, jsonify, redirect, render_template,
                    request, session, url_for, current_app)
 
+from .article_content import (
+    canonicalize_editor_content,
+    html_to_canonical_markdown,
+    looks_like_html_fragment,
+    markdown_to_editor_html,
+    normalize_markdown,
+    render_article_preview,
+)
+from .article_ai import (
+    REWRITE_RATE_DEFAULT,
+    REWRITE_RATE_PRESETS,
+    parse_rewrite_rate,
+    rewrite_rate_instruction,
+    rewrite_temperature,
+)
+from .article_repository import (
+    article_admin_filename as repo_article_admin_filename,
+    load_post,
+    parse_post as repo_parse_post,
+    safe_post_path as repo_safe_post_path,
+    write_post,
+)
 from .auth import login_required
 from .converter import (_clean_markdown_formatting, detect_and_convert, extract_title,
                         fetch_url_as_markdown, URLFetchBlocked)
 from git_safety import GitSafetyError, guarded_commit_and_push
-from . import jobs
+from . import get_db, jobs
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +87,14 @@ THEME_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'theme.json')
 ALLOWED_EXT = {'md', 'markdown', 'txt', 'pdf', 'docx', 'doc', 'html', 'htm'}
 ALLOWED_IMAGE_EXT = {'png', 'jpg', 'jpeg', 'webp'}
 RICH_MEDIA_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'richtext')
+MAX_REMOTE_IMAGE_BYTES = 8 * 1024 * 1024
+REMOTE_IMAGE_TIMEOUT = 8
+REMOTE_IMAGE_CONTENT_TYPES = {
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+}
 SHARE_IMAGE_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets', 'images', 'share')
 SHARE_IMAGE_URL_PREFIX = '/assets/images/share'
 SHARE_IMAGE_PRESETS = {
@@ -98,6 +132,19 @@ def _article_asset_base() -> str:
     generated/uploaded media is served by the PolaZhenjing app prefix.
     """
     return request.script_root or '/PolaZhenjing'
+
+
+def _polazhenjing_admin_url(endpoint: str, **values) -> str:
+    """Build admin URLs that stay under the deployed PolaZhenjing prefix.
+
+    Root-domain public article pages are also served at /articles/... where
+    Flask has no SCRIPT_NAME. Plain url_for() would then produce /admin/...
+    links, which bypass the production app prefix and break admin actions.
+    """
+    path = url_for(endpoint, **values)
+    if path == '/admin' or path.startswith('/admin/'):
+        return f'/PolaZhenjing{path}'
+    return path
 
 
 def _set_theme(theme_id: str):
@@ -249,12 +296,27 @@ def _get_minimax_api_key() -> str | None:
     return os.environ.get('MINIMAX_TOKEN_PLAN_API_KEY') or None
 
 
+def _parse_rewrite_rate(value, default: int = REWRITE_RATE_DEFAULT) -> int:
+    """Normalize upload rewrite rate to one of the supported presets."""
+    return parse_rewrite_rate(value, default=default)
+
+
+def _rewrite_rate_instruction(rewrite_rate: int) -> str:
+    """Return the prompt contract for the selected rewrite strength."""
+    return rewrite_rate_instruction(rewrite_rate)
+
+
 def _call_llm_rewrite(content: str, title: str, system_prompt: str,
-                      revision_instruction: str = '') -> str | None:
+                      revision_instruction: str = '',
+                      rewrite_rate: int = REWRITE_RATE_DEFAULT) -> str | None:
     """Call MiniMax LLM to rewrite content using the given skill prompt.
 
     Returns rewritten content string, or None on failure.
     """
+    rewrite_rate = _parse_rewrite_rate(rewrite_rate)
+    if rewrite_rate <= 0:
+        return None
+
     api_key = _get_minimax_api_key()
     if not api_key:
         logger.warning('MINIMAX_TOKEN_PLAN_API_KEY not found, skipping LLM rewrite')
@@ -265,10 +327,15 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str,
         f'\n\n额外修改建议：\n{instruction}\n\n请在不改变事实和核心主题的前提下，优先落实这些修改建议。'
         if instruction else ''
     )
+    rewrite_contract = _rewrite_rate_instruction(rewrite_rate)
+    if rewrite_rate >= 100:
+        task_intro = '请根据以下素材，以你的风格写一篇公众号长文。'
+    else:
+        task_intro = '请根据以下素材，在指定 AI 改写率边界内编辑文章。'
     user_msg = (
-        f'请根据以下素材，以你的风格写一篇公众号长文。必须严格围绕素材的实际论点与主题展开，'
-        f'不要自行替换主题、混入无关个人经历或凭空构造事实。如果素材是个人博客/技术解读，'
-        f'保留原文的代码例子、术语和数据。标题是「{title}」，保持标题与正文语义一致。'
+        f'{task_intro}{rewrite_contract}'
+        f'如果素材是个人博客/技术解读，保留原文的代码例子、术语和数据。'
+        f'标题是「{title}」，保持标题与正文语义一致。'
         f'{instruction_text}\n\n'
         f'素材内容：\n{content}'
     )
@@ -279,7 +346,7 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str,
             {'role': 'system', 'content': system_prompt},
             {'role': 'user', 'content': user_msg},
         ],
-        'temperature': 0.8,
+        'temperature': rewrite_temperature(rewrite_rate),
         'max_tokens': 16000,
     }, ensure_ascii=False).encode('utf-8')
 
@@ -748,6 +815,220 @@ def _save_richtext_image(file_storage) -> str:
     return url_for('serve_assets', filename=f'images/richtext/{month}/{filename}')
 
 
+def _richtext_image_url_from_bytes(data: bytes, ext: str) -> str:
+    """Persist image bytes and return a stable richtext asset URL."""
+    if ext not in ALLOWED_IMAGE_EXT:
+        raise ValueError(f'不支持的图片类型：.{ext or "unknown"}')
+    if not data or len(data) > MAX_REMOTE_IMAGE_BYTES:
+        raise ValueError('图片内容为空或超过大小限制')
+    month = datetime.now().strftime('%Y-%m')
+    out_dir = os.path.join(RICH_MEDIA_DIR, month)
+    os.makedirs(out_dir, exist_ok=True)
+    digest = hashlib.sha256(data).hexdigest()[:16]
+    filename = f'{digest}.{ext}'
+    out_path = os.path.join(out_dir, filename)
+    if not os.path.isfile(out_path):
+        with open(out_path, 'wb') as f:
+            f.write(data)
+    return url_for('serve_assets', filename=f'images/richtext/{month}/{filename}')
+
+
+def _log_remote_image_localization_failure(image_url: str, reason: str):
+    """Log remote image localization failures without leaking query strings."""
+    try:
+        parsed = urlparse(image_url or '')
+        host = parsed.netloc or parsed.path[:80]
+        current_app.logger.warning('Rich image localization failed for host=%s: %s', host, reason)
+    except RuntimeError:
+        logger.warning('Rich image localization failed: %s', reason)
+
+
+def _first_srcset_url(srcset: str) -> str:
+    """Return the first URL from an HTML srcset attribute."""
+    if not srcset:
+        return ''
+    first = next((item.strip() for item in srcset.split(',') if item.strip()), '')
+    return first.split()[0] if first else ''
+
+
+def _usable_rich_image_src(tag) -> str:
+    """Choose the most useful image source from pasted rich HTML."""
+    attrs = [
+        'src', 'data-src', 'data-original', 'data-url', 'data-image-src',
+        'data-actualsrc', 'data-lazy-src',
+    ]
+    for attr in attrs:
+        value = (tag.get(attr) or '').strip()
+        if value and value not in {'#', 'about:blank'}:
+            return value
+    for attr in ('srcset', 'data-srcset'):
+        value = _first_srcset_url(tag.get(attr) or '')
+        if value and value not in {'#', 'about:blank'}:
+            return value
+    return ''
+
+
+def _is_local_article_image_url(image_url: str) -> bool:
+    """Return True for local article assets that should not be re-downloaded."""
+    value = (image_url or '').strip()
+    if not value:
+        return False
+    if value.startswith(('data:', 'blob:')):
+        return False
+    if value.startswith('{{ site.baseurl }}'):
+        return True
+    parsed_path = urlparse(value).path if value.startswith(('http://', 'https://')) else value
+    return (
+        parsed_path.startswith('/PolaZhenjing/assets/')
+        or parsed_path.startswith('/assets/')
+        or parsed_path.startswith('assets/')
+    )
+
+
+def _is_public_remote_image_url(image_url: str) -> bool:
+    """Validate that a remote image URL resolves to public network addresses."""
+    parsed = urlparse(image_url)
+    if parsed.scheme not in {'http', 'https'} or not parsed.hostname:
+        return False
+    try:
+        infos = socket.getaddrinfo(parsed.hostname, None, type=socket.SOCK_STREAM)
+    except OSError:
+        return False
+    if not infos:
+        return False
+    for info in infos:
+        host = info[4][0].split('%', 1)[0]
+        try:
+            ip = ipaddress.ip_address(host)
+        except ValueError:
+            return False
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            return False
+    return True
+
+
+def _download_remote_image_to_richtext(image_url: str) -> str | None:
+    """Download a public remote image into richtext assets and return local URL."""
+    image_url = (image_url or '').strip()
+    if image_url.startswith('//'):
+        image_url = f'https:{image_url}'
+    if not _is_public_remote_image_url(image_url):
+        return None
+
+    try:
+        req = Request(
+            image_url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; PolaZhenJing/1.0; +https://aipd.me/)',
+                'Accept': 'image/avif,image/webp,image/png,image/jpeg,image/*,*/*;q=0.8',
+            },
+        )
+        with urlopen(req, timeout=REMOTE_IMAGE_TIMEOUT) as resp:
+            final_url = getattr(resp, 'url', image_url)
+            if 'noauth' in final_url.lower():
+                _log_remote_image_localization_failure(image_url, 'redirected to noAuth image')
+                return None
+            content_type = (resp.headers.get('Content-Type') or '').split(';', 1)[0].strip().lower()
+            ext = REMOTE_IMAGE_CONTENT_TYPES.get(content_type)
+            if not ext:
+                _log_remote_image_localization_failure(image_url, f'unsupported content type {content_type or "unknown"}')
+                return None
+            try:
+                content_length = int(resp.headers.get('Content-Length') or '0')
+            except ValueError:
+                content_length = 0
+            if content_length > MAX_REMOTE_IMAGE_BYTES:
+                _log_remote_image_localization_failure(image_url, 'content length exceeds limit')
+                return None
+            data = resp.read(MAX_REMOTE_IMAGE_BYTES + 1)
+            if len(data) > MAX_REMOTE_IMAGE_BYTES:
+                _log_remote_image_localization_failure(image_url, 'download exceeds limit')
+                return None
+            if not data or b'<html' in data[:512].lower():
+                _log_remote_image_localization_failure(image_url, 'response is empty or html')
+                return None
+            return _richtext_image_url_from_bytes(data, ext)
+    except Exception as exc:
+        _log_remote_image_localization_failure(image_url, exc.__class__.__name__)
+        return None
+
+
+def _save_data_image_to_richtext(data_url: str) -> str | None:
+    """Persist a data:image URL from pasted rich HTML as a local asset."""
+    match = re.match(r'^data:(image/(?:png|jpeg|jpg|webp));base64,(.+)$', data_url or '', re.I | re.S)
+    if not match:
+        return None
+    content_type = match.group(1).lower()
+    ext = REMOTE_IMAGE_CONTENT_TYPES.get(content_type)
+    if not ext:
+        return None
+    try:
+        data = base64.b64decode(match.group(2), validate=True)
+        return _richtext_image_url_from_bytes(data, ext)
+    except (binascii.Error, ValueError):
+        return None
+
+
+def _localize_rich_html_images(soup):
+    """Replace pasted external image URLs with local richtext assets when possible."""
+    for img in soup.find_all('img'):
+        src = _usable_rich_image_src(img)
+        if not src:
+            img.decompose()
+            continue
+        if src.startswith('//'):
+            src = f'https:{src}'
+        local_url = None
+        if src.startswith('data:image/'):
+            local_url = _save_data_image_to_richtext(src)
+        elif _is_local_article_image_url(src):
+            local_url = src
+        elif src.startswith(('http://', 'https://')):
+            local_url = _download_remote_image_to_richtext(src)
+        if local_url:
+            img['src'] = local_url
+            img['loading'] = img.get('loading') or 'lazy'
+        else:
+            img['src'] = src
+        for attr in ('srcset', 'data-srcset'):
+            img.attrs.pop(attr, None)
+
+
+def _sanitize_rich_html_attrs(soup):
+    """Strip large clipboard metadata and unsafe attributes before markdown conversion."""
+    allowed_attrs = {
+        'a': {'href', 'title'},
+        'img': {'src', 'alt', 'title', 'width', 'height', 'loading'},
+        'iframe': {'src', 'title', 'width', 'height', 'allow', 'allowfullscreen',
+                   'loading', 'referrerpolicy'},
+        'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
+        'source': {'src', 'type'},
+    }
+    for tag in soup.find_all(True):
+        tag_allowed = allowed_attrs.get(tag.name, set())
+        cleaned = {}
+        for key, value in list(tag.attrs.items()):
+            lower = key.lower()
+            if lower.startswith('on') or lower.startswith('data-') or lower in {
+                'style', 'class', 'id', 'name', 'uuid', 'contenteditable',
+            }:
+                continue
+            if lower in tag_allowed:
+                cleaned[lower] = value
+        if tag.name == 'a' and cleaned.get('href'):
+            href = str(cleaned['href']).strip()
+            if not href.startswith(('http://', 'https://', '/', '#', 'mailto:')):
+                cleaned.pop('href', None)
+        tag.attrs = cleaned
+
+
 def _safe_media_html(tag) -> str:
     """Serialize a media tag with only the attributes needed for articles."""
     name = getattr(tag, 'name', '')
@@ -773,50 +1054,21 @@ def _safe_media_html(tag) -> str:
 
 
 def _rich_html_to_markdown(html: str, preserve_media: bool = True) -> str:
-    """Convert TinyMCE HTML into Markdown, optionally preserving media blocks."""
-    if not html:
-        return ''
-    try:
-        from bs4 import BeautifulSoup
-        import html2text
-    except ImportError:
-        return html
+    """Convert TinyMCE HTML into canonical Markdown.
 
-    soup = BeautifulSoup(html, 'html.parser')
-    for tag in soup(['script', 'style', 'noscript']):
-        tag.decompose()
-
-    preserved: list[tuple[str, str]] = []
-    media_selector = ['iframe', 'video', 'picture']
-    if not preserve_media:
-        for tag in soup(['img', 'iframe', 'video', 'picture', 'source']):
-            tag.decompose()
-    else:
-        for idx, tag in enumerate(soup.find_all(media_selector), start=1):
-            safe_html = _safe_media_html(tag)
-            token = f'RICH_MEDIA_BLOCK_{idx:03d}'
-            if safe_html:
-                preserved.append((token, safe_html))
-                tag.replace_with(soup.new_string(f'\n\n{token}\n\n'))
-            else:
-                tag.decompose()
-
-    h = html2text.HTML2Text()
-    h.body_width = 0
-    h.ignore_links = False
-    h.ignore_images = not preserve_media
-    h.ignore_emphasis = False
-    markdown_text = h.handle(str(soup))
-    for token, media_html in preserved:
-        markdown_text = markdown_text.replace(token, media_html)
-    return _clean_markdown_formatting(markdown_text).strip()
+    Kept as a compatibility wrapper while the implementation lives in
+    app.article_content.
+    """
+    return html_to_canonical_markdown(
+        html,
+        preserve_media=preserve_media,
+        image_localizer=_localize_rich_html_images if preserve_media else None,
+    )
 
 
 def _looks_like_html_fragment(text: str) -> bool:
     """Detect copied editor HTML that should be converted before generation."""
-    if not text:
-        return False
-    return bool(re.search(r'<(?:div|p|span|h[1-6]|ul|ol|li|blockquote|img|table|section)\b', text, re.I))
+    return looks_like_html_fragment(text)
 
 
 def _normalize_pasted_markdown(text: str, preserve_media: bool = True) -> str:
@@ -824,7 +1076,7 @@ def _normalize_pasted_markdown(text: str, preserve_media: bool = True) -> str:
     text = (text or '').strip()
     if _looks_like_html_fragment(text):
         return _rich_html_to_markdown(text, preserve_media=preserve_media)
-    return text
+    return normalize_markdown(text)
 
 
 _MARKDOWN_IMAGE_RE = re.compile(r'!\[[^\]]*\]\([^)]+\)')
@@ -867,20 +1119,26 @@ def _ensure_original_media(content: str, media_blocks: list[str]) -> str:
 
 
 def _apply_revision_instruction(content: str, title: str, revision_instruction: str,
-                                style: str = '') -> str | None:
+                                style: str = '',
+                                rewrite_rate: int = 50) -> str | None:
     """Ask the LLM to revise existing Markdown according to a short note."""
     instruction = (revision_instruction or '').strip()
     if not instruction:
         return None
+    rewrite_rate = _parse_rewrite_rate(rewrite_rate, default=50)
+    if rewrite_rate <= 0:
+        return None
     system_prompt = (
         '你是一名资深中文文章编辑。请基于用户的修改建议，对现有 Markdown 文章做二次修改。'
         '必须保留原文事实、数据、专有名词、代码块、Markdown 图片、HTML 媒体标签和 front matter 之外的正文结构。'
-        '不要输出解释说明，只输出修改后的 Markdown 正文。'
+        '不要输出解释说明，只输出修改后的 Markdown 正文。不要重复结尾，不要删除图片语法。'
     )
     style_hint = f'文章当前风格是 {style}。' if style else ''
+    rewrite_contract = _rewrite_rate_instruction(rewrite_rate)
     user_msg = (
         f'标题：{title}\n'
         f'{style_hint}\n'
+        f'{rewrite_contract}\n'
         f'修改建议：\n{instruction}\n\n'
         f'原文 Markdown：\n{content}'
     )
@@ -894,7 +1152,7 @@ def _apply_revision_instruction(content: str, title: str, revision_instruction: 
             {'role': 'system', 'content': system_prompt},
             {'role': 'user', 'content': user_msg},
         ],
-        'temperature': 0.45,
+        'temperature': rewrite_temperature(rewrite_rate),
         'max_tokens': 16000,
     }).encode('utf-8')
     req = Request(
@@ -1175,10 +1433,7 @@ _SHORT_CODE_RE = re.compile(r'^[0-9a-f]{8}$')
 
 def _article_admin_filename(filename: str) -> str:
     """Return the short admin URL filename for a Jekyll post filename."""
-    match = _POST_FILENAME_RE.match(filename or '')
-    if not match:
-        return filename
-    return f'{match.group(4)}.md'
+    return repo_article_admin_filename(filename)
 
 
 def _resolve_post_filename(filename: str) -> str | None:
@@ -1233,9 +1488,14 @@ def _public_short_url(short_code: str) -> str:
     return _absolute_public_url(f'/s/{short_code}')
 
 
+def _public_card_url(short_code: str) -> str:
+    return _absolute_public_url(f'/c/{short_code}')
+
+
 def _save_draft(content: str, title: str, tags: str, description: str,
                 illustration_files=None, preserve_original_media: bool = False,
-                original_media=None, revision_instruction: str = '') -> str:
+                original_media=None, revision_instruction: str = '',
+                rewrite_rate: int = REWRITE_RATE_DEFAULT) -> str:
     """Save draft to temp file, return draft ID."""
     os.makedirs(DRAFT_DIR, exist_ok=True)
     draft_id = hashlib.md5(f'{title}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]
@@ -1251,6 +1511,7 @@ def _save_draft(content: str, title: str, tags: str, description: str,
             'preserve_original_media': preserve_original_media,
             'original_media': original_media or [],
             'revision_instruction': (revision_instruction or '').strip(),
+            'rewrite_rate': _parse_rewrite_rate(rewrite_rate),
         }, f, ensure_ascii=False)
     return draft_id
 
@@ -1342,6 +1603,113 @@ def _post_public_summary(filename: str, meta: dict, body: str) -> dict:
     }
 
 
+def _public_filter_id(value: str) -> str:
+    """Return a DOM-safe filter id for public article chips."""
+    value = (value or '').strip().lower()
+    if not value:
+        return 'uncategorized'
+    return re.sub(r'[^a-z0-9\u4e00-\u9fff]+', '-', value).strip('-') or 'uncategorized'
+
+
+def _public_article_home_context(summaries: list[dict]) -> dict:
+    """Build derived context for the public article homepage."""
+    topic_counts: dict[str, int] = {}
+    keyword_counts: dict[str, int] = {}
+    read_time_total = 0
+    word_count_total = 0
+    for post in summaries:
+        section = (post.get('section') or 'AI Articles').strip()
+        topic_counts[section] = topic_counts.get(section, 0) + 1
+        read_time_total += int(post.get('read_time') or 0)
+        word_count_total += int(post.get('word_count') or 0)
+        for keyword in post.get('keywords') or []:
+            keyword = str(keyword).strip()
+            if keyword:
+                keyword_counts[keyword] = keyword_counts.get(keyword, 0) + 1
+
+    topic_filters = [
+        {'id': _public_filter_id(name), 'label': name, 'count': count}
+        for name, count in sorted(topic_counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+    keyword_filters = [
+        {'id': _public_filter_id(name), 'label': name, 'count': count}
+        for name, count in sorted(keyword_counts.items(), key=lambda item: (-item[1], item[0]))[:10]
+    ]
+    return {
+        'featured_post': summaries[0] if summaries else None,
+        'topic_filters': topic_filters,
+        'keyword_filters': keyword_filters,
+        'article_stats': {
+            'article_count': len(summaries),
+            'topic_count': len(topic_filters),
+            'read_time_total': read_time_total,
+            'word_count_total': word_count_total,
+        },
+    }
+
+
+def _article_nav_item(post: dict, current_filename: str) -> dict:
+    """Build a compact article navigation item without reading full content."""
+    filename = post.get('filename', '')
+    admin_filename = post.get('admin_filename') or _article_admin_filename(filename)
+    return {
+        'filename': filename,
+        'admin_filename': admin_filename,
+        'title': post.get('title') or admin_filename.replace('.md', ''),
+        'date': post.get('date') or filename[:10],
+        'url': url_for('public_articles.public_article_view', filename=admin_filename),
+        'is_current': filename == current_filename,
+    }
+
+
+def _article_navigation_context(current_filename: str, quick_limit: int = 8) -> dict:
+    """Return previous/next and quick article links for the reader page."""
+    posts = _scan_posts()
+    if not posts:
+        return {'previous': None, 'next': None, 'quick': []}
+
+    current_index = next(
+        (idx for idx, post in enumerate(posts) if post.get('filename') == current_filename),
+        None,
+    )
+    if current_index is None:
+        return {'previous': None, 'next': None, 'quick': []}
+
+    current_post = posts[current_index]
+    previous_post = posts[current_index - 1] if current_index > 0 else None
+    next_post = posts[current_index + 1] if current_index + 1 < len(posts) else None
+
+    quick_posts = posts[:quick_limit]
+    if current_post not in quick_posts:
+        quick_posts = [current_post] + quick_posts[:max(quick_limit - 1, 0)]
+
+    return {
+        'previous': _article_nav_item(previous_post, current_filename) if previous_post else None,
+        'next': _article_nav_item(next_post, current_filename) if next_post else None,
+        'quick': [_article_nav_item(post, current_filename) for post in quick_posts],
+    }
+
+
+def _article_like_count(article_id: str) -> int:
+    """Return persisted like count for an article."""
+    if not article_id:
+        return 0
+    try:
+        row = get_db().execute(
+            'SELECT like_count FROM article_likes WHERE article_id = ?',
+            (article_id,),
+        ).fetchone()
+    except Exception:
+        logger.exception('Failed to read article like count for %s', article_id)
+        return 0
+    if not row:
+        return 0
+    try:
+        return max(int(row['like_count'] or 0), 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 @uploader_bp.route('/api/public/articles')
 def public_articles():
     """Return recent article metadata for the public AIPD homepage."""
@@ -1382,6 +1750,7 @@ def upload():
         markdown_content = request.form.get('content', '').strip()
         rich_content = request.form.get('rich_content', '').strip()
         revision_instruction = request.form.get('revision_instruction', '').strip()
+        rewrite_rate = _parse_rewrite_rate(request.form.get('rewrite_rate'))
 
         # Handle file upload
         if 'file' in request.files and request.files['file'].filename:
@@ -1466,15 +1835,20 @@ def upload():
             return render_template('upload.html')
 
         # Store in temp file (avoid session cookie size limit)
+        resolved_title = request.form.get('title', '').strip() or title
+        resolved_tags = _format_article_tags(
+            _auto_article_tags(resolved_title, content, request.form.get('tags', '').strip())
+        )
         original_media = _extract_markdown_media_blocks(content) if preserve_original_media else []
         draft_id = _save_draft(content,
-                               request.form.get('title', '').strip() or title,
-                               request.form.get('tags', '').strip(),
+                               resolved_title,
+                               resolved_tags,
                                request.form.get('description', '').strip(),
                                request.files.getlist('illustrations'),
                                preserve_original_media=preserve_original_media,
                                original_media=original_media,
-                               revision_instruction=revision_instruction)
+                               revision_instruction=revision_instruction,
+                               rewrite_rate=rewrite_rate)
         session['draft_id'] = draft_id
         return redirect(url_for('uploader.style_select'))
 
@@ -1528,6 +1902,7 @@ def generate():
     description = draft['description']
     inserted_images = draft.get('inserted_images') or []
     revision_instruction = draft.get('revision_instruction', '')
+    rewrite_rate = _parse_rewrite_rate(draft.get('rewrite_rate'))
     style = request.form.get('style', 'deep-technical')
 
     if not content:
@@ -1544,6 +1919,7 @@ def generate():
         'description': description,
         'inserted_images': inserted_images,
         'revision_instruction': revision_instruction,
+        'rewrite_rate': rewrite_rate,
         'preserve_original_media': draft.get('preserve_original_media', False),
         'original_media': draft.get('original_media') or [],
         'style': style,
@@ -1569,6 +1945,7 @@ def _run_generate_job(job_id: str, p: dict):
     description = p['description']
     inserted_images = p.get('inserted_images') or []
     revision_instruction = p.get('revision_instruction', '')
+    rewrite_rate = _parse_rewrite_rate(p.get('rewrite_rate'))
     preserve_original_media = bool(p.get('preserve_original_media'))
     original_media = p.get('original_media') or []
     style = p['style']
@@ -1579,12 +1956,21 @@ def _run_generate_job(job_id: str, p: dict):
 
     # ── LLM skill rewriting ──────────────────────────────────
     skill_prompt = _get_style_prompt(style)
-    if skill_prompt:
-        jobs.update_job(job_id, stage=f'LLM 正在以「{style}」风格重写…', progress=15)
-        rewritten = _call_llm_rewrite(content, title, skill_prompt, revision_instruction=revision_instruction)
+    if rewrite_rate <= 0:
+        jobs.update_job(job_id, stage='AI 改写率 0%，跳过文本重写…', progress=15)
+        jobs.append_message(job_id, 'info', 'AI 改写率为 0%，已跳过文本重写，将继续生成/插入图片。')
+    elif skill_prompt:
+        jobs.update_job(job_id, stage=f'LLM 正在以「{style}」风格按 {rewrite_rate}% 改写…', progress=15)
+        rewritten = _call_llm_rewrite(
+            content,
+            title,
+            skill_prompt,
+            revision_instruction=revision_instruction,
+            rewrite_rate=rewrite_rate,
+        )
         if rewritten:
             content = rewritten
-            jobs.append_message(job_id, 'info', f'已使用 LLM 技能重写内容（风格：{style}）。')
+            jobs.append_message(job_id, 'info', f'已使用 LLM 技能按 {rewrite_rate}% 改写内容（风格：{style}）。')
             if revision_instruction:
                 jobs.append_message(job_id, 'info', '已根据「修改建议简述」调整文章。')
         else:
@@ -1652,7 +2038,7 @@ def _run_generate_job(job_id: str, p: dict):
     filename = _unique_post_filename(posts_dir, date_str, slug)
 
     # Front matter
-    tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
+    tag_list = _auto_article_tags(title, content, tags)
     summary = _generate_summary(content)
     seo_description = (description or summary or _generate_summary(content, max_chars=160)).strip()
     if len(seo_description) > 180:
@@ -1797,7 +2183,12 @@ def _render_public_articles():
             if len(parts) >= 3:
                 body = parts[2].strip()
         summaries.append(_post_public_summary(filename, meta, body))
+    homepage = _public_article_home_context(summaries)
     return render_template('public_articles.html', posts=summaries,
+                           featured_post=homepage['featured_post'],
+                           topic_filters=homepage['topic_filters'],
+                           keyword_filters=homepage['keyword_filters'],
+                           article_stats=homepage['article_stats'],
                            show_admin_nav=False)
 
 
@@ -1820,32 +2211,12 @@ def _build_pages_url(filename):
 
 def _safe_post_path(filename: str) -> str | None:
     """Return an absolute post path only for safe _posts markdown filenames."""
-    resolved = _resolve_post_filename(filename)
-    if not resolved:
-        return None
-    fpath = os.path.abspath(os.path.join(POSTS_DIR, resolved))
-    posts_root = os.path.abspath(POSTS_DIR)
-    if not fpath.startswith(posts_root + os.sep):
-        return None
-    return fpath
+    return repo_safe_post_path(filename, POSTS_DIR)
 
 
 def _parse_post(raw: str) -> tuple[dict, list[str], str]:
     """Parse the simple Jekyll front matter used by this project."""
-    meta: dict = {}
-    front_lines: list[str] = []
-    body = raw
-    if raw.startswith('---'):
-        parts = raw.split('---', 2)
-        if len(parts) >= 3:
-            front_lines = parts[1].strip().split('\n')
-            body = parts[2].strip()
-            for line in front_lines:
-                if ':' not in line:
-                    continue
-                key, value = line.split(':', 1)
-                meta[key.strip()] = value.strip().strip('"').strip("'")
-    return meta, front_lines, body
+    return repo_parse_post(raw)
 
 
 def _yaml_quote(value: str) -> str:
@@ -1893,6 +2264,175 @@ def _article_keywords(meta_tags: str) -> list[str]:
             inner = value[1:-1]
             return [item.strip().strip('"').strip("'") for item in inner.split(',') if item.strip()]
     return [item.strip() for item in value.split(',') if item.strip()]
+
+
+ARTICLE_PRIMARY_TAGS = {
+    'agent-systems': [
+        'agent', 'agents', 'agentic', 'multi-agent', 'a2a', 'mcp', 'harness',
+        'workflow', 'workflows', 'autonomous', 'tool use', 'tools', '智能体',
+        '代理', '工作流', '多智能体', '工具调用', '自动化',
+    ],
+    'ai-engineering': [
+        'engineering', 'context engineering', 'prompt', 'rag', 'embedding',
+        'embeddings', 'retrieval', 'eval', 'evaluation', 'observability',
+        'production', 'pipeline', '架构', '工程', '提示词', '上下文工程',
+        '检索', '评测', '向量', '知识库',
+    ],
+    'model-research': [
+        'llm', 'large language model', 'transformer', 'attention', 'reasoning',
+        'scaling', 'training', 'deep learning', 'model', 'inference', 'research',
+        '大模型', '模型', '训练', '推理', '注意力', '研究', '深度学习',
+    ],
+    'product-design': [
+        'product', 'design', 'linear', 'interface', 'ux', 'user experience',
+        'saas', 'native', '产品', '设计', '交互', '体验', '用户', '三层架构',
+    ],
+    'data-infrastructure': [
+        'data', 'database', 'databricks', 'snowflake', 'fde', 'palantir',
+        'warehouse', 'lakehouse', 'analytics', '数据', '数据库', '数据仓库',
+        '数据基础设施', '数据平台',
+    ],
+    'coding-tools': [
+        'codex', 'claude code', 'cursor', 'cli', 'typescript', 'javascript',
+        'sdk', 'github', 'developer', 'programming', '代码', '编程', '开发者',
+        '命令行', '工具',
+    ],
+    'media-generation': [
+        'video', 'image', 'multimodal', 'vision', 'seedance', '生成模型',
+        '视频', '图像', '视觉', '多模态', '影像', '叙事引擎',
+    ],
+    'industry-analysis': [
+        'industry', 'market', 'company', 'startup', 'anthropic', 'openai',
+        'deepseek', 'karpathy', 'sam bowman', 'future', 'prediction', 'reshape',
+        '行业', '公司', '创业', '团队', '商业', '趋势',
+    ],
+    'personal-knowledge': [
+        'knowledge', 'learning', 'notes', 'practice', 'writing', 'memory',
+        '个人', '知识', '学习', '笔记', '写作', '实践', '认知',
+    ],
+    'testing-harness': [
+        'test', 'testing', 'regression', 'harness', 'qa', '验证', '测试',
+        '回归', '门禁',
+    ],
+}
+
+ARTICLE_SECONDARY_TAGS = {
+    'openai': ['openai', 'chatgpt', 'gpt'],
+    'anthropic': ['anthropic'],
+    'claude': ['claude'],
+    'codex': ['codex'],
+    'deepseek': ['deepseek'],
+    'langchain': ['langchain'],
+    'palantir': ['palantir'],
+    'databricks': ['databricks'],
+    'snowflake': ['snowflake'],
+    'fde': ['fde', 'forward deployed engineer', '前线部署工程师'],
+    'llm': ['llm', 'large language model', '大语言模型', '大模型'],
+    'transformer': ['transformer', 'attention', 'self-attention', '注意力'],
+    'deep-learning': ['deep learning', 'deep-learning', '深度学习'],
+    'rag': ['rag', 'retrieval augmented', '检索增强'],
+    'context-engineering': ['context engineering', '上下文工程'],
+    'prompt-engineering': ['prompt', '提示词'],
+    'developer-tools': ['developer tool', 'developer tools', '开发者工具'],
+    'workflow': ['workflow', 'workflows', '工作流'],
+    'multimodal': ['multimodal', '多模态'],
+    'video-generation': ['video generation', '视频生成', 'seedance'],
+    'typescript': ['typescript', 'javascript'],
+    'case-study': ['case study', '案例', '实战', '实践'],
+    'guide': ['guide', '指南', '教程', '入门'],
+    'research': ['research', '论文', '研究'],
+    'opinion': ['opinion', '观点', '思考', '判断'],
+}
+
+STYLE_TAGS = {style['id'] for style in STYLES}
+
+
+def _normalize_article_tag(tag: str) -> str:
+    """Normalize tags to stable lowercase kebab-case tokens."""
+    tag = (tag or '').strip().strip('"').strip("'")
+    if not tag:
+        return ''
+    tag = tag.replace('_', '-').replace('/', '-')
+    tag = re.sub(r'\s+', '-', tag)
+    tag = re.sub(r'[^A-Za-z0-9\u4e00-\u9fff-]+', '', tag)
+    tag = re.sub(r'-{2,}', '-', tag).strip('-')
+    return tag.lower()
+
+
+def _dedupe_article_tags(tags: list[str], limit: int = 6) -> list[str]:
+    """Return normalized unique tags, dropping empty values and style-only tags."""
+    result = []
+    seen = set()
+    for raw in tags:
+        tag = _normalize_article_tag(str(raw))
+        if not tag or tag in seen or tag in STYLE_TAGS:
+            continue
+        seen.add(tag)
+        result.append(tag)
+        if len(result) >= limit:
+            break
+    return result
+
+
+def _tag_score(text: str, needles: list[str]) -> int:
+    """Score tag keywords against normalized text."""
+    score = 0
+    for needle in needles:
+        needle = needle.lower()
+        if needle and needle in text:
+            score += 3 if len(needle) > 3 else 1
+    return score
+
+
+def _auto_article_tags(title: str, content: str, existing_tags: str = '') -> list[str]:
+    """Generate stable article tags from title/body when users leave tags blank."""
+    existing = _dedupe_article_tags(_article_keywords(existing_tags))
+    if existing:
+        return existing
+
+    title_searchable = _strip_markdown_media(title or '').lower()
+    body_searchable = _strip_markdown_media(content or '').lower()
+    searchable = f'{title_searchable}\n{body_searchable}'
+    scored_primary = []
+    for tag, needles in ARTICLE_PRIMARY_TAGS.items():
+        score = (_tag_score(title_searchable, needles) * 3) + _tag_score(body_searchable, needles)
+        scored_primary.append((tag, score))
+    scored_primary.sort(key=lambda item: (-item[1], item[0]))
+    primary = scored_primary[0][0] if scored_primary and scored_primary[0][1] > 0 else 'personal-knowledge'
+
+    tags = [primary]
+    secondary = []
+    for tag, needles in ARTICLE_SECONDARY_TAGS.items():
+        score = (_tag_score(title_searchable, needles) * 2) + _tag_score(body_searchable, needles)
+        if score > 0:
+            secondary.append((tag, score))
+    secondary.sort(key=lambda item: (-item[1], item[0]))
+    tags.extend(tag for tag, _ in secondary)
+
+    if primary == 'testing-harness' and 'test' not in tags:
+        tags.append('test')
+    if primary in {'agent-systems', 'ai-engineering', 'coding-tools'} and 'ai' not in tags:
+        tags.append('ai')
+    if primary in {'model-research', 'industry-analysis'} and 'ai' not in tags:
+        tags.append('ai')
+    if 'guide' not in tags and any(token in searchable for token in ['指南', '教程', '入门', 'guide']):
+        tags.append('guide')
+    if len(tags) < 3:
+        tags.append('ai')
+    if len(tags) < 3:
+        tags.append('knowledge')
+    result = _dedupe_article_tags(tags, limit=6)
+    for fallback in ['ai', 'knowledge']:
+        if len(result) >= 3:
+            break
+        if fallback not in result:
+            result.append(fallback)
+    return result
+
+
+def _format_article_tags(tags: list[str]) -> str:
+    """Format tags for Jekyll front matter."""
+    return ', '.join(_dedupe_article_tags(tags))
 
 
 def _strip_markdown_media(text: str) -> str:
@@ -2051,6 +2591,53 @@ def _og_share_image_url(raw_url: str, actual_filename: str) -> str:
     return _share_image_url(raw_url, actual_filename, 'og')
 
 
+def _build_article_share_context(actual_filename: str, meta: dict, body: str, fpath: str) -> dict:
+    """Build public sharing metadata used by full article and card pages."""
+    admin_filename = _article_admin_filename(actual_filename)
+    short_code = _article_short_code(actual_filename)
+    title = meta.get('title') or actual_filename.replace('.md', '')
+    share_title = meta.get('share_title') or title
+    canonical_url = _public_article_url(admin_filename)
+    short_url = _public_short_url(short_code)
+    share_card_url = _public_card_url(short_code)
+    share_description = _clamp_description(
+        meta.get('share_summary') or meta.get('description')
+        or meta.get('summary') or _generate_summary(body, max_chars=160)
+    )
+    raw_share_image = (
+        meta.get('share_image') or meta.get('image') or meta.get('cover') or _article_first_image(body)
+        or '/assets/images/test_cover.jpg'
+    )
+    wechat_share_image = _wechat_share_image_url(raw_share_image, actual_filename)
+    og_share_image = _og_share_image_url(raw_share_image, actual_filename)
+    keywords = _article_keywords(meta.get('tags', ''))
+    layout = meta.get('layout', 'deep-technical')
+    date_published = meta.get('date') or actual_filename[:10]
+    date_modified = _article_modified_time(fpath) or date_published
+    read_time = _calc_read_time(body)
+    word_count = _article_word_count(body)
+    return {
+        'actual_filename': actual_filename,
+        'admin_filename': admin_filename,
+        'title': title,
+        'share_title': share_title,
+        'share_description': share_description,
+        'short_code': short_code,
+        'canonical_url': canonical_url,
+        'short_url': short_url,
+        'share_card_url': share_card_url,
+        'wechat_share_image': wechat_share_image,
+        'og_share_image': og_share_image,
+        'article_keywords': keywords,
+        'article_section': _article_section(layout, keywords),
+        'article_published_time': date_published,
+        'article_modified_time': date_modified,
+        'read_time': read_time,
+        'article_word_count': word_count,
+        'layout': layout,
+    }
+
+
 def _article_modified_time(path: str) -> str:
     try:
         return datetime.fromtimestamp(os.path.getmtime(path)).astimezone().isoformat()
@@ -2108,6 +2695,7 @@ def _article_json_ld_graph(
         description: str,
         canonical_url: str,
         short_url: str,
+        share_card_url: str,
         og_image: str,
         wechat_image: str,
         keywords: list[str],
@@ -2197,7 +2785,7 @@ def _article_json_ld_graph(
                 'description': description,
                 'url': canonical_url,
                 'mainEntityOfPage': {'@id': webpage_id},
-                'sameAs': [short_url],
+                'sameAs': [short_url, share_card_url],
                 'image': image_objects,
                 'inLanguage': 'zh-CN',
                 'datePublished': date_published,
@@ -2255,7 +2843,26 @@ def _wechat_jsapi_ticket() -> str:
     return WECHAT_TICKET_CACHE['jsapi_ticket']
 
 
-def _build_post_markdown(form) -> str:
+def _canonical_body_from_form(form, preserve_media: bool = True) -> str:
+    """Return canonical Markdown body from the edit/upload form shape."""
+    content_format = (form.get('content_format') or 'markdown').strip().lower()
+    body = (form.get('body') or '').strip()
+    rich_body = (form.get('rich_content') or '').strip()
+    markdown_body = (form.get('content') or '').strip()
+    if content_format == 'rich_html':
+        body = body or rich_body or markdown_body
+    else:
+        body = body or markdown_body or rich_body
+
+    return canonicalize_editor_content(
+        body,
+        content_format,
+        preserve_media=preserve_media,
+        image_localizer=_localize_rich_html_images if preserve_media else None,
+    )
+
+
+def _build_post_markdown(form, canonical_body: str | None = None) -> str:
     """Build a Jekyll post from edit form fields."""
     layout = form.get('layout', 'deep-technical').strip() or 'deep-technical'
     theme = form.get('theme', _get_theme()).strip() or _get_theme()
@@ -2263,7 +2870,7 @@ def _build_post_markdown(form) -> str:
     date_value = form.get('date', '').strip() or datetime.now().strftime('%Y-%m-%d')
     summary = form.get('summary', '').strip()
     description = form.get('description', '').strip()
-    body = form.get('body', '').strip()
+    body = canonical_body if canonical_body is not None else _canonical_body_from_form(form)
 
     front = [
         '---',
@@ -2311,6 +2918,75 @@ def check_pages_url():
     except Exception:
         live = False
     return jsonify({'live': live, 'url': url})
+
+
+@uploader_bp.route('/api/editor/convert', methods=['POST'])
+@login_required
+def editor_convert():
+    """Convert article editor content between Markdown and rich HTML."""
+    payload = request.get_json(silent=True) or request.form
+    content = payload.get('content', '')
+    source_format = (payload.get('source_format') or 'markdown').strip().lower()
+    target_format = (payload.get('target_format') or 'markdown').strip().lower()
+    try:
+        if target_format in {'rich', 'rich_html', 'html'}:
+            markdown_body = canonicalize_editor_content(
+                content,
+                source_format,
+                preserve_media=True,
+                image_localizer=_localize_rich_html_images if source_format == 'rich_html' else None,
+            )
+            converted = markdown_to_editor_html(markdown_body, asset_base=_article_asset_base())
+            return jsonify({
+                'ok': True,
+                'content': converted,
+                'canonical_markdown': markdown_body,
+                'format': 'rich_html',
+                'warnings': [],
+            })
+        markdown_body = canonicalize_editor_content(
+            content,
+            source_format,
+            preserve_media=True,
+            image_localizer=_localize_rich_html_images if source_format == 'rich_html' else None,
+        )
+        return jsonify({
+            'ok': True,
+            'content': markdown_body,
+            'canonical_markdown': markdown_body,
+            'format': 'markdown',
+            'warnings': [],
+        })
+    except Exception as exc:
+        logger.exception('Editor convert failed')
+        return jsonify({'ok': False, 'error': f'转换失败：{exc}'}), 500
+
+
+@uploader_bp.route('/api/editor/preview', methods=['POST'])
+@login_required
+def editor_preview():
+    """Render a save-equivalent article preview for upload/edit editors."""
+    payload = request.get_json(silent=True) or request.form
+    content = payload.get('content') or payload.get('body') or ''
+    content_format = (payload.get('content_format') or 'markdown').strip().lower()
+    try:
+        result = render_article_preview(
+            content,
+            content_format,
+            asset_base=_article_asset_base(),
+            preserve_media=True,
+            image_localizer=_localize_rich_html_images if content_format == 'rich_html' else None,
+        )
+        return jsonify({
+            'ok': True,
+            'html': result.html,
+            'canonical_markdown': result.canonical_markdown,
+            'format': 'markdown',
+            'warnings': result.warnings,
+        })
+    except Exception as exc:
+        logger.exception('Editor preview failed')
+        return jsonify({'ok': False, 'error': f'预览失败：{exc}'}), 500
 
 
 @uploader_bp.route('/api/wechat/share-config')
@@ -2388,6 +3064,59 @@ def public_article_view(filename):
     return _render_article(filename, public=True)
 
 
+@public_articles_bp.route('/articles/<filename>/like', methods=['GET', 'POST'])
+def public_article_like(filename):
+    """Return or update the lightweight public like count for an article."""
+    fpath = _safe_post_path(filename)
+    if not fpath or not os.path.isfile(fpath):
+        return jsonify({'ok': False, 'error': 'not_found'}), 404
+
+    actual_filename = os.path.basename(fpath)
+    article_id = _article_admin_filename(actual_filename)
+    db = get_db()
+
+    if request.method == 'GET':
+        return jsonify({
+            'ok': True,
+            'article_id': article_id,
+            'like_count': _article_like_count(article_id),
+        })
+
+    payload = request.get_json(silent=True) or {}
+    liked = bool(payload.get('liked', True))
+    db.execute(
+        'INSERT OR IGNORE INTO article_likes (article_id, like_count) VALUES (?, 0)',
+        (article_id,),
+    )
+    if liked:
+        db.execute(
+            '''
+            UPDATE article_likes
+               SET like_count = like_count + 1,
+                   updated_at = CURRENT_TIMESTAMP
+             WHERE article_id = ?
+            ''',
+            (article_id,),
+        )
+    else:
+        db.execute(
+            '''
+            UPDATE article_likes
+               SET like_count = MAX(like_count - 1, 0),
+                   updated_at = CURRENT_TIMESTAMP
+             WHERE article_id = ?
+            ''',
+            (article_id,),
+        )
+    db.commit()
+    return jsonify({
+        'ok': True,
+        'article_id': article_id,
+        'liked': liked,
+        'like_count': _article_like_count(article_id),
+    })
+
+
 @public_articles_bp.route('/s/<code>')
 def public_article_short_link(code):
     """Render a public article from its stable short-link code."""
@@ -2395,6 +3124,31 @@ def public_article_short_link(code):
     if not actual_filename:
         return render_template('public_article_404.html'), 404
     return _render_article(_article_admin_filename(actual_filename), public=True)
+
+
+@public_articles_bp.route('/c/<code>')
+def public_article_card_link(code):
+    """Render a lightweight social-card page for crawlers and sharing apps."""
+    actual_filename = _resolve_short_code(code)
+    if not actual_filename:
+        return render_template('public_article_404.html'), 404
+    fpath = os.path.join(POSTS_DIR, actual_filename)
+    if not os.path.isfile(fpath):
+        return render_template('public_article_404.html'), 404
+    with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
+        raw = f.read()
+    meta, _, body = _parse_post(raw)
+    body = body.replace('{{ site.baseurl }}', _article_asset_base())
+    share = _build_article_share_context(actual_filename, meta, body, fpath)
+    response = current_app.response_class(
+        render_template('article_share_card.html',
+                        meta=meta,
+                        share=share,
+                        share_logo=_absolute_asset_url('/assets/images/test_cover.jpg')),
+        mimetype='text/html; charset=utf-8',
+    )
+    response.headers['Cache-Control'] = 'public, max-age=300'
+    return response
 
 
 @public_articles_bp.route('/sitemap.xml')
@@ -2594,45 +3348,41 @@ def _render_article(filename: str, public: bool = False):
     # Render markdown to HTML. Article media lives under the PolaZhenjing app
     # asset route even when the public article itself is mounted at /articles/.
     body = body.replace('{{ site.baseurl }}', _article_asset_base())
-    title = meta.get('title') or actual_filename.replace('.md', '')
-    share_title = meta.get('share_title') or title
+    share = _build_article_share_context(actual_filename, meta, body, fpath)
+    title = share['title']
+    share_title = share['share_title']
     body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
     body_html = _remove_duplicate_leading_heading(body_html, title)
     github_url = f'https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/_posts/{actual_filename}'
     # Build GitHub Pages article URL from Jekyll permalink /:year/:month/:day/:title/
     pages_url = _build_pages_url(actual_filename)
-    short_code = _article_short_code(actual_filename)
-    canonical_url = _public_article_url(admin_filename)
-    short_url = _public_short_url(short_code)
-    share_url = short_url
-    read_time = _calc_read_time(body)
+    short_code = share['short_code']
+    canonical_url = share['canonical_url']
+    short_url = share['short_url']
+    share_card_url = share['share_card_url']
+    share_url = share_card_url
+    read_time = share['read_time']
     # Get style accent color
-    layout = meta.get('layout', 'deep-technical')
+    layout = share['layout']
     accent_color = STYLE_ACCENTS.get(layout, '#E4BF7A')
-    share_description = _clamp_description(
-        meta.get('share_summary') or meta.get('description')
-        or meta.get('summary') or _generate_summary(body, max_chars=160)
-    )
-    raw_share_image = (
-        meta.get('share_image') or meta.get('image') or meta.get('cover') or _article_first_image(body)
-        or '/assets/images/test_cover.jpg'
-    )
-    wechat_share_image = _wechat_share_image_url(raw_share_image, actual_filename)
-    og_share_image = _og_share_image_url(raw_share_image, actual_filename)
+    share_description = share['share_description']
+    wechat_share_image = share['wechat_share_image']
+    og_share_image = share['og_share_image']
     wechat_share_config_url = _absolute_public_url('/PolaZhenjing/admin/api/wechat/share-config')
     wechat_share_diagnostics_url = _absolute_public_url('/PolaZhenjing/admin/api/wechat/share-diagnostics')
     share_logo = _absolute_asset_url('/assets/images/test_cover.jpg')
     article_asset_base = _article_asset_base()
-    article_keywords = _article_keywords(meta.get('tags', ''))
-    article_section = _article_section(layout, article_keywords)
-    article_published_time = meta.get('date') or actual_filename[:10]
-    article_modified_time = _article_modified_time(fpath) or article_published_time
-    article_word_count = _article_word_count(body)
+    article_keywords = share['article_keywords']
+    article_section = share['article_section']
+    article_published_time = share['article_published_time']
+    article_modified_time = share['article_modified_time']
+    article_word_count = share['article_word_count']
     article_json_ld = _article_json_ld_graph(
         title=share_title,
         description=share_description,
         canonical_url=canonical_url,
         short_url=short_url,
+        share_card_url=share_card_url,
         og_image=og_share_image,
         wechat_image=wechat_share_image,
         keywords=article_keywords,
@@ -2642,6 +3392,15 @@ def _render_article(filename: str, public: bool = False):
         word_count=article_word_count,
         read_time=read_time,
     )
+    article_navigation = _article_navigation_context(actual_filename)
+    article_like_count = _article_like_count(admin_filename)
+    article_like_url = url_for('public_articles.public_article_like', filename=admin_filename)
+    admin_edit_url = _polazhenjing_admin_url('uploader.edit_article',
+                                             filename=admin_filename)
+    admin_publish_url = _polazhenjing_admin_url('social_publish.article',
+                                                filename=admin_filename)
+    admin_delete_url = _polazhenjing_admin_url('uploader.delete_article',
+                                               filename=admin_filename)
     return render_template('article_view.html',
                            filename=filename, meta=meta,
                            admin_filename=admin_filename,
@@ -2651,6 +3410,7 @@ def _render_article(filename: str, public: bool = False):
                            canonical_url=canonical_url,
                            short_code=short_code,
                            short_url=short_url,
+                           share_card_url=share_card_url,
                            share_url=share_url,
                            share_title=share_title,
                            share_description=share_description,
@@ -2666,6 +3426,12 @@ def _render_article(filename: str, public: bool = False):
                            article_published_time=article_published_time,
                            article_modified_time=article_modified_time,
                            article_word_count=article_word_count,
+                           article_navigation=article_navigation,
+                           article_like_count=article_like_count,
+                           article_like_url=article_like_url,
+                           admin_edit_url=admin_edit_url,
+                           admin_publish_url=admin_publish_url,
+                           admin_delete_url=admin_delete_url,
                            accent_color=accent_color,
                            is_public=public,
                            can_manage=_is_admin_session(),
@@ -2676,31 +3442,39 @@ def _render_article(filename: str, public: bool = False):
 @login_required
 def edit_article(filename):
     """Edit an existing Markdown/Jekyll article."""
-    fpath = _safe_post_path(filename)
-    if not fpath or not os.path.isfile(fpath):
+    post = load_post(filename, POSTS_DIR)
+    if not post:
         flash('文章未找到。', 'error')
         return redirect(url_for('uploader.articles'))
-    actual_filename = os.path.basename(fpath)
-    admin_filename = _article_admin_filename(actual_filename)
+    fpath = post.path
+    actual_filename = post.actual_filename
+    admin_filename = post.admin_filename
 
     if request.method == 'POST':
         form_data = request.form.copy()
         revision_instruction = form_data.get('revision_instruction', '').strip()
+        rewrite_rate = _parse_rewrite_rate(form_data.get('rewrite_rate'), default=50)
+        canonical_body = _canonical_body_from_form(form_data, preserve_media=True)
         if revision_instruction:
             revised_body = _apply_revision_instruction(
-                form_data.get('body', ''),
+                canonical_body,
                 form_data.get('title', filename).strip() or filename,
                 revision_instruction,
                 form_data.get('layout', ''),
+                rewrite_rate=rewrite_rate,
             )
             if revised_body:
-                form_data['body'] = revised_body
+                canonical_body = normalize_markdown(revised_body)
+                form_data['body'] = canonical_body
+                form_data['content_format'] = 'markdown'
                 flash('已根据修改建议简述完成正文调整。', 'success')
             else:
-                flash('修改建议未能自动应用，已保存当前正文。', 'warning')
-        post_markdown = _build_post_markdown(form_data)
-        with open(fpath, 'w', encoding='utf-8') as f:
-            f.write(post_markdown)
+                if rewrite_rate <= 0:
+                    flash('AI 改写率为 0%，已跳过修改建议并保存当前正文。', 'info')
+                else:
+                    flash('修改建议未能自动应用，已保存当前正文。', 'warning')
+        post_markdown = _build_post_markdown(form_data, canonical_body=canonical_body)
+        write_post(fpath, post_markdown)
         if request.form.get('save_mode') == 'sync':
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             ok, detail = _sync_project_to_github(
@@ -2715,9 +3489,7 @@ def edit_article(filename):
             flash('文章已保存。', 'success')
         return redirect(url_for('uploader.view_article', filename=admin_filename))
 
-    with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
-        raw = f.read()
-    meta, front_lines, body = _parse_post(raw)
+    meta, front_lines, body = post.meta, post.front_lines, post.body
     known_front_keys = {'layout', 'theme', 'title', 'date', 'tags', 'description', 'summary'}
     extra_front_matter = '\n'.join(
         line for line in front_lines
@@ -2740,23 +3512,30 @@ def edit_article(filename):
 @uploader_bp.route('/articles/<filename>/preview', methods=['POST'])
 @login_required
 def preview_article_markdown(filename):
-    """Render the edited body for the article edit page preview panel.
-
-    Honors the new content_format flag: rich_html is returned as-is
-    (TinyMCE already produced trusted HTML) while markdown continues to
-    be rendered through python-markdown with the same {{ site.baseurl }}
-    rewriting as before.
-    """
-    fpath = _safe_post_path(filename)
-    if not fpath or not os.path.isfile(fpath):
+    """Render the edited body through the same canonical Markdown pipeline as save."""
+    post = load_post(filename, POSTS_DIR)
+    if not post:
         return jsonify({'ok': False, 'error': '文章未找到。'}), 404
     body = request.form.get('body', '')
     content_format = (request.form.get('content_format') or 'markdown').strip().lower()
-    if content_format == 'rich_html':
-        return jsonify({'ok': True, 'html': body, 'format': 'rich_html'})
-    body = body.replace('{{ site.baseurl }}', _article_asset_base())
-    body_html = md_lib.markdown(body, extensions=['extra', 'codehilite', 'toc', 'tables'])
-    return jsonify({'ok': True, 'html': body_html, 'format': 'markdown'})
+    try:
+        result = render_article_preview(
+            body,
+            content_format,
+            asset_base=_article_asset_base(),
+            preserve_media=True,
+            image_localizer=_localize_rich_html_images if content_format == 'rich_html' else None,
+        )
+    except Exception as exc:
+        logger.exception('Article edit preview failed')
+        return jsonify({'ok': False, 'error': f'预览失败：{exc}'}), 500
+    return jsonify({
+        'ok': True,
+        'html': result.html,
+        'canonical_markdown': result.canonical_markdown,
+        'format': 'markdown',
+        'warnings': result.warnings,
+    })
 
 
 @uploader_bp.route('/articles/<filename>/delete', methods=['POST'])

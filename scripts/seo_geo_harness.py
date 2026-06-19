@@ -69,6 +69,7 @@ def check_flask_geo_routes() -> list[str]:
     admin_filename = _article_admin_filename(filename)
     short_code = _article_short_code(filename)
     short_url = f"https://aipd.me/s/{short_code}"
+    card_url = f"https://aipd.me/c/{short_code}"
     canonical_url = f"https://aipd.me/articles/{admin_filename}"
 
     article_resp = client.get(f"/articles/{admin_filename}", base_url="https://aipd.me")
@@ -82,12 +83,12 @@ def check_flask_geo_routes() -> list[str]:
         '<meta name="robots" content="index,follow,max-image-preview:large">',
         f'<link rel="canonical" href="{canonical_url}">',
         f'<link rel="shortlink" href="{short_url}">',
-        f'<meta property="og:url" content="{short_url}">',
+        f'<link rel="alternate" type="text/html" title="社交卡片页" href="{card_url}">',
+        f'<meta property="og:url" content="{card_url}">',
         '<meta property="og:image:type" content="image/jpeg">',
         '<meta property="og:image:width" content="1200">',
         '<meta property="og:image:height" content="630">',
         '<meta name="thumbnail" content="',
-        'data-copy-shortlink',
         '<script type="application/ld+json">',
         '"@graph"',
         '"Article"',
@@ -100,6 +101,19 @@ def check_flask_geo_routes() -> list[str]:
     ]:
         if token not in article_html:
             errors.append(f"article HTML missing {token}")
+    for token in ['data-copy-cardlink', 'data-copy-wechat-card', '微信图文卡片']:
+        if token in article_html:
+            errors.append(f"public article HTML should not expose admin share control {token}")
+    admin_client = app.test_client()
+    with admin_client.session_transaction(base_url="https://aipd.me") as session:
+        session.update({"user_id": 1, "role": "admin"})
+    admin_resp = admin_client.get(f"/admin/articles/{admin_filename}", base_url="https://aipd.me")
+    admin_html = admin_resp.get_data(as_text=True) if admin_resp.status_code == 200 else ""
+    if admin_resp.status_code != 200:
+        errors.append(f"admin article route status {admin_resp.status_code}")
+    for token in ['data-copy-cardlink', 'data-copy-wechat-card', '微信图文卡片']:
+        if token not in admin_html:
+            errors.append(f"admin article HTML missing {token}")
     image_match = re.search(r'<meta property="og:image" content="([^"]+)"', article_html)
     if not image_match:
         errors.append("article HTML missing og:image")
@@ -112,11 +126,31 @@ def check_flask_geo_routes() -> list[str]:
     if short_resp.status_code != 200:
         errors.append(f"short route status {short_resp.status_code}")
 
+    card_resp = client.get(f"/c/{short_code}", base_url="https://aipd.me")
+    card_html = card_resp.get_data(as_text=True)
+    if card_resp.status_code != 200:
+        errors.append(f"card route status {card_resp.status_code}")
+    for token in [f'<meta property="og:url" content="{card_url}">', f'<link rel="shortlink" href="{short_url}">']:
+        if token not in card_html:
+            errors.append(f"card HTML missing {token}")
+
     index_resp = client.get("/articles", base_url="https://aipd.me")
     index_html = index_resp.get_data(as_text=True)
     if index_resp.status_code != 200:
         errors.append(f"article index status {index_resp.status_code}")
-    for token in ['"@type": "ItemList"', canonical_url, "https://aipd.me/feed.xml", "https://aipd.me/articles.json"]:
+    for token in [
+        '"@type": "ItemList"',
+        canonical_url,
+        "https://aipd.me/feed.xml",
+        "https://aipd.me/articles.json",
+        "https://aipd.me/llms.txt",
+        "data-public-article-home",
+        "data-article-search",
+        "data-article-sort",
+        "data-filter-topic",
+        "data-article-card",
+        "快速 Wiki",
+    ]:
         if token not in index_html:
             errors.append(f"article index missing {token}")
 

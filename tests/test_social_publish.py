@@ -225,6 +225,7 @@ def test_public_article_short_link_renders_share_card_metadata():
     admin_filename = _article_admin_filename(filename)
     short_code = _article_short_code(filename)
     short_url = f"https://aipd.me/s/{short_code}"
+    card_url = f"https://aipd.me/c/{short_code}"
     canonical_url = f"https://aipd.me/articles/{admin_filename}"
 
     response = client.get(f"/s/{short_code}", base_url="https://aipd.me")
@@ -232,8 +233,9 @@ def test_public_article_short_link_renders_share_card_metadata():
 
     assert response.status_code == 200
     assert f'<link rel="canonical" href="{canonical_url}">' in body
-    assert f'<meta property="og:url" content="{short_url}">' in body
-    assert f'<meta name="twitter:url" content="{short_url}">' in body
+    assert f'<link rel="alternate" type="text/html" title="社交卡片页" href="{card_url}">' in body
+    assert f'<meta property="og:url" content="{card_url}">' in body
+    assert f'<meta name="twitter:url" content="{card_url}">' in body
     assert '<meta property="og:image:type" content="image/jpeg">' in body
     assert '<meta property="og:image:width" content="1200">' in body
     assert '<meta property="og:image:height" content="630">' in body
@@ -244,8 +246,6 @@ def test_public_article_short_link_renders_share_card_metadata():
     assert '"@graph":' in body
     assert '"BreadcrumbList"' in body
     assert '"wordCount"' in body
-    assert 'data-copy-shortlink' in body
-    assert "复制短链接" in body
     assert "updateAppMessageShareData" in body
     assert "updateTimelineShareData" in body
     assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-config" in body
@@ -256,13 +256,61 @@ def test_public_article_short_link_renders_share_card_metadata():
     assert "showMenuItems" in body
     assert "share-api-registered" in body
     assert "reportWechatShareByImage" in body
+    assert 'data-copy-cardlink' not in body
+    assert 'data-copy-wechat-card' not in body
+    assert "复制卡片链接" not in body
+    assert "微信图文卡片" not in body
+    assert "renderSharePoster" not in body
 
     long_response = client.get(f"/articles/{admin_filename}", base_url="https://aipd.me")
     long_body = long_response.get_data(as_text=True)
 
     assert long_response.status_code == 200
     assert short_url in long_body
+    assert card_url in long_body
     assert canonical_url in long_body
+
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+    admin_response = client.get(f"/admin/articles/{admin_filename}")
+    admin_body = admin_response.get_data(as_text=True)
+
+    assert admin_response.status_code == 200
+    assert 'data-copy-cardlink' in admin_body
+    assert 'data-copy-wechat-card' in admin_body
+    assert "复制卡片链接" in admin_body
+    assert "微信图文卡片" in admin_body
+    assert "renderSharePoster" in admin_body
+
+
+def test_public_article_card_link_is_lightweight_for_social_crawlers():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    filename = _sample_post_filename()
+    admin_filename = _article_admin_filename(filename)
+    short_code = _article_short_code(filename)
+    short_url = f"https://aipd.me/s/{short_code}"
+    card_url = f"https://aipd.me/c/{short_code}"
+    canonical_url = f"https://aipd.me/articles/{admin_filename}"
+
+    response = client.get(f"/c/{short_code}", base_url="https://aipd.me")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "public, max-age=300"
+    assert f'<link rel="canonical" href="{canonical_url}">' in body
+    assert f'<link rel="shortlink" href="{short_url}">' in body
+    assert f'<meta property="og:url" content="{card_url}">' in body
+    assert f'<meta name="twitter:url" content="{card_url}">' in body
+    assert '<meta property="og:image:type" content="image/jpeg">' in body
+    assert '<meta property="og:image:width" content="1200">' in body
+    assert '<meta property="og:image:height" content="630">' in body
+    assert '<meta name="twitter:card" content="summary_large_image">' in body
+    assert short_url in body
+    assert "jweixin" not in body.lower()
+    assert "article-body" not in body
 
 
 def test_wechat_share_diagnostics_supports_image_probe():
@@ -290,6 +338,16 @@ def test_public_article_short_link_rejects_unknown_code():
     client = app.test_client()
 
     response = client.get("/s/00000000", base_url="https://aipd.me")
+
+    assert response.status_code == 404
+
+
+def test_public_article_card_link_rejects_unknown_code():
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+
+    response = client.get("/c/00000000", base_url="https://aipd.me")
 
     assert response.status_code == 404
 

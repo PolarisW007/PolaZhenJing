@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ share.share_title }} · 织梦空间</title>
+  <meta name="description" content="{{ share.share_description }}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="{{ share.canonical_url }}">
+  <link rel="shortlink" href="{{ share.short_url }}">
+  <meta property="og:site_name" content="织梦空间">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="{{ share.share_title }}">
+  <meta property="og:description" content="{{ share.share_description }}">
+  <meta property="og:url" content="{{ share.share_card_url }}">
+  <meta property="og:image" content="{{ share.og_share_image }}">
+  <meta property="og:image:url" content="{{ share.og_share_image }}">
+  <meta property="og:image:secure_url" content="{{ share.og_share_image }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ share.share_title }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ share.share_title }}">
+  <meta name="twitter:description" content="{{ share.share_description }}">
+  <meta name="twitter:image" content="{{ share.og_share_image }}">
+  <meta name="twitter:image:alt" content="{{ share.share_title }}">
+  <meta name="twitter:url" content="{{ share.share_card_url }}">
+  <meta name="thumbnail" content="{{ share.wechat_share_image }}">
+  <meta itemprop="name" content="{{ share.share_title }}">
+  <meta itemprop="description" content="{{ share.share_description }}">
+  <meta itemprop="image" content="{{ share.og_share_image }}">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f0e6;
+      --ink: #241a12;
+      --muted: #74685d;
+      --line: rgba(36, 26, 18, 0.14);
+      --gold: #9a6a37;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+      padding: 24px;
+    }
+    main {
+      width: min(720px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 252, 246, 0.86);
+      overflow: hidden;
+    }
+    img { display: block; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; }
+    section { padding: 28px; }
+    p.kicker { margin: 0 0 12px; color: var(--gold); font-weight: 700; font-size: 14px; }
+    h1 { margin: 0; font-size: clamp(28px, 6vw, 48px); line-height: 1.12; letter-spacing: 0; }
+    p.desc { color: var(--muted); line-height: 1.8; font-size: 16px; margin: 18px 0 24px; }
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      text-decoration: none;
+      background: #fffaf0;
+      font-weight: 700;
+    }
+    code { display: block; margin-top: 16px; color: var(--muted); word-break: break-all; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="{{ share.og_share_image }}" alt="{{ share.share_title }}">
+    <section>
+      <p class="kicker">织梦空间 · Pola 真经</p>
+      <h1>{{ share.share_title }}</h1>
+      <p class="desc">{{ share.share_description }}</p>
+      <a href="{{ share.short_url }}">打开文章</a>
+      <code>{{ share.short_url }}</code>
+    </section>
+  </main>
+  <script>
+    setTimeout(() => {
+      if (!/bot|spider|crawl|preview|facebookexternalhit|twitterbot|slackbot|discordbot|okjike|jike/i.test(navigator.userAgent)) {
+        window.location.replace({{ share.short_url | tojson }});
+      }
+    }, 900);
+  </script>
+</body>
+</html>

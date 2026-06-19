@@ -137,6 +137,11 @@ def init_db(app):
                 UNIQUE(user_id, app_id),
                 FOREIGN KEY(user_id) REFERENCES users(id)
             );
+            CREATE TABLE IF NOT EXISTS article_likes (
+                article_id TEXT PRIMARY KEY,
+                like_count INTEGER NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         ''')
         db.commit()
 

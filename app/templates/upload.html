@@ -18,14 +18,16 @@
     display: block;
   }
   .editor-mode-switch,
-  .media-policy {
+  .media-policy,
+  .rewrite-rate-options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.65rem;
     margin-bottom: 0.75rem;
   }
   .editor-mode-switch label,
-  .media-policy label {
+  .media-policy label,
+  .rewrite-rate-option {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -39,7 +41,30 @@
     letter-spacing: 0;
   }
   .editor-mode-switch input,
-  .media-policy input { accent-color: var(--gold-primary); }
+  .media-policy input,
+  .rewrite-rate-option input { accent-color: var(--gold-primary); }
+  .rewrite-rate-option {
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 120px;
+  }
+  .rewrite-rate-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+  .rewrite-rate-desc {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .rewrite-rate-help {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
   .rich-editor-help {
     margin-top: 0.55rem;
     color: var(--text-muted);
@@ -195,8 +220,8 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="tags">标签（英文逗号分隔）</label>
-      <input type="text" id="tags" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
+      <label for="tags">标签（可选，留空自动生成）</label>
+      <input type="text" id="tags" name="tags" class="form-input" placeholder="agent-systems, ai-engineering, codex">
     </div>
     <div class="form-group">
       <label for="description">描述（可选）</label>
@@ -212,6 +237,17 @@
     <div class="form-group">
       <label for="revision-instruction1">修改建议简述（可选）</label>
       <textarea id="revision-instruction1" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把开头写得更有故事感，弱化技术术语，补充对创业者的启发。"></textarea>
+    </div>
+    <div class="form-group rewrite-rate">
+      <label>AI 改写率</label>
+      <div class="rewrite-rate-options">
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="0"> 0%</span><span class="rewrite-rate-desc">不改写，只插图</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="25"> 25%</span><span class="rewrite-rate-desc">轻润色</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="50"> 50%</span><span class="rewrite-rate-desc">结构优化</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="75"> 75%</span><span class="rewrite-rate-desc">深度改写</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="100" checked> 100%</span><span class="rewrite-rate-desc">完整改写</span></label>
+      </div>
+      <div class="rewrite-rate-help">0% 会完全保留正文，只继续生成/插入图片；100% 会按下一步选择的风格完整重写。</div>
     </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
@@ -251,8 +287,8 @@
       <input type="text" id="title2" name="title" class="form-input" placeholder="文章标题...">
     </div>
     <div class="form-group">
-      <label for="tags2">标签（英文逗号分隔）</label>
-      <input type="text" id="tags2" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
+      <label for="tags2">标签（可选，留空自动生成）</label>
+      <input type="text" id="tags2" name="tags" class="form-input" placeholder="agent-systems, ai-engineering, codex">
     </div>
     <div class="form-group">
       <label for="desc2">描述（可选）</label>
@@ -268,6 +304,17 @@
     <div class="form-group">
       <label for="revision-instruction2">修改建议简述（可选）</label>
       <textarea id="revision-instruction2" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把结构调整为先讲结论再讲案例，增加更锋利的判断，整体更像公众号长文。"></textarea>
+    </div>
+    <div class="form-group rewrite-rate">
+      <label>AI 改写率</label>
+      <div class="rewrite-rate-options">
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="0"> 0%</span><span class="rewrite-rate-desc">不改写，只插图</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="25"> 25%</span><span class="rewrite-rate-desc">轻润色</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="50"> 50%</span><span class="rewrite-rate-desc">结构优化</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="75"> 75%</span><span class="rewrite-rate-desc">深度改写</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="100" checked> 100%</span><span class="rewrite-rate-desc">完整改写</span></label>
+      </div>
+      <div class="rewrite-rate-help">0% 会完全保留正文，只继续生成/插入图片；100% 会按下一步选择的风格完整重写。</div>
     </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
@@ -296,8 +343,8 @@
       </div>
     </div>
     <div class="form-group">
-      <label for="tags3">标签（英文逗号分隔）</label>
-      <input type="text" id="tags3" name="tags" class="form-input" placeholder="AI, deep-learning, transformers">
+      <label for="tags3">标签（可选，留空自动生成）</label>
+      <input type="text" id="tags3" name="tags" class="form-input" placeholder="agent-systems, ai-engineering, codex">
     </div>
     <div class="form-group">
       <label for="desc3">描述（可选）</label>
@@ -314,6 +361,17 @@
       <label for="revision-instruction3">修改建议简述（可选）</label>
       <textarea id="revision-instruction3" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：保留原文事实，但改成更克制、更有洞察力的叙事。"></textarea>
     </div>
+    <div class="form-group rewrite-rate">
+      <label>AI 改写率</label>
+      <div class="rewrite-rate-options">
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="0"> 0%</span><span class="rewrite-rate-desc">不改写，只插图</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="25"> 25%</span><span class="rewrite-rate-desc">轻润色</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="50"> 50%</span><span class="rewrite-rate-desc">结构优化</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="75"> 75%</span><span class="rewrite-rate-desc">深度改写</span></label>
+        <label class="rewrite-rate-option"><span class="rewrite-rate-main"><input type="radio" name="rewrite_rate" value="100" checked> 100%</span><span class="rewrite-rate-desc">完整改写</span></label>
+      </div>
+      <div class="rewrite-rate-help">0% 会完全保留正文，只继续生成/插入图片；100% 会按下一步选择的风格完整重写。</div>
+    </div>
     <button type="submit" class="btn-gold">下一步：选择风格 →</button>
   </form>
 </div>
@@ -326,6 +384,7 @@ const TINYMCE_BASE_URL = '{{ url_for("serve_assets", filename="vendor/tinymce") 
 const TINYMCE_ASSET_VERSION = {{ tinymce_manifest.asset_version|tojson }};
 const TINYMCE_CACHE_SUFFIX = `?v=${encodeURIComponent(TINYMCE_ASSET_VERSION)}`;
 const TINYMCE_SCRIPT_URL = {{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js", v=tinymce_manifest.asset_version)|tojson }};
+const EDITOR_CONVERT_URL = {{ url_for("uploader.editor_convert")|tojson }};
 
 function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -569,35 +628,109 @@ function showEditorFallback() {
   }
 }
 
-function setEditorMode(mode) {
+async function convertEditorContent(content, sourceFormat, targetFormat) {
+  const response = await fetch(EDITOR_CONVERT_URL, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      content,
+      source_format: sourceFormat,
+      target_format: targetFormat
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || `转换失败（${response.status}）`);
+  }
+  return data.content || '';
+}
+
+function getRichEditorHtml() {
+  const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (editor && editor.initialized && editor.serializer) {
+    try {
+      const html = editor.getContent();
+      if (html && html.trim()) return html;
+    } catch (error) {
+      console.warn('TinyMCE content is not ready, falling back to textarea value.', error);
+    }
+  }
+  return rich ? rich.value : '';
+}
+
+function showEditorStatus(message) {
+  const status = document.getElementById('editor-load-status');
+  if (status) {
+    status.style.display = 'block';
+    status.textContent = message;
+  }
+}
+
+function hideEditorStatus() {
+  const status = document.getElementById('editor-load-status');
+  if (status && richEditorReady) status.style.display = 'none';
+}
+
+async function setEditorMode(mode) {
   const contentFormat = document.getElementById('content-format');
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
   const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  const currentFormat = contentFormat.value || 'rich_html';
+  if ((mode === 'markdown' && currentFormat === 'markdown') ||
+      (mode === 'rich' && currentFormat === 'rich_html')) {
+    return;
+  }
   if (mode === 'markdown') {
-    contentFormat.value = 'markdown';
-    markdown.style.display = 'block';
-    if (editor) {
-      editor.save();
-      editor.hide();
-      if (editor.getContainer()) {
-        editor.getContainer().style.display = 'none';
+    const source = getRichEditorHtml();
+    try {
+      showEditorStatus('正在转换为 Markdown 源码…');
+      markdown.value = await convertEditorContent(source, 'rich_html', 'markdown');
+      contentFormat.value = 'markdown';
+      markdown.style.display = 'block';
+      if (editor) {
+        editor.hide();
+        if (editor.getContainer()) {
+          editor.getContainer().style.display = 'none';
+        }
+      } else {
+        rich.style.display = 'none';
       }
-    } else {
-      rich.style.display = 'none';
+      hideEditorStatus();
+    } catch (error) {
+      console.error(error);
+      showEditorStatus(error.message || '转换失败，已保留当前富文本内容。');
+      const richRadio = document.querySelector('input[name="editor_mode"][value="rich"]');
+      if (richRadio) richRadio.checked = true;
+      return;
     }
   } else {
-    contentFormat.value = 'rich_html';
-    markdown.style.display = 'none';
-    initRichEditor();
-    const activeEditor = window.tinymce ? tinymce.get('rich-content') : null;
-    if (activeEditor) {
-      if (activeEditor.getContainer()) {
-        activeEditor.getContainer().style.display = '';
+    try {
+      showEditorStatus('正在转换为富文本视图…');
+      const html = await convertEditorContent(markdown.value, 'markdown', 'rich_html');
+      rich.value = html;
+      contentFormat.value = 'rich_html';
+      markdown.style.display = 'none';
+      initRichEditor();
+      const activeEditor = window.tinymce ? tinymce.get('rich-content') : null;
+      if (activeEditor) {
+        activeEditor.setContent(html);
+        if (activeEditor.getContainer()) {
+          activeEditor.getContainer().style.display = '';
+        }
+        activeEditor.show();
+      } else {
+        rich.style.display = 'block';
       }
-      activeEditor.show();
-    } else {
-      rich.style.display = 'block';
+      hideEditorStatus();
+    } catch (error) {
+      console.error(error);
+      showEditorStatus(error.message || '转换失败，已保留当前 Markdown 内容。');
+      const markdownRadio = document.querySelector('input[name="editor_mode"][value="markdown"]');
+      if (markdownRadio) markdownRadio.checked = true;
+      return;
     }
   }
 }

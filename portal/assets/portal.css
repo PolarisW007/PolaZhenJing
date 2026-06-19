@@ -283,8 +283,8 @@ img {
 
 .hero-section {
   position: relative;
-  min-height: 100svh;
-  padding: 104px 24px 52px;
+  min-height: 88svh;
+  padding: 104px 24px 28px;
   isolation: isolate;
 }
 

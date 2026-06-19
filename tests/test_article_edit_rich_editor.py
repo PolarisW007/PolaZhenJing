@@ -31,6 +31,11 @@ def test_article_edit_page_uses_local_tinymce_assets():
     assert 'id="content-format"' in body
     assert "TINYMCE_SCRIPT_URL" in body
     assert "language: 'zh-Hans'" in body
+    assert "initRichEditor();\nsetEditorMode(initialMode);" not in body
+    assert "Markdown 源码模式已就绪" in body
+    assert ".tox-tinymce.editor-mode-hidden" in body
+    assert "hideRichEditorSurface" in body
+    assert "showRichEditorSurface" in body
     # Editor flex layout (prevents iframe collapse) is preserved.
     assert "display: flex !important" in body
 
@@ -46,8 +51,10 @@ def test_preview_endpoint_returns_html_for_rich_format():
 
     assert response.status_code == 200
     assert payload["ok"] is True
-    assert payload["format"] == "rich_html"
-    assert payload["html"] == html_body
+    assert payload["format"] == "markdown"
+    assert payload["canonical_markdown"]
+    assert "<h1" in payload["html"]
+    assert "<strong>html</strong>" in payload["html"]
 
 
 def test_preview_endpoint_renders_markdown_for_markdown_format():
@@ -76,3 +83,189 @@ def test_preview_endpoint_defaults_to_markdown_when_format_missing():
     assert response.status_code == 200
     assert payload["format"] == "markdown"
     assert "<h2" in payload["html"]
+
+
+def _isolated_article_client(tmp_path, monkeypatch):
+    posts_dir = tmp_path / "_posts"
+    posts_dir.mkdir()
+    post_path = posts_dir / "2026-06-14-editor-image-test.md"
+    post_path.write_text(
+        "---\nlayout: deep-technical\ntitle: old title\ndate: 2026-06-14\n---\n\nseed\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("app.uploader.POSTS_DIR", str(posts_dir), raising=False)
+    app = create_app()
+    app.config["TESTING"] = True
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess["user_id"] = 1
+        sess["role"] = "admin"
+    return client, post_path
+
+
+def test_edit_save_rich_html_sanitizes_clipboard_metadata_and_localizes_images(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        "app.uploader._download_remote_image_to_richtext",
+        lambda url: "/assets/images/richtext/2026-06/localized.jpg",
+    )
+    rich_body = """
+    <article class="4ever-article" data-clipboard-cangjie="huge-internal-payload">
+      <p style="font-size: 18px" data-block="x">第一段正文</p>
+      <p><img src="https://alidocs.dingtalk.com/core/api/resources/img/demo.png?tmpCode=abc"
+              data-src="https://fallback.example.com/image.jpg"
+              style="width: 100px" class="doc-image"></p>
+    </article>
+    """
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "新标题",
+            "date": "2026-06-14",
+            "summary": "摘要",
+            "body": rich_body,
+            "content_format": "rich_html",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "data-clipboard-cangjie" not in saved
+    assert "style=" not in saved
+    assert "<article" not in saved
+    assert "https://alidocs.dingtalk.com" not in saved
+    assert "/assets/images/richtext/2026-06/localized.jpg" in saved
+    assert "第一段正文" in saved
+
+
+def test_edit_save_markdown_keeps_markdown_images(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    markdown_body = "# 标题\n\n![本地图](/assets/images/test_cover.jpg)\n\n正文"
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "Markdown 标题",
+            "date": "2026-06-14",
+            "body": markdown_body,
+            "content_format": "markdown",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "![本地图](/assets/images/test_cover.jpg)" in saved
+    assert "正文" in saved
+
+
+def test_edit_save_uses_rich_content_when_body_field_missing(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    rich_body = "<p>只从 rich_content 提交的新正文</p>"
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "富文本兜底",
+            "date": "2026-06-14",
+            "rich_content": rich_body,
+            "content_format": "rich_html",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "只从 rich_content 提交的新正文" in saved
+    assert "seed" not in saved
+
+
+def test_edit_save_uses_markdown_content_when_body_field_missing(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    markdown_body = "## 只从 content 提交的新正文\n\n正文第二段"
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "Markdown 兜底",
+            "date": "2026-06-14",
+            "content": markdown_body,
+            "content_format": "markdown",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "## 只从 content 提交的新正文" in saved
+    assert "正文第二段" in saved
+    assert "seed" not in saved
+
+
+def test_editor_convert_api_markdown_to_rich_html():
+    client = _admin_client()
+    response = client.post(
+        "/admin/api/editor/convert",
+        json={
+            "source_format": "markdown",
+            "target_format": "rich_html",
+            "content": "# 标题\n\n![图](/assets/a.png)\n\n正文",
+        },
+    )
+    payload = response.get_json()
+
+    assert response.status_code == 200
+    assert payload["ok"] is True
+    assert payload["format"] == "rich_html"
+    assert "<h1" in payload["content"]
+    assert '<img' in payload["content"]
+
+
+def test_edit_save_revision_uses_canonical_markdown_before_llm(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    seen = {}
+
+    def fake_revision(content, title, revision_instruction, style="", rewrite_rate=50):
+        seen["content"] = content
+        seen["rewrite_rate"] = rewrite_rate
+        return content + "\n\n补充一句。"
+
+    monkeypatch.setattr("app.uploader._apply_revision_instruction", fake_revision)
+    rich_body = "<h1>正文标题</h1><p>第一段</p><p><img src=\"/assets/images/test_cover.jpg\"></p>"
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "修订标题",
+            "date": "2026-06-14",
+            "body": rich_body,
+            "content_format": "rich_html",
+            "rewrite_rate": "75",
+            "revision_instruction": "补充一句",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert seen["rewrite_rate"] == 75
+    assert "# 正文标题" in seen["content"]
+    assert "<h1>" not in seen["content"]
+    assert "补充一句。" in saved

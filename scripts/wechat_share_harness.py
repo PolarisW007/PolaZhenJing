@@ -73,7 +73,7 @@ def main() -> int:
 
     assert og_title.strip(), "og:title is empty"
     assert 20 <= len(og_description) <= 190, f"bad description length: {len(og_description)}"
-    assert re.match(r"^https://aipd\.me/s/[0-9a-f]{8}$", og_url), og_url
+    assert re.match(r"^https://aipd\.me/c/[0-9a-f]{8}$", og_url), og_url
     assert og_image.startswith("https://aipd.me/"), og_image
     assert "/assets/images/share/" in og_image, f"OG share image should use generated share asset: {og_image}"
     assert og_image.endswith("-og.jpg"), f"OG share image should be large-card JPEG: {og_image}"
@@ -99,8 +99,10 @@ def main() -> int:
     assert "Twitter" not in html, "Public article should not show admin Twitter share button"
     assert "LinkedIn" not in html, "Public article should not show admin LinkedIn share button"
     assert "copy-link-btn" not in html, "Public article should not show admin copy share button"
-    assert "data-copy-shortlink" in html, "Public article should show short-link copy button"
-    assert "复制短链接" in html, "Public article short-link copy label missing"
+    assert "data-copy-cardlink" not in html, "Public article should not show card-link copy button"
+    assert "data-copy-wechat-card" not in html, "Public article should not show WeChat image card button"
+    assert "复制卡片链接" not in html, "Public article card-link copy label should be admin-only"
+    assert "微信图文卡片" not in html, "WeChat image card fallback label should be admin-only"
 
     asset_filename = _asset_regression_filename(filename)
     public_resp = client.get(
@@ -130,8 +132,22 @@ def main() -> int:
     assert short_resp.status_code == 200, short_resp.status_code
     short_html = short_resp.get_data(as_text=True)
     assert f'https://aipd.me/s/{short_code}' in short_html, "Short-link page should expose short share URL"
+    assert f'https://aipd.me/c/{short_code}' in short_html, "Short-link page should expose social card URL"
     assert f'https://aipd.me/articles/{asset_filename}' in short_html, "Short-link page should expose canonical URL"
     assert "https://aipd.me/PolaZhenjing/admin/api/wechat/share-config" in short_html, "Short-link page should call prefixed WeChat API"
+
+    card_resp = client.get(
+        f"/c/{short_code}",
+        base_url="https://aipd.me",
+    )
+    assert card_resp.status_code == 200, card_resp.status_code
+    card_html = card_resp.get_data(as_text=True)
+    assert f'<link rel="canonical" href="https://aipd.me/articles/{asset_filename}">' in card_html
+    assert f'<link rel="shortlink" href="https://aipd.me/s/{short_code}">' in card_html
+    assert f'<meta property="og:url" content="https://aipd.me/c/{short_code}">' in card_html
+    assert '<meta property="og:image:width" content="1200">' in card_html
+    assert '<meta name="twitter:card" content="summary_large_image">' in card_html
+    assert "jweixin" not in card_html.lower(), "Card page should remain lightweight"
 
     admin_client = app.test_client()
     with admin_client.session_transaction(base_url="https://aipd.me") as session:
@@ -145,7 +161,9 @@ def main() -> int:
     admin_html = admin_response.get_data(as_text=True)
     assert "Twitter" in admin_html, "Admin article should show Twitter share button"
     assert "LinkedIn" in admin_html, "Admin article should show LinkedIn share button"
-    assert "复制短链" in admin_html, "Admin short-link copy helper missing"
+    assert "复制卡片链接" in admin_html, "Admin card-link copy helper missing"
+    assert "阅读短链" in admin_html, "Admin read-link copy helper missing"
+    assert "微信图文卡片" in admin_html, "Admin WeChat image-card helper missing"
     assert "即刻" in admin_html, "Jike share helper missing"
     assert "TL;DR" not in admin_html, "Admin article should not show TL;DR label"
 

@@ -24,6 +24,24 @@
     letter-spacing: 0;
   }
   .editor-mode-switch input { accent-color: var(--gold-primary); }
+  .rewrite-rate-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+  }
+  .rewrite-rate-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.035);
+    cursor: pointer;
+  }
+  .rewrite-rate-option input { accent-color: var(--gold-primary); }
   .editor-load-warning {
     display: none;
     margin-top: 0.6rem;
@@ -64,6 +82,10 @@
     overflow: hidden;
     background: rgba(255,255,255,0.035) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tox-tinymce.editor-mode-hidden,
+  #rich-content.editor-mode-hidden {
+    display: none !important;
   }
   .tox-tinymce .tox-editor-container {
     flex: 1 1 auto !important;
@@ -142,10 +164,10 @@
   <div class="form-group">
     <label>正文编辑</label>
     <div class="editor-mode-switch">
-      <label><input type="radio" name="editor_mode" value="rich" checked> 富文本编辑</label>
-      <label><input type="radio" name="editor_mode" value="markdown"> Markdown 源码</label>
+      <label><input type="radio" name="editor_mode" value="rich"> 富文本编辑</label>
+      <label><input type="radio" name="editor_mode" value="markdown" checked> Markdown 源码</label>
     </div>
-    <input type="hidden" id="content-format" name="content_format" value="rich_html">
+    <input type="hidden" id="content-format" name="content_format" value="markdown">
     <textarea id="rich-content" name="rich_content" class="form-input" style="display:none;">{{ body }}</textarea>
     <textarea id="content" name="content" class="form-input body-markdown-textarea" style="display:none;" placeholder="# 标题&#10;&#10;在这里用 Markdown 编写内容...">{{ body }}</textarea>
     <div id="editor-load-status" class="editor-load-status">
@@ -164,6 +186,18 @@
       </div>
       <div class="article-preview" id="article-preview"></div>
     </div>
+  </div>
+
+  <div class="form-group rewrite-rate">
+    <label>AI 改写率（仅填写修改建议时生效）</label>
+    <div class="rewrite-rate-options">
+      <label class="rewrite-rate-option"><input type="radio" name="rewrite_rate" value="0"> 0%</label>
+      <label class="rewrite-rate-option"><input type="radio" name="rewrite_rate" value="25"> 25%</label>
+      <label class="rewrite-rate-option"><input type="radio" name="rewrite_rate" value="50" checked> 50%</label>
+      <label class="rewrite-rate-option"><input type="radio" name="rewrite_rate" value="75"> 75%</label>
+      <label class="rewrite-rate-option"><input type="radio" name="rewrite_rate" value="100"> 100%</label>
+    </div>
+    <div class="field-help">不填写修改建议时不会调用 AI；0% 会跳过 AI 修改建议，直接保存当前正文。</div>
   </div>
 
   <div class="form-group revision-advice-group">
@@ -319,6 +353,7 @@ const TINYMCE_BASE_URL = '{{ url_for("serve_assets", filename="vendor/tinymce") 
 const TINYMCE_ASSET_VERSION = {{ tinymce_manifest.asset_version|tojson }};
 const TINYMCE_CACHE_SUFFIX = `?v=${encodeURIComponent(TINYMCE_ASSET_VERSION)}`;
 const TINYMCE_SCRIPT_URL = {{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js", v=tinymce_manifest.asset_version)|tojson }};
+const EDITOR_CONVERT_URL = {{ url_for("uploader.editor_convert")|tojson }};
 
 function themeVar(name, fallback) {
   return getComputedStyle(document.body).getPropertyValue(name).trim() || fallback;
@@ -427,13 +462,7 @@ function uploadEditorImage(file, filename, progress) {
 const preview = document.getElementById('article-preview');
 const contentFormatField = document.getElementById('content-format');
 const initialBody = {{ body|tojson }};
-const initialLooksHtml = (() => {
-  const trimmed = String(initialBody || '').trimStart();
-  if (!trimmed) return false;
-  if (/^</.test(trimmed) && /<\/?[a-z][^>]*>/i.test(trimmed)) return true;
-  if (/<(?:p|h[1-6]|ul|ol|table|img|blockquote|figure|div|section|article|video|iframe|hr|pre)\b/i.test(trimmed)) return true;
-  return false;
-})();
+const initialMode = 'markdown';
 
 let richEditorReady = false;
 let richEditorFallbackShown = false;
@@ -460,8 +489,8 @@ function showEditorFallback() {
   const rich = document.getElementById('rich-content');
   if (warning) warning.style.display = 'block';
   if (rich) {
-    rich.style.display = 'block';
-    rich.style.minHeight = '420px';
+    rich.classList.add('editor-mode-hidden');
+    rich.setAttribute('aria-hidden', 'true');
   }
   setEditorMode('markdown');
 }
@@ -546,10 +575,7 @@ function initRichEditor() {
     init_instance_callback: editor => {
       if (status) status.style.display = 'none';
       if (document.querySelector('input[name="editor_mode"]:checked').value === 'markdown') {
-        editor.hide();
-        if (editor.getContainer()) {
-          editor.getContainer().style.display = 'none';
-        }
+        hideRichEditorSurface({ sync: false });
       }
       schedulePreviewRefresh();
     }
@@ -560,38 +586,150 @@ function initRichEditor() {
   });
 }
 
-function setEditorMode(mode) {
+function hideRichEditorSurface(options = {}) {
+  const sync = options.sync !== false;
+  const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (editor) {
+    if (sync) editor.save();
+    const container = editor.getContainer();
+    if (container) {
+      container.classList.add('editor-mode-hidden');
+      container.setAttribute('aria-hidden', 'true');
+    }
+    window.setTimeout(() => {
+      const delayedContainer = editor.getContainer();
+      if (delayedContainer) {
+        delayedContainer.classList.add('editor-mode-hidden');
+        delayedContainer.setAttribute('aria-hidden', 'true');
+      }
+      if (rich) {
+        rich.classList.add('editor-mode-hidden');
+        rich.setAttribute('aria-hidden', 'true');
+      }
+    }, 50);
+  }
+  if (rich) {
+    rich.classList.add('editor-mode-hidden');
+    rich.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function showRichEditorSurface() {
+  const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (editor) {
+    if (editor.hidden) {
+      editor.show();
+    }
+    const container = editor.getContainer();
+    if (container) {
+      container.classList.remove('editor-mode-hidden');
+      container.style.removeProperty('display');
+      container.removeAttribute('aria-hidden');
+    }
+    if (rich) {
+      rich.classList.add('editor-mode-hidden');
+      rich.removeAttribute('aria-hidden');
+    }
+    return true;
+  }
+  if (rich) {
+    rich.classList.add('editor-mode-hidden');
+    rich.setAttribute('aria-hidden', 'true');
+  }
+  return false;
+}
+
+function getRichEditorHtml() {
+  const rich = document.getElementById('rich-content');
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (editor && editor.initialized && editor.serializer) {
+    try {
+      const html = editor.getContent();
+      if (html && html.trim()) return html;
+    } catch (error) {
+      console.warn('TinyMCE content is not ready, falling back to textarea value.', error);
+    }
+  }
+  return rich ? rich.value : '';
+}
+
+async function convertEditorContent(content, sourceFormat, targetFormat) {
+  const response = await fetch(EDITOR_CONVERT_URL, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      content,
+      source_format: sourceFormat,
+      target_format: targetFormat
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || `转换失败（${response.status}）`);
+  }
+  return data.content || '';
+}
+
+function showEditorStatus(message) {
+  const status = document.getElementById('editor-load-status');
+  if (status) {
+    status.style.display = 'block';
+    status.textContent = message;
+  }
+}
+
+function hideEditorStatus() {
+  const status = document.getElementById('editor-load-status');
+  if (status && richEditorReady) status.style.display = 'none';
+}
+
+async function setEditorMode(mode) {
   const contentFormat = document.getElementById('content-format');
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
   const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  const currentFormat = contentFormat.value || 'markdown';
+  if ((mode === 'markdown' && currentFormat === 'markdown') ||
+      (mode === 'rich' && currentFormat === 'rich_html')) {
+    return;
+  }
   if (mode === 'markdown') {
-    contentFormat.value = 'markdown';
-    if (editor) {
-      editor.save();
-      if (markdown && !markdown.value.trim() && rich && rich.value.trim()) {
-        markdown.value = rich.value;
-      }
-      editor.hide();
-      if (editor.getContainer()) {
-        editor.getContainer().style.display = 'none';
-      }
-    } else {
-      if (rich) rich.style.display = 'none';
+    const source = getRichEditorHtml();
+    try {
+      showEditorStatus('正在转换为 Markdown 源码…');
+      if (markdown) markdown.value = await convertEditorContent(source, 'rich_html', 'markdown');
+      contentFormat.value = 'markdown';
+      hideRichEditorSurface({ sync: false });
+      if (markdown) markdown.style.display = 'block';
+      hideEditorStatus();
+    } catch (error) {
+      console.error(error);
+      showEditorStatus(error.message || '转换失败，已保留当前富文本内容。');
+      const richRadio = document.querySelector('input[name="editor_mode"][value="rich"]');
+      if (richRadio) richRadio.checked = true;
+      return;
     }
-    if (markdown) markdown.style.display = 'block';
   } else {
-    contentFormat.value = 'rich_html';
-    if (markdown) markdown.style.display = 'none';
-    initRichEditor();
-    const activeEditor = window.tinymce ? tinymce.get('rich-content') : null;
-    if (activeEditor) {
-      if (activeEditor.getContainer()) {
-        activeEditor.getContainer().style.display = '';
+    try {
+      showEditorStatus('正在转换为富文本视图…');
+      const html = await convertEditorContent(markdown ? markdown.value : '', 'markdown', 'rich_html');
+      if (rich) rich.value = html;
+      if (editor) editor.setContent(html);
+      contentFormat.value = 'rich_html';
+      if (markdown) markdown.style.display = 'none';
+      if (!showRichEditorSurface()) {
+        initRichEditor();
       }
-      activeEditor.show();
-    } else {
-      if (rich) rich.style.display = 'block';
+      hideEditorStatus();
+    } catch (error) {
+      console.error(error);
+      showEditorStatus(error.message || '转换失败，已保留当前 Markdown 内容。');
+      const markdownRadio = document.querySelector('input[name="editor_mode"][value="markdown"]');
+      if (markdownRadio) markdownRadio.checked = true;
+      return;
     }
   }
   schedulePreviewRefresh();
@@ -614,8 +752,7 @@ async function refreshPreview() {
   const rich = document.getElementById('rich-content');
   let body = '';
   if (contentFormat === 'rich_html') {
-    const editor = window.tinymce ? tinymce.get('rich-content') : null;
-    body = editor ? editor.getContent() : (rich ? rich.value : '');
+    body = getRichEditorHtml();
   } else {
     body = markdown ? markdown.value : '';
   }
@@ -662,7 +799,7 @@ document.getElementById('article-edit-form').addEventListener('submit', function
   // existing /admin/articles/.../edit backend, which still reads form.get('body').
   let payload = '';
   if (activeMode === 'rich_html') {
-    payload = rich ? rich.value : '';
+    payload = getRichEditorHtml();
   } else {
     payload = markdown ? markdown.value : '';
     if (!payload.trim() && rich && rich.value.trim()) {
@@ -679,11 +816,11 @@ document.getElementById('article-edit-form').addEventListener('submit', function
   bodyField.value = payload;
 });
 
-const initialMode = initialLooksHtml ? 'rich' : 'markdown';
 const initialRadio = document.querySelector(`input[name="editor_mode"][value="${initialMode}"]`);
 if (initialRadio) initialRadio.checked = true;
-initRichEditor();
-setEditorMode(initialMode);
+const initialMarkdown = document.getElementById('content');
+if (initialMarkdown) initialMarkdown.style.display = 'block';
+showEditorStatus('Markdown 源码模式已就绪；切换富文本时会自动转换格式。');
 refreshPreview();
 </script>
 {% endblock %}
