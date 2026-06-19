@@ -42,7 +42,20 @@ systemctl restart polazj
   - `.venv/bin/python -m pytest tests/test_article_content.py tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_social_publish.py tests/test_public_article_homepage.py tests/test_article_auto_tagging.py tests/test_article_reader_roles.py tests/test_article_reader_sidebar_like.py -q`：`53 passed in 0.93s`。
   - `.venv/bin/python scripts/upload_edit_playwright_harness.py --base-url http://127.0.0.1:5019`：Pass，真实点击保存并验证临时文章写回。
   - `git diff --check`：Pass。
-- 本地 commit：待回填。
-- 备份目录：待回填。
-- 云端验证：待回填。
-- 公网 smoke：待回填。
+- 本地 commit：`85c7154 fix(editor): show save progress and cover submit path`，已 push 到 `origin/main`。
+- 备份目录：`/opt/backups/polazj-edit-save-feedback-20260619170335`。
+- 云端同步：
+  - `/PolaZhenjing/app/templates/article_edit.html`
+  - `/PolaZhenjing/scripts/upload_edit_playwright_harness.py`
+  - `/PolaZhenjing/tests/test_article_edit_rich_editor.py`
+  - `/PolaZhenjing/docs/pola/project-knowledge/`
+- 云端验证：
+  - `.venv/bin/python3 -m py_compile app/uploader.py scripts/upload_edit_playwright_harness.py`：Pass。
+  - `PYTHONPATH=. .venv/bin/pytest tests/test_article_edit_rich_editor.py tests/test_upload_rewrite_rate.py tests/test_article_content.py -q`：`19 passed in 0.98s`。
+  - `systemctl is-active polazj`：`active`。
+  - 认证态模板 smoke：`/admin/articles/rolling-ai-fde-ai-20260607.md/edit` 返回 200，并命中 `save-status`、`event.submitter`、`articleEditSubmitting`、AI 保存状态文案和隐藏 `save_mode`。
+  - 转换 API smoke：Markdown -> 富文本返回 200，`ok=True`。
+- 公网 smoke：
+  - `https://aipd.me/PolaZhenjing/admin/login`：200。
+  - `https://aipd.me/PolaZhenjing/admin/articles/rolling-ai-fde-ai-20260607.md/edit`：未登录 302 到登录页，符合预期。
+  - `https://aipd.me/PolaZhenjing/articles/rolling-ai-fde-ai-20260607.md`：200。
