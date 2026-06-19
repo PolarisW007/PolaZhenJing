@@ -164,6 +164,50 @@ def test_edit_save_rich_html_sanitizes_clipboard_metadata_and_localizes_images(t
     assert "第一段正文" in saved
 
 
+def test_edit_save_rich_html_recovers_x_picture_and_background_images(tmp_path, monkeypatch):
+    client, post_path = _isolated_article_client(tmp_path, monkeypatch)
+    seen_urls = []
+
+    def fake_download(url):
+        seen_urls.append(url)
+        return f"/assets/images/richtext/2026-06/x-{len(seen_urls)}.jpg"
+
+    monkeypatch.setattr("app.uploader._download_remote_image_to_richtext", fake_download)
+    rich_body = """
+    <article>
+      <p>X 复制正文</p>
+      <picture>
+        <source srcset="https://pbs.twimg.com/media/picture-demo?format=jpg&name=large 1x">
+        <img alt="tweet picture" src="">
+      </picture>
+      <div aria-label="tweet background"
+           style="background-image: url('https://pbs.twimg.com/media/background-demo?format=jpg&name=large')"></div>
+    </article>
+    """
+
+    response = client.post(
+        "/admin/articles/editor-image-test.md/edit",
+        data={
+            "layout": "deep-technical",
+            "theme": "claude",
+            "title": "X 图片粘贴",
+            "date": "2026-06-14",
+            "body": rich_body,
+            "content_format": "rich_html",
+            "save_mode": "save",
+        },
+        follow_redirects=False,
+    )
+    saved = post_path.read_text(encoding="utf-8")
+
+    assert response.status_code == 302
+    assert "https://pbs.twimg.com/media/picture-demo?format=jpg&name=large" in seen_urls
+    assert "https://pbs.twimg.com/media/background-demo?format=jpg&name=large" in seen_urls
+    assert "/assets/images/richtext/2026-06/x-1.jpg" in saved
+    assert "/assets/images/richtext/2026-06/x-2.jpg" in saved
+    assert "X 复制正文" in saved
+
+
 def test_edit_save_markdown_keeps_markdown_images(tmp_path, monkeypatch):
     client, post_path = _isolated_article_client(tmp_path, monkeypatch)
     markdown_body = "# 标题\n\n![本地图](/assets/images/test_cover.jpg)\n\n正文"

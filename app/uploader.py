@@ -856,21 +856,90 @@ def _first_srcset_url(srcset: str) -> str:
     return first.split()[0] if first else ''
 
 
+def _normalize_remote_image_src(value: str) -> str:
+    """Normalize pasted image URL variants before validation/download."""
+    src = (value or '').strip().strip('"\'')
+    if src.startswith('//'):
+        src = f'https:{src}'
+    if src.startswith('http://'):
+        src = f'https://{src[7:]}'
+    return src
+
+
 def _usable_rich_image_src(tag) -> str:
     """Choose the most useful image source from pasted rich HTML."""
     attrs = [
         'src', 'data-src', 'data-original', 'data-url', 'data-image-src',
-        'data-actualsrc', 'data-lazy-src',
+        'data-image-url', 'data-media-url', 'data-full-url',
+        'data-actualsrc', 'data-actual-src', 'data-lazy-src',
     ]
     for attr in attrs:
-        value = (tag.get(attr) or '').strip()
+        value = _normalize_remote_image_src(tag.get(attr) or '')
         if value and value not in {'#', 'about:blank'}:
             return value
     for attr in ('srcset', 'data-srcset'):
-        value = _first_srcset_url(tag.get(attr) or '')
+        value = _normalize_remote_image_src(_first_srcset_url(tag.get(attr) or ''))
         if value and value not in {'#', 'about:blank'}:
             return value
+    parent = tag.find_parent('picture') if hasattr(tag, 'find_parent') else None
+    if parent:
+        for source in parent.find_all('source'):
+            value = _normalize_remote_image_src(source.get('src') or '')
+            if not value:
+                value = _normalize_remote_image_src(_first_srcset_url(source.get('srcset') or ''))
+            if not value:
+                value = _normalize_remote_image_src(_first_srcset_url(source.get('data-srcset') or ''))
+            if value and value not in {'#', 'about:blank'}:
+                return value
     return ''
+
+
+def _style_image_urls(style: str) -> list[str]:
+    """Extract image URLs from pasted background-image style values."""
+    if not style:
+        return []
+    urls = []
+    for match in re.finditer(r'url\((["\']?)(.*?)\1\)', style, re.I):
+        src = _normalize_remote_image_src(match.group(2))
+        if src:
+            urls.append(src)
+    return urls
+
+
+def _looks_like_pasted_content_image_url(image_url: str) -> bool:
+    """Avoid turning decorative CSS assets into article images."""
+    src = _normalize_remote_image_src(image_url)
+    if not src:
+        return False
+    if src.startswith('data:image/'):
+        return True
+    parsed = urlparse(src)
+    host = (parsed.hostname or '').lower()
+    path = (parsed.path or '').lower()
+    return (
+        host.endswith('twimg.com')
+        or path.endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif'))
+        or 'format=' in (parsed.query or '').lower()
+    )
+
+
+def _promote_pasted_background_images(soup):
+    """Convert content images copied as CSS backgrounds into normal img tags."""
+    seen = {
+        _usable_rich_image_src(img)
+        for img in soup.find_all('img')
+        if _usable_rich_image_src(img)
+    }
+    for tag in list(soup.find_all(True)):
+        for src in _style_image_urls(tag.get('style') or ''):
+            if not _looks_like_pasted_content_image_url(src) or src in seen:
+                continue
+            img = soup.new_tag('img')
+            img['src'] = src
+            img['alt'] = tag.get('aria-label') or tag.get('alt') or '粘贴图片'
+            img['loading'] = 'lazy'
+            tag.insert_after(img)
+            seen.add(src)
 
 
 def _is_local_article_image_url(image_url: str) -> bool:
@@ -983,13 +1052,13 @@ def _save_data_image_to_richtext(data_url: str) -> str | None:
 
 def _localize_rich_html_images(soup):
     """Replace pasted external image URLs with local richtext assets when possible."""
+    _promote_pasted_background_images(soup)
     for img in soup.find_all('img'):
         src = _usable_rich_image_src(img)
         if not src:
             img.decompose()
             continue
-        if src.startswith('//'):
-            src = f'https:{src}'
+        src = _normalize_remote_image_src(src)
         local_url = None
         if src.startswith('data:image/'):
             local_url = _save_data_image_to_richtext(src)
@@ -1014,7 +1083,7 @@ def _sanitize_rich_html_attrs(soup):
         'iframe': {'src', 'title', 'width', 'height', 'allow', 'allowfullscreen',
                    'loading', 'referrerpolicy'},
         'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
-        'source': {'src', 'type'},
+        'source': {'src', 'srcset', 'type'},
     }
     for tag in soup.find_all(True):
         tag_allowed = allowed_attrs.get(tag.name, set())
@@ -1042,7 +1111,7 @@ def _safe_media_html(tag) -> str:
         'iframe': {'src', 'title', 'width', 'height', 'allow', 'allowfullscreen',
                    'loading', 'referrerpolicy'},
         'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
-        'source': {'src', 'type'},
+        'source': {'src', 'srcset', 'type'},
         'picture': set(),
     }
     if name not in allowed:

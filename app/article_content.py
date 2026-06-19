@@ -59,7 +59,7 @@ def _sanitize_rich_html_attrs(soup):
             'loading', 'referrerpolicy',
         },
         'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
-        'source': {'src', 'type'},
+        'source': {'src', 'srcset', 'type'},
     }
     for tag in soup.find_all(True):
         tag_allowed = allowed_attrs.get(tag.name, set())
@@ -87,8 +87,9 @@ def _safe_media_html(tag) -> str:
             'src', 'title', 'width', 'height', 'allow', 'allowfullscreen',
             'loading', 'referrerpolicy',
         },
+        'img': {'src', 'alt', 'title', 'width', 'height', 'loading'},
         'video': {'src', 'controls', 'poster', 'width', 'height', 'preload'},
-        'source': {'src', 'type'},
+        'source': {'src', 'srcset', 'type'},
         'picture': set(),
     }
     if name not in allowed:

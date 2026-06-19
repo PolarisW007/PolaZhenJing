@@ -1,0 +1,35 @@
+# 2026-06-19 富文本粘贴 X 图片恢复
+
+## 需求
+
+用户在 `/PolaZhenjing/admin/upload` 粘贴 X/Twitter 内容时，正文可以进入富文本编辑器，但原本能显示的图片不再显示。需要排查并恢复粘贴图片能力。
+
+## 原因
+
+URL 抓取入口仍然按既有策略拒绝 X/Twitter 直接抓取，因为该站点需要登录且动态渲染。实际问题出在富文本粘贴链路：浏览器从 X 复制出的图片常位于 `picture > source srcset` 或 CSS `background-image`，而当前前端和后端只识别普通 `img/src`，导致粘贴时图片被当作无效图片删除或保存时丢失。
+
+## 改动
+
+- `app/templates/upload.html`
+  - 富文本粘贴预处理新增 `picture/source srcset` 识别。
+  - 新增 CSS 背景图 URL 提升为普通 `img` 的兜底。
+  - 扩展 `data-image-url`、`data-media-url`、`data-full-url` 等常见剪贴板属性。
+- `app/templates/article_edit.html`
+  - 与上传页保持一致，避免编辑已有文章时再次丢图。
+- `app/uploader.py`
+  - 后端富文本本地化新增 `picture/source srcset` 兜底。
+  - 将内容型 CSS 背景图提升为 `img` 后进入现有 richtext 图片本地化流程。
+- `app/article_content.py`
+  - 保留 `source/srcset` 和 `picture` 内 `img` 的安全属性，避免转换阶段误删图片。
+- `tests/test_article_edit_rich_editor.py`
+  - 新增 X 复制格式回归：`picture/source srcset` 和 `background-image` 都能被下载成本地 richtext 图片。
+
+## 验证
+
+- `.venv/bin/python -m pytest tests/test_article_edit_rich_editor.py tests/test_article_content.py -q`
+  - 17 passed
+
+## 风险与边界
+
+- 本次不改变 X/Twitter URL 直接抓取限制；直接在“输入 URL”中抓取 X 仍会提示改用粘贴内容或外部抓取工具。
+- CSS 背景图提升只接受明显图片 URL、`twimg.com` 或带 `format=` 的媒体 URL，减少误把装饰背景保存进文章的风险。

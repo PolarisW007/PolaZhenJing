@@ -452,12 +452,57 @@ function firstSrcsetUrl(srcset) {
   return first.split(/\s+/)[0] || '';
 }
 
+function imageSourceFromPicture(img) {
+  const picture = img.closest('picture');
+  if (!picture) return '';
+  const sources = Array.from(picture.querySelectorAll('source'));
+  for (const source of sources) {
+    const candidate = usableImageSrc(source.getAttribute('src')) ||
+      usableImageSrc(firstSrcsetUrl(source.getAttribute('srcset'))) ||
+      usableImageSrc(firstSrcsetUrl(source.getAttribute('data-srcset')));
+    if (candidate) return candidate;
+  }
+  return '';
+}
+
 function usableImageSrc(src) {
   if (!src) return '';
   const value = String(src).trim();
   if (!value || value === '#' || value === 'about:blank') return '';
   if (/^data:image\/(?:gif|png);base64,R0lGODlhAQAB/i.test(value)) return '';
   return value;
+}
+
+function normalizeImageSrc(src) {
+  return usableImageSrc(src).replace(/^http:\/\//i, 'https://');
+}
+
+function styleImageUrls(style) {
+  if (!style) return [];
+  const urls = [];
+  const pattern = /url\((['"]?)(.*?)\1\)/gi;
+  let match;
+  while ((match = pattern.exec(style)) !== null) {
+    const url = normalizeImageSrc(match[2]);
+    if (url) urls.push(url);
+  }
+  return urls;
+}
+
+function isPastedContentImageUrl(src) {
+  const value = usableImageSrc(src);
+  if (!value) return false;
+  if (value.startsWith('data:image/')) return true;
+  try {
+    const parsed = new URL(value, window.location.origin);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+    return host.endsWith('twimg.com') ||
+      /\.(?:png|jpe?g|webp|gif)$/.test(path) ||
+      parsed.searchParams.has('format');
+  } catch (error) {
+    return /\.(?:png|jpe?g|webp|gif)(?:$|[?#])/i.test(value);
+  }
 }
 
 function escapeAttr(value) {
@@ -471,8 +516,9 @@ function escapeAttr(value) {
 }
 
 function normalizePastedImages(html) {
-  if (!html || !/<img[\s>]/i.test(html)) return html;
+  if (!html || !/(<img[\s>]|<picture[\s>]|background-image|twimg\.com)/i.test(html)) return html;
   const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
+  const seen = new Set();
   doc.querySelectorAll('img').forEach(img => {
     const candidates = [
       img.getAttribute('src'),
@@ -480,19 +526,37 @@ function normalizePastedImages(html) {
       img.getAttribute('data-original'),
       img.getAttribute('data-url'),
       img.getAttribute('data-image-src'),
+      img.getAttribute('data-image-url'),
+      img.getAttribute('data-media-url'),
+      img.getAttribute('data-full-url'),
       img.getAttribute('data-actualsrc'),
+      img.getAttribute('data-actual-src'),
       img.getAttribute('data-lazy-src'),
       firstSrcsetUrl(img.getAttribute('srcset')),
-      firstSrcsetUrl(img.getAttribute('data-srcset'))
+      firstSrcsetUrl(img.getAttribute('data-srcset')),
+      imageSourceFromPicture(img)
     ].map(usableImageSrc).filter(Boolean);
     if (candidates.length) {
-      img.setAttribute('src', candidates[0].replace(/^http:\/\//i, 'https://'));
+      const normalized = normalizeImageSrc(candidates[0]);
+      img.setAttribute('src', normalized);
       img.setAttribute('loading', 'lazy');
       img.removeAttribute('srcset');
       img.removeAttribute('data-srcset');
+      seen.add(normalized);
     } else {
       img.remove();
     }
+  });
+  doc.querySelectorAll('[style*="url("]').forEach(node => {
+    styleImageUrls(node.getAttribute('style')).forEach(src => {
+      if (!isPastedContentImageUrl(src) || seen.has(src)) return;
+      const img = doc.createElement('img');
+      img.setAttribute('src', src);
+      img.setAttribute('alt', node.getAttribute('aria-label') || node.getAttribute('alt') || '粘贴图片');
+      img.setAttribute('loading', 'lazy');
+      node.insertAdjacentElement('afterend', img);
+      seen.add(src);
+    });
   });
   return doc.body.firstElementChild ? doc.body.firstElementChild.innerHTML : html;
 }
