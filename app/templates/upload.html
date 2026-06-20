@@ -191,6 +191,11 @@
 {% endblock %}
 {% block content %}
 <h2>上传文章</h2>
+{% if insight_prefill %}
+<div class="flash flash-info">
+  已导入洞察选题：{{ insight_prefill.title }}。当前使用 Markdown 源码模式，可直接进入风格选择。
+</div>
+{% endif %}
 
 <div class="tab-bar">
   <div class="tab" onclick="switchTab(event, 'upload')">上传文件</div>
@@ -256,15 +261,15 @@
 <!-- Paste Tab -->
 <div id="tab-paste">
   <form method="POST" enctype="multipart/form-data" id="paste-form">
-    <input type="hidden" name="content_format" id="content-format" value="rich_html">
+    <input type="hidden" name="content_format" id="content-format" value="{{ 'markdown' if insight_prefill else 'rich_html' }}">
     <div class="form-group">
       <label>正文编辑</label>
       <div class="editor-mode-switch">
-        <label><input type="radio" name="editor_mode" value="rich" checked> 富文本编辑</label>
-        <label><input type="radio" name="editor_mode" value="markdown"> Markdown 源码</label>
+        <label><input type="radio" name="editor_mode" value="rich" {{ '' if insight_prefill else 'checked' }}> 富文本编辑</label>
+        <label><input type="radio" name="editor_mode" value="markdown" {{ 'checked' if insight_prefill else '' }}> Markdown 源码</label>
       </div>
-      <textarea id="rich-content" name="rich_content" class="form-input" placeholder="可以直接粘贴富文本内容，支持图片、视频、表格和链接..."></textarea>
-      <textarea id="content" name="content" class="form-input" style="display:none;" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容..."></textarea>
+      <textarea id="rich-content" name="rich_content" class="form-input" style="{{ 'display:none;' if insight_prefill else '' }}" placeholder="可以直接粘贴富文本内容，支持图片、视频、表格和链接..."></textarea>
+      <textarea id="content" name="content" class="form-input" style="{{ '' if insight_prefill else 'display:none;' }}" placeholder="# 我的文章&#10;&#10;在这里用 Markdown 编写内容...">{{ insight_prefill.content if insight_prefill else '' }}</textarea>
       <div id="editor-load-status" class="editor-load-status">
         富文本工具正在加载，当前文本框可直接输入或粘贴。
       </div>
@@ -284,15 +289,15 @@
     </div>
     <div class="form-group">
       <label for="title2">标题（可选）</label>
-      <input type="text" id="title2" name="title" class="form-input" placeholder="文章标题...">
+      <input type="text" id="title2" name="title" class="form-input" placeholder="文章标题..." value="{{ insight_prefill.title if insight_prefill else '' }}">
     </div>
     <div class="form-group">
       <label for="tags2">标签（可选，留空自动生成）</label>
-      <input type="text" id="tags2" name="tags" class="form-input" placeholder="agent-systems, ai-engineering, codex">
+      <input type="text" id="tags2" name="tags" class="form-input" placeholder="agent-systems, ai-engineering, codex" value="{{ insight_prefill.tags if insight_prefill else '' }}">
     </div>
     <div class="form-group">
       <label for="desc2">描述（可选）</label>
-      <input type="text" id="desc2" name="description" class="form-input" placeholder="简要摘要...">
+      <input type="text" id="desc2" name="description" class="form-input" placeholder="简要摘要..." value="{{ insight_prefill.description if insight_prefill else '' }}">
     </div>
     <div class="form-group">
       <label for="illustrations2">插入配图（可选，可多选）</label>
@@ -385,6 +390,7 @@ const TINYMCE_ASSET_VERSION = {{ tinymce_manifest.asset_version|tojson }};
 const TINYMCE_CACHE_SUFFIX = `?v=${encodeURIComponent(TINYMCE_ASSET_VERSION)}`;
 const TINYMCE_SCRIPT_URL = {{ url_for("serve_assets", filename="vendor/tinymce/tinymce.min.js", v=tinymce_manifest.asset_version)|tojson }};
 const EDITOR_CONVERT_URL = {{ url_for("uploader.editor_convert")|tojson }};
+const INITIAL_EDITOR_MODE = {{ ('markdown' if insight_prefill else 'rich')|tojson }};
 
 function switchTab(ev, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -823,6 +829,14 @@ document.getElementById('paste-form').addEventListener('submit', () => {
 });
 
 initRichEditor();
-setEditorMode('rich');
+if (INITIAL_EDITOR_MODE === 'markdown') {
+  const markdown = document.getElementById('content');
+  const rich = document.getElementById('rich-content');
+  document.getElementById('content-format').value = 'markdown';
+  if (markdown) markdown.style.display = 'block';
+  if (rich) rich.style.display = 'none';
+} else {
+  setEditorMode('rich');
+}
 </script>
 {% endblock %}

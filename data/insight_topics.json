@@ -1,0 +1,54 @@
+{
+  "source_url": "https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space",
+  "updated_at": "2026-06-20T09:55:00",
+  "topics": [
+    {
+      "date": "2026-06-20",
+      "title": "内容生产 v2：从上传工具走向作者型写作系统",
+      "angle": "把实时信号、作者风格、去 AI 味审稿串成一条内容生产流水线。",
+      "summary": "PolaZhenJing 已经具备上传、改写、配图、发布能力，下一步重点是让系统先完成选题洞察、证据整理和作者腔调校验，再进入文章生成。",
+      "tags": [
+        "content-production",
+        "author-workflow",
+        "insight"
+      ],
+      "status": "new",
+      "source_url": "https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space",
+      "id": "724e49daee3e",
+      "created_at": "2026-06-20T09:55:00",
+      "updated_at": "2026-06-20T09:55:00"
+    },
+    {
+      "date": "2026-06-20",
+      "title": "去 AI 味不是检测器，而是编辑工作流",
+      "angle": "检测器只能提示风险，真正有效的是证据、判断、场景和删改机制。",
+      "summary": "围绕中文套话、模板结构、证据缺口和第一人称判断建立审稿报告，减少文章的模型味。",
+      "tags": [
+        "humanizer",
+        "editorial-review",
+        "writing"
+      ],
+      "status": "new",
+      "source_url": "https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space",
+      "id": "37404647a98c",
+      "created_at": "2026-06-20T09:55:00",
+      "updated_at": "2026-06-20T09:55:00"
+    },
+    {
+      "date": "2026-06-20",
+      "title": "实时趋势研究如何进入每日选题",
+      "angle": "把 X、GitHub、行业文章等信号归一化为 clusters、controversies 和 links。",
+      "summary": "选题不只来自灵感，也来自可追溯的近期信号；缺失来源必须显式标注，避免伪研究。",
+      "tags": [
+        "trend-research",
+        "signals",
+        "daily-topics"
+      ],
+      "status": "new",
+      "source_url": "https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space",
+      "id": "0f2e185d56bf",
+      "created_at": "2026-06-20T09:55:00",
+      "updated_at": "2026-06-20T09:55:00"
+    }
+  ]
+}

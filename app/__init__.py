@@ -179,11 +179,13 @@ def create_app():
 
     # Register blueprints
     from .auth import auth_bp
+    from .admin_workbench import admin_workbench_bp
     from .uploader import public_articles_bp, uploader_bp
     from .social_publish import social_publish_bp
     from .skillhub import skillhub_bp
     from .agent import agent_admin_bp, agent_bp
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_workbench_bp)
     app.register_blueprint(public_articles_bp)
     app.register_blueprint(uploader_bp)
     app.register_blueprint(social_publish_bp)
@@ -202,7 +204,9 @@ def create_app():
     @app.route('/admin/')
     def index():
         if session.get('user_id'):
-            return redirect(url_for('uploader.upload'))
+            if session.get('role') == 'admin':
+                return redirect(url_for('admin_workbench.workbench'))
+            return redirect(url_for('auth.account'))
         return redirect(url_for('auth.login'))
 
     return app

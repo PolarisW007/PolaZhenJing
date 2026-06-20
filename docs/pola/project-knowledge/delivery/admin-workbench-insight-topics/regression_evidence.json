@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "environment": "local Flask app + Playwright Chromium, Python venv test runner",
+  "validated_paths": [
+    {
+      "id": "RG-PATH-1",
+      "entry": "/admin/workbench",
+      "viewport": "1366x900",
+      "steps": ["建立管理员测试 session", "打开工作台", "检查核心模块文本"],
+      "result": "pass: 页面包含 Admin 工作台和模块入口",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
+    },
+    {
+      "id": "RG-PATH-2",
+      "entry": "/admin/insights/topics",
+      "viewport": "1366x900",
+      "steps": ["打开洞察选题池", "检查列表标题和选题卡片"],
+      "result": "pass: 页面包含洞察文章选题和种子选题",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
+    },
+    {
+      "id": "RG-PATH-3",
+      "entry": "/admin/insights/topics/<topic_id>/import",
+      "viewport": "1366x900",
+      "steps": ["点击一键导入", "跟随跳转到上传页", "检查 Markdown 源码 textarea"],
+      "result": "pass: #content 可见并包含 ## 洞察选题和状态：已导入",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
+    }
+  ],
+  "validated_ids": ["A1", "A2", "A3", "A4", "A5", "A6"],
+  "side_effects": [
+    "选题状态写入仅发生在 data/insight_topics.json 或测试 monkeypatch 的临时 JSON",
+    "上传页 POST 解析逻辑保持原有优先级",
+    "未修改 _posts 文章内容"
+  ],
+  "logs": [
+    "python3 -m py_compile ... => exit 0",
+    ".venv/bin/python -m pytest ... => 15 passed",
+    "git diff --check => exit 0",
+    "validate_function_test_cases.py => PASS: 6 acceptance ids, 6 features, 12 cases",
+    "validate_pola_skills.py => PASS: Pola skill harness found no issues",
+    "Playwright smoke used temporary insight_topics.json to avoid mutating production seed data",
+    "curl -L --max-time 12 -I AliDocs URL => OAuth/login response, confirmed server-side unauthenticated limitation"
+  ],
+  "risks": [
+    "钉钉文档自动同步未实现，后续需接入钉钉开放接口或授权凭据",
+    "本轮未执行生产部署"
+  ]
+}

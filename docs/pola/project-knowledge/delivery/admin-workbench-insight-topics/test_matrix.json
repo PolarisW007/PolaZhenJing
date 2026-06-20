@@ -1,0 +1,85 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/admin-workbench-insight-topics/function_test_cases.json",
+  "commands": [
+    {
+      "id": "T1",
+      "command": "python3 -m py_compile app/admin_workbench.py app/insight_topics.py app/__init__.py app/uploader.py",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Python syntax for new/changed backend modules",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "语法检查通过"
+    },
+    {
+      "id": "T2",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Admin workbench and insight topics unit/integration tests",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "4 passed"
+    },
+    {
+      "id": "T3",
+      "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py tests/test_public_article_homepage.py tests/test_social_publish.py::test_admin_links_respect_script_name_prefix -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Adjacent upload, public user, and admin prefix regressions",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "11 passed"
+    },
+    {
+      "id": "T4",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py tests/test_upload_rewrite_rate.py tests/test_public_article_homepage.py tests/test_social_publish.py::test_admin_links_respect_script_name_prefix -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Combined relevant regression suite",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "15 passed"
+    },
+    {
+      "id": "T5",
+      "command": "git diff --check",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Whitespace and patch hygiene",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "通过"
+    },
+    {
+      "id": "T6",
+      "command": "Playwright local smoke: workbench -> topics -> import -> upload prefill",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Browser integration smoke",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "workbench, topics, import prefill passed"
+    },
+    {
+      "id": "T7",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/requirements/2026-06-20-admin-workbench-insight-topics.md --prd docs/pola/project-knowledge/specs/2026-06-20-admin-workbench-insight-topics-prd.md --sdd docs/pola/project-knowledge/architecture/2026-06-20-admin-workbench-insight-topics-sdd.md --spec docs/pola/project-knowledge/specs/2026-06-20-admin-workbench-insight-topics-spec.md --cases docs/pola/project-knowledge/delivery/admin-workbench-insight-topics/function_test_cases.json",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "A2A function test case coverage harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: function test cases cover 6 documented acceptance id(s), 6 feature(s), 12 case(s)."
+    },
+    {
+      "id": "T8",
+      "command": "/Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Pola local skill framework harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: Pola skill harness found no issues."
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"], "commands": ["T2", "T4", "T6", "T7"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": ["T2", "T4", "T6", "T7"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F3-001", "IT-F3-001", "RG-F3-001"], "commands": ["T2", "T3", "T4", "T6", "T7"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F4-001"], "commands": ["T2", "T4", "T7"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F5-001", "RG-F5-001"], "commands": ["T2", "T3", "T4", "T7"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F6-001", "IT-F6-001"], "commands": ["T2", "T4", "T6", "T7"]}
+  ]
+}

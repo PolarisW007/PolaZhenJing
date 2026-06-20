@@ -1,0 +1,204 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-20-admin-workbench-insight-topics.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-admin-workbench-insight-topics-prd.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-admin-workbench-insight-topics-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-06-20-admin-workbench-insight-topics-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "Admin 工作台入口",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A1",
+        "specs/2026-06-20-admin-workbench-insight-topics-spec.md#路由规格"
+      ],
+      "acceptance_ids": ["A1"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_admin_workbench_shows_core_modules",
+          "scenario": "管理员访问工作台",
+          "assertions": ["页面返回 200", "页面包含文章管理、小王记忆管理、洞察选题入口"],
+          "expected": "工作台作为后台聚合入口可用",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "/admin/workbench",
+          "scenario": "浏览器登录管理员测试会话后进入工作台",
+          "assertions": ["页面文本包含 Admin 工作台", "核心模块卡片可见"],
+          "expected": "浏览器真实渲染工作台成功",
+          "manual_verification": "Playwright 本地烟测"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "洞察选题列表与筛选",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A2",
+        "specs/2026-06-20-admin-workbench-insight-topics-prd.md#3.2-洞察选题池"
+      ],
+      "acceptance_ids": ["A2"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_insight_topics_list_and_status_update",
+          "scenario": "管理员访问洞察选题页",
+          "assertions": ["页面返回 200", "页面包含种子选题", "状态筛选入口存在"],
+          "expected": "每日选题列表可查看",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F2-001",
+          "target": "/admin/insights/topics",
+          "scenario": "浏览器打开洞察选题池",
+          "assertions": ["页面文本包含洞察文章选题", "选题卡片可见"],
+          "expected": "选题池真实渲染成功",
+          "manual_verification": "Playwright 本地烟测"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "选题一键导入上传",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A3",
+        "specs/2026-06-20-admin-workbench-insight-topics-spec.md#导入-Markdown-模板"
+      ],
+      "acceptance_ids": ["A3"],
+      "risk": "P1",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_import_topic_prefills_upload_markdown",
+          "scenario": "POST 导入选题并跟随跳转",
+          "assertions": ["上传页出现导入提示", "Markdown 源码模式被选中", "正文包含洞察选题和写作角度"],
+          "expected": "选题可进入上传生成链路",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F3-001",
+          "target": "/admin/upload?insight_topic=<id>",
+          "scenario": "浏览器点击一键导入后进入上传页",
+          "assertions": ["#content 可见", "#content value 包含 ## 洞察选题"],
+          "expected": "上传页预填可被用户继续提交",
+          "manual_verification": "Playwright 本地烟测"
+        }
+      ],
+      "regression_cases": [
+        {
+          "id": "RG-F3-001",
+          "target": "tests/test_upload_rewrite_rate.py",
+          "scenario": "未带 insight_topic 的上传页和上传草稿流程",
+          "assertions": ["AI 改写率控件仍存在", "上传草稿仍能持久化 rewrite_rate"],
+          "expected": "原上传主流程不回归",
+          "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "name": "选题状态打标持久化",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A4",
+        "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md#2.1-app/insight_topics.py"
+      ],
+      "acceptance_ids": ["A4"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_insight_topics_list_and_status_update",
+          "scenario": "POST 状态更新",
+          "assertions": ["JSON 文件中对应 topic status 变为 selected"],
+          "expected": "状态变更可持久化",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F5",
+      "name": "后台权限隔离",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A5",
+        "specs/2026-06-20-admin-workbench-insight-topics-prd.md#2-用户角色"
+      ],
+      "acceptance_ids": ["A5"],
+      "risk": "P1",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_non_admin_workbench_redirects_to_account",
+          "scenario": "普通登录用户访问工作台",
+          "assertions": ["响应 302", "跳转到 /admin/account"],
+          "expected": "普通用户不能进入 Admin 工作台",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RG-F5-001",
+          "target": "tests/test_public_article_homepage.py",
+          "scenario": "普通用户访问文章后台列表",
+          "assertions": ["继续使用公共文章页和 PolaUUH 用户中心", "不暴露上传入口"],
+          "expected": "既有普通用户隔离逻辑不回归",
+          "command": ".venv/bin/python -m pytest tests/test_public_article_homepage.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F6",
+      "name": "钉钉底料授权限制说明",
+      "source_refs": [
+        "requirements/2026-06-20-admin-workbench-insight-topics.md#A6",
+        "specs/2026-06-20-admin-workbench-insight-topics-prd.md#4-异常与空态"
+      ],
+      "acceptance_ids": ["A6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F6-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_admin_workbench_shows_core_modules",
+          "scenario": "工作台展示钉钉底料入口和说明",
+          "assertions": ["页面包含钉钉底料链接", "页面包含登录授权限制提示"],
+          "expected": "用户理解当前底料来源与限制",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F6-001",
+          "target": "https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space",
+          "scenario": "服务端探测钉钉文档访问状态",
+          "assertions": ["curl -I 返回 OAuth 跳转或登录相关响应"],
+          "expected": "不把未授权空响应当作真实底料",
+          "manual_verification": "curl -L --max-time 12 -I AliDocs URL"
+        }
+      ],
+      "regression_cases": []
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F3-001", "IT-F3-001", "RG-F3-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F4-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F5-001", "RG-F5-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F6-001", "IT-F6-001"]}
+  ]
+}

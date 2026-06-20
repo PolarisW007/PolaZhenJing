@@ -271,11 +271,13 @@
   {% set should_show_admin_nav = show_admin_nav if show_admin_nav is defined else session.get('role') == 'admin' %}
   {% if should_show_admin_nav %}
   <nav class="admin-nav">
-    <a href="{{ url_for('uploader.upload') }}" class="admin-nav-logo">{% block nav_logo %}PolaZhenjing 管理后台{% endblock %}</a>
+    <a href="{{ url_for('admin_workbench.workbench') }}" class="admin-nav-logo">{% block nav_logo %}PolaZhenjing 管理后台{% endblock %}</a>
     <ul class="admin-nav-links">
       {% if session.get('user_id') %}
+      <li><a href="{{ url_for('admin_workbench.workbench') }}">工作台</a></li>
       <li><a href="{{ url_for('uploader.upload') }}">上传</a></li>
       <li><a href="{{ url_for('uploader.articles') }}">文章</a></li>
+      <li><a href="{{ url_for('admin_workbench.insight_topics') }}">选题</a></li>
       <li><a href="{{ url_for('social_publish.index') }}">发布</a></li>
       <li><a href="{{ url_for('skillhub.index') }}">Skills</a></li>
       <li><a href="{{ url_for('agent_admin.memory_workbench') }}">小王记忆</a></li>

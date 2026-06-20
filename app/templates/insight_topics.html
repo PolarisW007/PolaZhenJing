@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}洞察选题{% endblock %}
+{% block card_class %}card-full insight-card{% endblock %}
+{% block head_extra %}
+<style>
+  .card.insight-card {
+    width: min(1180px, calc(100vw - 3rem));
+    max-width: min(1180px, calc(100vw - 3rem)) !important;
+  }
+  .insight-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+  .insight-header h2 {
+    text-align: left;
+    margin-bottom: 0.35rem;
+  }
+  .insight-header p,
+  .topic-meta,
+  .topic-summary {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.65;
+  }
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .filter-pill {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    border: 1px solid var(--text-ghost);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+  }
+  .filter-pill.active {
+    color: var(--gold-primary);
+    border-color: rgba(228,191,122,0.45);
+    background: rgba(228,191,122,0.08);
+  }
+  .topics-table {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .topic-card {
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.035);
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 270px;
+    gap: 1rem;
+  }
+  .topic-card h3 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.45rem;
+  }
+  .topic-angle {
+    color: var(--text-secondary);
+    margin: 0.65rem 0;
+    line-height: 1.7;
+  }
+  .topic-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+  }
+  .topic-tag {
+    border: 1px solid rgba(228,191,122,0.22);
+    color: var(--gold-primary);
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+  }
+  .topic-actions {
+    display: grid;
+    gap: 0.65rem;
+    align-content: start;
+  }
+  .topic-actions select {
+    width: 100%;
+  }
+  .inline-form {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .inline-form .btn-ghost,
+  .topic-actions .btn-gold {
+    width: 100%;
+  }
+  @media (max-width: 860px) {
+    .insight-header,
+    .topic-card {
+      display: block;
+    }
+    .topic-actions {
+      margin-top: 0.9rem;
+    }
+    .inline-form {
+      display: grid;
+    }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="insight-header">
+  <div>
+    <h2>洞察文章选题</h2>
+    <p>每日选题池。当前钉钉底料需要登录授权，后台先保留来源链接并以本地状态池管理。</p>
+  </div>
+  <div class="module-actions">
+    <a class="btn-ghost" href="{{ url_for('admin_workbench.workbench') }}">返回工作台</a>
+    <a class="btn-ghost" href="{{ alidocs_source_url }}" target="_blank" rel="noopener">打开钉钉底料</a>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <a class="filter-pill {{ 'active' if not selected_status else '' }}" href="{{ url_for('admin_workbench.insight_topics') }}">全部 <strong>{{ topic_counts.total }}</strong></a>
+  {% for status, label in topic_statuses.items() %}
+  <a class="filter-pill {{ 'active' if selected_status == status else '' }}" href="{{ url_for('admin_workbench.insight_topics', status=status) }}">{{ label }} <strong>{{ topic_counts.get(status, 0) }}</strong></a>
+  {% endfor %}
+</div>
+
+<div class="topics-table">
+  {% for topic in topics %}
+  <article class="topic-card">
+    <div>
+      <div class="topic-meta">{{ topic.date }} · {{ topic_statuses.get(topic.status, topic.status) }}</div>
+      <h3>{{ topic.title }}</h3>
+      <div class="topic-angle">{{ topic.angle }}</div>
+      <p class="topic-summary">{{ topic.summary }}</p>
+      <div class="topic-tags">
+        {% for tag in topic.tags %}
+        <span class="topic-tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="topic-actions">
+      <form class="inline-form" method="post" action="{{ url_for('admin_workbench.update_insight_topic_status', topic_id=topic.id) }}">
+        <select name="status" class="form-input">
+          {% for status, label in topic_statuses.items() %}
+          <option value="{{ status }}" {{ 'selected' if topic.status == status else '' }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn-ghost" type="submit">保存状态</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_workbench.import_insight_topic', topic_id=topic.id) }}">
+        <button class="btn-gold btn-sm" type="submit">一键导入上传</button>
+      </form>
+      <a class="btn-ghost" href="{{ topic.source_url }}" target="_blank" rel="noopener">查看来源</a>
+    </div>
+  </article>
+  {% else %}
+  <div class="topic-card">
+    <div>
+      <h3>暂无选题</h3>
+      <p class="topic-summary">当前筛选条件下没有选题，切回全部或从钉钉底料补充。</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

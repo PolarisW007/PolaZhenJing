@@ -48,6 +48,7 @@ from .article_repository import (
 from .auth import login_required
 from .converter import (_clean_markdown_formatting, detect_and_convert, extract_title,
                         fetch_url_as_markdown, URLFetchBlocked)
+from .insight_topics import build_upload_prefill, get_topic
 from git_safety import GitSafetyError, guarded_commit_and_push
 from . import get_db, jobs
 
@@ -1947,7 +1948,15 @@ def upload():
         session['draft_id'] = draft_id
         return redirect(url_for('uploader.style_select'))
 
-    return render_template('upload.html')
+    insight_prefill = None
+    insight_topic_id = request.args.get('insight_topic', '').strip()
+    if insight_topic_id:
+        topic = get_topic(insight_topic_id)
+        if topic:
+            insight_prefill = build_upload_prefill(topic)
+        else:
+            flash('洞察选题不存在，已进入普通上传模式。', 'warning')
+    return render_template('upload.html', insight_prefill=insight_prefill)
 
 
 @uploader_bp.route('/upload/media', methods=['POST'])

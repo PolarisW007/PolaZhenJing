@@ -1,0 +1,177 @@
+{
+  "status": "ready_for_release",
+  "mode": "ship_ready",
+  "slug": "admin-workbench-insight-topics",
+  "updated_at": "2026-06-20T11:08:00+08:00",
+  "stages": [
+    {
+      "name": "project-context",
+      "status": "done",
+      "artifact": "AGENTS.md, docs/pola/project-knowledge/README.md, app/__init__.py, app/uploader.py",
+      "evidence": "Existing Flask app, admin blueprint, upload route and template inspected",
+      "blockers": [],
+      "updated_at": "2026-06-20T09:35:00+08:00"
+    },
+    {
+      "name": "requirement-analysis",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "evidence": "Acceptance criteria A1-A6",
+      "blockers": [],
+      "updated_at": "2026-06-20T10:08:00+08:00"
+    },
+    {
+      "name": "architecture",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "evidence": "JSON storage, admin blueprint, upload prefill data flow documented",
+      "blockers": [],
+      "updated_at": "2026-06-20T10:08:00+08:00"
+    },
+    {
+      "name": "spec",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/specs/2026-06-20-admin-workbench-insight-topics-spec.md",
+      "evidence": "Routes, status enum, data structure and Markdown template specified",
+      "blockers": [],
+      "updated_at": "2026-06-20T10:08:00+08:00"
+    },
+    {
+      "name": "implementation",
+      "status": "done",
+      "artifact": "app/admin_workbench.py, app/insight_topics.py, templates, upload prefill changes",
+      "evidence": "Code diff maps to A1-A6",
+      "blockers": [],
+      "updated_at": "2026-06-20T10:08:00+08:00"
+    },
+    {
+      "name": "review",
+      "status": "done",
+      "artifact": "self-review",
+      "evidence": "Fixed import prefill status to use updated imported topic",
+      "blockers": [],
+      "updated_at": "2026-06-20T10:08:00+08:00"
+    },
+    {
+      "name": "test",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/delivery/admin-workbench-insight-topics/function_test_cases.json, test_matrix.json",
+      "evidence": "15 pytest cases passed, py_compile passed, function test cases harness passed, Pola skill harness passed",
+      "blockers": [],
+      "updated_at": "2026-06-20T11:08:00+08:00"
+    },
+    {
+      "name": "integration-regression",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/delivery/admin-workbench-insight-topics/regression_evidence.json",
+      "evidence": "Playwright smoke verified workbench, topics and upload prefill with temp topic data; import prefill includes imported status",
+      "blockers": [],
+      "updated_at": "2026-06-20T11:08:00+08:00"
+    },
+    {
+      "name": "release",
+      "status": "partial",
+      "artifact": "docs/pola/project-knowledge/devlogs/2026-06-20-admin-workbench-insight-topics.md",
+      "evidence": "Release runbook not executed; production deployment requires explicit user confirmation",
+      "blockers": ["not deployed"],
+      "updated_at": "2026-06-20T11:08:00+08:00"
+    },
+    {
+      "name": "git-finalization",
+      "status": "partial",
+      "artifact": "git status",
+      "evidence": "Working tree has unrelated existing _posts changes; commit not requested in this turn",
+      "blockers": ["commit not requested", "unrelated dirty _posts present"],
+      "updated_at": "2026-06-20T11:08:00+08:00"
+    }
+  ],
+  "acceptance_coverage": [
+    {
+      "acceptance_id": "A1",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "app/admin_workbench.py; app/templates/admin_workbench.html",
+      "review": "self-review",
+      "tests": ["UT-F1-001", "IT-F1-001"],
+      "regression": ["RG-PATH-1"],
+      "release": "release pending explicit deployment request"
+    },
+    {
+      "acceptance_id": "A2",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "app/admin_workbench.py; app/templates/insight_topics.html",
+      "review": "self-review",
+      "tests": ["UT-F2-001", "IT-F2-001"],
+      "regression": ["RG-PATH-2"],
+      "release": "release pending explicit deployment request"
+    },
+    {
+      "acceptance_id": "A3",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "app/insight_topics.py; app/uploader.py; app/templates/upload.html",
+      "review": "self-review fixed imported status prefill",
+      "tests": ["UT-F3-001", "IT-F3-001", "RG-F3-001"],
+      "regression": ["RG-PATH-3"],
+      "release": "release pending explicit deployment request"
+    },
+    {
+      "acceptance_id": "A4",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "app/insight_topics.py; data/insight_topics.json",
+      "review": "self-review",
+      "tests": ["UT-F4-001"],
+      "regression": [],
+      "release": "release pending explicit deployment request"
+    },
+    {
+      "acceptance_id": "A5",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "app/admin_workbench.py",
+      "review": "self-review",
+      "tests": ["UT-F5-001", "RG-F5-001"],
+      "regression": [],
+      "release": "release pending explicit deployment request"
+    },
+    {
+      "acceptance_id": "A6",
+      "requirement": "requirements/2026-06-20-admin-workbench-insight-topics.md",
+      "architecture": "architecture/2026-06-20-admin-workbench-insight-topics-sdd.md",
+      "implementation": "templates include source link and auth limitation copy",
+      "review": "self-review",
+      "tests": ["UT-F6-001", "IT-F6-001"],
+      "regression": [],
+      "release": "release pending explicit deployment request"
+    }
+  ],
+  "dirty_worktree_ledger": [
+    {
+      "path": "_posts/*.md",
+      "reason": "Existing unrelated dirty article files before this task; not touched for workbench delivery",
+      "include_in_commit": false
+    },
+    {
+      "path": ".qoder/skills/",
+      "reason": "Existing untracked local tool directory; unrelated",
+      "include_in_commit": false
+    },
+    {
+      "path": "tmp/",
+      "reason": "Existing untracked local temporary directory; unrelated",
+      "include_in_commit": false
+    },
+    {
+      "path": "app/admin_workbench.py, app/insight_topics.py, templates, docs, tests, data/insight_topics.json",
+      "reason": "This task implementation and evidence",
+      "include_in_commit": true
+    }
+  ],
+  "security_checks": {
+    "diff_check": "git diff --check passed",
+    "secret_scan": "No token/cookie/private key added; AliDocs URL is public source link only",
+    "sensitive_output_handling": "No OAuth cookie, token, or .env content printed or persisted"
+  }
+}
