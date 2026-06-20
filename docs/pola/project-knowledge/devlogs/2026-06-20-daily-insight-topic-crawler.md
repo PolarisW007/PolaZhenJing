@@ -59,7 +59,7 @@
 
 ## Commit 状态
 
-- 尚未提交。
+- 实现提交：`c4bf339 feat(admin): refresh insight topics from online signals`。
 
 ## 云端发布
 
