@@ -1,0 +1,133 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-crawler.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-prd.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-crawler-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "线上信号刷新入口",
+      "source_refs": ["requirements/2026-06-20-daily-insight-topic-crawler.md#A2", "specs/2026-06-20-daily-insight-topic-crawler-spec.md#1-路由"],
+      "acceptance_ids": ["A2", "A5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topics_from_online_signals_preserves_status",
+          "scenario": "管理员 POST /admin/insights/topics/refresh",
+          "assertions": ["返回刷新成功提示", "last_refresh 写入 source_counts", "页面展示新生成选题"],
+          "expected": "选题池可从线上信号刷新",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "app.insight_topics.refresh_topics_from_sources(days=7)",
+          "scenario": "真实网络源 smoke，临时 JSON 输出",
+          "assertions": ["PolaNews/HN/GitHub/RSS 至少一个来源返回", "生成 topic_count > 0", "每个 topic 带 evidence_links"],
+          "expected": "可从真实线上来源生成候选选题",
+          "command": "临时 JSON 调用 app.insight_topics.refresh_topics_from_sources(days=7)"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "PolaNews 与外部公开源采集",
+      "source_refs": ["requirements/2026-06-20-daily-insight-topic-crawler.md#A2", "architecture/2026-06-20-daily-insight-topic-crawler-sdd.md#3-数据流"],
+      "acceptance_ids": ["A2", "A3"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topics_from_online_signals_preserves_status",
+          "scenario": "monkeypatch 模拟 PolaNews 与 GitHub 信号",
+          "assertions": ["source_type/source_count/score/evidence_links 写入 JSON"],
+          "expected": "采集结果被归一化成可展示选题",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "刷新保留人工状态",
+      "source_refs": ["requirements/2026-06-20-daily-insight-topic-crawler.md#A4", "specs/2026-06-20-daily-insight-topic-crawler-spec.md#4-刷新合并规则"],
+      "acceptance_ids": ["A4"],
+      "risk": "P1",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topics_from_online_signals_preserves_status",
+          "scenario": "先把选题标记为 selected，再刷新同源同标题信号",
+          "assertions": ["status 仍为 selected", "source_url 重复时不串状态"],
+          "expected": "刷新不破坏运营状态",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RG-F3-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topics_from_online_signals_preserves_status",
+          "scenario": "默认种子选题共用钉钉 source_url，刷新同源同标题信号",
+          "assertions": ["按 source_url + title 优先匹配", "selected 状态不转移到其他种子选题"],
+          "expected": "刷新不会破坏历史人工打标",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "name": "证据导入上传",
+      "source_refs": ["requirements/2026-06-20-daily-insight-topic-crawler.md#A6", "specs/2026-06-20-daily-insight-topic-crawler-spec.md#6-导入上传模板"],
+      "acceptance_ids": ["A6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topic_import_includes_evidence_links",
+          "scenario": "刷新生成 HN 选题后一键导入上传",
+          "assertions": ["Markdown 包含来源类型", "Markdown 包含 ## 证据链接", "证据 URL 可见"],
+          "expected": "文章生成底料包含真实证据",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F5",
+      "name": "旧工作台与筛选不回归",
+      "source_refs": ["requirements/2026-06-20-daily-insight-topic-crawler.md#A7", "requirements/2026-06-20-daily-insight-topic-crawler.md#A8"],
+      "acceptance_ids": ["A7", "A8"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "tests/test_admin_workbench_insight_topics.py",
+          "scenario": "工作台、列表、状态更新、导入、非管理员隔离",
+          "assertions": ["6 个测试全部通过"],
+          "expected": "既有管理链路不回归",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F5-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "IT-F1-001", "UT-F2-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F3-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F4-001"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F5-001"]},
+    {"acceptance_id": "A8", "case_ids": ["UT-F5-001"]}
+  ]
+}

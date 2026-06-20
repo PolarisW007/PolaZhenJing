@@ -1,0 +1,60 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/daily-insight-topic-crawler/function_test_cases.json",
+  "commands": [
+    {
+      "id": "T1",
+      "command": "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Python syntax for insight crawler and admin route changes",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "语法检查通过"
+    },
+    {
+      "id": "T2",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Admin insight topics unit/integration tests",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "6 passed"
+    },
+    {
+      "id": "T3",
+      "command": "临时 JSON 真实网络 smoke：refresh_topics_from_sources(days=7)",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "PolaNews + Hacker News + GitHub + RSS live source collection",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "signals=136, topics=24, source_counts={polanews:60,hackernews:46,github:19,rss:11}, errors=[]"
+    },
+    {
+      "id": "T4",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-crawler.md --prd docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-prd.md --sdd docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-crawler-sdd.md --spec docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-spec.md --cases docs/pola/project-knowledge/delivery/daily-insight-topic-crawler/function_test_cases.json",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "A2A function test case coverage harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: function test cases cover 8 documented acceptance id(s), 5 feature(s), 7 case(s)."
+    },
+    {
+      "id": "T5",
+      "command": "git diff --check",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Whitespace and patch hygiene",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "通过"
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F5-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "IT-F1-001", "UT-F2-001"], "commands": ["T2", "T3", "T4"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001"], "commands": ["T2", "T3", "T4"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F3-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F1-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F4-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F5-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A8", "case_ids": ["UT-F5-001"], "commands": ["T2", "T4"]}
+  ]
+}

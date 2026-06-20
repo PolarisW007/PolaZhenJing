@@ -1,0 +1,59 @@
+{
+  "name": "每日选题线上信号抓取",
+  "slug": "daily-insight-topic-crawler",
+  "status": "deployed",
+  "risk_level": "P2",
+  "updated_at": "2026-06-20",
+  "steps": [
+    {
+      "name": "需求与边界",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-crawler.md"
+    },
+    {
+      "name": "PRD / SPEC",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-prd.md; docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-crawler-spec.md"
+    },
+    {
+      "name": "SDD / 架构参考",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-crawler-sdd.md; docs/pola/arch-reference.md"
+    },
+    {
+      "name": "实现",
+      "status": "done",
+      "artifact": "app/insight_topics.py; app/admin_workbench.py; app/templates/insight_topics.html; app/templates/admin_workbench.html"
+    },
+    {
+      "name": "测试",
+      "status": "done",
+      "artifact": "tests/test_admin_workbench_insight_topics.py; docs/pola/project-knowledge/delivery/daily-insight-topic-crawler/"
+    }
+  ],
+  "implemented": [
+    "新增 PolaNews 多关键词 search 采集，避免只取全站最新流。",
+    "新增 Hacker News、GitHub Search、公开 RSS 采集。",
+    "新增相关性过滤，避免 train 等英文单词内部误命中 AI。",
+    "新增 signals_to_topics 聚合与评分，每条选题带 evidence_links。",
+    "新增 refresh 路由和页面刷新面板。",
+    "刷新合并保留 selected/imported/archived 状态，并修复同 source_url 多种子选题状态串线风险。",
+    "一键导入上传时带来源类型、来源数量、评分和证据链接。"
+  ],
+  "validation": [
+    "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+    "临时 JSON 真实网络 smoke：signals=136, topics=24, errors=[]",
+    "validate_function_test_cases.py: PASS, cover 8 acceptance ids / 5 features / 7 cases",
+    "git diff --check: pass",
+    "cloud py_compile: pass",
+    "cloud pytest tests/test_admin_workbench_insight_topics.py: 6 passed",
+    "cloud live-source smoke: signals=132, topics=24, errors=[]",
+    "cloud function test cases harness: PASS",
+    "cloud polazj.service: active",
+    "cloud smoke: login=200, protected admin routes=302, authenticated workbench/topics=200"
+  ],
+  "pending": [
+    "无"
+  ]
+}

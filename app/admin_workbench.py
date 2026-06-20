@@ -7,11 +7,15 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 from .auth import login_required
 from .insight_topics import (
     ALIDOCS_SOURCE_URL,
+    ALLOWED_REFRESH_DAYS,
+    DEFAULT_REFRESH_DAYS,
     TOPIC_STATUSES,
     build_upload_prefill,
+    get_last_refresh,
     get_topic,
     load_topics,
     mark_topic_imported,
+    refresh_topics_from_sources,
     topic_counts,
     update_topic_status,
 )
@@ -77,6 +81,7 @@ def workbench():
         topic_counts=topic_counts(topics),
         topic_statuses=TOPIC_STATUSES,
         alidocs_source_url=ALIDOCS_SOURCE_URL,
+        last_refresh=get_last_refresh(),
     )
 
 
@@ -98,7 +103,38 @@ def insight_topics():
         topic_statuses=TOPIC_STATUSES,
         selected_status=status,
         alidocs_source_url=ALIDOCS_SOURCE_URL,
+        last_refresh=get_last_refresh(),
+        refresh_days_options=ALLOWED_REFRESH_DAYS,
+        default_refresh_days=DEFAULT_REFRESH_DAYS,
     )
+
+
+@admin_workbench_bp.route("/insights/topics/refresh", methods=["POST"])
+@login_required
+def refresh_insight_topics():
+    blocked = _require_admin_redirect()
+    if blocked:
+        return blocked
+    try:
+        days = int(request.form.get("days", DEFAULT_REFRESH_DAYS))
+    except (TypeError, ValueError):
+        days = DEFAULT_REFRESH_DAYS
+    if days not in ALLOWED_REFRESH_DAYS:
+        days = DEFAULT_REFRESH_DAYS
+    result = refresh_topics_from_sources(days=days)
+    last_refresh = result.get("last_refresh") or {}
+    topic_count = int(last_refresh.get("topic_count") or 0)
+    signal_count = int(last_refresh.get("signal_count") or 0)
+    errors = result.get("errors") or []
+    if topic_count:
+        flash(f"已从线上信号刷新 {topic_count} 个选题，采集到 {signal_count} 条信号。", "success")
+    elif signal_count:
+        flash("已采集线上信号，但本轮没有生成新的可用选题。", "warning")
+    else:
+        flash("本轮没有采集到可用线上信号，已保留现有选题池。", "warning")
+    if errors:
+        flash("部分来源抓取失败：" + "；".join(str(error) for error in errors[:3]), "warning")
+    return redirect(url_for("admin_workbench.insight_topics"))
 
 
 @admin_workbench_bp.route("/insights/topics/<topic_id>/status", methods=["POST"])

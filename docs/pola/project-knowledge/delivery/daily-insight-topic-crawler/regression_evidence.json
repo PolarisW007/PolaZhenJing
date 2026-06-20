@@ -1,0 +1,42 @@
+{
+  "feature": "daily-insight-topic-crawler",
+  "date": "2026-06-20",
+  "risk_level": "P2",
+  "evidence": [
+    {
+      "id": "EV1",
+      "type": "unit",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "result": "pass: 6 passed",
+      "notes": "覆盖工作台、列表、状态更新、刷新、状态保留、证据导入和非管理员隔离。"
+    },
+    {
+      "id": "EV2",
+      "type": "syntax",
+      "command": "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "result": "pass",
+      "notes": "后台模块语法检查通过。"
+    },
+    {
+      "id": "EV3",
+      "type": "live-source-smoke",
+      "command": "临时 JSON 调用 refresh_topics_from_sources(days=7)",
+      "result": "pass: signals=136, topics=24, errors=[]",
+      "notes": "source_counts={polanews:60,hackernews:46,github:19,rss:11}; 样例包含 NousResearch/hermes-agent、OpenCLI、AI生成和人类写作、Google AI 人才等。"
+    }
+  ],
+  "non_regression_paths": [
+    "/admin/workbench 仍显示核心模块入口",
+    "/admin/insights/topics 仍支持状态筛选和状态保存",
+    "/admin/insights/topics/<topic_id>/import 仍跳转上传页并预填 Markdown",
+    "普通用户访问 /admin/workbench 仍跳转 /admin/account",
+    "未手动刷新时继续读取现有 data/insight_topics.json"
+  ],
+  "safety_notes": [
+    "本次不新增定时任务，不会后台自动抓取外部站点。",
+    "真实网络 smoke 使用 /tmp/pzj-insight-topics-live-smoke.json，未污染正式 data/insight_topics.json。",
+    "每次 HTTP 请求设置 8 秒超时，分源失败隔离。",
+    "选题必须带 evidence_links，不生成无来源选题。",
+    "未提交任何 token、cookie、私钥或 .env。"
+  ]
+}

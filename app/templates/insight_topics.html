@@ -31,6 +31,59 @@
     gap: 0.6rem;
     margin-bottom: 1rem;
   }
+  .refresh-panel {
+    border: 1px solid rgba(228,191,122,0.18);
+    border-radius: var(--radius-lg);
+    background: rgba(228,191,122,0.055);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+  }
+  .refresh-panel h3 {
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    margin-bottom: 0.35rem;
+  }
+  .refresh-panel p,
+  .refresh-meta,
+  .evidence-list {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
+  .refresh-form {
+    display: flex;
+    gap: 0.55rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .refresh-form select {
+    min-width: 110px;
+  }
+  .topic-source-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.65rem;
+  }
+  .source-pill {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    color: var(--text-muted);
+    padding: 0.2rem 0.48rem;
+    font-size: 0.72rem;
+  }
+  .evidence-list {
+    margin-top: 0.65rem;
+    display: grid;
+    gap: 0.2rem;
+  }
+  .evidence-list a {
+    color: var(--gold-primary);
+  }
   .filter-pill {
     display: inline-flex;
     gap: 0.4rem;
@@ -100,8 +153,13 @@
   }
   @media (max-width: 860px) {
     .insight-header,
+    .refresh-panel,
     .topic-card {
       display: block;
+    }
+    .refresh-form {
+      justify-content: flex-start;
+      margin-top: 0.85rem;
     }
     .topic-actions {
       margin-top: 0.9rem;
@@ -116,13 +174,42 @@
 <div class="insight-header">
   <div>
     <h2>洞察文章选题</h2>
-    <p>每日选题池。当前钉钉底料需要登录授权，后台先保留来源链接并以本地状态池管理。</p>
+    <p>每日选题池。现在从 PolaNews 和公开线上信号生成，钉钉底料保留为人工参考来源。</p>
   </div>
   <div class="module-actions">
     <a class="btn-ghost" href="{{ url_for('admin_workbench.workbench') }}">返回工作台</a>
     <a class="btn-ghost" href="{{ alidocs_source_url }}" target="_blank" rel="noopener">打开钉钉底料</a>
   </div>
 </div>
+
+<section class="refresh-panel">
+  <div>
+    <h3>线上信号刷新</h3>
+    <p>PolaNews 负责站内周期新闻，Hacker News、GitHub 和公开 RSS 作为外部信号补充；失败源会记录但不影响现有选题。</p>
+    {% if last_refresh %}
+    <div class="refresh-meta">
+      最近刷新：{{ last_refresh.refreshed_at }} · 周期 {{ last_refresh.days }} 天 · 信号 {{ last_refresh.signal_count }} 条 · 选题 {{ last_refresh.topic_count }} 个
+      {% if last_refresh.source_counts %}
+      · 来源
+      {% for name, count in last_refresh.source_counts.items() %}
+        {{ name }}={{ count }}
+      {% endfor %}
+      {% endif %}
+      {% if last_refresh.errors %}
+      <br>部分失败：{{ last_refresh.errors[:3]|join('；') }}
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <form class="refresh-form" method="post" action="{{ url_for('admin_workbench.refresh_insight_topics') }}">
+    <select name="days" class="form-input">
+      {% for days in refresh_days_options %}
+      <option value="{{ days }}" {{ 'selected' if days == default_refresh_days else '' }}>{{ days }} 天</option>
+      {% endfor %}
+    </select>
+    <button class="btn-gold btn-sm" type="submit">刷新线上选题</button>
+  </form>
+</section>
 
 <div class="filter-bar">
   <a class="filter-pill {{ 'active' if not selected_status else '' }}" href="{{ url_for('admin_workbench.insight_topics') }}">全部 <strong>{{ topic_counts.total }}</strong></a>
@@ -139,6 +226,18 @@
       <h3>{{ topic.title }}</h3>
       <div class="topic-angle">{{ topic.angle }}</div>
       <p class="topic-summary">{{ topic.summary }}</p>
+      <div class="topic-source-line">
+        <span class="source-pill">来源：{{ topic.source_type }}</span>
+        <span class="source-pill">证据 {{ topic.source_count }}</span>
+        <span class="source-pill">评分 {{ topic.score }}</span>
+      </div>
+      {% if topic.evidence_links %}
+      <div class="evidence-list">
+        {% for link in topic.evidence_links[:3] %}
+        <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.source }} · {{ link.title }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
       <div class="topic-tags">
         {% for tag in topic.tags %}
         <span class="topic-tag">{{ tag }}</span>

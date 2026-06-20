@@ -23,6 +23,12 @@
     font-size: 0.86rem;
     line-height: 1.7;
   }
+  .topic-refresh-note {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    margin-top: 0.55rem;
+  }
   .workbench-stats,
   .workbench-grid {
     display: grid;
@@ -163,11 +169,14 @@
   </section>
   <section class="module-card">
     <h3>洞察选题</h3>
-    <p>查看每日选题、标记状态，并一键导入上传页形成洞察消息。</p>
+    <p>从 PolaNews 与公开线上信号刷新每日选题，支持状态打标并一键导入上传页形成洞察消息。</p>
     <div class="module-actions">
       <a class="btn-ghost" href="{{ url_for('admin_workbench.insight_topics') }}">每日选题</a>
       <a class="btn-ghost" href="{{ alidocs_source_url }}" target="_blank" rel="noopener">钉钉底料</a>
     </div>
+    {% if last_refresh %}
+    <div class="topic-refresh-note">最近刷新：{{ last_refresh.refreshed_at }} · {{ last_refresh.signal_count }} 条线上信号</div>
+    {% endif %}
   </section>
   <section class="module-card">
     <h3>小王记忆管理</h3>
@@ -192,7 +201,7 @@
   <h3>今日洞察选题</h3>
   <a class="btn-ghost" href="{{ url_for('admin_workbench.insight_topics') }}">完整列表</a>
 </div>
-<p class="topic-source-note">钉钉文档当前需要登录授权，后台先保留来源链接并支持人工维护选题；后续可接入钉钉开放接口自动同步。</p>
+<p class="topic-source-note">选题池支持手动刷新线上信号；钉钉文档当前需要登录授权，保留为人工底料入口。</p>
 <div class="topic-list">
   {% for topic in topics %}
   <article class="topic-row">
