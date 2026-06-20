@@ -1,8 +1,8 @@
 {
-  "status": "ready_for_release",
+  "status": "deployed",
   "mode": "ship_ready",
   "slug": "admin-workbench-insight-topics",
-  "updated_at": "2026-06-20T11:08:00+08:00",
+  "updated_at": "2026-06-20T12:38:00+08:00",
   "stages": [
     {
       "name": "project-context",
@@ -70,19 +70,19 @@
     },
     {
       "name": "release",
-      "status": "partial",
+      "status": "done",
       "artifact": "docs/pola/project-knowledge/devlogs/2026-06-20-admin-workbench-insight-topics.md",
-      "evidence": "Release runbook not executed; production deployment requires explicit user confirmation",
-      "blockers": ["not deployed"],
-      "updated_at": "2026-06-20T11:08:00+08:00"
+      "evidence": "Released to /PolaZhenjing via exact rsync; backup /opt/backups/polazj-admin-workbench-insights-20260620122554; polazj.service active; public and authenticated smoke passed",
+      "blockers": [],
+      "updated_at": "2026-06-20T12:38:00+08:00"
     },
     {
       "name": "git-finalization",
-      "status": "partial",
+      "status": "done",
       "artifact": "git status",
-      "evidence": "Working tree has unrelated existing _posts changes; commit not requested in this turn",
-      "blockers": ["commit not requested", "unrelated dirty _posts present"],
-      "updated_at": "2026-06-20T11:08:00+08:00"
+      "evidence": "Commit 83d58a1 pushed to origin/main; unrelated local and cloud _posts dirty changes left untouched",
+      "blockers": [],
+      "updated_at": "2026-06-20T12:38:00+08:00"
     }
   ],
   "acceptance_coverage": [
@@ -94,7 +94,7 @@
       "review": "self-review",
       "tests": ["UT-F1-001", "IT-F1-001"],
       "regression": ["RG-PATH-1"],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     },
     {
       "acceptance_id": "A2",
@@ -104,7 +104,7 @@
       "review": "self-review",
       "tests": ["UT-F2-001", "IT-F2-001"],
       "regression": ["RG-PATH-2"],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     },
     {
       "acceptance_id": "A3",
@@ -114,7 +114,7 @@
       "review": "self-review fixed imported status prefill",
       "tests": ["UT-F3-001", "IT-F3-001", "RG-F3-001"],
       "regression": ["RG-PATH-3"],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     },
     {
       "acceptance_id": "A4",
@@ -124,7 +124,7 @@
       "review": "self-review",
       "tests": ["UT-F4-001"],
       "regression": [],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     },
     {
       "acceptance_id": "A5",
@@ -134,7 +134,7 @@
       "review": "self-review",
       "tests": ["UT-F5-001", "RG-F5-001"],
       "regression": [],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     },
     {
       "acceptance_id": "A6",
@@ -144,7 +144,7 @@
       "review": "self-review",
       "tests": ["UT-F6-001", "IT-F6-001"],
       "regression": [],
-      "release": "release pending explicit deployment request"
+      "release": "deployed via exact rsync; public and authenticated smoke passed"
     }
   ],
   "dirty_worktree_ledger": [

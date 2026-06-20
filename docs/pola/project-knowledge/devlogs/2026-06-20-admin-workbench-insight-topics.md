@@ -66,4 +66,10 @@
 
 ## Commit 状态
 
-尚未提交。
+已提交并发布：
+
+- Commit：`83d58a1 feat(admin): add workbench insight topic workflow`。
+- Push：`origin/main` 已更新。
+- 云端发布：采用精确 rsync 同步到 `/PolaZhenjing`，备份目录 `/opt/backups/polazj-admin-workbench-insights-20260620122554`。
+- 云端验证：py_compile、相关 pytest、function cases harness、服务重启、公网 smoke、认证态 Flask smoke 均通过。
+- 备注：云端仓库存在既有 `_posts` 和 `.gitignore` 脏改动，未执行 `git pull`；发布范围文件已同步为本次 commit 内容。

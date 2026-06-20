@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "environment": "local Flask app + Playwright Chromium, Python venv test runner",
+  "environment": "local Flask app + Playwright Chromium, Python venv test runner; production /PolaZhenjing after rsync deploy",
   "validated_paths": [
     {
       "id": "RG-PATH-1",
@@ -31,6 +31,26 @@
       "screenshots": [],
       "console_errors": [],
       "network_failures": []
+    },
+    {
+      "id": "RG-PATH-4",
+      "entry": "https://aipd.me/PolaZhenjing/admin/workbench",
+      "viewport": "production HTTP",
+      "steps": ["公网未登录访问后台工作台", "检查重定向位置"],
+      "result": "pass: 302 to /PolaZhenjing/admin/login",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
+    },
+    {
+      "id": "RG-PATH-5",
+      "entry": "cloud Flask authenticated smoke",
+      "viewport": "server test client with X-Script-Name /PolaZhenjing",
+      "steps": ["访问 /admin/workbench", "访问 /admin/insights/topics", "POST 一键导入", "验证上传页预填"],
+      "result": "pass: workbench/topics/upload 200; import redirects to prefixed upload URL; prefill contains ## 洞察选题 and 状态：已导入",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
     }
   ],
   "validated_ids": ["A1", "A2", "A3", "A4", "A5", "A6"],
@@ -46,10 +66,16 @@
     "validate_function_test_cases.py => PASS: 6 acceptance ids, 6 features, 12 cases",
     "validate_pola_skills.py => PASS: Pola skill harness found no issues",
     "Playwright smoke used temporary insight_topics.json to avoid mutating production seed data",
-    "curl -L --max-time 12 -I AliDocs URL => OAuth/login response, confirmed server-side unauthenticated limitation"
+    "curl -L --max-time 12 -I AliDocs URL => OAuth/login response, confirmed server-side unauthenticated limitation",
+    "production deploy backup => /opt/backups/polazj-admin-workbench-insights-20260620122554",
+    "production py_compile => pass; production pytest subset => 15 passed; production function cases harness => pass",
+    "production systemctl is-active polazj.service => active",
+    "production public smoke => admin pages 302 to login, public article 200",
+    "production authenticated smoke => cloud flask smoke ok",
+    "production data cleanup => rsynced seed data/insight_topics.json back; all default topic statuses are new"
   ],
   "risks": [
     "钉钉文档自动同步未实现，后续需接入钉钉开放接口或授权凭据",
-    "本轮未执行生产部署"
+    "云端仓库存在既有 _posts 和 .gitignore 脏改动，本轮采用精确 rsync 发布而非 git pull"
   ]
 }
