@@ -1,0 +1,52 @@
+{
+  "topic": "PolaZhenJing 内容生产升级 v2",
+  "sources": [
+    {
+      "source": "X",
+      "available": false,
+      "summary": "缺少授权 token，本轮未抓取原帖级讨论。",
+      "clusters": [
+        "创作者工作流自动化"
+      ],
+      "controversies": [
+        "没有原帖截图时是否允许继续立项"
+      ],
+      "links": []
+    },
+    {
+      "source": "GitHub",
+      "available": true,
+      "summary": "11 个参考项目可按能力阶段拆图。",
+      "clusters": [
+        "去 AI 味规则库",
+        "作者风格蒸馏",
+        "实时趋势研究"
+      ],
+      "controversies": [
+        "检测器只能做辅助，不能做唯一标准"
+      ],
+      "links": [
+        "https://github.com/blader/humanizer",
+        "https://github.com/mvanhorn/last30days-skill"
+      ]
+    }
+  ],
+  "clusters": [
+    "创作者工作流自动化",
+    "去 AI 味规则库",
+    "作者风格蒸馏",
+    "实时趋势研究"
+  ],
+  "controversies": [
+    "没有原帖截图时是否允许继续立项",
+    "检测器只能做辅助，不能做唯一标准"
+  ],
+  "links": [
+    "https://github.com/blader/humanizer",
+    "https://github.com/mvanhorn/last30days-skill"
+  ],
+  "missing_sources": [
+    "X"
+  ],
+  "status": "partial"
+}

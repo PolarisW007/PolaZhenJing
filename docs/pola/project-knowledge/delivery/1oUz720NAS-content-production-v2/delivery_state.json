@@ -1,0 +1,45 @@
+{
+  "record_id": "1oUz720NAS",
+  "title": "PolaZhenjing 内容生产升级 v2：实时趋势研究 + 去 AI 味规则库 + 作者风格闭环",
+  "owner": "熾駒",
+  "proposer": "超级小王",
+  "status": "in_progress",
+  "stage_status": {
+    "requirement": "completed",
+    "architecture": "completed",
+    "implementation": "completed",
+    "review": "completed",
+    "test": "completed",
+    "regression": "pending",
+    "release": "pending",
+    "wrapup": "in_progress"
+  },
+  "artifacts": {
+    "requirement": "docs/pola/project-knowledge/requirements/2026-06-20-content-production-v2.md",
+    "prd": "docs/pola/project-knowledge/specs/2026-06-20-content-production-v2-prd.md",
+    "sdd": "docs/pola/project-knowledge/architecture/2026-06-20-content-production-v2-sdd.md",
+    "devlog": "docs/pola/project-knowledge/devlogs/2026-06-20-content-production-v2.md",
+    "test_report": "docs/pola/project-knowledge/test-reports/2026-06-20-content-production-v2-test.md"
+  },
+  "acceptance": [
+    "A1 文档落地",
+    "A2 能力地图",
+    "A3 实时信号摘要",
+    "A4 去 AI 味审稿报告",
+    "A5 工程验证"
+  ],
+  "blockers": [
+    "last30days/X 等真实来源抓取与 token 接入不在本轮范围内，只输出来源缺失结构"
+  ],
+  "dirty_worktree_note": "仓库已有大量 _posts 修改和 .qoder/skills、tmp 未跟踪项，本轮不清理也不提交。",
+  "updated_at": "2026-06-20",
+  "verification": {
+    "py_compile": "passed",
+    "pytest": "4 passed",
+    "analysis_artifacts": [
+      "docs/pola/project-knowledge/analysis/2026-06-20-content-production-v2-capability-map.md",
+      "docs/pola/project-knowledge/analysis/2026-06-20-content-production-v2-signal-summary.json",
+      "docs/pola/project-knowledge/analysis/2026-06-20-content-production-v2-review.md"
+    ]
+  }
+}
