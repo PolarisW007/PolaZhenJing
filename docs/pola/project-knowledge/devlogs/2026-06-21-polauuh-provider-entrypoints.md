@@ -30,7 +30,12 @@ P2。改动影响线上登录/注册主流程，但仅新增入口展示和安�
 - `.venv/bin/python -m py_compile app/auth.py app/__init__.py`：通过。
 - `.venv/bin/python -m pytest tests/test_polauuh_provider_entrypoints.py -q`：3 passed。
 - `.venv/bin/python -m pytest tests/test_polauuh_auth.py tests/test_polauuh_provider_entrypoints.py -q`：5 passed。
-- 线上部署和 curl 验证待发布后回填。
+- 服务器 `/PolaZhenjing` Flask test client：
+  - `/admin/login?...`：200，微信、支付宝、Google、Apple、华为全部存在。
+  - `/admin/register?...`：200，微信、支付宝、Google、Apple、华为全部存在。
+- 公网 `https://aipd.me/PolaUUH/admin/login?...`：200，五个平台入口与 `/PolaUUH/admin/auth/<provider>/start` 链接全部存在。
+- 公网 `https://aipd.me/PolaUUH/admin/register?...`：200，五个平台入口与 `/PolaUUH/admin/auth/<provider>/start` 链接全部存在。
+- 公网 `https://aipd.me/PolaUUH/admin/auth/wechat/start?...`：302 到 `/PolaUUH/admin/login?...`，未配置完整授权参数时安全降级。
 
 ## 安全记录
 

@@ -25,4 +25,16 @@
 
 ## 线上验证
 
-待部署后回填。
+- 部署目标：`/PolaZhenjing`，由 Nginx 对外承载 `/PolaUUH/admin/*`。
+- 服务状态：`polazj.service` 重启后 active。
+- 服务器端 Flask test client：
+  - `/admin/login?next=...`：200，五个平台标签全部存在。
+  - `/admin/register?next=...`：200，五个平台标签全部存在。
+- 公网验证：
+  - `https://aipd.me/PolaUUH/admin/login?next=...`：200，微信、支付宝、Google、Apple、华为标签和 start 链接全部存在。
+  - `https://aipd.me/PolaUUH/admin/register?next=...`：200，微信、支付宝、Google、Apple、华为标签和 start 链接全部存在。
+  - `https://aipd.me/PolaUUH/admin/auth/wechat/start?next=...`：302，回到登录页，未出现 500。
+
+## 结论
+
+通过。线上注册页和登录页均已支持三方快捷验证入口展示；未配置完整平台授权参数时按安全兜底处理，不影响原有密码登录、邮箱注册和 SSO 回跳。
