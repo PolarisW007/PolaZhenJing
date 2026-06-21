@@ -41,3 +41,8 @@ P2。改动影响线上登录/注册主流程，但仅新增入口展示和安�
 
 - 未写入、打印或提交任何第三方平台 secret。
 - 提交前执行 `git diff --check` 与 diff secret 关键词人工检查。
+
+## 钉钉同步
+
+- 钉钉文档已创建：`https://alidocs.dingtalk.com/i/nodes/7dx2rn0JbYvRkOd6fZ7PlmybVMGjLRb3`
+- AI 表格 `各项目迭代记录日志` / `开发日志` 已新增记录：`NUG506VWFM`。
