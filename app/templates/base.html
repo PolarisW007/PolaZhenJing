@@ -145,6 +145,44 @@
     /* Links */
     .form-links { text-align: center; margin-top: 1rem; font-size: 0.85rem; }
     .form-links a { color: var(--text-muted); }
+    .auth-divider {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--text-muted); font-size: 0.78rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ""; flex: 1; height: 1px; background: var(--text-ghost);
+    }
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      gap: 0.65rem;
+    }
+    .provider-button {
+      min-height: 42px;
+      display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--text-ghost);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.035);
+      font-size: 0.85rem; font-weight: 600;
+      transition: all 0.25s var(--ease-primary);
+    }
+    .provider-button:hover {
+      color: var(--text-primary);
+      border-color: rgba(228,191,122,0.5);
+      background: rgba(228,191,122,0.08);
+      transform: translateY(-1px);
+    }
+    .provider-mark {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--gold-brown);
+      background: var(--gradient-gold-btn);
+      font-size: 0.72rem; line-height: 1;
+      flex: 0 0 auto;
+    }
 
     /* Table */
     .table-wrap { overflow-x: auto; }

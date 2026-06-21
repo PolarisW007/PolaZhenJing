@@ -14,6 +14,17 @@
   </div>
   <button type="submit" class="btn-gold">登录</button>
 </form>
+{% if third_party_providers %}
+<div class="auth-divider"><span>快捷验证登录</span></div>
+<div class="provider-grid" aria-label="第三方快捷登录">
+  {% for item in third_party_providers %}
+  <a class="provider-button provider-{{ item.provider }}" href="{{ url_for('auth.third_party_start', provider=item.provider, next=next_url) }}">
+    <span class="provider-mark">{{ item.label[:1] }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
 <div class="form-links">
   <a href="{{ url_for('auth.register', next=next_url) }}">没有账号？去注册</a>
 </div>

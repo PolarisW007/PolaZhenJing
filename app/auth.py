@@ -70,6 +70,18 @@ DEFAULT_USER_PERMISSIONS = {
 }
 ADMIN_PERMISSIONS = set(PERMISSION_CATALOG)
 
+THIRD_PARTY_PROVIDERS = [
+    {'provider': 'wechat', 'label': '微信'},
+    {'provider': 'alipay', 'label': '支付宝'},
+    {'provider': 'google', 'label': 'Google'},
+    {'provider': 'apple', 'label': 'Apple'},
+    {'provider': 'huawei', 'label': '华为'},
+]
+
+
+def _provider_context():
+    return [item.copy() for item in THIRD_PARTY_PROVIDERS]
+
 
 def _valid_preference(field, value):
     value = (value or '').strip()
@@ -317,7 +329,11 @@ def login():
             return redirect(_safe_next())
 
         flash(error, 'error')
-    return render_template('login.html', next_url=request.args.get('next', ''))
+    return render_template(
+        'login.html',
+        next_url=request.args.get('next', ''),
+        third_party_providers=_provider_context(),
+    )
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -363,7 +379,27 @@ def register():
                 error = f'用户 {username} 或邮箱 {email} 已被注册。'
 
         flash(error, 'error')
-    return render_template('register.html', next_url=request.args.get('next', ''))
+    return render_template(
+        'register.html',
+        next_url=request.args.get('next', ''),
+        third_party_providers=_provider_context(),
+    )
+
+
+@auth_bp.route('/auth/<provider>/start')
+def third_party_start(provider):
+    provider_meta = next(
+        (item for item in THIRD_PARTY_PROVIDERS if item['provider'] == provider),
+        None,
+    )
+    if provider_meta is None:
+        flash('暂不支持该快捷登录方式。', 'error')
+    else:
+        flash(
+            f"{provider_meta['label']}快捷登录入口已接入，生产授权参数接通后即可完成验证登录。",
+            'info',
+        )
+    return redirect(url_for('auth.login', next=request.args.get('next', '')))
 
 
 @auth_bp.route('/verify', methods=['GET', 'POST'])
