@@ -69,3 +69,16 @@
 - 本地待传输包: `/tmp/polazj-upload-media-45c7de5/runtime.tgz`。
 - 阻塞点: 当前执行环境到 `42.121.164.11:22` 连续出现 `Operation not permitted`,导致 `scp` 和 `ssh stdin` 传输失败。
 - 当前状态: 未覆盖线上文件,未重启服务,线上仍为部署前版本。
+
+## Git 部署恢复信息
+
+- 连接账号: `root@42.121.164.11`;密码仅由操作者临时提供,不落库、不入文档。
+- Git bundle: `/tmp/polazj-upload-media-45c7de5/polazj-upload-media-ed7bfcf.bundle`。
+- bundle 内容: `origin/main` 之后的 `45c7de5`、`ed7bfcf`。
+- 服务器恢复部署命令草案:
+  1. 上传 bundle 到 `/tmp/polazj-upload-media-ed7bfcf.bundle`。
+  2. `cd /PolaZhenjing && git fetch /tmp/polazj-upload-media-ed7bfcf.bundle HEAD:refs/tmp/upload-media-ed7bfcf`
+  3. `cd /PolaZhenjing && git checkout refs/tmp/upload-media-ed7bfcf -- app/article_content.py app/uploader.py app/templates/upload.html`
+  4. `cd /PolaZhenjing && .venv/bin/python3 -m py_compile app/article_content.py app/uploader.py app/__init__.py`
+  5. `systemctl restart polazj.service && systemctl is-active polazj.service`
+  6. 执行发布后验证中的 curl/HTML 探针。

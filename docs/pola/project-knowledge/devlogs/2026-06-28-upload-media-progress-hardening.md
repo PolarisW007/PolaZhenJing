@@ -48,6 +48,11 @@
   - 传输包 `/tmp/polazj-upload-media-45c7de5/runtime.tgz` 已在本地生成,仅包含 `app/article_content.py`、`app/uploader.py`、`app/templates/upload.html`。
   - 当前执行环境到 `42.121.164.11:22` 间歇返回 `Operation not permitted`;本轮未覆盖线上文件,也未重启 `polazj.service`,线上仍保持备份前状态。
   - 钉钉开发日志/AI 表格同步未执行;本轮 blocker 是云服务器 SSH 传输通道不稳定,待网络通道恢复后补同步或在下一次交付中补记。
+- 2026-06-29 root 凭据与 Git 部署重试:
+  - 本地部署连接信息记录为 `root@42.121.164.11`;明文密码不写入仓库、文档或脚本。
+  - 已生成 Git bundle: `/tmp/polazj-upload-media-45c7de5/polazj-upload-media-ed7bfcf.bundle`,包含 `origin/main` 之后的 `45c7de5` 和 `ed7bfcf`。
+  - 使用 `sshpass` 对 root 密码链路测试 8 次、原 `pola-server` alias 测试 3 次、root ControlMaster 持久连接测试 20 次,均在建立连接前返回 `Operation not permitted`。
+  - 当前仍未覆盖线上文件、未重启服务;继续部署需先恢复本机到 `42.121.164.11:22` 的出站 SSH 通道。
 
 ## 风险与备注
 
