@@ -42,6 +42,12 @@
   - 已备份运行时目标文件到 `/opt/backups/polazj-upload-media-progress-20260628195754`。
   - `rsync`、`tar | ssh`、`scp` 均受当前执行环境 SSH/传输限制影响,出现 `Operation not permitted` 或 `Connection closed`。
   - 纯 `ssh` 间歇可用,但无法稳定传输补丁包;本轮未成功覆盖线上运行时代码。
+- 2026-06-29 git 与线上部署收尾:
+  - 已将本地修复提交为 `45c7de5 fix: 修复上传富文本图片和进度反馈`。
+  - 已再次备份线上运行时目标文件到 `/opt/backups/polazj-upload-media-45c7de5-20260629003819`。
+  - 传输包 `/tmp/polazj-upload-media-45c7de5/runtime.tgz` 已在本地生成,仅包含 `app/article_content.py`、`app/uploader.py`、`app/templates/upload.html`。
+  - 当前执行环境到 `42.121.164.11:22` 间歇返回 `Operation not permitted`;本轮未覆盖线上文件,也未重启 `polazj.service`,线上仍保持备份前状态。
+  - 钉钉开发日志/AI 表格同步未执行;本轮 blocker 是云服务器 SSH 传输通道不稳定,待网络通道恢复后补同步或在下一次交付中补记。
 
 ## 风险与备注
 

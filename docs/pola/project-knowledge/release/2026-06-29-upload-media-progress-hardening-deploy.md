@@ -61,3 +61,11 @@
 - 上传页是否能正常进入风格选择。
 - 富文本图片上传接口是否返回 `/PolaZhenjing/assets/images/richtext/...`。
 - 历史坏图片占位是否不再直接露出为正文。
+
+## 2026-06-29 部署状态
+
+- 本地修复提交: `45c7de5 fix: 修复上传富文本图片和进度反馈`。
+- 线上备份已完成: `/opt/backups/polazj-upload-media-45c7de5-20260629003819`。
+- 本地待传输包: `/tmp/polazj-upload-media-45c7de5/runtime.tgz`。
+- 阻塞点: 当前执行环境到 `42.121.164.11:22` 连续出现 `Operation not permitted`,导致 `scp` 和 `ssh stdin` 传输失败。
+- 当前状态: 未覆盖线上文件,未重启服务,线上仍为部署前版本。
