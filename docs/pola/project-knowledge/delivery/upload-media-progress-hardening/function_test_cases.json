@@ -1,0 +1,154 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-28-upload-media-progress-hardening.md",
+    "docs/pola/project-knowledge/specs/2026-06-28-upload-media-progress-hardening-prd.md",
+    "docs/pola/project-knowledge/architecture/2026-06-28-upload-media-progress-hardening-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "富文本无效图片清理",
+      "source_refs": [
+        "requirements/2026-06-28-upload-media-progress-hardening.md#验收标准",
+        "architecture/2026-06-28-upload-media-progress-hardening-sdd.md#富文本转换防御"
+      ],
+      "acceptance_ids": ["DOC-1"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_article_content.py::test_rich_html_drops_unpersistable_images_instead_of_bad_markdown",
+          "scenario": "富文本中包含缺失 src、空 src 和 blob 图片",
+          "assertions": ["正文文本保留", "坏图片 Markdown 不出现", "blob URL 不持久化"],
+          "expected": "服务端保存 canonical Markdown 时不会生成坏图片语法",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_article_content.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "历史裸图片占位渲染清理",
+      "source_refs": [
+        "requirements/2026-06-28-upload-media-progress-hardening.md#验收标准",
+        "architecture/2026-06-28-upload-media-progress-hardening-sdd.md#富文本转换防御"
+      ],
+      "acceptance_ids": ["DOC-5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_article_content.py::test_normalize_markdown_drops_bare_image_placeholders_only",
+          "scenario": "Markdown 同时包含裸图片占位、空链接图片和正常图片",
+          "assertions": ["裸占位被删除", "空链接图片被删除", "正常图片保留"],
+          "expected": "线上历史文章不再显示坏占位,正常图片不受影响",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_article_content.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F2-001",
+          "target": "https://aipd.me/PolaZhenjing/admin/articles/claude-code-cli-60-20260628.md",
+          "scenario": "云服务器文章源文件中存在裸图片占位",
+          "assertions": ["部署后页面 HTML 不应包含 ![Claude Code 60+ 命令一览图]"],
+          "expected": "旧文章坏占位在渲染层被兜底清理",
+          "manual_verification": "部署后 curl/浏览器回归"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "富文本图片上传稳定路径",
+      "source_refs": [
+        "requirements/2026-06-28-upload-media-progress-hardening.md#验收标准",
+        "architecture/2026-06-28-upload-media-progress-hardening-sdd.md#富文本图片-url"
+      ],
+      "acceptance_ids": ["DOC-2"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "tests/test_upload_rewrite_rate.py::test_richtext_media_upload_returns_prefixed_asset_url",
+          "scenario": "TinyMCE 上传一张图片到后端媒体接口",
+          "assertions": ["接口返回 200", "location 以 /PolaZhenjing/assets/images/richtext/ 开头"],
+          "expected": "编辑器图片使用线上可访问的稳定资源路径",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F4",
+      "name": "PDF/文件上传进度",
+      "source_refs": [
+        "requirements/2026-06-28-upload-media-progress-hardening.md#验收标准",
+        "specs/2026-06-28-upload-media-progress-hardening-prd.md#文件/pdf-上传"
+      ],
+      "acceptance_ids": ["DOC-3"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_upload_rewrite_rate.py::test_upload_page_has_file_progress_and_rich_image_flush",
+          "scenario": "管理员打开上传页",
+          "assertions": ["页面包含上传进度条", "页面包含 xhr.upload.onprogress", "提交按钮上传中会锁定"],
+          "expected": "PDF 上传期间有明确进度和处理状态",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F4-001",
+          "target": "/admin/upload",
+          "scenario": "Flask test client 检查上传页增强 JS",
+          "assertions": ["status=200", "file-upload-progress 存在", "xhr.upload.onprogress 存在"],
+          "expected": "无浏览器环境下仍能验证页面交互脚本存在",
+          "manual_verification": "本地 Flask Harness"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F5",
+      "name": "富文本提交前图片 flush",
+      "source_refs": [
+        "requirements/2026-06-28-upload-media-progress-hardening.md#验收标准",
+        "specs/2026-06-28-upload-media-progress-hardening-prd.md#富文本粘贴图片"
+      ],
+      "acceptance_ids": ["DOC-4", "DOC-6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "tests/test_upload_rewrite_rate.py::test_upload_page_has_file_progress_and_rich_image_flush",
+          "scenario": "富文本模式提交表单",
+          "assertions": ["页面包含 flushRichEditorImages", "页面包含 editor.uploadImages", "页面检测 blob/data:image 残留"],
+          "expected": "图片未上传完成时不提交生成流程",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RG-F5-001",
+          "target": "tests/test_article_edit_rich_editor.py",
+          "scenario": "编辑页预览和富文本图片本地化既有回归",
+          "assertions": ["预览端点仍返回 canonical markdown", "富文本保存仍能本地化图片"],
+          "expected": "上传页修复不破坏编辑页富文本管线",
+          "command": "PYTHONPATH=. .venv/bin/pytest tests/test_article_edit_rich_editor.py -q"
+        }
+      ]
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "DOC-1", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "DOC-5", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "DOC-2", "case_ids": ["UT-F3-001"]},
+    {"acceptance_id": "DOC-3", "case_ids": ["UT-F4-001", "IT-F4-001"]},
+    {"acceptance_id": "DOC-4", "case_ids": ["UT-F5-001", "RG-F5-001"]},
+    {"acceptance_id": "DOC-6", "case_ids": ["UT-F1-001", "UT-F2-001", "UT-F3-001", "UT-F4-001", "UT-F5-001", "RG-F5-001"]}
+  ]
+}

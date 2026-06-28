@@ -1,3 +1,4 @@
+import io
 import json
 
 from app import create_app
@@ -25,6 +26,36 @@ def test_upload_page_shows_rewrite_rate_presets():
         assert f'value="{value}"' in body
     assert "不改写，只插图" in body
     assert "完整改写" in body
+
+
+def test_upload_page_has_file_progress_and_rich_image_flush():
+    client = _admin_client()
+    response = client.get("/admin/upload")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert 'id="file-upload-progress"' in body
+    assert "xhr.upload.onprogress" in body
+    assert "setFileUploadProgress" in body
+    assert "flushRichEditorImages" in body
+    assert "editor.uploadImages()" in body
+    assert "readyToSubmit" in body
+
+
+def test_richtext_media_upload_returns_prefixed_asset_url(tmp_path, monkeypatch):
+    monkeypatch.setattr(uploader, "RICH_MEDIA_DIR", str(tmp_path))
+    client = _admin_client()
+
+    response = client.post(
+        "/admin/upload/media",
+        data={"file": (io.BytesIO(b"fake-image"), "clip.png")},
+        content_type="multipart/form-data",
+    )
+    payload = response.get_json()
+
+    assert response.status_code == 200
+    assert payload["location"].startswith("/PolaZhenjing/assets/images/richtext/")
+    assert payload["location"].endswith(".png")
 
 
 def test_parse_rewrite_rate_normalizes_to_presets():

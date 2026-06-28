@@ -89,6 +89,37 @@
     font-size: 0.78rem;
     line-height: 1.6;
   }
+  .file-upload-progress {
+    display: none;
+    margin: 1rem 0 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(228,191,122,0.28);
+    border-radius: var(--radius-md);
+    background: rgba(228,191,122,0.08);
+  }
+  .file-upload-progress.is-active {
+    display: block;
+  }
+  .file-upload-progress-track {
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+  }
+  .file-upload-progress-bar {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--gold-primary), #f4d08f);
+    transition: width 0.18s ease;
+  }
+  .file-upload-progress-text {
+    margin-top: 0.55rem;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
   .compact-textarea {
     min-height: 92px !important;
     font-family: inherit !important;
@@ -211,6 +242,12 @@
       <div class="drop-zone-text" id="drop-text">拖拽文件到此处或点击浏览</div>
       <div class="drop-zone-hint">支持 PDF、Word、HTML、Markdown（最大 16MB）</div>
       <input type="file" id="file-input" name="file" accept=".pdf,.docx,.doc,.html,.htm,.md,.markdown,.txt">
+    </div>
+    <div class="file-upload-progress" id="file-upload-progress" aria-live="polite">
+      <div class="file-upload-progress-track">
+        <div class="file-upload-progress-bar" id="file-upload-progress-bar"></div>
+      </div>
+      <div class="file-upload-progress-text" id="file-upload-progress-text">准备上传...</div>
     </div>
 
     <div class="form-group" style="margin-top: 1.25rem;">
@@ -409,6 +446,74 @@ const dt = document.getElementById('drop-text');
 ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('dragover'); }));
 dz.addEventListener('drop', ev => { fi.files = ev.dataTransfer.files; dt.textContent = fi.files[0].name; });
 fi.addEventListener('change', () => { if (fi.files.length) dt.textContent = fi.files[0].name; });
+
+function setFileUploadProgress(percent, message) {
+  const panel = document.getElementById('file-upload-progress');
+  const bar = document.getElementById('file-upload-progress-bar');
+  const text = document.getElementById('file-upload-progress-text');
+  if (!panel || !bar || !text) return;
+  panel.classList.add('is-active');
+  if (typeof percent === 'number') {
+    bar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+  }
+  if (message) text.textContent = message;
+}
+
+function bindFileUploadProgress() {
+  const uploadForm = document.getElementById('upload-form');
+  if (!uploadForm || !window.XMLHttpRequest || !window.FormData) return;
+  uploadForm.addEventListener('submit', event => {
+    if (!fi || !fi.files || !fi.files.length) return;
+    event.preventDefault();
+    const submitButton = uploadForm.querySelector('button[type="submit"]');
+    const originalText = submitButton ? submitButton.textContent : '';
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = '上传中...';
+    }
+    setFileUploadProgress(0, `正在上传 ${fi.files[0].name}...`);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadForm.action || window.location.href, true);
+    xhr.withCredentials = true;
+    xhr.upload.onprogress = event => {
+      if (event.lengthComputable) {
+        const pct = Math.round((event.loaded / event.total) * 100);
+        setFileUploadProgress(pct, pct >= 100 ? '上传完成，正在解析文件...' : `上传中 ${pct}%`);
+      } else {
+        setFileUploadProgress(35, '正在上传，文件大小由浏览器估算中...');
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 400) {
+        setFileUploadProgress(100, '处理完成，正在进入风格选择...');
+        if (xhr.responseURL && xhr.responseURL !== window.location.href) {
+          window.location.href = xhr.responseURL;
+        } else {
+          document.open();
+          document.write(xhr.responseText);
+          document.close();
+        }
+        return;
+      }
+      setFileUploadProgress(100, `上传失败（${xhr.status}），请检查文件后重试。`);
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
+    };
+    xhr.onerror = () => {
+      setFileUploadProgress(100, '网络异常，上传未完成，请重试。');
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
+    };
+    xhr.send(new FormData(uploadForm));
+  });
+}
+
+bindFileUploadProgress();
 
 let richEditorReady = false;
 let richEditorFallbackShown = false;
@@ -743,6 +848,20 @@ function hideEditorStatus() {
   if (status && richEditorReady) status.style.display = 'none';
 }
 
+async function flushRichEditorImages() {
+  const activeMode = document.getElementById('content-format').value;
+  const editor = window.tinymce ? tinymce.get('rich-content') : null;
+  if (activeMode !== 'rich_html' || !editor || !editor.initialized) return;
+  if (typeof editor.uploadImages === 'function') {
+    showEditorStatus('正在上传富文本图片...');
+    await editor.uploadImages();
+  }
+  const html = editor.getContent();
+  if (/\ssrc=["'](?:blob:|data:image\/)/i.test(html)) {
+    throw new Error('还有图片没有上传完成，请稍后重试；如果持续失败，请使用“插入配图”上传图片。');
+  }
+}
+
 async function setEditorMode(mode) {
   const contentFormat = document.getElementById('content-format');
   const markdown = document.getElementById('content');
@@ -809,7 +928,7 @@ document.querySelectorAll('input[name="editor_mode"]').forEach(input => {
   input.addEventListener('change', () => setEditorMode(input.value));
 });
 
-document.getElementById('paste-form').addEventListener('submit', () => {
+function preparePasteFormForSubmit() {
   const activeMode = document.getElementById('content-format').value;
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
@@ -826,16 +945,32 @@ document.getElementById('paste-form').addEventListener('submit', () => {
     markdown.disabled = true;
     rich.disabled = false;
   }
+}
+
+const pasteForm = document.getElementById('paste-form');
+pasteForm.addEventListener('submit', async event => {
+  if (pasteForm.dataset.readyToSubmit === '1') return;
+  event.preventDefault();
+  try {
+    await flushRichEditorImages();
+    preparePasteFormForSubmit();
+    pasteForm.dataset.readyToSubmit = '1';
+    HTMLFormElement.prototype.submit.call(pasteForm);
+  } catch (error) {
+    console.error(error);
+    showEditorStatus(error.message || '富文本图片上传失败，请重试。');
+  }
 });
 
-initRichEditor();
 if (INITIAL_EDITOR_MODE === 'markdown') {
   const markdown = document.getElementById('content');
   const rich = document.getElementById('rich-content');
   document.getElementById('content-format').value = 'markdown';
   if (markdown) markdown.style.display = 'block';
   if (rich) rich.style.display = 'none';
+  showEditorStatus('Markdown 源码模式已就绪，导入内容可直接编辑。');
 } else {
+  initRichEditor();
   setEditorMode('rich');
 }
 </script>

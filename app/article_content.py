@@ -43,6 +43,8 @@ def normalize_markdown(markdown_text: str) -> str:
     """Normalize Markdown without changing article meaning."""
     text = (markdown_text or '').replace('\r\n', '\n').replace('\r', '\n')
     text = text.replace('&mdash;', '——').replace('&nbsp;', ' ')
+    text = re.sub(r'(?m)^[ \t]*!\[[^\]\n]*\][ \t]*$', '', text)
+    text = re.sub(r'!\[([^\]\n]*)\]\([ \t]*\)', '', text)
     text = re.sub(r'[ \t]+\n', '\n', text)
     text = re.sub(r'\n{4,}', '\n\n\n', text)
     text = re.sub(r' {3,}', '  ', text)
@@ -77,6 +79,14 @@ def _sanitize_rich_html_attrs(soup):
             if not href.startswith(('http://', 'https://', '/', '#', 'mailto:')):
                 cleaned.pop('href', None)
         tag.attrs = cleaned
+
+
+def _drop_unpersistable_images(soup):
+    """Remove image tags that cannot become stable article media."""
+    for img in list(soup.find_all('img')):
+        src = str(img.get('src') or '').strip()
+        if not src or src.startswith('blob:'):
+            img.decompose()
 
 
 def _safe_media_html(tag) -> str:
@@ -126,6 +136,9 @@ def html_to_canonical_markdown(
 
     if preserve_media and image_localizer:
         image_localizer(soup)
+
+    if preserve_media:
+        _drop_unpersistable_images(soup)
 
     _sanitize_rich_html_attrs(soup)
 

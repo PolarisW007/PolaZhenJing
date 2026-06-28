@@ -818,7 +818,7 @@ def _save_richtext_image(file_storage) -> str:
     filename = f'{hashlib.sha256(seed).hexdigest()[:16]}.{ext}'
     out_path = os.path.join(out_dir, filename)
     file_storage.save(out_path)
-    return url_for('serve_assets', filename=f'images/richtext/{month}/{filename}')
+    return f'{_article_asset_base()}/assets/images/richtext/{month}/{filename}'
 
 
 def _richtext_image_url_from_bytes(data: bytes, ext: str) -> str:
@@ -836,7 +836,7 @@ def _richtext_image_url_from_bytes(data: bytes, ext: str) -> str:
     if not os.path.isfile(out_path):
         with open(out_path, 'wb') as f:
             f.write(data)
-    return url_for('serve_assets', filename=f'images/richtext/{month}/{filename}')
+    return f'{_article_asset_base()}/assets/images/richtext/{month}/{filename}'
 
 
 def _log_remote_image_localization_failure(image_url: str, reason: str):
@@ -1060,6 +1060,9 @@ def _localize_rich_html_images(soup):
             img.decompose()
             continue
         src = _normalize_remote_image_src(src)
+        if src.startswith('blob:'):
+            img.decompose()
+            continue
         local_url = None
         if src.startswith('data:image/'):
             local_url = _save_data_image_to_richtext(src)
@@ -3242,7 +3245,7 @@ def public_article_card_link(code):
     with open(fpath, 'r', encoding='utf-8', errors='ignore') as f:
         raw = f.read()
     meta, _, body = _parse_post(raw)
-    body = body.replace('{{ site.baseurl }}', _article_asset_base())
+    body = normalize_markdown(body).replace('{{ site.baseurl }}', _article_asset_base())
     share = _build_article_share_context(actual_filename, meta, body, fpath)
     response = current_app.response_class(
         render_template('article_share_card.html',
@@ -3451,7 +3454,7 @@ def _render_article(filename: str, public: bool = False):
     meta, _, body = _parse_post(raw)
     # Render markdown to HTML. Article media lives under the PolaZhenjing app
     # asset route even when the public article itself is mounted at /articles/.
-    body = body.replace('{{ site.baseurl }}', _article_asset_base())
+    body = normalize_markdown(body).replace('{{ site.baseurl }}', _article_asset_base())
     share = _build_article_share_context(actual_filename, meta, body, fpath)
     title = share['title']
     share_title = share['share_title']
