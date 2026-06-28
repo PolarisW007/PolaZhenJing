@@ -53,6 +53,19 @@
   - 已生成 Git bundle: `/tmp/polazj-upload-media-45c7de5/polazj-upload-media-ed7bfcf.bundle`,包含 `origin/main` 之后的 `45c7de5` 和 `ed7bfcf`。
   - 使用 `sshpass` 对 root 密码链路测试 8 次、原 `pola-server` alias 测试 3 次、root ControlMaster 持久连接测试 20 次,均在建立连接前返回 `Operation not permitted`。
   - 当前仍未覆盖线上文件、未重启服务;继续部署需先恢复本机到 `42.121.164.11:22` 的出站 SSH 通道。
+- 2026-06-29 权限恢复后部署完成:
+  - Codex 当前会话权限切换到可联网后,`nc 42.121.164.11 22` 成功,确认前序阻塞为执行环境网络沙箱限制,不是云服务器 22 端口或 sshd 故障。
+  - 已将本地 `main` 推送到 GitHub: `4026671..83526b4`。
+  - 云服务器 `/PolaZhenjing` 已 `git fetch origin main`,远端 `origin/main=83526b4`。
+  - 线上运行时目标文件已备份到 `/opt/backups/polazj-upload-media-83526b4-20260629074333`。
+  - 已通过 `git checkout origin/main -- app/article_content.py app/uploader.py app/templates/upload.html` 精确部署 3 个运行文件,未执行 `git pull` 或覆盖 `_posts`/数据文件。
+  - 云端验证:
+    - `.venv/bin/python3 -m py_compile app/article_content.py app/uploader.py app/__init__.py`: 通过。
+    - `PYTHONPATH=. .venv/bin/pytest tests/test_article_content.py tests/test_upload_rewrite_rate.py tests/test_article_edit_rich_editor.py tests/test_social_publish.py::test_public_article_short_link_renders_share_card_metadata -q`: 通过,24 passed。
+    - `systemctl restart polazj.service && systemctl is-active polazj.service`: `active`。
+    - Flask test-client `/admin/upload`: 200,包含 `file-upload-progress` 和 `flushRichEditorImages`。
+    - Flask test-client `/admin/articles/claude-code-cli-60-20260628.md`: 200,不再包含裸文本 `![Claude Code 60+ 命令一览图]`。
+    - 公网 smoke: `/PolaZhenjing/admin/login` 200,`/PolaZhenjing/admin/upload` 302,`/PolaZhenjing/admin/articles/claude-code-cli-60-20260628.md` 200。
 
 ## 风险与备注
 

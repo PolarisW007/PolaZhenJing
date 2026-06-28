@@ -70,6 +70,21 @@
 - 阻塞点: 当前执行环境到 `42.121.164.11:22` 连续出现 `Operation not permitted`,导致 `scp` 和 `ssh stdin` 传输失败。
 - 当前状态: 未覆盖线上文件,未重启服务,线上仍为部署前版本。
 
+## 2026-06-29 部署完成记录
+
+- 原因确认: 用户本机普通终端可登录云服务器,而 Codex 旧会话中 `nc`/`ssh` 对公网 IP 返回 `Operation not permitted`;当前权限恢复后 `nc 42.121.164.11 22` 成功,判定为 Codex 执行环境网络沙箱限制。
+- GitHub: `main` 已推送到 `83526b4`。
+- 云服务器: `/PolaZhenjing` 已 `git fetch origin main`,`origin/main=83526b4`。
+- 线上备份: `/opt/backups/polazj-upload-media-83526b4-20260629074333`。
+- 部署方式: 从 `origin/main` 精确 checkout `app/article_content.py`、`app/uploader.py`、`app/templates/upload.html`,未执行全量 `git pull`,未覆盖文章和运行数据。
+- 云端测试:
+  - `py_compile`: 通过。
+  - 相关 pytest: `24 passed in 1.19s`。
+  - `polazj.service`: 重启后 `active`。
+  - Flask test-client 上传页: 200,含进度条与图片 flush 逻辑。
+  - Flask test-client 问题文章: 200,裸图片占位不再露出。
+  - 公网 smoke: login 200,upload 未登录 302,问题文章 200。
+
 ## Git 部署恢复信息
 
 - 连接账号: `root@42.121.164.11`;密码仅由操作者临时提供,不落库、不入文档。
