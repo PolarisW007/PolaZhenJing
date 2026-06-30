@@ -48,3 +48,9 @@
   - `systemctl restart polazj.service` 后 `systemctl is-active polazj.service`：active。
   - `curl -I https://aipd.me/PolaZhenjing/admin/articles/software-engineering-in-the-20260629.md`：200 OK。
   - `curl -I https://aipd.me/PolaZhenjing/admin/upload`：302 到 `/PolaZhenjing/admin/login`，符合未登录保护。
+
+## 钉钉开发日志同步
+
+- 已检查本机 `dws` 可用，`dws doc info --node DnRL6jAJMGQ0Xgd6uql3NodwWyMoPYe1` 可读取 `Pola开发日志记录文件` 文件夹信息。
+- 本轮未完成文档上传和 AI 表格回填。原因是当前 `dws doc upload` 暴露的是三步上传凭证流程，需要继续执行 OSS PUT 和 commit_uploaded_file；为避免误写或半同步，先记录为收尾 blocker。
+- 后续补同步目标：将本文件同步至钉钉开发日志文件夹，并回填 AI 表格 `开发日志` 表的 `来源文件` 字段。
