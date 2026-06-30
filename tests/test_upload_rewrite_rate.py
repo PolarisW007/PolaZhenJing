@@ -199,4 +199,13 @@ def test_call_llm_rewrite_prompt_contains_mid_rate_instruction(monkeypatch):
     user_msg = captured["payload"]["messages"][1]["content"]
     assert "AI改写率为50%" in user_msg
     assert "结构优化" in user_msg
+    assert "输出语言必须是简体中文" in user_msg
+    assert "最终输出必须是简体中文 Markdown 成稿" in user_msg
+    assert "代码块、命令、API" in user_msg
     assert captured["payload"]["temperature"] == 0.5
+
+
+def test_generic_rewrite_prompt_requires_chinese_translation():
+    assert "输出必须是简体中文成稿" in uploader._GENERIC_REWRITE_PROMPT
+    assert "先忠实翻译成中文" in uploader._GENERIC_REWRITE_PROMPT
+    assert "不要整段保留外文正文" in uploader._GENERIC_REWRITE_PROMPT

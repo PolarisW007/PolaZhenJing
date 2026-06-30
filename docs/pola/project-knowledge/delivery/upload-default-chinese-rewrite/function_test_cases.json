@@ -1,0 +1,103 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-30-upload-default-chinese-rewrite.md",
+    "docs/pola/project-knowledge/specs/2026-06-30-upload-default-chinese-rewrite-spec.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "AI 改写默认中文输出契约",
+      "source_refs": [
+        "requirements/2026-06-30-upload-default-chinese-rewrite.md#验收标准",
+        "specs/2026-06-30-upload-default-chinese-rewrite-spec.md#设计"
+      ],
+      "acceptance_ids": ["A1", "A2", "A4"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_upload_rewrite_rate.py::test_call_llm_rewrite_prompt_contains_mid_rate_instruction",
+          "scenario": "调用 LLM 改写时生成请求体",
+          "assertions": [
+            "用户消息包含 AI 改写率说明",
+            "用户消息包含简体中文输出要求",
+            "用户消息包含代码、命令、API 等英文保留例外"
+          ],
+          "expected": "外文素材不会因 prompt 缺失而默认保留整段英文",
+          "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py -q"
+        },
+        {
+          "id": "UT-F1-002",
+          "target": "tests/test_upload_rewrite_rate.py::test_generic_rewrite_prompt_requires_chinese_translation",
+          "scenario": "非专属作者风格使用通用编辑 prompt",
+          "assertions": [
+            "通用 prompt 包含简体中文成稿要求",
+            "通用 prompt 包含外文素材先翻译成中文要求",
+            "通用 prompt 禁止整段保留外文正文"
+          ],
+          "expected": "deep-technical 等通用风格也默认输出中文",
+          "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "https://aipd.me/PolaZhenjing/admin/articles/software-engineering-in-the-20260629.md",
+          "scenario": "复核线上已生成文章",
+          "assertions": [
+            "页面正文仍为英文",
+            "页面配图 alt 为中文"
+          ],
+          "expected": "确认问题来自正文改写语言契约，不是配图链路",
+          "manual_verification": "curl -L 线上文章 HTML 并检查标题、正文和图片 alt"
+        }
+      ],
+      "regression_cases": [
+        {
+          "id": "RG-F1-001",
+          "target": "tests/test_upload_rewrite_rate.py::test_generate_job_rewrite_rate_zero_skips_llm_but_runs_images",
+          "scenario": "0% 改写上传生成",
+          "assertions": [
+            "不调用 LLM",
+            "继续执行图片生成路径",
+            "原始正文被保留"
+          ],
+          "expected": "0% 仍表示不改写、不翻译",
+          "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "name": "编辑页 AI 修改建议兼容",
+      "source_refs": [
+        "requirements/2026-06-30-upload-default-chinese-rewrite.md#验收标准"
+      ],
+      "acceptance_ids": ["A5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_article_edit_rich_editor.py",
+          "scenario": "文章编辑页富文本和 AI 修改建议回归",
+          "assertions": [
+            "编辑页仍加载本地 TinyMCE",
+            "修改建议保存路径仍可用",
+            "改写率参数仍传给二次修改函数"
+          ],
+          "expected": "共享改写契约不破坏编辑页",
+          "command": ".venv/bin/python -m pytest tests/test_article_edit_rich_editor.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-002"]},
+    {"acceptance_id": "A3", "case_ids": ["RG-F1-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F1-001", "UT-F1-002"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F2-001"]}
+  ]
+}

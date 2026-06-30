@@ -250,6 +250,7 @@ STYLE_SKILL_MAP = {
 # Cleans up formatting, adds section headings, and restructures content.
 _GENERIC_REWRITE_PROMPT = """你是一个专业的内容编辑。请对以下素材进行整理和优化：
 
+0. 输出必须是简体中文成稿。如果素材是英文或其他语言，先忠实翻译成中文，再整理优化。代码块、命令、API、产品名、链接和必要英文专有名词可以保留原文，但不要整段保留外文正文
 1. 给文章加上清晰的段落标题（用 ## 标记），使结构一目了然
 2. 清理格式问题（多余的加粗、斜体、空行等）
 3. 保持原文的核心观点和数据不变，不要添加新内容
@@ -340,6 +341,8 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str,
         task_intro = '请根据以下素材，在指定 AI 改写率边界内编辑文章。'
     user_msg = (
         f'{task_intro}{rewrite_contract}'
+        f'最终输出必须是简体中文 Markdown 成稿。若素材是英文或其他语言，请翻译为自然中文；'
+        f'仅代码块、命令、API、产品名、链接和必要英文专有名词保留原文。'
         f'如果素材是个人博客/技术解读，保留原文的代码例子、术语和数据。'
         f'标题是「{title}」，保持标题与正文语义一致。'
         f'{instruction_text}\n\n'
