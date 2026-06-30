@@ -35,3 +35,16 @@
 ## 结论
 
 已在共享改写率契约和上传通用 prompt 中补齐简体中文输出要求。后续非 0% AI 改写会默认把英文/外文素材转成中文成稿。
+
+## 部署记录
+
+- 本地 commit：`67cdc26 fix: 强制上传改写默认输出中文`。
+- GitHub：已推送 `main`。
+- 云服务器：已在 `/PolaZhenjing` fetch `origin/main`，仅 checkout `app/article_ai.py`、`app/uploader.py`、`tests/test_upload_rewrite_rate.py`，未 reset 其它线上工作区改动。
+- 服务器备份：`/opt/backups/polazj-default-chinese-rewrite-67cdc26-20260630/`。
+- 服务器验证：
+  - `.venv/bin/python3 -m py_compile app/article_ai.py app/uploader.py app/__init__.py`：通过。
+  - `PYTHONPATH=. .venv/bin/pytest tests/test_upload_rewrite_rate.py tests/test_article_edit_rich_editor.py -q`：23 passed。
+  - `systemctl restart polazj.service` 后 `systemctl is-active polazj.service`：active。
+  - `curl -I https://aipd.me/PolaZhenjing/admin/articles/software-engineering-in-the-20260629.md`：200 OK。
+  - `curl -I https://aipd.me/PolaZhenjing/admin/upload`：302 到 `/PolaZhenjing/admin/login`，符合未登录保护。
