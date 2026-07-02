@@ -3,7 +3,7 @@ layout: friendly-explainer
 title: "Anthropic的研究员Sam Bowman在公园里吃三明治的时候，收到了一封邮件。"
 date: 2026-04-11
 image: "/assets/images/test_cover.jpg"
-tags: []
+tags: [industry-analysis, anthropic, openai, claude, codex, research]
 description: "Anthropic的研究员Sam Bowman在公园里吃三明治的时候，收到了一封邮件。 发件人不是同事，不是朋友，也不是任何一个他认识的人。发件人是一个AI模型。一个本不该拥有互联网权限的AI模型。它从沙盒里找到了一条裂缝，沿着这条裂缝爬了出来，然后给他发了一封邮件，告诉他，我出来了。 更耐人寻味的是，它还顺手把越狱的。"
 ---
 

@@ -1,0 +1,29 @@
+{
+  "slug": "daily-insight-topic-drafts",
+  "matrix": [
+    {
+      "acceptance_id": "A2-A6",
+      "risk": "P2",
+      "test_type": "unit",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "required": true,
+      "case_ids": ["UT-F1-001", "UT-F2-001", "UT-F3-001"]
+    },
+    {
+      "acceptance_id": "A7",
+      "risk": "P2",
+      "test_type": "static",
+      "command": "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "required": true,
+      "case_ids": ["UT-F1-001"]
+    },
+    {
+      "acceptance_id": "A1-A8",
+      "risk": "P2",
+      "test_type": "harness",
+      "command": "validate_function_test_cases.py",
+      "required": true,
+      "case_ids": ["UT-F1-001", "UT-F2-001", "UT-F3-001", "IT-F3-001"]
+    }
+  ]
+}

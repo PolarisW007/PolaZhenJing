@@ -4,7 +4,7 @@ theme: wukong
 title: "FDE 模式 探索和研究"
 date: 2026-05-21
 image: "/assets/images/generated/zui-jin-ban-nian-yi-zhi-zai-guan-zhu-palantir-de-fde-mo-shi/cover.png"
-tags: []
+tags: [industry-analysis, fde, research, anthropic, claude, openai]
 summary: "2026年5月4日，OpenAI和Anthropic在同一天各自宣布了一件大事。OpenAI联合TPG等19家机构成立了Deployment Company，砸了40亿美元，专门往企业里派工程师帮他们把AI塞进核心业务流程。"
 description: "2026年5月4日，OpenAI和Anthropic在同一天各自宣布了一件大事。OpenAI联合TPG等19家机构成立了Deployment Company，砸了40亿美元，专门往企业里派工程师帮他们把AI塞进核心业务流程。"
 ---

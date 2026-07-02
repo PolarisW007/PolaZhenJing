@@ -3,7 +3,7 @@ layout: friendly-explainer
 theme: claude
 title: "A good harness gives your agent the right prompts, tools"
 date: 2026-05-23
-tags: []
+tags: [agent-systems, prompt-engineering, claude, guide, langchain, openai]
 summary: "你有没有遇到过这种情况。花了三周调 prompt，调工具定义，调 few-shot 示例，终于把 Agent 跑通了。演示的时候领导眼前一亮，问了一个灵魂问题：这个能上生产吗？因为你知道，现在这套东西跑在本地，跑在笔记本上，一旦部署到生产环境，面对用户并发、进程崩溃、模型抽风、长时间运行、中途需要人工介入这些状况，基本上撑不住。这不是你一个人会遇到的问题。"
 description: "一个好的 Agent Harness 应该把提示词、工具、运行时、状态和人工介入组织起来，让本地原型走向生产。"
 image: "/assets/images/generated/a-good-harness-gives20260523/cover.png"

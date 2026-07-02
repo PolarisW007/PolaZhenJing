@@ -4,7 +4,7 @@ theme: wukong
 title: "仔细听了一下张小珺对姚顺宇播客的访谈，收获非常大。"
 date: 2026-05-19
 image: "/assets/images/generated/zi-xi-ting-liao-yi-xia-zhang-xiao-jun-dui-yao-shun-yu-bo-ke/cover.png"
-tags: []
+tags: [coding-tools, openai, anthropic, claude, codex, transformer]
 summary: "4 个小时的时长，放在现在来说能好好听完的人想必也不多。于是我就把重点给大家罗列了出来。不得不说这种播客的方式，虽然时间长，但确实能学到很多东西，这也是老外很喜欢的一种形式。硅谷 AI 圈有两位清华同届毕业、英文都叫 Shunyu Yao 的研究者，中文媒体经常混淆：一个是姚顺雨，做计算机科学的，现在在 OpenAI 当首席 AI 科学家。"
 description: "4 个小时的时长，放在现在来说能好好听完的人想必也不多。于是我就把重点给大家罗列了出来。不得不说这种播客的方式，虽然时间长，但确实能学到很多东西，这也是老外很喜欢的一种形式。硅谷 AI 圈有两位清华同届毕业、英文都叫 Shunyu Yao 的研究者，中文媒体经常混淆：一个是姚顺雨，做计算机科学的，现在在 OpenAI。"
 ---

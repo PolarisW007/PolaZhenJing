@@ -4,7 +4,7 @@ theme: claude
 title: "本文深入解析AI Native产品设计的核心范式——Linear三层架构模型"
 date: 2026-05-10
 image: "/assets/images/generated/ben-wen-shen-ru-jie-xi-ai-nativechan-pin-she-ji-de-he-xin-fa/cover.png"
-tags: []
+tags: [product-design, codex, openai, case-study, opinion, workflow]
 summary: "![本文深入解析AI Native产品设计的核心范式——Linear三层架构模型 — cover]({{ site.baseurl }}/assets/images/generated/ben-wen-shen-ru-jie-xi-ai-nativechan-pin-she-ji-de-he-xin-fa/cover."
 description: "![本文深入解析AI Native产品设计的核心范式——Linear三层架构模型 — cover]({{ site.baseurl }}/assets/images/generated/ben-wen-shen-ru-jie-xi-ai-nativechan-pin-she-ji-de-he-xin-fa/cover."
 ---

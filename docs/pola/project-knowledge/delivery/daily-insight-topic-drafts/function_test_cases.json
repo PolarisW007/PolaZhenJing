@@ -1,0 +1,116 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-drafts.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-prd.md",
+    "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-drafts-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "选题底稿字段补齐",
+      "source_refs": ["A2", "A3", "A6"],
+      "acceptance_ids": ["A2", "A3", "A6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "app/insight_topics.py",
+          "scenario": "旧 topic 缺少 draft_markdown 时自动补齐",
+          "assertions": ["返回 draft_markdown", "draft_word_count >= 4500"],
+          "expected": "选题可直接导入上传页",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "选题列表摘要展示",
+      "source_refs": ["A4"],
+      "acceptance_ids": ["A4"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "app/templates/insight_topics.html",
+          "scenario": "列表卡片正文只展示摘要",
+          "assertions": ["页面包含摘要", "页面不包含来源、评分、证据链接、标签和底稿字数", "页面不包含底稿独有章节全文"],
+          "expected": "列表保持扫描友好",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "一键导入上传 Markdown",
+      "source_refs": ["A5", "A8"],
+      "acceptance_ids": ["A5", "A8"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "app/admin_workbench.py",
+          "scenario": "导入选题后上传页 Markdown textarea 预填正文型长稿",
+          "assertions": ["页面选中 markdown", "textarea 包含摘要正文", "textarea 可见字符数 >= 5000 且 <= 30000", "textarea 包含 ## 核心判断", "textarea 不包含来源、证据链接、状态和评分元信息", "状态变为 imported"],
+          "expected": "管理员可继续在上传页基于长稿编辑文章",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F3-001",
+          "target": "/admin/insights/topics/<id>/import",
+          "scenario": "Flask test client 真实路由 follow_redirects 到 upload",
+          "assertions": ["HTTP 200", "出现导入成功提示", "Markdown 长稿内容存在", "运营元信息不进入 Markdown textarea"],
+          "expected": "导入链路端到端可用",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F4",
+      "name": "导入页 Markdown 可见与钉钉入口移除",
+      "source_refs": ["A9", "A10"],
+      "acceptance_ids": ["A9", "A10"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_import_topic_prefills_upload_markdown",
+          "scenario": "导入选题后上传页默认 Markdown 模式",
+          "assertions": ["页面包含 Markdown 就绪提示", "工作台不包含钉钉底料入口"],
+          "expected": "导入选题不会显示空富文本编辑器",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F4-001",
+          "target": "/admin/upload?insight_topic=<id>",
+          "scenario": "Playwright 渲染导入后的上传页",
+          "assertions": ["#content 可见", "#rich-content 隐藏", "window.tinymce=false", "页面不包含钉钉底料", "#content value 包含 5000-30000 可见字符长稿"],
+          "expected": "浏览器真实交互中 Markdown 长稿可编辑",
+          "manual_verification": "Playwright 本地烟测"
+        }
+      ],
+      "regression_cases": []
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F3-001", "IT-F3-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F1-001", "UT-F2-001", "UT-F3-001"]},
+    {"acceptance_id": "A8", "case_ids": ["IT-F3-001"]},
+    {"acceptance_id": "A9", "case_ids": ["UT-F4-001", "IT-F4-001"]},
+    {"acceptance_id": "A10", "case_ids": ["UT-F4-001", "IT-F4-001"]}
+  ]
+}

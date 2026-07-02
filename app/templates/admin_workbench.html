@@ -115,6 +115,11 @@
     font-size: 0.82rem;
     line-height: 1.6;
   }
+  .topic-draft-note {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    margin-top: 0.35rem;
+  }
   .status-pill {
     display: inline-flex;
     padding: 0.25rem 0.55rem;
@@ -172,7 +177,6 @@
     <p>从 PolaNews 与公开线上信号刷新每日选题，支持状态打标并一键导入上传页形成洞察消息。</p>
     <div class="module-actions">
       <a class="btn-ghost" href="{{ url_for('admin_workbench.insight_topics') }}">每日选题</a>
-      <a class="btn-ghost" href="{{ alidocs_source_url }}" target="_blank" rel="noopener">钉钉底料</a>
     </div>
     {% if last_refresh %}
     <div class="topic-refresh-note">最近刷新：{{ last_refresh.refreshed_at }} · {{ last_refresh.signal_count }} 条线上信号</div>
@@ -201,13 +205,14 @@
   <h3>今日洞察选题</h3>
   <a class="btn-ghost" href="{{ url_for('admin_workbench.insight_topics') }}">完整列表</a>
 </div>
-<p class="topic-source-note">选题池支持手动刷新线上信号；钉钉文档当前需要登录授权，保留为人工底料入口。</p>
+<p class="topic-source-note">选题池支持手动刷新线上信号；导入后会预填 Markdown 草稿。</p>
 <div class="topic-list">
   {% for topic in topics %}
   <article class="topic-row">
     <div>
       <h4>{{ topic.title }} <span class="status-pill">{{ topic_statuses.get(topic.status, topic.status) }}</span></h4>
       <p>{{ topic.summary }}</p>
+      <div class="topic-draft-note">底稿 {{ topic.draft_word_count or 0 }} 字</div>
     </div>
     <form method="post" action="{{ url_for('admin_workbench.import_insight_topic', topic_id=topic.id) }}">
       <button class="btn-gold btn-sm" type="submit">导入上传</button>

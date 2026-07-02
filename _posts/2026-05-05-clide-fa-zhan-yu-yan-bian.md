@@ -4,7 +4,7 @@ theme: claude
 title: "CLI的发展与演变"
 date: 2026-05-05
 image: "/assets/images/generated/clide-fa-zhan-yu-yan-bian/cover.png"
-tags: []
+tags: [coding-tools, ai, knowledge]
 summary: "![CLI的发展与演变 — cover]({{ site.baseurl }}/assets/images/generated/clide-fa-zhan-yu-yan-bian/cover.png)您好！我注意到您提供的素材内容显示为\"Please wait...\"，看起来素材尚未完整提供。为了帮您撰写一篇高质量的「CLI的发展与演变」公众号长文，我需要您提供完整的素材内容。"
 description: "![CLI的发展与演变 — cover]({{ site.baseurl }}/assets/images/generated/clide-fa-zhan-yu-yan-bian/cover.png)您好！我注意到您提供的素材内容显示为\\\"Please wait...\\\"，看起来素材尚未完整提供。为了帮您撰写一篇高质量。"
 ---

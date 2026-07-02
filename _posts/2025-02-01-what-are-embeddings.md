@@ -3,7 +3,7 @@ layout: friendly-explainer
 title: "What Are Embeddings? A Friendly Guide"
 date: 2025-02-01
 image: "/assets/images/test_cover.jpg"
-tags: [embeddings, NLP, beginner-friendly]
+tags: [ai-engineering, guide, openai, ai]
 description: "A gentle introduction to word and sentence embeddings in machine learning."
 tldr: "Embeddings are numerical representations of words or concepts that capture meaning. Similar words end up close together in this number space. They power search, recommendations, and modern AI."
 ---

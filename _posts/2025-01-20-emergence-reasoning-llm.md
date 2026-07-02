@@ -3,7 +3,7 @@ layout: academic-insight
 title: "The Emergence of Reasoning in Large Language Models"
 date: 2025-01-20
 image: "/assets/images/test_cover.jpg"
-tags: [LLM, reasoning, scaling-laws]
+tags: [model-research, llm, prompt-engineering, ai]
 description: "An academic analysis of how chain-of-thought reasoning emerges in scaled language models."
 abstract: "We examine the phenomenon of emergent reasoning abilities in large language models, analyzing how chain-of-thought prompting enables complex multi-step inference at scale."
 ---

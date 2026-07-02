@@ -4,7 +4,7 @@ theme: wukong
 title: "从Prompt到Context Engineering再到Harness，AI工程的演进"
 date: 2026-04-18
 image: "/assets/images/test_cover.jpg"
-tags: []
+tags: [ai-engineering, context-engineering, prompt-engineering, typescript, openai, rag]
 summary: "最近在帮一个朋友看他的AI项目。他的团队做了大半年，用上了最流行的RAG架构，接了向量数据库，精心设计了chunk策略，还专门训练了Embedding模型。理论上，这套系统应该很强了。但上线三个月，客户投诉不断。核心问题只有一个：不稳定。同样的问题，换个问法，答案可能完全不一样。有时候能给出完美答案，有时候就瞎编一气。"
 description: "最近在帮一个朋友看他的AI项目。他的团队做了大半年，用上了最流行的RAG架构，接了向量数据库，精心设计了chunk策略，还专门训练了Embedding模型。理论上，这套系统应该很强了。但上线三个月，客户投诉不断。核心问题只有一个：不稳定。同样的问题，换个问法，答案可能完全不一样。有时候能给出完美答案，有时候就瞎编一气。"
 ---

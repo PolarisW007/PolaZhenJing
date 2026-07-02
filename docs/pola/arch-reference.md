@@ -41,7 +41,7 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 - 当前主数据库：`data/wiki.db` SQLite，WAL 模式。
 - 当前 `users` 表字段：`id`、`username`、`email`、`password_hash`、`email_verified`、`created_at`、`nickname`、`avatar_url`、`role`。
 - 发布中心状态表：`social_publications` 和 `social_publication_events`，记录每篇文章在各平台的状态、外部 ID/URL、payload、错误和事件轨迹；第三方 token 不写入表内。
-- 洞察选题池：`data/insight_topics.json` 存储 Admin 每日选题、状态、来源证据和最近刷新元数据；`app/insight_topics.py` 负责从 PolaNews、Hacker News、GitHub Search、公开 RSS 手动刷新线上信号，按证据聚合为候选选题。
+- 洞察选题池：`data/insight_topics.json` 存储 Admin 每日选题、状态、来源证据、约 5000 字 Markdown 底稿和最近刷新元数据；`app/insight_topics.py` 负责从 PolaNews、Hacker News、GitHub Search、公开 RSS 手动刷新线上信号，按证据聚合为候选选题。列表页卡片正文只展示摘要，不展示来源/证据/评分/底稿字数；一键导入上传时 Markdown 编辑器预填 5000-30000 可见字符的正文型长稿，并剔除状态、来源、评分等选题池管理元信息。
 - 头像文件：`assets/avatars/`，URL 为 `/PolaZhenjing/assets/avatars/<file>`。
 - 当前权限：`user_payload()` 以 role 生成基础权限列表，admin 用户扩展管理权限。
 

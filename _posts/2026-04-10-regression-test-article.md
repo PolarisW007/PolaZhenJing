@@ -3,7 +3,7 @@ layout: friendly-explainer
 title: "Regression Test Article"
 date: 2026-04-10
 image: "/assets/images/test_cover.jpg"
-tags: [test, regression]
+tags: [testing-harness, test, ai]
 description: "A test article"
 ---
 

@@ -4,7 +4,7 @@ theme: claude
 title: "用 AI 写代码一段时间后，我发现一个很反直觉的问题：我们其实已经有一些“最佳实践”，但它们无法复用："
 date: 2026-05-05
 image: "/assets/images/generated/yong-ai-xie-dai-ma-yi-duan-shi-jian-hou-wo-fa-xian-yi-ge-hen/cover.png"
-tags: []
+tags: [coding-tools, case-study, codex, prompt-engineering, typescript, opinion]
 summary: "![用 AI 写代码一段时间后，我发现一个很反直觉的问题：我们其实已经有一些“最佳实践”，但它们无法复用： — cover]({{ site.baseurl }}/assets/images/generated/yong-ai-xie-dai-ma-yi-duan-shi-jian-hou-wo-fa-xian-yi-ge-hen/cover.png)做了几年开发，用 AI 写代码也算有些时日了。"
 description: "![用 AI 写代码一段时间后，我发现一个很反直觉的问题：我们其实已经有一些“最佳实践”，但它们无法复用： — cover]({{ site.baseurl }}/assets/images/generated/yong-ai-xie-dai-ma-yi-duan-shi-jian-hou-wo-fa-xian-yi-。"
 ---

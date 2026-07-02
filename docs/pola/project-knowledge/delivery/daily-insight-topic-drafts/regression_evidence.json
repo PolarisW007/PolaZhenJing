@@ -1,0 +1,32 @@
+{
+  "slug": "daily-insight-topic-drafts",
+  "status": "passed",
+  "environment": "local",
+  "validated_paths": [
+    {
+      "path": "/admin/insights/topics",
+      "result": "列表展示摘要和底稿字数，未渲染底稿全文。"
+    },
+    {
+      "path": "/admin/insights/topics/<topic_id>/import -> /admin/upload?insight_topic=<topic_id>",
+      "result": "上传页 Markdown textarea 包含完整底稿、核心判断、证据链接和状态：已导入。"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "status": "passed"
+    },
+    {
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "status": "passed",
+      "summary": "6 passed in 0.61s"
+    },
+    {
+      "command": "validate_function_test_cases.py",
+      "status": "passed",
+      "summary": "8 acceptance ids covered"
+    }
+  ],
+  "risks": []
+}

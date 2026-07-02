@@ -3,7 +3,7 @@ layout: friendly-explainer
 title: "Seedance 2.0 美丽的垃圾与叙事引擎"
 date: 2026-04-11
 image: "/assets/images/seedance-article/cover.jpg"
-tags: []
+tags: [media-generation, video-generation, prompt-engineering, opinion, transformer, workflow]
 summary: "上周有个朋友兴冲冲给我发链接，说你一定要看看这个，用Seedance 2.0做的AI短剧，太牛了。我点进去看了五分钟。怎么说呢，就是那种，你明明知道它很厉害，但就是看不下去的感觉。每一帧单独截图都漂亮得能当壁纸。但连在一起看？第3秒还是这张脸，第8秒换了个人。上一秒在客厅，下一秒桌子凭空消失了。镜头跟镜头之间，好像在各自平行宇宙里运行。我当时脑子里冒出一个比喻，后来想想还挺准的。"
 description: "上周有个朋友兴冲冲给我发链接，说你一定要看看这个，用Seedance 2.0做的AI短剧，太牛了。我点进去看了五分钟。怎么说呢，就是那种，你明明知道它很厉害，但就是看不下去的感觉。每一帧单独截图都漂亮得能当壁纸。但连在一起看？第3秒还是这张脸，第8秒换了个人。上一秒在客厅，下一秒桌子凭空消失了。镜头跟镜头之间，好像在各。"
 ---

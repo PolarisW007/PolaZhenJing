@@ -1,0 +1,38 @@
+{
+  "slug": "daily-insight-topic-drafts",
+  "status": "implemented",
+  "updated_at": "2026-06-20 19:24:58 CST",
+  "artifacts": {
+    "requirement": "docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-drafts.md",
+    "prd": "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-prd.md",
+    "spec": "docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-spec.md",
+    "sdd": "docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-drafts-sdd.md",
+    "devlog": "docs/pola/project-knowledge/devlogs/2026-06-20-daily-insight-topic-drafts.md"
+  },
+  "acceptance": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"],
+  "checks": [
+    {
+      "name": "py_compile",
+      "command": "python3 -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "status": "passed"
+    },
+    {
+      "name": "pytest",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "status": "passed",
+      "summary": "6 passed in 0.61s"
+    },
+    {
+      "name": "function_test_cases_harness",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/requirements/2026-06-20-daily-insight-topic-drafts.md --prd docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-prd.md --sdd docs/pola/project-knowledge/architecture/2026-06-20-daily-insight-topic-drafts-sdd.md --spec docs/pola/project-knowledge/specs/2026-06-20-daily-insight-topic-drafts-spec.md --cases docs/pola/project-knowledge/delivery/daily-insight-topic-drafts/function_test_cases.json",
+      "status": "passed",
+      "summary": "covered 8 acceptance ids, 3 features, 4 cases"
+    },
+    {
+      "name": "flask_test_client_smoke",
+      "command": ".venv/bin/python - <<'PY' ...",
+      "status": "passed",
+      "summary": "draft_word_count=5048; list_has_count=True; list_leaks_final_sentence=False; import_has_markdown=True; import_status_line=True"
+    }
+  ]
+}

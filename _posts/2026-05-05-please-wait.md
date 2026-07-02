@@ -4,7 +4,7 @@ theme: claude
 title: "Please wait..."
 date: 2026-05-05
 image: "/assets/images/generated/please-wait/cover.png"
-tags: []
+tags: [product-design, ai, knowledge]
 summary: "![Please wait... — cover]({{ site.baseurl }}/assets/images/generated/please-wait/cover.png)你一定见过这个画面。白色的屏幕上，跳动着一行简单的字母：**Please wait...**然后是漫长的几秒——有时候是几十秒。"
 description: "![Please wait... — cover]({{ site.baseurl }}/assets/images/generated/please-wait/cover.png)你一定见过这个画面。白色的屏幕上，跳动着一行简单的字母：**Please wait...**然后是漫长的几秒——有时候是几十秒。"
 ---

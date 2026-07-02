@@ -5,6 +5,8 @@
 1. PolaZhenjing Admin 后台需要一个工作台入口，聚合文章管理、小王记忆管理、Skills 管理、项目简介及管理等功能模块。
 2. 以钉钉文档 `https://alidocs.dingtalk.com/i/nodes/y20BglGWO2LKQjdrtgBEGo1L8A7depqY?utm_scene=person_space` 为底料，增加洞察文章选题模块，可查看每天选题，并支持选题一键导入上传功能，导入到文章生成的洞察消息，支持状态打标。
 
+补充：每日选题已改为 PolaNews + 公开线上信号作为主要来源，钉钉底料入口不再使用，需要从当前工作台和选题页移除。
+
 ## 背景与约束
 
 - 当前 `/admin/` 登录后默认跳转 `/admin/upload`，后台缺少总入口。
@@ -31,4 +33,4 @@
 - A3 点击选题导入后跳转 `/admin/upload?insight_topic=<id>`，上传页以 Markdown 模式预填洞察消息。
 - A4 状态打标能持久化到本地 JSON。
 - A5 普通未登录用户不能进入后台工作台和选题池。
-- A6 钉钉文档无法服务端直读时，页面和文档需要明确来源链接、登录限制和后续接入边界。
+- A6 工作台和选题页不再展示钉钉底料入口；选题来源说明聚焦 PolaNews 与公开线上信号。

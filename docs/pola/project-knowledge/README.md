@@ -33,4 +33,8 @@
 - 任何代码或配置改动，都必须同步更新需求/PRD/SDD/开发日志中的至少一类记录。
 - 中大型需求必须同时有需求记录、PRD、SDD/架构记录和开发日志。
 - 小修复可以只更新开发日志，但必须写清楚需求来源、改动原因、验证证据。
+- 每次 Pola 项目开发日志更新后，必须同步到钉钉开发日志文件夹，并回填 AI 表格开发日志记录：
+  - 钉钉开发日志文件夹：`https://alidocs.dingtalk.com/i/nodes/DnRL6jAJMGQ0Xgd6uql3NodwWyMoPYe1`
+  - AI 表格开发日志视图：`https://alidocs.dingtalk.com/i/nodes/np9zOoBVBYOk2Ew6fPjEja5pW1DK0g6l?iframeQuery=entrance%3Ddata%26sheetId%3DhERWDMS%26viewId%3DqvGDAH2`
+  - 表格中 `来源文件` 应指向钉钉文件夹下的具体开发文档，`更新内容` 由 AI 字段从来源文件抽取；同步失败必须记录 blocker。
 - 历史废弃方案必须以 `legacy-` 命名，或在正文开头标注“仅供历史/迁移/风险参考”。
