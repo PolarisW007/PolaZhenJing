@@ -63,27 +63,6 @@
   .refresh-form select {
     min-width: 110px;
   }
-  .topic-source-line {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-top: 0.65rem;
-  }
-  .source-pill {
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 999px;
-    color: var(--text-muted);
-    padding: 0.2rem 0.48rem;
-    font-size: 0.72rem;
-  }
-  .evidence-list {
-    margin-top: 0.65rem;
-    display: grid;
-    gap: 0.2rem;
-  }
-  .evidence-list a {
-    color: var(--gold-primary);
-  }
   .filter-pill {
     display: inline-flex;
     gap: 0.4rem;
@@ -117,23 +96,8 @@
     font-size: 1rem;
     margin-bottom: 0.45rem;
   }
-  .topic-angle {
-    color: var(--text-secondary);
-    margin: 0.65rem 0;
-    line-height: 1.7;
-  }
-  .topic-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
+  .topic-summary {
     margin-top: 0.65rem;
-  }
-  .topic-tag {
-    border: 1px solid rgba(228,191,122,0.22);
-    color: var(--gold-primary);
-    border-radius: 999px;
-    padding: 0.2rem 0.5rem;
-    font-size: 0.72rem;
   }
   .topic-actions {
     display: grid;
@@ -174,11 +138,10 @@
 <div class="insight-header">
   <div>
     <h2>洞察文章选题</h2>
-    <p>每日选题池。现在从 PolaNews 和公开线上信号生成，钉钉底料保留为人工参考来源。</p>
+    <p>每日选题池。现在从 PolaNews 和公开线上信号生成，可直接导入上传页形成洞察草稿。</p>
   </div>
   <div class="module-actions">
     <a class="btn-ghost" href="{{ url_for('admin_workbench.workbench') }}">返回工作台</a>
-    <a class="btn-ghost" href="{{ alidocs_source_url }}" target="_blank" rel="noopener">打开钉钉底料</a>
   </div>
 </div>
 
@@ -186,6 +149,11 @@
   <div>
     <h3>线上信号刷新</h3>
     <p>PolaNews 负责站内周期新闻，Hacker News、GitHub 和公开 RSS 作为外部信号补充；失败源会记录但不影响现有选题。</p>
+    {% if auto_refresh and auto_refresh.status == 'started' %}
+    <div class="refresh-meta">检测到选题池已过期，已在后台自动刷新近 {{ default_refresh_days }} 天线上信号；稍后刷新页面可查看新选题。</div>
+    {% elif auto_refresh and auto_refresh.status == 'locked' %}
+    <div class="refresh-meta">后台刷新正在进行中，稍后刷新页面可查看最新选题。</div>
+    {% endif %}
     {% if last_refresh %}
     <div class="refresh-meta">
       最近刷新：{{ last_refresh.refreshed_at }} · 周期 {{ last_refresh.days }} 天 · 信号 {{ last_refresh.signal_count }} 条 · 选题 {{ last_refresh.topic_count }} 个
@@ -224,25 +192,7 @@
     <div>
       <div class="topic-meta">{{ topic.date }} · {{ topic_statuses.get(topic.status, topic.status) }}</div>
       <h3>{{ topic.title }}</h3>
-      <div class="topic-angle">{{ topic.angle }}</div>
       <p class="topic-summary">{{ topic.summary }}</p>
-      <div class="topic-source-line">
-        <span class="source-pill">来源：{{ topic.source_type }}</span>
-        <span class="source-pill">证据 {{ topic.source_count }}</span>
-        <span class="source-pill">评分 {{ topic.score }}</span>
-      </div>
-      {% if topic.evidence_links %}
-      <div class="evidence-list">
-        {% for link in topic.evidence_links[:3] %}
-        <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.source }} · {{ link.title }}</a>
-        {% endfor %}
-      </div>
-      {% endif %}
-      <div class="topic-tags">
-        {% for tag in topic.tags %}
-        <span class="topic-tag">{{ tag }}</span>
-        {% endfor %}
-      </div>
     </div>
     <div class="topic-actions">
       <form class="inline-form" method="post" action="{{ url_for('admin_workbench.update_insight_topic_status', topic_id=topic.id) }}">
@@ -263,7 +213,7 @@
   <div class="topic-card">
     <div>
       <h3>暂无选题</h3>
-      <p class="topic-summary">当前筛选条件下没有选题，切回全部或从钉钉底料补充。</p>
+      <p class="topic-summary">当前筛选条件下没有选题，切回全部或刷新线上选题。</p>
     </div>
   </div>
   {% endfor %}

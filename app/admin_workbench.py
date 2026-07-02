@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 
 from .auth import login_required
 from .insight_topics import (
@@ -16,6 +16,7 @@ from .insight_topics import (
     load_topics,
     mark_topic_imported,
     refresh_topics_from_sources,
+    trigger_stale_refresh_in_background,
     topic_counts,
     update_topic_status,
 )
@@ -73,6 +74,9 @@ def workbench():
     blocked = _require_admin_redirect()
     if blocked:
         return blocked
+    auto_refresh = {"status": "skipped"}
+    if not current_app.config.get("TESTING"):
+        auto_refresh = trigger_stale_refresh_in_background(days=DEFAULT_REFRESH_DAYS)
     topics = load_topics()
     return render_template(
         "admin_workbench.html",
@@ -82,6 +86,7 @@ def workbench():
         topic_statuses=TOPIC_STATUSES,
         alidocs_source_url=ALIDOCS_SOURCE_URL,
         last_refresh=get_last_refresh(),
+        auto_refresh=auto_refresh,
     )
 
 
@@ -91,6 +96,9 @@ def insight_topics():
     blocked = _require_admin_redirect()
     if blocked:
         return blocked
+    auto_refresh = {"status": "skipped"}
+    if not current_app.config.get("TESTING"):
+        auto_refresh = trigger_stale_refresh_in_background(days=DEFAULT_REFRESH_DAYS)
     status = request.args.get("status", "").strip()
     topics = load_topics()
     if status in TOPIC_STATUSES:
@@ -104,6 +112,7 @@ def insight_topics():
         selected_status=status,
         alidocs_source_url=ALIDOCS_SOURCE_URL,
         last_refresh=get_last_refresh(),
+        auto_refresh=auto_refresh,
         refresh_days_options=ALLOWED_REFRESH_DAYS,
         default_refresh_days=DEFAULT_REFRESH_DAYS,
     )

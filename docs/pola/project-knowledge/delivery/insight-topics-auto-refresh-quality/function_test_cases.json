@@ -1,0 +1,73 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-06-30-insight-topics-auto-refresh-quality.md",
+    "docs/pola/project-knowledge/specs/2026-06-30-insight-topics-auto-refresh-quality-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-06-30-insight-topics-auto-refresh-quality-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "洞察选题后台自动刷新",
+      "source_refs": ["A1", "A2", "A3", "A5"],
+      "acceptance_ids": ["A1", "A2", "A3", "A5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "app/insight_topics.py",
+          "scenario": "last_refresh 超过阈值时启动后台刷新并释放文件锁",
+          "assertions": ["返回 started", "后台刷新收到 10 天参数", "锁文件释放"],
+          "expected": "页面入口可触发一次后台刷新且不会重复卡死",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "app/insight_topics.py",
+          "scenario": "真实网络采集近 10 天信号",
+          "assertions": ["signal_count > 0", "topic_count > 0"],
+          "expected": "可生成近期候选选题",
+          "command": ".venv/bin/python - <<'PY'\nfrom app.insight_topics import collect_topic_signals, signals_to_topics\nsignals, counts, errors = collect_topic_signals(10)\ntopics = signals_to_topics(signals)\nassert signals and topics\nprint(len(signals), len(topics), counts, errors)\nPY"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "选题质量聚焦",
+      "source_refs": ["A4", "A6"],
+      "acceptance_ids": ["A4", "A6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "app/insight_topics.py",
+          "scenario": "弱相关高热度 HN 内容与 AI workflow skill 内容同时进入候选",
+          "assertions": ["只保留 AI workflow skill 选题", "focus_score >= 45"],
+          "expected": "选题更贴近 AI 场景、实践和 Skill 解决方案",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RG-F2-001",
+          "target": "app/admin_workbench.py",
+          "scenario": "既有手动刷新、状态打标和导入上传仍通过",
+          "assertions": ["列表可访问", "状态可更新", "导入后 upload textarea 有长底稿"],
+          "expected": "旧路径不回归",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ]
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["IT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A6", "case_ids": ["RG-F2-001"]}
+  ]
+}

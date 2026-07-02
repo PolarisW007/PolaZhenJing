@@ -1,5 +1,7 @@
+import html
 import json
-from datetime import datetime, timezone
+import time
+from datetime import datetime, timedelta, timezone
 
 from app import create_app
 from app import insight_topics
@@ -17,6 +19,14 @@ def _admin_client(monkeypatch, tmp_path):
     return client, topics_file
 
 
+def _textarea_value(body: str, element_id: str = "content") -> str:
+    marker = f'id="{element_id}"'
+    assert marker in body
+    after_marker = body.split(marker, 1)[1]
+    raw_value = after_marker.split(">", 1)[1].split("</textarea>", 1)[0]
+    return html.unescape(raw_value)
+
+
 def test_admin_workbench_shows_core_modules(monkeypatch, tmp_path):
     client, _ = _admin_client(monkeypatch, tmp_path)
 
@@ -28,7 +38,7 @@ def test_admin_workbench_shows_core_modules(monkeypatch, tmp_path):
     assert "文章管理" in body
     assert "小王记忆管理" in body
     assert "洞察选题" in body
-    assert "钉钉底料" in body
+    assert "钉钉底料" not in body
     assert "公开线上信号" in body
     assert 'href="/admin/insights/topics"' in body
 
@@ -43,7 +53,15 @@ def test_insight_topics_list_and_status_update(monkeypatch, tmp_path):
     assert "内容生产 v2" in body
     assert "刷新线上选题" in body
     assert "PolaNews" in body
+    assert "好的洞察文章不负责制造确定性" not in body
     topic_id = insight_topics.load_topics()[0]["id"]
+    topic = insight_topics.load_topics()[0]
+    assert topic["draft_word_count"] >= 4500
+    assert "## 核心判断" in topic["draft_markdown"]
+    assert f"底稿 {topic['draft_word_count']}" not in body
+    assert f"来源：{topic['source_type']}" not in body
+    assert f"评分 {topic['score']}" not in body
+    assert topic["summary"] in body
 
     status_response = client.post(
         f"/admin/insights/topics/{topic_id}/status",
@@ -58,7 +76,8 @@ def test_insight_topics_list_and_status_update(monkeypatch, tmp_path):
 
 def test_import_topic_prefills_upload_markdown(monkeypatch, tmp_path):
     client, topics_file = _admin_client(monkeypatch, tmp_path)
-    topic_id = insight_topics.load_topics()[0]["id"]
+    topic = insight_topics.load_topics()[0]
+    topic_id = topic["id"]
 
     response = client.post(
         f"/admin/insights/topics/{topic_id}/import",
@@ -69,10 +88,19 @@ def test_import_topic_prefills_upload_markdown(monkeypatch, tmp_path):
     assert response.status_code == 200
     assert "已导入洞察选题" in body
     assert 'value="markdown" checked' in body
-    assert "## 洞察选题" in body
-    assert "## 写作角度" in body
-    assert "## 证据链接" in body
-    assert "状态：已导入" in body
+    assert "Markdown 源码模式已就绪，导入内容可直接编辑。" in body
+    textarea = _textarea_value(body)
+    assert topic["summary"] in textarea
+    assert insight_topics._draft_word_count(textarea) >= 5000
+    assert insight_topics._draft_word_count(textarea) <= 30000
+    assert "## 核心判断" in textarea
+    assert "好的洞察文章不负责制造确定性" in textarea
+    assert "## 洞察选题" not in textarea
+    assert "## 写作角度" not in textarea
+    assert "## 证据链接" not in textarea
+    assert "状态：已导入" not in textarea
+    assert "来源类型：" not in textarea
+    assert "选题评分：" not in textarea
     assert "content-production" in body
     payload = json.loads(topics_file.read_text(encoding="utf-8"))
     imported = next(topic for topic in payload["topics"] if topic["id"] == topic_id)
@@ -107,7 +135,7 @@ def test_refresh_topics_from_online_signals_preserves_status(monkeypatch, tmp_pa
                     source="polanews",
                     title=topic["title"],
                     url=topic["source_url"],
-                    summary="来自 PolaNews 的周期信号。",
+                    summary="来自 PolaNews 的 AI 工作流周期信号。",
                     published_at=datetime(2026, 6, 20, tzinfo=timezone.utc),
                     score=88,
                     tags=["ai", "trend"],
@@ -139,9 +167,11 @@ def test_refresh_topics_from_online_signals_preserves_status(monkeypatch, tmp_pa
     assert refreshed["status"] == "selected"
     assert refreshed["source_type"] == "polanews"
     assert refreshed["evidence_links"][0]["url"] == topic["source_url"]
+    assert refreshed["draft_word_count"] >= 4500
+    assert "## 核心判断" in refreshed["draft_markdown"]
 
 
-def test_refresh_topic_import_includes_evidence_links(monkeypatch, tmp_path):
+def test_refresh_topic_import_prefills_long_article_draft(monkeypatch, tmp_path):
     client, _ = _admin_client(monkeypatch, tmp_path)
 
     def fake_collect_topic_signals(days):
@@ -172,6 +202,78 @@ def test_refresh_topic_import_includes_evidence_links(monkeypatch, tmp_path):
     body = response.get_data(as_text=True)
 
     assert response.status_code == 200
-    assert "来源类型：Hacker News" in body
-    assert "## 证据链接" in body
-    assert "news.ycombinator.com/item?id=123" in body
+    textarea = _textarea_value(body)
+    assert "HN 上关于 LLM workflow 的讨论升温。" in textarea
+    assert insight_topics._draft_word_count(textarea) >= 5000
+    assert insight_topics._draft_word_count(textarea) <= 30000
+    assert "## 核心判断" in textarea
+    assert "## 洞察选题" not in textarea
+    assert "来源类型：Hacker News" not in textarea
+    assert "## 证据链接" not in textarea
+    assert "news.ycombinator.com/item?id=123" not in textarea
+
+
+def test_stale_topic_pool_triggers_background_refresh(monkeypatch, tmp_path):
+    topics_file = tmp_path / "insight_topics.json"
+    lock_file = tmp_path / "insight_topics_refresh.lock"
+    monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)
+    monkeypatch.setattr(insight_topics, "AUTO_REFRESH_LOCK_FILE", lock_file)
+
+    old_refresh = {
+        "refreshed_at": (datetime.now(timezone.utc) - timedelta(hours=30)).isoformat(),
+        "days": 10,
+        "signal_count": 0,
+        "topic_count": 0,
+        "source_counts": {},
+        "errors": [],
+    }
+    insight_topics.save_topics(insight_topics.load_topics(), metadata={"last_refresh": old_refresh})
+
+    calls = []
+
+    def fake_run(days):
+        calls.append(days)
+        insight_topics._release_auto_refresh_lock()
+
+    monkeypatch.setattr(insight_topics, "_run_auto_refresh", fake_run)
+    result = insight_topics.trigger_stale_refresh_in_background(days=10, max_age_hours=20)
+
+    deadline = time.time() + 2
+    while time.time() < deadline and not calls:
+        time.sleep(0.01)
+
+    assert result["status"] == "started"
+    assert calls == [10]
+    deadline = time.time() + 2
+    while time.time() < deadline and lock_file.exists():
+        time.sleep(0.01)
+    assert not lock_file.exists()
+
+
+def test_signals_to_topics_prefers_ai_application_and_practice_topics():
+    topics = insight_topics.signals_to_topics(
+        [
+            insight_topics.InsightSignal(
+                source="hackernews",
+                title="Show HN: Bored People Chat - Anonymous global chat room",
+                url="https://news.ycombinator.com/item?id=1",
+                summary="HN 近期讨论：大量评论，主题是匿名聊天室。",
+                published_at=datetime(2026, 6, 30, tzinfo=timezone.utc),
+                score=200,
+                tags=["hackernews"],
+            ),
+            insight_topics.InsightSignal(
+                source="github",
+                title="AI agent workflow skill for enterprise support",
+                url="https://github.com/example/agent-workflow-skill",
+                summary="把 AI 智能体、业务工作流和客户支持场景串成可复用 skill 的最佳实践。",
+                published_at=datetime(2026, 6, 30, tzinfo=timezone.utc),
+                score=40,
+                tags=["ai-agent", "workflow", "skill", "enterprise-ai"],
+            ),
+        ]
+    )
+
+    assert len(topics) == 1
+    assert topics[0]["source_url"] == "https://github.com/example/agent-workflow-skill"
+    assert topics[0]["focus_score"] >= 45
