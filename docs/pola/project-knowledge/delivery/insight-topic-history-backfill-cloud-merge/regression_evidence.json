@@ -34,6 +34,12 @@
       "cloud service: active",
       "cloud HTTPS smoke: /PolaZhenjing/admin/login=200, protected admin/topics=302, /PolaZhenjing/articles=200"
     ],
+    "dingtalk_sync": {
+      "status": "pass",
+      "devlog_doc_url": "https://alidocs.dingtalk.com/i/nodes/7QG4Yx2JpLwEz4m6hQMomb11J9dEq3XD",
+      "aitable_record_id": "7gqqGXH6H4",
+      "batch": "polazj-history-backfill-20260703"
+    },
     "notes": [
       "云端已知当前 HEAD ahead 21 behind 72，不能直接 git pull。",
       "直接 cherry-pick 21 个 ahead 提交的演练会把旧 app 代码带回，导致 /admin 路由测试 404，因此采用 GitHub 最新代码 + 生产文章/图片/数据资产保留的目录切换方式。",

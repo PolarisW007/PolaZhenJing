@@ -51,9 +51,9 @@
     "cloud: backfill added_count=29, topic_count=57, covered_count=33, missing_count=0",
     "cloud: py_compile + pytest 10 passed + function test cases harness PASS",
     "cloud: nginx smoke admin login=200, protected admin/topics=302, articles=200",
-    "cloud: polazj.service active"
+    "cloud: polazj.service active",
+    "dingtalk: devlog doc created at https://alidocs.dingtalk.com/i/nodes/7QG4Yx2JpLwEz4m6hQMomb11J9dEq3XD",
+    "dingtalk: AI table record created with recordId=7gqqGXH6H4"
   ],
-  "pending": [
-    "钉钉开发日志同步。"
-  ]
+  "pending": []
 }

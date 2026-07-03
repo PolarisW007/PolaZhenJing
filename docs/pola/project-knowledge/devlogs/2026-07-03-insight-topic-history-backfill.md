@@ -50,4 +50,7 @@
 
 ## 钉钉同步
 
-待同步；如 dws/网络/权限失败，将在最终回复中记录 blocker。
+- 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/7QG4Yx2JpLwEz4m6hQMomb11J9dEq3XD`。
+- AI 表格 `开发日志` 表记录：`recordId=7gqqGXH6H4`。
+- 同步批次：`polazj-history-backfill-20260703`。
+- 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
