@@ -1,0 +1,69 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/insight-topic-history-backfill-cloud-merge/function_test_cases.json",
+  "commands": [
+    {
+      "id": "T1",
+      "command": ".venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Python syntax for history backfill engine and CLI",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "语法检查通过"
+    },
+    {
+      "id": "T2",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Insight topics unit/integration regression",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "10 passed"
+    },
+    {
+      "id": "T3",
+      "command": ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Local dry-run summary",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "本地 seed 数据 target_days=33, covered_days_before=1, added_count=32, missing_days_after=[]"
+    },
+    {
+      "id": "T4",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/requirements/2026-07-03-insight-topic-history-backfill.md --prd docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-prd.md --spec docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-spec.md --sdd docs/pola/project-knowledge/architecture/2026-07-03-insight-topic-history-backfill-sdd.md --cases docs/pola/project-knowledge/delivery/insight-topic-history-backfill-cloud-merge/function_test_cases.json",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "A2A function test case coverage harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: function test cases cover 8 documented acceptance id(s), 3 feature(s), 7 case(s)."
+    },
+    {
+      "id": "T5",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Pola skill framework harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: Pola skill harness found no issues."
+    },
+    {
+      "id": "T6",
+      "command": "git diff --check",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Whitespace and patch hygiene",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "通过"
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001", "IT-F3-001"], "commands": ["T2", "T3", "T4"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "RG-F1-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": ["T2", "T3", "T4"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F1-001", "RG-F1-001"], "commands": ["T2", "T4"]},
+    {"acceptance_id": "A5", "case_ids": ["IT-F3-001"], "commands": ["T4"]},
+    {"acceptance_id": "A6", "case_ids": ["IT-F1-001", "RG-F1-001", "IT-F2-001", "IT-F3-001"], "commands": ["T1", "T2", "T3", "T4"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F1-001", "UT-F2-001"], "commands": ["T1", "T2", "T4"]},
+    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"], "commands": ["T4"]}
+  ]
+}

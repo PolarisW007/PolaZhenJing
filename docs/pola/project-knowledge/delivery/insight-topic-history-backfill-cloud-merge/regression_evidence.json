@@ -1,0 +1,21 @@
+{
+  "slug": "insight-topic-history-backfill-cloud-merge",
+  "updated_at": "2026-07-03",
+  "local": {
+    "py_compile": "pass",
+    "pytest": "10 passed",
+    "dry_run": {
+      "target_days": 33,
+      "covered_days_before": 1,
+      "added_count": 32,
+      "missing_days_after": []
+    }
+  },
+  "cloud": {
+    "status": "pending",
+    "notes": [
+      "云端已知当前 HEAD ahead 21 behind 72，不能直接 git pull。",
+      "云端已知 2026-06-01 至 2026-07-03 选题只覆盖 4/33 天，预计补 29 天。"
+    ]
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-07-03-insight-topic-history-backfill.md",
+    "docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-prd.md",
+    "docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-07-03-insight-topic-history-backfill-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "历史日期幂等回填",
+      "source_refs": [
+        "requirements/2026-07-03-insight-topic-history-backfill.md#验收标准",
+        "specs/2026-07-03-insight-topic-history-backfill-spec.md#数据写入规则"
+      ],
+      "acceptance_ids": ["A1", "A2", "A4", "A7"],
+      "risk": "P1",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_backfill_topics_for_date_range_fills_missing_days",
+          "scenario": "已有 2026-06-20 selected 选题，回填 2026-06-18 到 2026-06-20",
+          "assertions": [
+            "只新增 2026-06-18 和 2026-06-19",
+            "2026-06-20 原 topic id 和 selected 状态保持不变",
+            "回填 topic source_type 为 manual_backfill",
+            "回填 topic draft_word_count >= 4500",
+            "last_backfill missing_days_after 为空"
+          ],
+          "expected": "历史回填幂等补缺且保留运营状态",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_backfill_topics_for_date_range_fills_missing_days -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "scripts/backfill_insight_topics.py",
+          "scenario": "本地真实 data/insight_topics.json dry-run 2026-06-01 到 2026-07-03",
+          "assertions": [
+            "输出 target_days=33",
+            "输出 added_dates",
+            "输出 missing_days_after=[]",
+            "dry-run 不写数据文件"
+          ],
+          "expected": "生产执行前可预估补全结果",
+          "command": ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json"
+        }
+      ],
+      "regression_cases": [
+        {
+          "id": "RG-F1-001",
+          "target": "tests/test_admin_workbench_insight_topics.py",
+          "scenario": "回归洞察选题列表、状态更新、导入上传、自动刷新",
+          "assertions": [
+            "10 个相关测试通过",
+            "导入上传仍使用长底稿",
+            "刷新逻辑仍保留状态"
+          ],
+          "expected": "旧选题流程不回归",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "name": "CLI dry-run 与持久化摘要",
+      "source_refs": [
+        "specs/2026-07-03-insight-topic-history-backfill-prd.md#功能行为",
+        "specs/2026-07-03-insight-topic-history-backfill-spec.md#输出字段"
+      ],
+      "acceptance_ids": ["A3", "A6", "A7"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_backfill_topics_for_date_range_dry_run_does_not_write",
+          "scenario": "空 topic 文件 dry-run 回填 2 天",
+          "assertions": [
+            "result added_count=2",
+            "result persisted=false",
+            "data 文件 topics 仍为空",
+            "last_backfill 不写入"
+          ],
+          "expected": "dry-run 只计算不落盘",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_backfill_topics_for_date_range_dry_run_does_not_write -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F2-001",
+          "target": "scripts/backfill_insight_topics.py --json",
+          "scenario": "CLI 输出机器可读摘要",
+          "assertions": [
+            "包含 missing_days_before",
+            "包含 added_dates",
+            "包含 missing_days_after",
+            "包含 total_topics"
+          ],
+          "expected": "发布记录可直接引用 CLI JSON",
+          "command": ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "云端安全合并与发布门禁",
+      "source_refs": [
+        "architecture/2026-07-03-insight-topic-history-backfill-sdd.md#云端安全合并策略",
+        "release/2026-07-03-insight-topic-history-backfill-cloud-merge.md#门禁"
+      ],
+      "acceptance_ids": ["A5", "A6", "A8"],
+      "risk": "P1",
+      "unit_cases": [],
+      "unit_not_applicable_reason": "云端分支合并和生产目录备份属于运维发布门禁，不能用本地单元测试替代。",
+      "integration_cases": [
+        {
+          "id": "IT-F3-001",
+          "target": "cloud /PolaZhenjing",
+          "scenario": "云端创建备份分支、备份 data/insight_topics.json、合并演练后执行回填",
+          "assertions": [
+            "备份分支存在",
+            "备份 JSON 存在",
+            "不执行未备份的 hard reset",
+            "回填后 33 天覆盖",
+            "polazj.service active"
+          ],
+          "expected": "云端最新代码和历史选题安全交付",
+          "manual_verification": "执行 release/2026-07-03-insight-topic-history-backfill-cloud-merge.md 中的发布前、发布后命令并记录输出摘要。"
+        }
+      ],
+      "regression_cases": [
+        {
+          "id": "RG-F3-001",
+          "target": "cloud HTTP smoke",
+          "scenario": "部署后访问登录页、管理工作台保护跳转、洞察选题入口和公共文章页",
+          "assertions": [
+            "登录页 HTTP 200",
+            "未登录管理页保持 302",
+            "服务状态 active",
+            "选题数据覆盖 2026-06-01 到 2026-07-03"
+          ],
+          "expected": "旧入口与线上服务不回归",
+          "manual_verification": "使用 curl 和云端 Python 统计脚本记录结果。"
+        }
+      ]
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001", "IT-F3-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "RG-F1-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F1-001", "RG-F1-001"]},
+    {"acceptance_id": "A5", "case_ids": ["IT-F3-001"]},
+    {"acceptance_id": "A6", "case_ids": ["IT-F1-001", "RG-F1-001", "IT-F2-001", "IT-F3-001"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F1-001", "UT-F2-001"]},
+    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"]}
+  ]
+}

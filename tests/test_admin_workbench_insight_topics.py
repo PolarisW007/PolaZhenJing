@@ -213,6 +213,59 @@ def test_refresh_topic_import_prefills_long_article_draft(monkeypatch, tmp_path)
     assert "news.ycombinator.com/item?id=123" not in textarea
 
 
+def test_backfill_topics_for_date_range_fills_missing_days(monkeypatch, tmp_path):
+    topics_file = tmp_path / "insight_topics.json"
+    monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)
+    existing_topic = insight_topics._normalize_topic(
+        {
+            "date": "2026-06-20",
+            "title": "已有的 6 月 20 日选题",
+            "angle": "保留线上已有选题，不被历史回填覆盖。",
+            "summary": "这条选题代表线上已经存在的运营数据。",
+            "tags": ["existing"],
+            "status": "selected",
+            "source_url": "https://example.com/existing",
+            "source_type": "manual",
+        }
+    )
+    insight_topics.save_topics([existing_topic])
+
+    result = insight_topics.backfill_topics_for_date_range("2026-06-18", "2026-06-20")
+    payload = json.loads(topics_file.read_text(encoding="utf-8"))
+    topics = payload["topics"]
+    topics_by_date = {topic["date"]: topic for topic in topics}
+    backfilled = [topic for topic in topics if topic["source_type"] == "manual_backfill"]
+
+    assert result["added_count"] == 2
+    assert result["added_dates"] == ["2026-06-18", "2026-06-19"]
+    assert result["missing_days_after"] == []
+    assert topics_by_date["2026-06-20"]["id"] == existing_topic["id"]
+    assert topics_by_date["2026-06-20"]["status"] == "selected"
+    assert len(backfilled) == 2
+    assert {topic["date"] for topic in backfilled} == {"2026-06-18", "2026-06-19"}
+    assert all(topic["draft_word_count"] >= 4500 for topic in backfilled)
+    assert payload["last_backfill"]["added_count"] == 2
+    assert payload["last_backfill"]["missing_days_after"] == []
+
+
+def test_backfill_topics_for_date_range_dry_run_does_not_write(monkeypatch, tmp_path):
+    topics_file = tmp_path / "insight_topics.json"
+    monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)
+    insight_topics.save_topics([])
+
+    result = insight_topics.backfill_topics_for_date_range(
+        "2026-07-01",
+        "2026-07-02",
+        persist=False,
+    )
+    payload = json.loads(topics_file.read_text(encoding="utf-8"))
+
+    assert result["added_count"] == 2
+    assert result["persisted"] is False
+    assert payload["topics"] == []
+    assert "last_backfill" not in payload
+
+
 def test_stale_topic_pool_triggers_background_refresh(monkeypatch, tmp_path):
     topics_file = tmp_path / "insight_topics.json"
     lock_file = tmp_path / "insight_topics_refresh.lock"

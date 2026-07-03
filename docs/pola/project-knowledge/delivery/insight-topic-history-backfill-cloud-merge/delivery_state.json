@@ -1,0 +1,55 @@
+{
+  "name": "历史每日选题回填与云端安全合并",
+  "slug": "insight-topic-history-backfill-cloud-merge",
+  "status": "in_progress",
+  "risk_level": "P1",
+  "updated_at": "2026-07-03",
+  "steps": [
+    {
+      "name": "需求与边界",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/requirements/2026-07-03-insight-topic-history-backfill.md"
+    },
+    {
+      "name": "PRD / SPEC",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-prd.md; docs/pola/project-knowledge/specs/2026-07-03-insight-topic-history-backfill-spec.md"
+    },
+    {
+      "name": "SDD / 发布方案",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/architecture/2026-07-03-insight-topic-history-backfill-sdd.md; docs/pola/project-knowledge/release/2026-07-03-insight-topic-history-backfill-cloud-merge.md"
+    },
+    {
+      "name": "实现",
+      "status": "done",
+      "artifact": "app/insight_topics.py; scripts/backfill_insight_topics.py"
+    },
+    {
+      "name": "本地测试",
+      "status": "done",
+      "artifact": "tests/test_admin_workbench_insight_topics.py; docs/pola/project-knowledge/test-reports/2026-07-03-insight-topic-history-backfill-test.md"
+    },
+    {
+      "name": "云端合并与回填",
+      "status": "pending",
+      "artifact": "docs/pola/project-knowledge/release/2026-07-03-insight-topic-history-backfill-cloud-merge.md"
+    }
+  ],
+  "implemented": [
+    "新增历史回填 topic 生成器，按日期幂等补齐缺失每日选题。",
+    "新增 dry-run / JSON CLI，便于生产执行前后留证据。",
+    "新增 metadata 保留式 save_topics，避免 last_refresh 与 last_backfill 相互覆盖。",
+    "新增测试和 A2A function test cases。"
+  ],
+  "validation": [
+    ".venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py",
+    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+    ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json"
+  ],
+  "pending": [
+    "本地 commit/push。",
+    "云端备份、合并演练、部署、回填和线上 smoke。",
+    "钉钉开发日志同步。"
+  ]
+}

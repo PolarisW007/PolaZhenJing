@@ -11,7 +11,7 @@ import threading
 import time
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -41,6 +41,8 @@ REQUEST_TIMEOUT = 8
 TARGET_DRAFT_CHARS = 5000
 MIN_DRAFT_CHARS = 4500
 MAX_DRAFT_CHARS = 5600
+MAX_BACKFILL_DAYS = 366
+MAX_BACKFILL_TOPICS_PER_DAY = 3
 
 
 def _env_float(name: str, default: float) -> float:
@@ -98,8 +100,42 @@ SOURCE_LABELS = {
     "google_ai_blog": "Google AI",
     "mixed": "多源聚合",
     "manual_seed": "本地种子",
+    "manual_backfill": "历史回填",
     "manual": "人工维护",
 }
+
+BACKFILL_TOPIC_THEMES = [
+    {
+        "title": "AI 进入真实工作流后的采用门槛",
+        "angle": "从权限、成本、协作习惯和责任归属切入，判断 AI 能否从演示进入日常流程。",
+        "summary": "真正值得关注的不是单个工具是否惊艳，而是它能否稳定进入组织流程，并改变任务分配和判断形成方式。",
+        "tags": ["ai-workflow", "adoption", "organization"],
+    },
+    {
+        "title": "智能体产品从工具走向交付结果",
+        "angle": "观察 Agent 如何把多步骤任务、历史上下文和业务约束组合成可复用的结果交付能力。",
+        "summary": "智能体的竞争不只在模型能力，而在任务边界、失败恢复、权限控制和可追踪结果能否被工程化。",
+        "tags": ["ai-agent", "product", "delivery"],
+    },
+    {
+        "title": "内容生产从灵感驱动走向证据驱动",
+        "angle": "把每日信号、选题判断、证据链接和作者腔调串成可复盘的内容生产系统。",
+        "summary": "内容团队需要的不是更多模板，而是能沉淀判断、保留证据、支持复盘的生产链路。",
+        "tags": ["content-production", "insight", "evidence"],
+    },
+    {
+        "title": "大模型应用的工程稳定性成为产品体验",
+        "angle": "从队列、超时、幂等、日志和降级策略出发，讨论 AI 功能为什么必须被当成生产系统建设。",
+        "summary": "越是看起来像智能体验的问题，越需要底层工程能力兜住，稳定性会直接决定用户是否愿意托付真实任务。",
+        "tags": ["llmops", "reliability", "engineering"],
+    },
+    {
+        "title": "个人效率工具正在重写专业能力边界",
+        "angle": "观察 AI 编码、写作、研究和自动化工具如何改变个人的能力半径与协作方式。",
+        "summary": "AI 工具提升的不只是速度，也会改变一个人能独立承担的任务类型，以及团队内的分工结构。",
+        "tags": ["personal-ai", "productivity", "ai-coding"],
+    },
+]
 
 KEYWORD_TAGS = {
     "agent": "ai-agent",
@@ -364,6 +400,29 @@ def _parse_datetime(value: Any) -> datetime | None:
         except ValueError:
             continue
     return None
+
+
+def _parse_date(value: Any) -> date:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value or "").strip()
+    try:
+        return date.fromisoformat(text)
+    except ValueError as exc:
+        raise ValueError(f"日期格式应为 YYYY-MM-DD：{value}") from exc
+
+
+def _iter_dates(start_date: Any, end_date: Any) -> list[date]:
+    start = _parse_date(start_date)
+    end = _parse_date(end_date)
+    if start > end:
+        raise ValueError("开始日期不能晚于结束日期。")
+    span_days = (end - start).days + 1
+    if span_days > MAX_BACKFILL_DAYS:
+        raise ValueError(f"一次历史回填最多支持 {MAX_BACKFILL_DAYS} 天。")
+    return [start + timedelta(days=offset) for offset in range(span_days)]
 
 
 def _within_days(value: datetime | None, days: int) -> bool:
@@ -836,6 +895,108 @@ def _seed_topics() -> list[dict]:
     return [_normalize_topic(topic) for topic in deepcopy(DEFAULT_TOPICS)]
 
 
+def _topics_from_payload(payload: dict) -> list[dict]:
+    raw_topics = payload.get("topics") or []
+    return sorted(
+        [_normalize_topic(topic) for topic in raw_topics if isinstance(topic, dict)],
+        key=_topic_sort_key,
+        reverse=True,
+    )
+
+
+def _backfill_topic_for_date(day: date, sequence: int = 1) -> dict:
+    theme = BACKFILL_TOPIC_THEMES[(day.toordinal() + sequence - 1) % len(BACKFILL_TOPIC_THEMES)]
+    sequence_suffix = "" if sequence == 1 else f"（方向 {sequence}）"
+    date_text = day.isoformat()
+    title = f"{date_text} 每日洞察：{theme['title']}{sequence_suffix}"
+    return _normalize_topic(
+        {
+            "date": date_text,
+            "title": title,
+            "angle": theme["angle"],
+            "summary": theme["summary"],
+            "tags": ["daily-topic", "history-backfill", *theme["tags"]],
+            "status": "new",
+            "source_url": ALIDOCS_SOURCE_URL,
+            "source_type": "manual_backfill",
+            "source_count": 1,
+            "evidence_links": [
+                {
+                    "title": "PolaZhenJing 历史每日选题回填记录",
+                    "url": ALIDOCS_SOURCE_URL,
+                    "source": "钉钉底料",
+                }
+            ],
+            "score": 50 + (day.toordinal() % 20),
+            "focus_score": 55,
+            "generated_at": _now(),
+            "cluster_key": _cluster_key(title, theme["tags"]),
+        }
+    )
+
+
+def backfill_topics_for_date_range(
+    start_date: Any,
+    end_date: Any,
+    topics_per_day: int = 1,
+    persist: bool = True,
+) -> dict:
+    """Add deterministic historical daily topics for dates not already covered."""
+    try:
+        topics_per_day = int(topics_per_day)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("每天回填数量必须是整数。") from exc
+    if topics_per_day < 1 or topics_per_day > MAX_BACKFILL_TOPICS_PER_DAY:
+        raise ValueError(f"每天回填数量必须在 1 到 {MAX_BACKFILL_TOPICS_PER_DAY} 之间。")
+
+    target_days = _iter_dates(start_date, end_date)
+    target_dates = [day.isoformat() for day in target_days]
+    existing_topics = _topics_from_payload(_load_payload())
+    existing_dates = {str(topic.get("date") or "") for topic in existing_topics}
+    missing_before = [date_text for date_text in target_dates if date_text not in existing_dates]
+
+    additions: list[dict] = []
+    for day in target_days:
+        date_text = day.isoformat()
+        if date_text in existing_dates:
+            continue
+        for sequence in range(1, topics_per_day + 1):
+            additions.append(_backfill_topic_for_date(day, sequence=sequence))
+
+    final_topics = sorted([*existing_topics, *additions], key=_topic_sort_key, reverse=True)
+    final_dates = {str(topic.get("date") or "") for topic in final_topics}
+    missing_after = [date_text for date_text in target_dates if date_text not in final_dates]
+    last_backfill = {
+        "backfilled_at": _now(),
+        "start_date": target_dates[0],
+        "end_date": target_dates[-1],
+        "topics_per_day": topics_per_day,
+        "target_days": len(target_dates),
+        "covered_days_before": len(target_dates) - len(missing_before),
+        "missing_days_before": missing_before,
+        "added_count": len(additions),
+        "added_dates": sorted({topic["date"] for topic in additions}),
+        "missing_days_after": missing_after,
+        "persisted": bool(persist),
+    }
+    if persist and additions:
+        save_topics(final_topics, metadata={"last_backfill": last_backfill})
+
+    return {
+        "start_date": target_dates[0],
+        "end_date": target_dates[-1],
+        "target_days": len(target_dates),
+        "topics_per_day": topics_per_day,
+        "covered_days_before": len(target_dates) - len(missing_before),
+        "missing_days_before": missing_before,
+        "added_count": len(additions),
+        "added_dates": last_backfill["added_dates"],
+        "missing_days_after": missing_after,
+        "total_topics": len(final_topics),
+        "persisted": bool(persist and additions),
+    }
+
+
 def collect_polanews_signals(days: int, limit: int = MAX_SIGNALS_PER_SOURCE) -> list[InsightSignal]:
     articles: list[dict] = []
     seen_ids: set[str] = set()
@@ -1192,10 +1353,7 @@ def load_topics() -> list[dict]:
         topics = _seed_topics()
         save_topics(topics)
         return topics
-    payload = _load_payload()
-    raw_topics = payload.get("topics") or []
-    topics = [_normalize_topic(topic) for topic in raw_topics if isinstance(topic, dict)]
-    return sorted(topics, key=_topic_sort_key, reverse=True)
+    return _topics_from_payload(_load_payload())
 
 
 def save_topics(topics: list[dict], metadata: dict | None = None) -> None:
@@ -1204,11 +1362,16 @@ def save_topics(topics: list[dict], metadata: dict | None = None) -> None:
     metadata = metadata or {}
     INSIGHT_TOPICS_FILE.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "source_url": ALIDOCS_SOURCE_URL,
+        "source_url": existing_payload.get("source_url") or ALIDOCS_SOURCE_URL,
         "updated_at": _now(),
-        "last_refresh": metadata.get("last_refresh") or existing_payload.get("last_refresh"),
-        "topics": normalized,
     }
+    for key, value in existing_payload.items():
+        if key not in {"source_url", "updated_at", "topics"} and value is not None:
+            payload[key] = value
+    for key, value in metadata.items():
+        if key not in {"source_url", "updated_at", "topics"} and value is not None:
+            payload[key] = value
+    payload["topics"] = normalized
     tmp_path = INSIGHT_TOPICS_FILE.with_suffix(".json.tmp")
     tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp_path, INSIGHT_TOPICS_FILE)
