@@ -12,10 +12,32 @@
     }
   },
   "cloud": {
-    "status": "pending",
+    "status": "pass",
+    "head": "3be6d82cded0f102fc18f61ee37d3ab1803c895e",
+    "backup_branch": "backup/pre-history-backfill-20260703231809",
+    "backup_dir": "/root/polazj-backups/history-backfill-20260703231809",
+    "pre_deploy_dir": "/PolaZhenjing.pre-history-backfill-20260703231809",
+    "backfill": {
+      "target_days": 33,
+      "covered_days_before": 4,
+      "added_count": 29,
+      "total_topics": 57,
+      "covered_count": 33,
+      "missing_count": 0,
+      "manual_backfill": 29,
+      "manual_backfill_min_words": 5026
+    },
+    "validation": [
+      "cloud py_compile: pass",
+      "cloud pytest tests/test_admin_workbench_insight_topics.py -q: 10 passed",
+      "cloud function test cases harness: PASS",
+      "cloud service: active",
+      "cloud HTTPS smoke: /PolaZhenjing/admin/login=200, protected admin/topics=302, /PolaZhenjing/articles=200"
+    ],
     "notes": [
       "云端已知当前 HEAD ahead 21 behind 72，不能直接 git pull。",
-      "云端已知 2026-06-01 至 2026-07-03 选题只覆盖 4/33 天，预计补 29 天。"
+      "直接 cherry-pick 21 个 ahead 提交的演练会把旧 app 代码带回，导致 /admin 路由测试 404，因此采用 GitHub 最新代码 + 生产文章/图片/数据资产保留的目录切换方式。",
+      "发布后 git HEAD 对齐 GitHub main；生产文章、图片、data/insight_topics.json 和 data/theme.json 作为运行数据保留在工作区。"
     ]
   }
 }

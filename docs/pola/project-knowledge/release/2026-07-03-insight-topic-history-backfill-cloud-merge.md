@@ -39,6 +39,16 @@ cd /PolaZhenjing
 - 统计 `2026-06-01` 到 `2026-07-03` 覆盖日期。
 - HTTP smoke：登录页、管理工作台跳转、选题入口、公共文章页面。
 
+## 实际发布记录
+
+- 发布时间：2026-07-03 23:24 CST。
+- 备份分支：`backup/pre-history-backfill-20260703231809`。
+- 备份目录：`/root/polazj-backups/history-backfill-20260703231809`。
+- 旧目录保留：`/PolaZhenjing.pre-history-backfill-20260703231809`。
+- 发布后 HEAD：`3be6d82cded0f102fc18f61ee37d3ab1803c895e`。
+- 回填：补 29 天，选题总数 57，覆盖 33/33 天。
+- 验证：py_compile 通过，pytest 10 passed，function test cases Harness PASS，HTTPS smoke 通过，服务 active。
+
 ## 回滚
 
 ```bash

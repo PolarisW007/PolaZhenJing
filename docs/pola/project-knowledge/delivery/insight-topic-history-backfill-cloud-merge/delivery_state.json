@@ -1,7 +1,7 @@
 {
   "name": "历史每日选题回填与云端安全合并",
   "slug": "insight-topic-history-backfill-cloud-merge",
-  "status": "in_progress",
+  "status": "deployed",
   "risk_level": "P1",
   "updated_at": "2026-07-03",
   "steps": [
@@ -32,7 +32,7 @@
     },
     {
       "name": "云端合并与回填",
-      "status": "pending",
+      "status": "done",
       "artifact": "docs/pola/project-knowledge/release/2026-07-03-insight-topic-history-backfill-cloud-merge.md"
     }
   ],
@@ -45,11 +45,15 @@
   "validation": [
     ".venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py",
     ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
-    ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json"
+    ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json",
+    "cloud: backup branch backup/pre-history-backfill-20260703231809",
+    "cloud: deployed /PolaZhenjing at 3be6d82cded0f102fc18f61ee37d3ab1803c895e",
+    "cloud: backfill added_count=29, topic_count=57, covered_count=33, missing_count=0",
+    "cloud: py_compile + pytest 10 passed + function test cases harness PASS",
+    "cloud: nginx smoke admin login=200, protected admin/topics=302, articles=200",
+    "cloud: polazj.service active"
   ],
   "pending": [
-    "本地 commit/push。",
-    "云端备份、合并演练、部署、回填和线上 smoke。",
     "钉钉开发日志同步。"
   ]
 }

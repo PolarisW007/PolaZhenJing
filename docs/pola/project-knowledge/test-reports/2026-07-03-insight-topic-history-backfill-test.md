@@ -20,6 +20,14 @@
 
 ## 待补充
 
-- 云端合并演练结果。
-- 云端回填执行结果。
-- 线上 HTTP smoke。
+无。
+
+## 云端测试
+
+- 合并演练：直接 cherry-pick 云端 21 个 ahead 提交可自动合成，但会带入旧 app 代码并导致 6 个 `/admin/*` 路由相关测试 404；因此未采用该路径。
+- 安全发布：使用 GitHub 最新代码，保留生产文章/图片/data 资产，目录切换后启动服务。
+- 云端 `.venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py`：通过。
+- 云端 `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：10 passed。
+- 云端 function test cases Harness：PASS。
+- 回填结果：`topic_count=57`，`covered_count=33`，`missing_count=0`，`manual_backfill=29`，`manual_backfill_min_words=5026`。
+- HTTPS smoke：`/PolaZhenjing/admin/login` 200，受保护后台和选题入口 302，`/PolaZhenjing/articles` 200。

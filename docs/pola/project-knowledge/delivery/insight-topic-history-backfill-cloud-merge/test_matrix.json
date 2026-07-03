@@ -54,6 +54,42 @@
       "status": "pass",
       "exit_code": 0,
       "summary": "通过"
+    },
+    {
+      "id": "T7",
+      "command": "cloud: .venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py && .venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "cwd": "/PolaZhenjing",
+      "scope": "Cloud syntax and insight topics regression",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "10 passed"
+    },
+    {
+      "id": "T8",
+      "command": "cloud: /tmp/validate_function_test_cases.py ...",
+      "cwd": "/PolaZhenjing",
+      "scope": "Cloud A2A function test cases harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: function test cases cover 8 documented acceptance id(s), 3 feature(s), 7 case(s)."
+    },
+    {
+      "id": "T9",
+      "command": "cloud: scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --json",
+      "cwd": "/PolaZhenjing.release-20260703231809",
+      "scope": "Production historical topic backfill",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "added_count=29, total_topics=57, missing_days_after=[]"
+    },
+    {
+      "id": "T10",
+      "command": "cloud: curl smoke via https://aipd.me/PolaZhenjing/*",
+      "cwd": "/PolaZhenjing",
+      "scope": "Production HTTP smoke",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "admin/login=200, admin/workbench=302, admin/insights/topics=302, articles=200"
     }
   ],
   "coverage": [
