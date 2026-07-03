@@ -36,4 +36,6 @@
 
 ## 钉钉同步
 
-待同步。
+- 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/b9Y4gmKWrPXEL936F4NKgLpMJGXn6lpz`。
+- AI 表格 `开发日志` 表记录：`recordId=Bp9uVjiVKS`。
+- 同步批次：`polazj-cloud-test-tagfix-20260704`。
