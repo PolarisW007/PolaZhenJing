@@ -250,6 +250,30 @@ def test_signals_to_topics_generates_social_operation_blueprints_not_news_titles
     assert "## 社媒运营蓝图" in topic["draft_markdown"]
 
 
+def test_rss_sources_cover_social_operator_source_mix():
+    sources = {feed["source"]: feed for feed in insight_topics.RSS_SOURCES}
+    required_sources = {
+        "deepmind_blog",
+        "microsoft_official_blog",
+        "aws_ml_blog",
+        "github_ai_ml_blog",
+        "sequoia_stories",
+    }
+
+    assert required_sources.issubset(sources)
+    for source in required_sources:
+        feed = sources[source]
+        assert feed["feed_url"].startswith("https://")
+        assert feed["label"]
+        assert feed["tags"]
+        assert source in insight_topics.SOURCE_LABELS
+
+    all_tags = {tag for feed in sources.values() for tag in feed.get("tags", [])}
+    assert {"enterprise-ai", "best-practice", "business-model", "developer-tool", "research"}.issubset(
+        all_tags
+    )
+
+
 def test_backfill_topics_for_date_range_fills_missing_days(monkeypatch, tmp_path):
     topics_file = tmp_path / "insight_topics.json"
     monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)

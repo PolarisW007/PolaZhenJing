@@ -113,6 +113,38 @@
     },
     {
       "id": "F5",
+      "name": "数据源结构补强",
+      "source_refs": [
+        "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md#验收标准",
+        "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md#数据源结构",
+        "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md#数据源更新策略"
+      ],
+      "acceptance_ids": ["A8", "A9"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_rss_sources_cover_social_operator_source_mix",
+          "scenario": "检查 RSS_SOURCES 的新增来源结构",
+          "assertions": ["新增来源覆盖企业、工程、商业和研究标签", "新增来源都有 HTTPS feed_url、label、tags", "新增来源都有 SOURCE_LABELS 显示名"],
+          "expected": "数据源池能支撑社媒运营选题，而不是只覆盖新闻发布",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_rss_sources_cover_social_operator_source_mix -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F5-001",
+          "target": "app.insight_topics.collect_rss_signals",
+          "scenario": "只读运行 RSS live smoke，不写 data/insight_topics.json",
+          "assertions": ["30 天窗口可采集到新增源信号", "单源失败不会中断其他源", "输出包含 source_counts 证据"],
+          "expected": "新增源可被当前采集器解析",
+          "command": ".venv/bin/python - <<'PY'\nfrom collections import Counter\nfrom app.insight_topics import collect_rss_signals\nsignals = collect_rss_signals(days=30, limit_per_feed=4)\ncounts = Counter(signal.source for signal in signals)\nrequired = {'aws_ml_blog', 'github_ai_ml_blog', 'microsoft_official_blog'}\nassert required.issubset(counts)\nprint(len(signals), dict(counts))\nPY"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F6",
       "name": "Harness 交付证据",
       "source_refs": [
         "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md#验收标准",
@@ -122,10 +154,10 @@
       "risk": "P3",
       "unit_cases": [
         {
-          "id": "UT-F5-001",
+          "id": "UT-F6-001",
           "target": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
           "scenario": "运行 Pola function test case harness",
-          "assertions": ["A1-A7 均被用例覆盖"],
+          "assertions": ["A1-A9 均被用例覆盖"],
           "expected": "交付证据完整",
           "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json"
         }
@@ -141,6 +173,8 @@
     {"acceptance_id": "A4", "case_ids": ["UT-F2-001", "IT-F2-001"]},
     {"acceptance_id": "A5", "case_ids": ["UT-F3-001"]},
     {"acceptance_id": "A6", "case_ids": ["UT-F4-001", "RG-F4-001"]},
-    {"acceptance_id": "A7", "case_ids": ["UT-F5-001"]}
+    {"acceptance_id": "A7", "case_ids": ["UT-F6-001"]},
+    {"acceptance_id": "A8", "case_ids": ["UT-F5-001", "IT-F5-001"]},
+    {"acceptance_id": "A9", "case_ids": ["UT-F5-001"]}
   ]
 }

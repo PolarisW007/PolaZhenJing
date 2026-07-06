@@ -66,6 +66,30 @@ flowchart TD
 | `app/templates/insight_topics.html` | 展示社媒运营选题池、内容赛道、钩子、读者、核心问题、建议结构和来源信号。 |
 | `tests/test_admin_workbench_insight_topics.py` | 更新旧断言，新增“非新闻标题/蓝图字段/页面展示”测试。 |
 
+## 数据源更新策略
+
+本轮 follow-up 对数据源做结构化补强：
+
+| 来源 | 接入方式 | 主要覆盖 | 采用理由 |
+| --- | --- | --- | --- |
+| Google DeepMind Blog | RSS | 模型能力、研究产品化 | 补足 Google AI 通用博客之外的一线模型/研究信号。 |
+| Microsoft Official Blog | RSS | 企业采用、组织实践、Copilot/平台商业化 | 更容易产出组织采用和商业思考类选题。 |
+| AWS Machine Learning Blog | RSS | 云端 AI 架构、Agent/Bedrock 实践、行业场景 | 覆盖可复用的工程实践和真实业务场景。 |
+| GitHub AI & ML Blog | RSS | 开发者工具、Copilot、工程实践 | 支撑最佳实践、AI coding、开发者工作流选题。 |
+| Sequoia Stories | RSS | 创业、市场、商业模式 | 补足商业模式和创业观察，减少纯发布稿倾向。 |
+
+未接入来源：
+
+- Meta AI：官方博客可读，但未发现稳定官方 RSS，本轮不引入网页解析或第三方 RSSHub。
+- LangChain、LlamaIndex：当前官方站点 RSS/Feed 路径验证不稳定或不可用，本轮不引入非官方 feed。
+- Vercel Blog：Atom 可解析但全站 feed 体积较大且主题过宽，本轮暂不加入同步刷新链路。
+
+稳定性约束：
+
+- 继续使用既有 `collect_rss_signals()`，不新增抓取进程。
+- 单个 RSS 源失败继续被捕获，刷新保留旧选题池。
+- 新源只增加 `RSS_SOURCES` 配置、`SOURCE_LABELS` 显示名和测试，不改变生产数据文件。
+
 ## 兼容策略
 
 - 旧 JSON 缺字段时 `_normalize_topic` 自动补齐。
@@ -76,7 +100,7 @@ flowchart TD
 
 ## 性能与资源
 
-- 不新增网络请求和采集源。
+- 数据源 follow-up 新增 5 个 RSS/Atom 源，但不新增采集类型、模型调用、队列或后台进程。
 - 不新增模型调用。
 - 新增逻辑为字符串规则和少量排序，复杂度约为 O(n) 到 O(n log n)，n 为当次采集信号数，上限由既有 `MAX_SIGNALS_PER_SOURCE` 控制。
 - 草稿生成仍为本地模板文本，无 CPU/内存风险。

@@ -41,7 +41,7 @@ AIPD 是 `aipd.me` 根域下的个人 AI 云服务入口，根门户承载全站
 - 当前主数据库：`data/wiki.db` SQLite，WAL 模式。
 - 当前 `users` 表字段：`id`、`username`、`email`、`password_hash`、`email_verified`、`created_at`、`nickname`、`avatar_url`、`role`。
 - 发布中心状态表：`social_publications` 和 `social_publication_events`，记录每篇文章在各平台的状态、外部 ID/URL、payload、错误和事件轨迹；第三方 token 不写入表内。
-- 洞察选题池：`data/insight_topics.json` 存储 Admin 每日选题、状态、来源证据、社媒运营蓝图字段、约 5000 字 Markdown 底稿和最近刷新元数据；`app/insight_topics.py` 负责从 PolaNews、Hacker News、GitHub Search、公开 RSS 手动刷新线上信号，先按 AI 相关性过滤，再把原始信号转译为“场景使用、产品能力更新、业务模式、商业思考、最佳实践、实践复盘”六类社媒运营选题。列表页展示内容赛道、社媒钩子、目标读者、核心问题、建议结构和来源信号；一键导入上传时 Markdown 编辑器预填 5000-30000 可见字符的正文型长稿，并剔除状态、来源、评分等选题池管理元信息。
+- 洞察选题池：`data/insight_topics.json` 存储 Admin 每日选题、状态、来源证据、社媒运营蓝图字段、约 5000 字 Markdown 底稿和最近刷新元数据；`app/insight_topics.py` 负责从 PolaNews、Hacker News、GitHub Search、公开 RSS 手动刷新线上信号，先按 AI 相关性过滤，再把原始信号转译为“场景使用、产品能力更新、业务模式、商业思考、最佳实践、实践复盘”六类社媒运营选题。RSS 数据源按价值分层，覆盖官方模型/产品更新、企业采用与云端实践、开发者工程实践、商业模式和创业观察，当前包含 OpenAI、Anthropic、Hugging Face、Google AI、Google DeepMind、Microsoft Official Blog、AWS Machine Learning Blog、GitHub AI & ML、Sequoia Stories。列表页展示内容赛道、社媒钩子、目标读者、核心问题、建议结构和来源信号；一键导入上传时 Markdown 编辑器预填 5000-30000 可见字符的正文型长稿，并剔除状态、来源、评分等选题池管理元信息。
 - 头像文件：`assets/avatars/`，URL 为 `/PolaZhenjing/assets/avatars/<file>`。
 - 当前权限：`user_payload()` 以 role 生成基础权限列表，admin 用户扩展管理权限。
 

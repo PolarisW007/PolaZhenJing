@@ -37,22 +37,42 @@
 - `docs/pola/project-knowledge/*`
   - 补齐需求、PRD、SDD、test report、delivery state、test matrix、regression evidence。
 
+## 数据源二阶段更新
+
+- 背景：用户继续指出数据源可能也需要更新。现有源偏官方模型发布和社区热度，虽然能生成蓝图，但对企业采用、云端实践、工程最佳实践和商业模式的覆盖还不够。
+- 新增 RSS/Atom 来源：
+  - `deepmind_blog`：Google DeepMind，覆盖模型能力和研究产品化。
+  - `microsoft_official_blog`：Microsoft Official Blog，覆盖企业采用、组织实践和 Copilot/平台商业化。
+  - `aws_ml_blog`：AWS Machine Learning Blog，覆盖 Bedrock/Agent/云端 AI 架构和行业实践。
+  - `github_ai_ml_blog`：GitHub AI & ML，覆盖开发者工具、Copilot、AI coding 和工程实践。
+  - `sequoia_stories`：Sequoia，覆盖创业观察、AI for verticals 和商业模式。
+- 扩展查询词：
+  - PolaNews 增加 `AI工作流`、`AI应用`、`企业AI`、`AI商业化`、`AI最佳实践`、`AI产品`。
+  - Hacker News 增加 `AI workflow`、`enterprise AI`、`LLM evals`、`RAG`。
+  - GitHub Search 增加 `topic:rag`、`topic:llmops`。
+- 未接入：
+  - Meta AI 未发现稳定官方 RSS。
+  - LangChain/LlamaIndex 当前 feed 路径验证不稳定或不可用。
+  - Vercel Blog 可解析但全站 Atom 体积过大且主题过宽，暂不加入同步刷新链路。
+
 ## 稳定性与安全门禁
 
 - 风险等级：P2。
 - 不新增 secret，不新增模型调用，不新增后台进程。
 - 采集源、请求超时、自动刷新锁沿用旧逻辑。
 - 旧数据通过 `_normalize_topic` 补齐新字段。
+- 数据源二阶段只增加 RSS/Atom 配置和查询词，不新增采集类型；真实刷新仍由分源失败隔离兜底。
 
 ## 验证记录
 
 - `.venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py`：通过。
-- `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`11 passed in 0.73s`。
-- `.venv/bin/python -m pytest tests -q`：`104 passed in 2.16s`。
-- `.venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json`：PASS。
+- `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`12 passed in 0.84s`。
+- `.venv/bin/python -m pytest tests -q`：`105 passed in 1.90s`。
+- `.venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json`：PASS，覆盖 9 个验收 ID / 6 个 feature / 9 个 case。
 - `.venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py`：PASS。
 - Flask test client 渲染 `/admin/insights/topics` 管理员页面：HTTP 200，包含社媒标题、赛道、钩子和建议结构。
 - Playwright system Chrome 渲染：通过，截图 `/tmp/polazj-insight-topics-social-operator.png`。
+- RSS live smoke：`collect_rss_signals(days=30, limit_per_feed=4)` 只读执行，采集 30 条信号，新增源中 `deepmind_blog`、`microsoft_official_blog`、`aws_ml_blog`、`github_ai_ml_blog`、`sequoia_stories` 均有返回。
 
 ## 影响面
 
@@ -70,6 +90,9 @@
 - 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
 - 同步校验：`dws doc read` 回读成功；`dws aitable record query --record-ids oBx4EtxtmE` 回读成功。
 - 备注：钉钉文档创建时已包含本次开发日志主体；AI 表格创建后尝试用 `dws doc update --mode append` 将最终同步结果回写到同一钉钉文档，两种 CLI 写法均返回后端缺少 `markdown` 参数。最终同步证据已保留在本地开发日志和 AI 表格记录中。
+- 数据源二阶段钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/9E05BDRVQ2pvPkd5tDBwoXoEJ63zgkYA`。
+- 数据源二阶段 AI 表格 `开发日志` 表记录：`recordId=kEyHOZRCUj`。
+- 数据源二阶段同步校验：`dws doc read --node 9E05BDRVQ2pvPkd5tDBwoXoEJ63zgkYA` 回读成功；`dws aitable record query --record-ids kEyHOZRCUj` 回读成功。
 
 ## Commit 状态
 

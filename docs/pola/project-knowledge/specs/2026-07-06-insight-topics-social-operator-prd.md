@@ -41,6 +41,20 @@ flowchart TD
 | 最佳实践 | 写可复用方法、工程经验和使用原则 | 怎么做更稳，边界在哪里？ |
 | 实践复盘 | 写真实尝试、失败原因、迁移路径 | 为什么 demo 可用但落地困难？ |
 
+## 数据源结构
+
+公开来源按内容价值分层，避免只从新闻标题生成选题：
+
+| 来源层 | 代表来源 | 选题价值 |
+| --- | --- | --- |
+| 官方模型与产品更新 | OpenAI、Anthropic、Google AI、Google DeepMind | 判断产品能力、模型能力和接口变化 |
+| 企业采用与云端实践 | Microsoft Official Blog、AWS Machine Learning Blog | 发现 AI 在组织、云基础设施、行业应用里的真实工作流 |
+| 开发者与工程实践 | GitHub AI & ML、Hugging Face | 提炼开发者工具、Agent、RAG、评估、LLMOps 等最佳实践 |
+| 商业模式与创业观察 | Sequoia Stories | 补足创业、客户付费、AI for verticals、商业模式判断 |
+| 站内/社区信号 | PolaNews、Hacker News、GitHub Search | 捕捉热度和社区讨论，但必须转译成运营蓝图 |
+
+不接入当前无法稳定机器读取的来源，避免刷新链路被单个页面拖慢或变成网页解析器。
+
 ## Topic 字段
 
 新增或强化字段：
@@ -89,3 +103,5 @@ flowchart TD
 - A5：导入测试验证上传页长稿保留核心判断，不暴露管理态元信息。
 - A6：既有刷新、状态、回填、自动刷新测试继续通过。
 - A7：Harness JSON 覆盖 A1-A6。
+- A8：测试验证 RSS 数据源覆盖官方/企业/工程/商业四类运营来源。
+- A9：测试验证新增源都有 `source`、`feed_url`、`label`、`tags` 和对应 `SOURCE_LABELS`。

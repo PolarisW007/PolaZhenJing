@@ -61,7 +61,21 @@ POLANEWS_ARTICLES_URL = os.getenv(
     "POLANEWS_ARTICLES_URL",
     "https://aipd.me/polanews/api/articles",
 )
-POLANEWS_SEARCH_QUERIES = ("AI", "人工智能", "大模型", "智能体", "OpenAI", "Claude", "Agent")
+POLANEWS_SEARCH_QUERIES = (
+    "AI",
+    "人工智能",
+    "大模型",
+    "智能体",
+    "OpenAI",
+    "Claude",
+    "Agent",
+    "AI工作流",
+    "AI应用",
+    "企业AI",
+    "AI商业化",
+    "AI最佳实践",
+    "AI产品",
+)
 HN_SEARCH_URL = "https://hn.algolia.com/api/v1/search_by_date"
 GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 RSS_SOURCES = [
@@ -89,6 +103,39 @@ RSS_SOURCES = [
         "label": "Google AI",
         "tags": ["ai-lab", "google"],
     },
+    {
+        "source": "deepmind_blog",
+        "feed_url": "https://deepmind.google/blog/rss.xml",
+        "label": "Google DeepMind",
+        "tags": ["ai-lab", "research", "model", "google-deepmind"],
+    },
+    {
+        "source": "microsoft_official_blog",
+        "feed_url": "https://blogs.microsoft.com/feed/",
+        "label": "Microsoft",
+        "tags": ["enterprise-ai", "strategy", "business", "microsoft"],
+        "limit": 10,
+    },
+    {
+        "source": "aws_ml_blog",
+        "feed_url": "https://aws.amazon.com/blogs/machine-learning/feed/",
+        "label": "AWS Machine Learning",
+        "tags": ["cloud-ai", "enterprise-ai", "best-practice", "implementation", "aws"],
+        "limit": 8,
+    },
+    {
+        "source": "github_ai_ml_blog",
+        "feed_url": "https://github.blog/ai-and-ml/feed/",
+        "label": "GitHub AI & ML",
+        "tags": ["developer-tool", "ai-coding", "best-practice", "github"],
+    },
+    {
+        "source": "sequoia_stories",
+        "feed_url": "https://www.sequoiacap.com/feed/",
+        "label": "Sequoia",
+        "tags": ["business-model", "startup", "commercial-thinking", "venture"],
+        "limit": 10,
+    },
 ]
 
 SOURCE_LABELS = {
@@ -99,6 +146,11 @@ SOURCE_LABELS = {
     "anthropic_news": "Anthropic",
     "huggingface_blog": "Hugging Face",
     "google_ai_blog": "Google AI",
+    "deepmind_blog": "Google DeepMind",
+    "microsoft_official_blog": "Microsoft",
+    "aws_ml_blog": "AWS Machine Learning",
+    "github_ai_ml_blog": "GitHub AI & ML",
+    "sequoia_stories": "Sequoia",
     "mixed": "多源聚合",
     "manual_seed": "本地种子",
     "manual_backfill": "历史回填",
@@ -1431,7 +1483,18 @@ def collect_polanews_signals(days: int, limit: int = MAX_SIGNALS_PER_SOURCE) -> 
 
 
 def collect_hackernews_signals(days: int, per_query: int = 8) -> list[InsightSignal]:
-    queries = ["AI agent", "LLM", "Claude Code", "OpenAI", "Anthropic", "AI coding", "MCP"]
+    queries = [
+        "AI agent",
+        "AI workflow",
+        "enterprise AI",
+        "LLM evals",
+        "RAG",
+        "Claude Code",
+        "OpenAI",
+        "Anthropic",
+        "AI coding",
+        "MCP",
+    ]
     signals: list[InsightSignal] = []
     seen_urls: set[str] = set()
     for query in queries:
@@ -1480,6 +1543,8 @@ def collect_github_signals(days: int, per_query: int = 6) -> list[InsightSignal]
         f"topic:ai-agent pushed:>{cutoff} stars:>100",
         f"topic:llm pushed:>{cutoff} stars:>500",
         f"topic:mcp pushed:>{cutoff} stars:>50",
+        f"topic:rag pushed:>{cutoff} stars:>100",
+        f"topic:llmops pushed:>{cutoff} stars:>50",
         f"AI pushed:>{cutoff} stars:>1000",
     ]
     signals: list[InsightSignal] = []
@@ -1553,7 +1618,8 @@ def collect_rss_signals(days: int, limit_per_feed: int = 6) -> list[InsightSigna
         except Exception:
             continue
         entries = root.findall(".//item") or root.findall(".//{http://www.w3.org/2005/Atom}entry")
-        for node in entries[:limit_per_feed]:
+        feed_limit = int(feed.get("limit") or limit_per_feed)
+        for node in entries[:feed_limit]:
             title = _xml_first_text(node, ("title",))
             url = _xml_link(node)
             published_at = _parse_datetime(
