@@ -119,7 +119,7 @@
         "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md#数据源结构",
         "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md#数据源更新策略"
       ],
-      "acceptance_ids": ["A8", "A9"],
+      "acceptance_ids": ["A8", "A9", "A10"],
       "risk": "P2",
       "unit_cases": [
         {
@@ -129,6 +129,22 @@
           "assertions": ["新增来源覆盖企业、工程、商业和研究标签", "新增来源都有 HTTPS feed_url、label、tags", "新增来源都有 SOURCE_LABELS 显示名"],
           "expected": "数据源池能支撑社媒运营选题，而不是只覆盖新闻发布",
           "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_rss_sources_cover_social_operator_source_mix -q"
+        },
+        {
+          "id": "UT-F5-002",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_polanews_queries_and_tags_prioritize_operator_intent",
+          "scenario": "检查 PolaNews 查询词和关键词标签映射",
+          "assertions": ["查询词覆盖 workflow/use case/business model/best practice/adoption", "中文查询覆盖场景、产品能力、商业模式、最佳实践、企业采用", "标签映射覆盖 context-engineering 与 guardrail"],
+          "expected": "站内候选信号更偏运营选题意图，而不是宽泛新闻词",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_polanews_queries_and_tags_prioritize_operator_intent -q"
+        },
+        {
+          "id": "UT-F5-003",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_industry_context_sources_feed_social_operator_topics",
+          "scenario": "检查静态行业实践源能生成运营选题",
+          "assertions": ["行业实践源都带 source_label 和 lane", "生成 topic 覆盖最佳实践、场景使用和业务模式", "topic 标题不等于原始来源标题"],
+          "expected": "非新闻实践材料能作为稳定底料进入选题池",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_industry_context_sources_feed_social_operator_topics -q"
         }
       ],
       "integration_cases": [
@@ -157,7 +173,7 @@
           "id": "UT-F6-001",
           "target": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
           "scenario": "运行 Pola function test case harness",
-          "assertions": ["A1-A9 均被用例覆盖"],
+          "assertions": ["A1-A10 均被用例覆盖"],
           "expected": "交付证据完整",
           "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json"
         }
@@ -174,7 +190,8 @@
     {"acceptance_id": "A5", "case_ids": ["UT-F3-001"]},
     {"acceptance_id": "A6", "case_ids": ["UT-F4-001", "RG-F4-001"]},
     {"acceptance_id": "A7", "case_ids": ["UT-F6-001"]},
-    {"acceptance_id": "A8", "case_ids": ["UT-F5-001", "IT-F5-001"]},
-    {"acceptance_id": "A9", "case_ids": ["UT-F5-001"]}
+    {"acceptance_id": "A8", "case_ids": ["UT-F5-001", "UT-F5-003", "IT-F5-001"]},
+    {"acceptance_id": "A9", "case_ids": ["UT-F5-001"]},
+    {"acceptance_id": "A10", "case_ids": ["UT-F5-002", "UT-F5-003"]}
   ]
 }

@@ -62,19 +62,20 @@ POLANEWS_ARTICLES_URL = os.getenv(
     "https://aipd.me/polanews/api/articles",
 )
 POLANEWS_SEARCH_QUERIES = (
-    "AI",
-    "人工智能",
-    "大模型",
-    "智能体",
-    "OpenAI",
-    "Claude",
-    "Agent",
-    "AI工作流",
-    "AI应用",
-    "企业AI",
-    "AI商业化",
-    "AI最佳实践",
-    "AI产品",
+    "AI agent workflow",
+    "AI use case",
+    "AI best practice",
+    "AI business model",
+    "AI product capability",
+    "AI adoption",
+    "context engineering",
+    "AI eval guardrails",
+    "AI 场景落地",
+    "AI 产品能力",
+    "AI 商业模式",
+    "AI 最佳实践",
+    "智能体 工作流",
+    "企业 AI 采用",
 )
 HN_SEARCH_URL = "https://hn.algolia.com/api/v1/search_by_date"
 GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
@@ -138,6 +139,92 @@ RSS_SOURCES = [
     },
 ]
 
+INDUSTRY_CONTEXT_SOURCES = [
+    {
+        "label": "Anthropic Engineering",
+        "title": "Building effective agents",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents",
+        "summary": (
+            "Anthropic 将 agent 系统拆成 workflow、tool use、routing、orchestrator 和 evaluator 等模式，"
+            "适合作为 AI agent 最佳实践和工程护栏选题的底层来源。"
+        ),
+        "tags": ["ai-agent", "best-practice", "engineering", "workflow", "guardrail"],
+        "lane": "best_practice",
+        "score": 88,
+    },
+    {
+        "label": "Anthropic Engineering",
+        "title": "Effective context engineering for AI agents",
+        "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+        "summary": (
+            "上下文工程正在成为 agent 落地的关键能力：选择、压缩、隔离和持久化上下文，"
+            "能直接影响 AI 工作流的可靠性。"
+        ),
+        "tags": ["ai-agent", "context-engineering", "best-practice", "workflow"],
+        "lane": "best_practice",
+        "score": 84,
+    },
+    {
+        "label": "Microsoft WorkLab",
+        "title": "Agents, human agency and the opportunity for every organization",
+        "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+        "summary": (
+            "Microsoft Work Trend Index 讨论 agent 与组织采用、岗位重组和人机协作，"
+            "适合产出企业 AI 采用、组织工作流和商业思考类选题。"
+        ),
+        "tags": ["enterprise-ai", "adoption", "organization", "workflow", "commercial-thinking"],
+        "lane": "commercial_thinking",
+        "score": 82,
+    },
+    {
+        "label": "Microsoft WorkLab",
+        "title": "2025 Work Trend Index: The year the Frontier Firm is born",
+        "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/2025-the-year-the-frontier-firm-is-born",
+        "summary": (
+            "Frontier Firm 框架把 AI 采用从个人效率提升推向组织结构变化，"
+            "可支撑工作流重构、团队边界和企业采用方法论选题。"
+        ),
+        "tags": ["enterprise-ai", "organization", "adoption", "business", "workflow"],
+        "lane": "commercial_thinking",
+        "score": 78,
+    },
+    {
+        "label": "OpenAI Business",
+        "title": "Identifying and scaling AI use cases",
+        "url": "https://cdn.openai.com/business-guides-and-resources/identifying-and-scaling-ai-use-cases.pdf",
+        "summary": (
+            "OpenAI 的企业 AI 用例识别和规模化方法，适合转译为场景选择、试点推进、指标验证和规模化复盘选题。"
+        ),
+        "tags": ["enterprise-ai", "use-case", "adoption", "best-practice", "workflow"],
+        "lane": "scenario_use_case",
+        "score": 86,
+    },
+    {
+        "label": "OpenAI Business",
+        "title": "The state of enterprise AI",
+        "url": "https://cdn.openai.com/business-guides-and-resources/the-state-of-enterprise-ai.pdf",
+        "summary": (
+            "OpenAI 企业 AI 报告聚焦真实组织如何采用 AI、在哪些环节看到价值，"
+            "适合做企业场景、产品能力和商业化判断。"
+        ),
+        "tags": ["enterprise-ai", "business", "adoption", "use-case"],
+        "lane": "business_model",
+        "score": 80,
+    },
+    {
+        "label": "McKinsey QuantumBlack",
+        "title": "The state of AI",
+        "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai",
+        "summary": (
+            "McKinsey State of AI 提供企业采用、价值捕获和 agentic AI 的高层趋势，"
+            "适合作为商业思考、业务模式和行业判断类选题的权威参考。"
+        ),
+        "tags": ["enterprise-ai", "business-model", "commercial-thinking", "adoption"],
+        "lane": "business_model",
+        "score": 78,
+    },
+]
+
 SOURCE_LABELS = {
     "polanews": "PolaNews",
     "hackernews": "Hacker News",
@@ -151,6 +238,7 @@ SOURCE_LABELS = {
     "aws_ml_blog": "AWS Machine Learning",
     "github_ai_ml_blog": "GitHub AI & ML",
     "sequoia_stories": "Sequoia",
+    "industry_context": "行业实践源",
     "mixed": "多源聚合",
     "manual_seed": "本地种子",
     "manual_backfill": "历史回填",
@@ -207,12 +295,31 @@ KEYWORD_TAGS = {
     "robot": "robotics",
     "robotics": "robotics",
     "enterprise": "enterprise-ai",
+    "workflow": "workflow",
+    "use case": "use-case",
+    "business model": "business-model",
+    "pricing": "business-model",
+    "revenue": "business-model",
+    "roi": "commercial-thinking",
+    "adoption": "adoption",
+    "context": "context-engineering",
+    "evaluation": "evaluation",
+    "eval": "evaluation",
+    "guardrail": "guardrail",
     "安全": "ai-safety",
     "模型": "model",
     "智能体": "ai-agent",
     "开源": "open-source",
     "视频": "multimodal",
     "企业": "enterprise-ai",
+    "工作流": "workflow",
+    "场景": "use-case",
+    "商业模式": "business-model",
+    "定价": "business-model",
+    "采用": "adoption",
+    "上下文": "context-engineering",
+    "评估": "evaluation",
+    "护栏": "guardrail",
 }
 
 RELEVANCE_TERMS = (
@@ -794,6 +901,13 @@ def _content_lane_info(lane_key: str) -> dict[str, Any]:
     return CONTENT_LANES.get(lane_key) or CONTENT_LANES["commercial_thinking"]
 
 
+def _signal_source_label(signal: InsightSignal) -> str:
+    metadata_label = ""
+    if isinstance(signal.metadata, dict):
+        metadata_label = _clean_text(signal.metadata.get("source_label") or signal.metadata.get("feed") or "")
+    return metadata_label or SOURCE_LABELS.get(signal.source, signal.source)
+
+
 def _infer_content_lane_from_text(*parts: str, source: str = "") -> str:
     haystack = " ".join(part or "" for part in parts).lower()
     scores: dict[str, int] = {lane_key: 0 for lane_key in CONTENT_LANES}
@@ -813,8 +927,13 @@ def _infer_content_lane_from_text(*parts: str, source: str = "") -> str:
     if source == "hackernews":
         scores["practice_recap"] += 8
         scores["best_practice"] += 6
-    if source in {"openai_blog", "anthropic_news", "huggingface_blog", "google_ai_blog"}:
+    if source in {"openai_blog", "anthropic_news", "huggingface_blog", "google_ai_blog", "deepmind_blog"}:
         scores["product_capability"] += 14
+    if source in {"aws_ml_blog", "github_ai_ml_blog"}:
+        scores["best_practice"] += 14
+    if source in {"microsoft_official_blog", "sequoia_stories", "industry_context"}:
+        scores["commercial_thinking"] += 10
+        scores["business_model"] += 8
     if any(term in haystack for term in ("enterprise", "pricing", "revenue", "商业", "定价", "企业")):
         scores["business_model"] += 8
     if any(term in haystack for term in ("workflow", "场景", "应用", "support", "sales", "运营")):
@@ -832,6 +951,10 @@ def _infer_content_lane_from_text(*parts: str, source: str = "") -> str:
 
 
 def _infer_content_lane(signal: InsightSignal) -> str:
+    if isinstance(signal.metadata, dict):
+        lane_key = str(signal.metadata.get("lane") or "").strip()
+        if lane_key in CONTENT_LANES:
+            return lane_key
     return _infer_content_lane_from_text(
         signal.title,
         signal.summary,
@@ -849,7 +972,7 @@ def _source_subject(title: str) -> str:
 
 
 def _content_lane_title(signal: InsightSignal, lane_key: str) -> str:
-    source_label = SOURCE_LABELS.get(signal.source, signal.source)
+    source_label = _signal_source_label(signal)
     subject = _source_subject(signal.title)
     template = CONTENT_LANE_TITLE_TEMPLATES.get(
         lane_key,
@@ -900,7 +1023,7 @@ def _evidence_link(signal: InsightSignal) -> dict:
     return {
         "title": _truncate(signal.title, 96),
         "url": signal.url,
-        "source": SOURCE_LABELS.get(signal.source, signal.source),
+        "source": _signal_source_label(signal),
     }
 
 
@@ -1645,9 +1768,40 @@ def collect_rss_signals(days: int, limit_per_feed: int = 6) -> list[InsightSigna
     return signals[:MAX_SIGNALS_PER_SOURCE]
 
 
+def collect_industry_context_signals(days: int, limit: int = MAX_SIGNALS_PER_SOURCE) -> list[InsightSignal]:
+    """Return curated non-news sources used as strategy context for social topics."""
+    signals: list[InsightSignal] = []
+    for source in INDUSTRY_CONTEXT_SOURCES[:limit]:
+        title = _clean_text(source.get("title"))
+        url = str(source.get("url") or "").strip()
+        summary = _clean_text(source.get("summary"))
+        if not title or not url:
+            continue
+        tags = _normalize_tags(source.get("tags") or []) + _keyword_tags(title, summary, url)
+        signals.append(
+            InsightSignal(
+                source="industry_context",
+                title=title,
+                url=url,
+                summary=summary,
+                published_at=None,
+                score=float(source.get("score") or 70),
+                tags=_normalize_tags(tags),
+                metadata={
+                    "source_label": source.get("label"),
+                    "lane": source.get("lane"),
+                    "evergreen": True,
+                    "refresh_days": days,
+                },
+            )
+        )
+    return signals[:limit]
+
+
 def collect_topic_signals(days: int = DEFAULT_REFRESH_DAYS) -> tuple[list[InsightSignal], dict, list[str]]:
     days = days if days in ALLOWED_REFRESH_DAYS else DEFAULT_REFRESH_DAYS
     source_calls = [
+        ("industry_context", collect_industry_context_signals),
         ("polanews", collect_polanews_signals),
         ("hackernews", collect_hackernews_signals),
         ("github", collect_github_signals),
@@ -1670,7 +1824,7 @@ def collect_topic_signals(days: int = DEFAULT_REFRESH_DAYS) -> tuple[list[Insigh
 
 def _topic_from_signal(signal: InsightSignal, generated_at: str) -> dict:
     tags = _normalize_tags(signal.tags + _keyword_tags(signal.title, signal.summary))
-    source_label = SOURCE_LABELS.get(signal.source, signal.source)
+    source_label = _signal_source_label(signal)
     date = (signal.published_at.date().isoformat() if signal.published_at else _today())
     host = _source_host(signal.url) or source_label
     focus_score = _topic_focus_score(signal.title, signal.summary)
@@ -1751,6 +1905,14 @@ def _rank_topics_for_social_operation(topics: list[dict], max_topics: int) -> li
         ranked.append(topic)
         used_ids.add(topic["id"])
     return ranked[:max_topics]
+
+
+def _content_lane_counts(topics: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for topic in topics:
+        label = _clean_text(topic.get("content_lane_label") or topic.get("content_lane") or "未分类")
+        counts[label] = counts.get(label, 0) + 1
+    return counts
 
 
 def signals_to_topics(
@@ -1961,6 +2123,9 @@ def refresh_topics_from_sources(days: int = DEFAULT_REFRESH_DAYS) -> dict:
         "signal_count": len(signals),
         "topic_count": len(generated_topics),
         "source_counts": source_counts,
+        "content_lane_counts": _content_lane_counts(generated_topics),
+        "strategy": TOPIC_BLUEPRINT_VERSION,
+        "data_source_strategy": "realtime-signals-plus-curated-industry-context",
         "errors": errors[:8],
     }
     save_topics(topics, metadata={"last_refresh": last_refresh})

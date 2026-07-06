@@ -21,7 +21,7 @@
 - `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`12 passed`。
 - `.venv/bin/python -m pytest tests -q`：`105 passed`。
 - RSS live smoke：`collect_rss_signals(days=30, limit_per_feed=4)` 采集 30 条信号。
-- `validate_function_test_cases.py`：PASS，9 个验收项 / 6 个 feature / 9 个 case。
+- `validate_function_test_cases.py`：PASS，10 个验收项 / 6 个 feature / 11 个 case。
 - `validate_pola_skills.py`：PASS。
 
 ## 发布步骤
@@ -34,6 +34,14 @@
 6. 运行云端语法检查和相关测试。
 7. 重启 `polazj.service`。
 8. 验证服务 active、HTTP smoke 和日志。
+
+## 查询包 Follow-up 发布计划
+
+- 目标：将 PolaNews 查询词从宽泛新闻/品牌词调整为场景、产品能力、商业模式、最佳实践、企业采用、评估护栏和上下文工程导向，并接入静态行业实践源作为非新闻选题底料。
+- 范围：`app/insight_topics.py`、`tests/test_admin_workbench_insight_topics.py` 和本次 project-knowledge 文档。
+- 不涉及：数据库迁移、依赖安装、环境变量、secret、systemd 配置、nginx 配置、采集频率调整。
+- 发布方式：提交后推送 `origin/main`，云端 `git merge --ff-only origin/main`，运行云端语法检查和选题测试，重启 `polazj.service`，执行 HTTPS smoke。
+- 发布前本地验证：`py_compile` 通过；选题测试 `14 passed`；全量测试 `107 passed`；function-case Harness 覆盖 10 个验收项 / 11 个 case；查询包 live smoke 返回 135 条候选信号且 errors 为空，其中 `industry_context=7`。
 
 ## 回滚方案
 

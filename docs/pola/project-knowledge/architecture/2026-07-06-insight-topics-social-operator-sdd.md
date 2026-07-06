@@ -89,6 +89,8 @@ flowchart TD
 - 继续使用既有 `collect_rss_signals()`，不新增抓取进程。
 - 单个 RSS 源失败继续被捕获，刷新保留旧选题池。
 - 新源只增加 `RSS_SOURCES` 配置、`SOURCE_LABELS` 显示名和测试，不改变生产数据文件。
+- PolaNews 查询包只调整查询意图和标签映射，不新增 API、后台任务或抓取频率；宽泛模型/品牌词降级，让候选池更偏场景、商业、实践和工程方法。
+- 行业实践源新增 `INDUSTRY_CONTEXT_SOURCES` 与 `collect_industry_context_signals()`，作为静态 curated signals 注入 `collect_topic_signals()`；不下载正文、不解析页面、不写生产数据。
 
 ## 兼容策略
 
@@ -101,6 +103,8 @@ flowchart TD
 ## 性能与资源
 
 - 数据源 follow-up 新增 5 个 RSS/Atom 源，但不新增采集类型、模型调用、队列或后台进程。
+- 查询包 follow-up 不新增外部来源，只改变既有 PolaNews API 的查询词集合；请求次数由查询词数量线性决定，本轮仍保持在轻量级范围。
+- 行业实践源 follow-up 是内存静态列表转 `InsightSignal`，只增加几十条字符串处理和排序成本。
 - 不新增模型调用。
 - 新增逻辑为字符串规则和少量排序，复杂度约为 O(n) 到 O(n log n)，n 为当次采集信号数，上限由既有 `MAX_SIGNALS_PER_SOURCE` 控制。
 - 草稿生成仍为本地模板文本，无 CPU/内存风险。

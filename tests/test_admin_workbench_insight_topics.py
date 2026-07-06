@@ -274,6 +274,40 @@ def test_rss_sources_cover_social_operator_source_mix():
     )
 
 
+def test_polanews_queries_and_tags_prioritize_operator_intent():
+    query_text = " ".join(insight_topics.POLANEWS_SEARCH_QUERIES).lower()
+
+    for term in ("workflow", "use case", "business model", "best practice", "adoption"):
+        assert term in query_text
+    for term in ("场景", "产品能力", "商业模式", "最佳实践", "企业"):
+        assert term in query_text
+
+    assert insight_topics.SOURCE_LABELS["industry_context"] == "行业实践源"
+    assert insight_topics.KEYWORD_TAGS["workflow"] == "workflow"
+    assert insight_topics.KEYWORD_TAGS["use case"] == "use-case"
+    assert insight_topics.KEYWORD_TAGS["business model"] == "business-model"
+    assert insight_topics.KEYWORD_TAGS["上下文"] == "context-engineering"
+    assert insight_topics.KEYWORD_TAGS["护栏"] == "guardrail"
+
+
+def test_industry_context_sources_feed_social_operator_topics():
+    signals = insight_topics.collect_industry_context_signals(days=10)
+
+    assert len(signals) >= 6
+    assert {signal.source for signal in signals} == {"industry_context"}
+    assert all(signal.metadata.get("source_label") for signal in signals)
+    assert all(signal.metadata.get("lane") in insight_topics.CONTENT_LANES for signal in signals)
+
+    topics = insight_topics.signals_to_topics(signals, max_topics=8)
+    lanes = {topic["content_lane"] for topic in topics}
+
+    assert len(topics) >= 5
+    assert {"best_practice", "scenario_use_case", "business_model"}.issubset(lanes)
+    assert all(topic["title"] != topic["source_signal_title"] for topic in topics)
+    assert all(topic["source_type"] == "industry_context" for topic in topics)
+    assert all(topic["social_hook"] and topic["content_structure"] for topic in topics)
+
+
 def test_backfill_topics_for_date_range_fills_missing_days(monkeypatch, tmp_path):
     topics_file = tmp_path / "insight_topics.json"
     monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)

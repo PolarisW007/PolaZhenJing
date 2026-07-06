@@ -55,6 +55,17 @@
   - LangChain/LlamaIndex 当前 feed 路径验证不稳定或不可用。
   - Vercel Blog 可解析但全站 Atom 体积过大且主题过宽，暂不加入同步刷新链路。
 
+## 数据源三阶段更新
+
+- 背景：线上发布收尾时继续检查候选信号入口，发现 PolaNews 查询词仍包含 `AI`、`大模型`、`OpenAI`、`Claude` 等宽泛新闻/品牌词，容易把候选池带回新闻式热点。
+- 查询包调整：
+  - PolaNews 查询词改为围绕 `AI agent workflow`、`AI use case`、`AI best practice`、`AI business model`、`AI product capability`、`AI adoption`、`context engineering`、`AI eval guardrails` 和对应中文场景词。
+  - 新增 `INDUSTRY_CONTEXT_SOURCES` 静态行业实践源，覆盖 Anthropic Engineering、Microsoft WorkLab、OpenAI Business 和 McKinsey QuantumBlack 的 agent workflow、context engineering、企业采用、用例规模化和价值捕获材料。
+  - 新增 `collect_industry_context_signals()`，把这些非新闻、长期有效的行业实践材料作为候选信号，与 PolaNews/HN/GitHub/RSS 合并排序。
+  - 扩展关键词标签：workflow、use-case、business-model、commercial-thinking、adoption、context-engineering、evaluation、guardrail。
+  - 刷新结果 metadata 新增 `content_lane_counts`，后台刷新面板可看到本次生成 topic 的赛道分布。
+- 边界：不新增外部 API 调用、不新增 RSS 源、不新增模型调用、不改变刷新频率；行业实践源是静态 curated list，只提供来源链接和摘要，不抓取页面正文。
+
 ## 稳定性与安全门禁
 
 - 风险等级：P2。
@@ -62,23 +73,27 @@
 - 采集源、请求超时、自动刷新锁沿用旧逻辑。
 - 旧数据通过 `_normalize_topic` 补齐新字段。
 - 数据源二阶段只增加 RSS/Atom 配置和查询词，不新增采集类型；真实刷新仍由分源失败隔离兜底。
+- 数据源三阶段只调整 PolaNews 查询词、标签映射和静态行业实践源，不新增运行时进程、密钥、生产数据迁移或额外网络抓取。
 
 ## 验证记录
 
 - `.venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py`：通过。
-- `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`12 passed in 0.84s`。
-- `.venv/bin/python -m pytest tests -q`：`105 passed in 1.90s`。
-- `.venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json`：PASS，覆盖 9 个验收 ID / 6 个 feature / 9 个 case。
+- `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`14 passed in 0.83s`。
+- `.venv/bin/python -m pytest tests -q`：`107 passed in 2.24s`。
+- `.venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json`：PASS，覆盖 10 个验收 ID / 6 个 feature / 11 个 case。
 - `.venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py`：PASS。
 - Flask test client 渲染 `/admin/insights/topics` 管理员页面：HTTP 200，包含社媒标题、赛道、钩子和建议结构。
 - Playwright system Chrome 渲染：通过，截图 `/tmp/polazj-insight-topics-social-operator.png`。
 - RSS live smoke：`collect_rss_signals(days=30, limit_per_feed=4)` 只读执行，采集 30 条信号，新增源中 `deepmind_blog`、`microsoft_official_blog`、`aws_ml_blog`、`github_ai_ml_blog`、`sequoia_stories` 均有返回。
+- 行业实践源单测：`test_industry_context_sources_feed_social_operator_topics` 验证静态行业实践源能生成 best_practice、scenario_use_case、business_model 等社媒运营选题。
+- 查询包 live smoke：`collect_polanews_signals(days=30, limit=20)` 返回 5 条 PolaNews 信号；`collect_topic_signals(days=30)` 返回 135 条，总 source_counts 为 `industry_context=7`、`polanews=5`、`hackernews=55`、`github=30`、`rss=38`，errors 为空。
 
 ## 影响面
 
 - 用户可见：`/PolaZhenjing/admin/insights/topics` 后台选题页展示从新闻列表升级为运营蓝图。
 - 数据：新增兼容字段写入 `data/insight_topics.json` 时向前兼容；本地测试未修改生产数据。
 - 性能：不新增外部请求、模型调用、后台进程、队列或定时任务；新增逻辑为本地字符串规则和排序。
+- 数据源三阶段：PolaNews 查询词数量仍为 14 个，只调整语义方向；行业实践源为静态列表，不增加外部请求频率量级。
 - 安全：不新增 secret，不读取或写入 `.env`，不输出 token/cookie。
 
 ## 发布状态

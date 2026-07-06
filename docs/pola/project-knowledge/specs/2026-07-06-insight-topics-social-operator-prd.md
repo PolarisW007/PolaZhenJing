@@ -20,7 +20,7 @@
 
 ```mermaid
 flowchart TD
-  A["管理员刷新线上信号"] --> B["采集 PolaNews/HN/GitHub/RSS"]
+  A["管理员刷新线上信号"] --> B["采集 PolaNews/HN/GitHub/RSS/行业实践源"]
   B --> C["AI 相关性与运营价值过滤"]
   C --> D["归入内容赛道"]
   D --> E["生成社媒蓝图字段"]
@@ -51,9 +51,14 @@ flowchart TD
 | 企业采用与云端实践 | Microsoft Official Blog、AWS Machine Learning Blog | 发现 AI 在组织、云基础设施、行业应用里的真实工作流 |
 | 开发者与工程实践 | GitHub AI & ML、Hugging Face | 提炼开发者工具、Agent、RAG、评估、LLMOps 等最佳实践 |
 | 商业模式与创业观察 | Sequoia Stories | 补足创业、客户付费、AI for verticals、商业模式判断 |
+| 行业实践源 | Anthropic Engineering、Microsoft WorkLab、OpenAI Business、McKinsey QuantumBlack | 提供非新闻、长期有效的 agent workflow、context engineering、企业采用和价值捕获材料 |
 | 站内/社区信号 | PolaNews、Hacker News、GitHub Search | 捕捉热度和社区讨论，但必须转译成运营蓝图 |
 
 不接入当前无法稳定机器读取的来源，避免刷新链路被单个页面拖慢或变成网页解析器。
+
+PolaNews 查询词不再以 `AI`、`大模型`、单个模型品牌等宽泛词作为主导，而是优先搜索 `AI agent workflow`、`AI use case`、`AI business model`、`AI best practice`、`AI adoption`、`context engineering`、`AI eval guardrails` 以及对应中文场景词。查询词本身只决定候选信号池，最终 topic 仍需转译为社媒运营蓝图。
+
+行业实践源不实时抓取网页正文，只以维护在代码中的标题、链接、摘要、标签和建议赛道参与排序，避免把选题生成变成不可控爬虫。
 
 ## Topic 字段
 
@@ -102,6 +107,7 @@ flowchart TD
 - A4：页面测试验证原始信号作为来源信号展示。
 - A5：导入测试验证上传页长稿保留核心判断，不暴露管理态元信息。
 - A6：既有刷新、状态、回填、自动刷新测试继续通过。
-- A7：Harness JSON 覆盖 A1-A6。
+- A7：Harness JSON 覆盖 A1-A10。
 - A8：测试验证 RSS 数据源覆盖官方/企业/工程/商业四类运营来源。
 - A9：测试验证新增源都有 `source`、`feed_url`、`label`、`tags` 和对应 `SOURCE_LABELS`。
+- A10：测试验证 PolaNews 查询词和关键词标签映射优先服务运营选题意图。

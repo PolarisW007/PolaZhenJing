@@ -177,7 +177,7 @@
 <div class="insight-header">
   <div>
     <h2>AI 行业社媒运营选题</h2>
-    <p>把 PolaNews 和公开线上信号转译成场景、产品、商业、实践和复盘类选题，可直接导入上传页继续成稿。</p>
+    <p>把 PolaNews、公开线上信号和行业实践源转译成场景、产品、商业、实践和复盘类选题，可直接导入上传页继续成稿。</p>
   </div>
   <div class="module-actions">
     <a class="btn-ghost" href="{{ url_for('admin_workbench.workbench') }}">返回工作台</a>
@@ -187,7 +187,7 @@
 <section class="refresh-panel">
   <div>
     <h3>线上信号刷新</h3>
-    <p>PolaNews、Hacker News、GitHub 和公开 RSS 只作为证据来源；系统会优先生成适合账号运营的洞察选题，而不是新闻搬运标题。</p>
+    <p>PolaNews、Hacker News、GitHub、公开 RSS 和行业实践源只作为证据来源；系统会优先生成适合账号运营的洞察选题，而不是事件搬运标题。</p>
     {% if auto_refresh and auto_refresh.status == 'started' %}
     <div class="refresh-meta">检测到选题池已过期，已在后台自动刷新近 {{ default_refresh_days }} 天线上信号；稍后刷新页面可查看新选题。</div>
     {% elif auto_refresh and auto_refresh.status == 'locked' %}
@@ -204,6 +204,12 @@
       {% endif %}
       {% if last_refresh.errors %}
       <br>部分失败：{{ last_refresh.errors[:3]|join('；') }}
+      {% endif %}
+      {% if last_refresh.content_lane_counts %}
+      <br>赛道
+      {% for name, count in last_refresh.content_lane_counts.items() %}
+        {{ name }}={{ count }}
+      {% endfor %}
       {% endif %}
     </div>
     {% endif %}
