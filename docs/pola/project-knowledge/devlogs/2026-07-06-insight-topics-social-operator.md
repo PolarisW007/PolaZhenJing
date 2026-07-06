@@ -124,6 +124,7 @@
 - 日期段重生成 follow-up 数据备份：`/root/polazj-backups/insight-date-replace-20260706233607/insight_topics.json`。
 - 日期段重生成 follow-up 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 15 passed；Pola skill harness PASS；replace dry-run 覆盖 2026-07-01 到 2026-07-06。
 - 7.1-7.6 真实重生成结果：移除 24 条旧 `new` 选题，保留 2 条 `imported` 选题，新增 6 条 `industry_context` 选题；日期覆盖 `2026-07-01..2026-07-06`；新生成部分不含“新闻/news”表述。
+- 7.1-7.6 手动复刷：2026-07-06 23:49 CST 按用户要求再次在线执行 replace，备份 `/root/polazj-backups/insight-date-refresh-20260706234932/insight_topics.json`；移除 6 条上一轮 `new` 行业实践源选题，保留 2 条 `imported`，重新新增 6 条 `industry_context`，新生成部分仍不含“新闻/news”表述。
 - 7.1-7.6 新生成赛道分布：最佳实践 2、业务模式 2、商业思考 1、场景使用 1；含被保护 imported 后整体区间分布为最佳实践 3、业务模式 2、商业思考 2、场景使用 1。
 - 日期段重生成 follow-up HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，未登录保护正常；管理员模板渲染 smoke 200，包含新题 `Identifying and scaling AI use cases` 与 `Effective context engineering for AI agents`。
 - 日期段重生成 follow-up 服务状态：`polazj.service` active；发布后 warning/alert 为空。
