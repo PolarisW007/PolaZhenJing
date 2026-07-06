@@ -37,7 +37,10 @@
     "replace_mode_follow_up": {
       "local_pytest": "15 passed for tests/test_admin_workbench_insight_topics.py; 108 passed for tests",
       "function_harness": "PASS: function test cases cover 9 documented acceptance id(s), 4 feature(s), 9 case(s).",
-      "dry_run": "2026-07-01..2026-07-06 replace dry-run added_count=6, lane_counts includes 最佳实践/业务模式/商业思考/场景使用"
+      "dry_run": "2026-07-01..2026-07-06 replace dry-run added_count=6, lane_counts includes 最佳实践/业务模式/商业思考/场景使用",
+      "cloud_deploy": "HEAD e28bb4624a0ca89ba7ea6436b7e68f923f926590, backup /root/polazj-backups/insight-date-replace-20260706233607/insight_topics.json",
+      "cloud_replace": "removed_new_count=24, preserved_in_range_count=2, added_count=6, persisted=true; range has industry_context=6 and imported=2",
+      "cloud_smoke": "admin/login=200, protected admin/insights/topics=302, admin template render=200, service warning/alert empty"
     },
     "dingtalk_sync": {
       "status": "pass",

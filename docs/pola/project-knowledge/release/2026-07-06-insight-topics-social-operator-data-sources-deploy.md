@@ -58,6 +58,25 @@
 - 服务日志：发布后 5 分钟 `journalctl -u polazj.service -p warning..alert` 无记录。
 - 钉钉同步：`https://alidocs.dingtalk.com/i/nodes/l6Pm2Db8D45pyG06he2wG3Z68xLq0Ee4`，AI 表格记录 `recordId=TwldmRZfe9`，均已回读成功。
 
+## 日期段重生成 Follow-up 实际发布记录
+
+- 发布时间：2026-07-06 23:36 CST。
+- 发布前云端 HEAD：`cfb90c0f5f9973f58fed758f0a991f2697918022`。
+- 发布后云端 HEAD：`e28bb4624a0ca89ba7ea6436b7e68f923f926590`。
+- 备份分支：`backup/pre-insight-date-replace-20260706233607`。
+- 数据备份：`/root/polazj-backups/insight-date-replace-20260706233607/insight_topics.json`。
+- 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 15 passed；Pola skill harness PASS。
+- replace dry-run：`removed_new_count=24`，`preserved_in_range_count=2`，`added_count=6`，`date_counts` 覆盖 `2026-07-01..2026-07-06`。
+- 真实 replace：`removed_new_count=24`，`preserved_in_range_count=2`，`added_count=6`，`persisted=true`。
+- 结果检查：7.1-7.6 区间共 8 条 topic，其中 `industry_context=6`、`imported=2`；新生成部分不含“新闻/news”表述。
+- 新生成样例：
+  - `2026-07-01`：`Identifying and scaling AI use cases 背后，AI 正在进入哪类真实工作流？`
+  - `2026-07-02`：`把 Building effective agents 变成可复用实践，需要哪些护栏？`
+  - `2026-07-06`：`把 Effective context engineering for AI agents 变成可复用实践，需要哪些护栏？`
+- HTTPS smoke：`/PolaZhenjing/admin/login` 200；`/PolaZhenjing/admin/insights/topics` 302，未登录保护正常。
+- 管理员模板渲染 smoke：`/admin/insights/topics` 返回 200，包含新生成 topic、`topic-lane`、`topic-hook`。
+- 服务日志：发布后 5 分钟 `journalctl -u polazj.service -p warning..alert` 无记录。
+
 ## 回滚方案
 
 ```bash

@@ -118,6 +118,15 @@
 - 行业实践源 follow-up HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，`/PolaZhenjing/articles` 200。
 - 行业实践源 follow-up 管理员模板 smoke：HTTP 200，包含 `AI 行业社媒运营选题`、`行业实践源`、`topic-lane`、`topic-hook`、`topic-structure`。
 - 行业实践源 follow-up 服务状态：`polazj.service` active，gunicorn 2 workers，内存约 88MB；发布后 warning/error 为空。
+- 日期段重生成 follow-up 已部署生产：2026-07-06 23:36 CST。
+- 日期段重生成 follow-up 发布前云端 HEAD：`cfb90c0f5f9973f58fed758f0a991f2697918022`；发布后云端 HEAD：`e28bb4624a0ca89ba7ea6436b7e68f923f926590`。
+- 日期段重生成 follow-up 备份分支：`backup/pre-insight-date-replace-20260706233607`。
+- 日期段重生成 follow-up 数据备份：`/root/polazj-backups/insight-date-replace-20260706233607/insight_topics.json`。
+- 日期段重生成 follow-up 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 15 passed；Pola skill harness PASS；replace dry-run 覆盖 2026-07-01 到 2026-07-06。
+- 7.1-7.6 真实重生成结果：移除 24 条旧 `new` 选题，保留 2 条 `imported` 选题，新增 6 条 `industry_context` 选题；日期覆盖 `2026-07-01..2026-07-06`；新生成部分不含“新闻/news”表述。
+- 7.1-7.6 新生成赛道分布：最佳实践 2、业务模式 2、商业思考 1、场景使用 1；含被保护 imported 后整体区间分布为最佳实践 3、业务模式 2、商业思考 2、场景使用 1。
+- 日期段重生成 follow-up HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，未登录保护正常；管理员模板渲染 smoke 200，包含新题 `Identifying and scaling AI use cases` 与 `Effective context engineering for AI agents`。
+- 日期段重生成 follow-up 服务状态：`polazj.service` active；发布后 warning/alert 为空。
 - 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/gpG2NdyVX37kymb5CP2nkzQYWMwvDqPk`。
 - AI 表格 `开发日志` 表记录：`recordId=oBx4EtxtmE`。
 - 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
@@ -139,3 +148,5 @@
 - 数据源改动提交：`d1f49b0 feat: 补强洞察选题数据源池`。
 - 线上部署记录提交：`cc2c91d docs: 记录洞察选题线上部署`。
 - 行业实践源 follow-up 提交：`1eb7a61 feat: 补强洞察行业实践源`。
+- 残留新闻表述清理提交：`cfb90c0 feat: 优化洞察选题行业实践源`。
+- 日期段重生成 follow-up 提交：`e28bb46 feat: 支持洞察选题日期段重生成`。
