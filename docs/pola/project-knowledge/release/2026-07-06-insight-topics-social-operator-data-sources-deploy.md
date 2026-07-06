@@ -43,6 +43,21 @@
 - 发布方式：提交后推送 `origin/main`，云端 `git merge --ff-only origin/main`，运行云端语法检查和选题测试，重启 `polazj.service`，执行 HTTPS smoke。
 - 发布前本地验证：`py_compile` 通过；选题测试 `14 passed`；全量测试 `107 passed`；function-case Harness 覆盖 10 个验收项 / 11 个 case；查询包 live smoke 返回 135 条候选信号且 errors 为空，其中 `industry_context=7`。
 
+## 查询包 Follow-up 实际发布记录
+
+- 发布时间：2026-07-06 22:48 CST。
+- 发布前云端 HEAD：`27e764e0b242cd7c8b07b490be7042f2a23aa492`。
+- 发布后云端 HEAD：`1eb7a61`。
+- 备份分支：`backup/pre-insight-industry-context-20260706224621`。
+- 数据备份：`/root/polazj-backups/insight-industry-context-20260706224621/insight_topics.json`。
+- 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 14 passed；`tests` 全量 107 passed。
+- 云端只读采集 smoke：`topic_signal_count=123`，`source_counts={'industry_context': 7, 'polanews': 5, 'hackernews': 56, 'github': 29, 'rss': 26}`，`errors=[]`。
+- 服务重启：`systemctl restart polazj.service`，重启后 `active`，gunicorn 2 workers，内存约 88MB。
+- HTTPS smoke：`/PolaZhenjing/admin/login` 200；`/PolaZhenjing/admin/insights/topics` 302，未登录保护正常；`/PolaZhenjing/articles` 200。
+- 管理员模板渲染 smoke：`/admin/insights/topics` 返回 200，包含 `AI 行业社媒运营选题`、`行业实践源`、`topic-lane`、`topic-hook`、`topic-structure`。
+- 服务日志：发布后 5 分钟 `journalctl -u polazj.service -p warning..alert` 无记录。
+- 钉钉同步：`https://alidocs.dingtalk.com/i/nodes/l6Pm2Db8D45pyG06he2wG3Z68xLq0Ee4`，AI 表格记录 `recordId=TwldmRZfe9`，均已回读成功。
+
 ## 回滚方案
 
 ```bash

@@ -23,6 +23,14 @@
 - 结果：`topic_signal_count=135`，`source_counts={'industry_context': 7, 'polanews': 5, 'hackernews': 55, 'github': 30, 'rss': 38}`，`errors=[]`。
 - 单测：`test_industry_context_sources_feed_social_operator_topics` 验证行业实践源能生成 best_practice、scenario_use_case、business_model 等运营选题，且标题不等于原始来源标题。
 
+## 云端 Follow-up 验证
+
+- 云端 `py_compile`：通过。
+- 云端 `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`14 passed in 1.51s`。
+- 云端 `.venv/bin/python -m pytest tests -q`：`107 passed in 3.75s`。
+- 云端只读采集 smoke：`topic_signal_count=123`，`source_counts={'industry_context': 7, 'polanews': 5, 'hackernews': 56, 'github': 29, 'rss': 26}`，`errors=[]`。
+- 云端管理员模板 smoke：HTTP 200，包含 `AI 行业社媒运营选题`、`行业实践源`、`topic-lane`、`topic-hook`、`topic-structure`。
+
 ## UI 渲染验证
 
 - 使用 Flask test client 构造管理员 session，渲染 `/admin/insights/topics`：HTTP 200。

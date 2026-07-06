@@ -77,6 +77,7 @@ flowchart TD
 | AWS Machine Learning Blog | RSS | 云端 AI 架构、Agent/Bedrock 实践、行业场景 | 覆盖可复用的工程实践和真实业务场景。 |
 | GitHub AI & ML Blog | RSS | 开发者工具、Copilot、工程实践 | 支撑最佳实践、AI coding、开发者工作流选题。 |
 | Sequoia Stories | RSS | 创业、市场、商业模式 | 补足商业模式和创业观察，减少纯发布稿倾向。 |
+| Industry Context Sources | 本地元数据 + 稳定公开 URL | Agent 工程、上下文工程、企业采用、用例规模化、商业判断 | 将权威报告和实践指南作为非新闻底层判断源，避免刷新结果完全受近期事件牵引。 |
 
 未接入来源：
 
@@ -102,7 +103,7 @@ flowchart TD
 
 ## 性能与资源
 
-- 数据源 follow-up 新增 5 个 RSS/Atom 源，但不新增采集类型、模型调用、队列或后台进程。
+- 数据源 follow-up 新增 5 个 RSS/Atom 源和一个本地行业实践源收集器，但不新增模型调用、队列或后台进程。
 - 查询包 follow-up 不新增外部来源，只改变既有 PolaNews API 的查询词集合；请求次数由查询词数量线性决定，本轮仍保持在轻量级范围。
 - 行业实践源 follow-up 是内存静态列表转 `InsightSignal`，只增加几十条字符串处理和排序成本。
 - 不新增模型调用。

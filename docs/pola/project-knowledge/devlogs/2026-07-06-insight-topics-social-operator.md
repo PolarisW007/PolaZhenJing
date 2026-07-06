@@ -107,6 +107,14 @@
 - HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，`/PolaZhenjing/articles` 200。
 - 管理员模板渲染 smoke：包含 `AI 行业社媒运营选题`、`topic-lane`、`topic-hook`、`topic-structure`。
 - 服务日志：发布后 5 分钟 warning/error 为空。
+- 行业实践源 follow-up 已部署生产：2026-07-06 22:48 CST。
+- 行业实践源 follow-up 发布前云端 HEAD：`27e764e0b242cd7c8b07b490be7042f2a23aa492`；发布后云端 HEAD：`1eb7a61`。
+- 行业实践源 follow-up 备份分支：`backup/pre-insight-industry-context-20260706224621`。
+- 行业实践源 follow-up 数据备份：`/root/polazj-backups/insight-industry-context-20260706224621/insight_topics.json`。
+- 行业实践源 follow-up 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 14 passed；`tests` 全量 107 passed；只读采集 smoke `topic_signal_count=123`，`industry_context=7`、`polanews=5`、`hackernews=56`、`github=29`、`rss=26`，errors 为空。
+- 行业实践源 follow-up HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，`/PolaZhenjing/articles` 200。
+- 行业实践源 follow-up 管理员模板 smoke：HTTP 200，包含 `AI 行业社媒运营选题`、`行业实践源`、`topic-lane`、`topic-hook`、`topic-structure`。
+- 行业实践源 follow-up 服务状态：`polazj.service` active，gunicorn 2 workers，内存约 88MB；发布后 warning/error 为空。
 - 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/gpG2NdyVX37kymb5CP2nkzQYWMwvDqPk`。
 - AI 表格 `开发日志` 表记录：`recordId=oBx4EtxtmE`。
 - 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
@@ -118,9 +126,13 @@
 - 线上部署钉钉发布记录文档：`https://alidocs.dingtalk.com/i/nodes/OG9lyrgJPzp47NdBCvpRDjZyWzN67Mw4`。
 - 线上部署 AI 表格 `开发日志` 表记录：`recordId=bEFPQt5IGz`。
 - 线上部署同步校验：`dws doc read --node OG9lyrgJPzp47NdBCvpRDjZyWzN67Mw4` 回读成功；`dws aitable record query --record-ids bEFPQt5IGz` 回读成功。
+- 行业实践源上线钉钉发布记录文档：`https://alidocs.dingtalk.com/i/nodes/l6Pm2Db8D45pyG06he2wG3Z68xLq0Ee4`。
+- 行业实践源上线 AI 表格 `开发日志` 表记录：`recordId=TwldmRZfe9`。
+- 行业实践源上线同步校验：`dws doc read --node l6Pm2Db8D45pyG06he2wG3Z68xLq0Ee4` 回读成功；`dws aitable record query --record-ids TwldmRZfe9` 回读成功。
 
 ## Commit 状态
 
 - 代码改动提交：`c2950d2 feat: 升级洞察选题社媒运营生成机制`。
 - 数据源改动提交：`d1f49b0 feat: 补强洞察选题数据源池`。
 - 线上部署记录提交：`cc2c91d docs: 记录洞察选题线上部署`。
+- 行业实践源 follow-up 提交：`1eb7a61 feat: 补强洞察行业实践源`。

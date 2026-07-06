@@ -54,7 +54,7 @@ flowchart TD
 | 行业实践源 | Anthropic Engineering、Microsoft WorkLab、OpenAI Business、McKinsey QuantumBlack | 提供非新闻、长期有效的 agent workflow、context engineering、企业采用和价值捕获材料 |
 | 站内/社区信号 | PolaNews、Hacker News、GitHub Search | 捕捉热度和社区讨论，但必须转译成运营蓝图 |
 
-不接入当前无法稳定机器读取的来源，避免刷新链路被单个页面拖慢或变成网页解析器。
+不接入当前无法稳定机器读取的实时来源，避免刷新链路被单个页面拖慢或变成网页解析器。
 
 PolaNews 查询词不再以 `AI`、`大模型`、单个模型品牌等宽泛词作为主导，而是优先搜索 `AI agent workflow`、`AI use case`、`AI business model`、`AI best practice`、`AI adoption`、`context engineering`、`AI eval guardrails` 以及对应中文场景词。查询词本身只决定候选信号池，最终 topic 仍需转译为社媒运营蓝图。
 
@@ -108,6 +108,6 @@ PolaNews 查询词不再以 `AI`、`大模型`、单个模型品牌等宽泛词�
 - A5：导入测试验证上传页长稿保留核心判断，不暴露管理态元信息。
 - A6：既有刷新、状态、回填、自动刷新测试继续通过。
 - A7：Harness JSON 覆盖 A1-A10。
-- A8：测试验证 RSS 数据源覆盖官方/企业/工程/商业四类运营来源。
-- A9：测试验证新增源都有 `source`、`feed_url`、`label`、`tags` 和对应 `SOURCE_LABELS`。
+- A8：测试验证 RSS 和行业实践源覆盖官方/企业/工程/商业四类运营来源。
+- A9：测试验证新增实时源都有 `source`、`feed_url`、`label`、`tags` 和对应 `SOURCE_LABELS`；行业实践源都有稳定 URL、标签、来源名和赛道元数据。
 - A10：测试验证 PolaNews 查询词和关键词标签映射优先服务运营选题意图。
