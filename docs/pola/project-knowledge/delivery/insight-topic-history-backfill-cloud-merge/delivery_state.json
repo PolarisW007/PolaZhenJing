@@ -3,7 +3,7 @@
   "slug": "insight-topic-history-backfill-cloud-merge",
   "status": "deployed",
   "risk_level": "P1",
-  "updated_at": "2026-07-03",
+  "updated_at": "2026-07-06",
   "steps": [
     {
       "name": "需求与边界",
@@ -38,13 +38,16 @@
   ],
   "implemented": [
     "新增历史回填 topic 生成器，按日期幂等补齐缺失每日选题。",
+    "新增 --replace 日期段重生成模式，只替换 new 旧选题，保护 selected/imported/archived，并使用行业实践源生成社媒运营选题。",
     "新增 dry-run / JSON CLI，便于生产执行前后留证据。",
     "新增 metadata 保留式 save_topics，避免 last_refresh 与 last_backfill 相互覆盖。",
     "新增测试和 A2A function test cases。"
   ],
   "validation": [
     ".venv/bin/python -m py_compile app/insight_topics.py scripts/backfill_insight_topics.py",
-    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q: 15 passed",
+    ".venv/bin/python -m pytest tests -q: 108 passed",
+    ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-07-01 --end 2026-07-06 --topics-per-day 1 --replace --dry-run --json",
     ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-06-01 --end 2026-07-03 --dry-run --json",
     "cloud: backup branch backup/pre-history-backfill-20260703231809",
     "cloud: deployed /PolaZhenjing at 3be6d82cded0f102fc18f61ee37d3ab1803c895e",

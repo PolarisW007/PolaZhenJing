@@ -8,9 +8,10 @@
   - 日期解析和范围限制。
   - 历史回填 topic 生成。
   - `backfill_topics_for_date_range` 幂等回填入口。
+  - `regenerate_topics_for_date_range` 日期段重生成入口，面向旧新闻式 topic 的质量刷新。
   - `save_topics` 保留 metadata。
 - `scripts/backfill_insight_topics.py`
-  - 运维 CLI，支持 dry-run 和 JSON 输出。
+  - 运维 CLI，支持 dry-run、replace 和 JSON 输出。
 
 ## 数据流
 
@@ -23,16 +24,29 @@ CLI args -> backfill_topics_for_date_range
   -> save_topics 写入 data/insight_topics.json
 ```
 
+```text
+CLI --replace -> regenerate_topics_for_date_range
+  -> _load_payload
+  -> 移除目标日期内 new topic
+  -> 保留 selected/imported/archived topic
+  -> collect_industry_context_signals
+  -> signals_to_topics 生成社媒运营蓝图
+  -> 按日期分配并 _normalize_topic
+  -> save_topics 写入 last_range_regeneration
+```
+
 ## 幂等和并发
 
 - 幂等依据：`date` 已存在则跳过。
+- replace 模式不是补缺幂等，而是显式质量重刷；它只替换 `new` 状态 topic，保护已进入运营流程的 topic。
 - 本次不提供并发写锁，生产执行为单次运维命令；执行前必须备份 `data/insight_topics.json`。
 - dry-run 不写文件。
 - 每次最多 366 天，每天最多 3 条，避免无界写入。
 
 ## 性能和资源
 
-- 不访问网络。
+- 默认补缺不访问网络。
+- replace 模式使用静态 `INDUSTRY_CONTEXT_SOURCES`，不访问外部网络、不调用模型。
 - 不加载模型。
 - 不启动 ASR、本地模型或后台批处理。
 - CPU 消耗来自 29 到 32 条长底稿文本生成，规模固定，预期秒级完成。

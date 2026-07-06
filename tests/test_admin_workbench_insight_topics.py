@@ -361,6 +361,67 @@ def test_backfill_topics_for_date_range_dry_run_does_not_write(monkeypatch, tmp_
     assert "last_backfill" not in payload
 
 
+def test_regenerate_topics_for_date_range_replaces_only_new_topics(monkeypatch, tmp_path):
+    topics_file = tmp_path / "insight_topics.json"
+    monkeypatch.setattr(insight_topics, "INSIGHT_TOPICS_FILE", topics_file)
+    old_topics = [
+        insight_topics._normalize_topic(
+            {
+                "date": "2026-07-01",
+                "title": "The latest AI news we announced in June 2026",
+                "angle": "旧的新闻式标题，应被重生成替换。",
+                "summary": "旧数据仍然像新闻搬运。",
+                "tags": ["old"],
+                "status": "new",
+                "source_url": "https://example.com/old-news",
+                "source_type": "rss",
+            }
+        ),
+        insight_topics._normalize_topic(
+            {
+                "date": "2026-07-02",
+                "title": "某公司发布 AI 新闻",
+                "angle": "旧的新闻式标题，应被重生成替换。",
+                "summary": "旧数据仍然像新闻搬运。",
+                "tags": ["old"],
+                "status": "new",
+                "source_url": "https://example.com/old-news-2",
+                "source_type": "rss",
+            }
+        ),
+        insight_topics._normalize_topic(
+            {
+                "date": "2026-07-01",
+                "title": "已选中的运营选题",
+                "angle": "用户已经选中，重生成时不能覆盖。",
+                "summary": "这是人工保留的结果。",
+                "tags": ["keep"],
+                "status": "selected",
+                "source_url": "https://example.com/selected",
+                "source_type": "manual",
+            }
+        ),
+    ]
+    protected_id = old_topics[-1]["id"]
+    insight_topics.save_topics(old_topics)
+
+    result = insight_topics.regenerate_topics_for_date_range("2026-07-01", "2026-07-02")
+    payload = json.loads(topics_file.read_text(encoding="utf-8"))
+    range_topics = [
+        topic for topic in payload["topics"] if "2026-07-01" <= topic["date"] <= "2026-07-02"
+    ]
+    regenerated = [topic for topic in range_topics if topic["source_type"] == "industry_context"]
+
+    assert result["removed_new_count"] == 2
+    assert result["added_count"] == 2
+    assert result["preserved_in_range_count"] == 1
+    assert {topic["date"] for topic in regenerated} == {"2026-07-01", "2026-07-02"}
+    assert any(topic["id"] == protected_id and topic["status"] == "selected" for topic in range_topics)
+    assert all("新闻" not in topic["title"] for topic in regenerated)
+    assert all("date-range-regenerated" in topic["tags"] for topic in regenerated)
+    assert payload["last_range_regeneration"]["removed_new_count"] == 2
+
+
 def test_stale_topic_pool_triggers_background_refresh(monkeypatch, tmp_path):
     topics_file = tmp_path / "insight_topics.json"
     lock_file = tmp_path / "insight_topics_refresh.lock"

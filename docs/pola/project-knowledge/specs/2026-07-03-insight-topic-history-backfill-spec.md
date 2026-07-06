@@ -14,6 +14,7 @@
 - `--end`：必填，结束日期。
 - `--topics-per-day`：默认 1，范围 1 到 3。
 - `--dry-run`：只计算不写入。
+- `--replace`：重生成目标日期段内的 `new` 选题；已选中/已导入/已归档 topic 保留。
 - `--json`：输出 JSON 摘要。
 
 ## 输出字段
@@ -30,6 +31,13 @@
 - `total_topics`
 - `persisted`
 
+`--replace` 模式额外输出：
+
+- `removed_new_count`
+- `preserved_in_range_count`
+- `date_counts`
+- `lane_counts`
+
 ## 数据写入规则
 
 1. 读取 `data/insight_topics.json`。
@@ -38,6 +46,14 @@
 4. 缺失日期生成 `manual_backfill` topic。
 5. 每条 topic 进入 `_normalize_topic`，保证 id、draft、word count、evidence links 一致。
 6. `save_topics` 保留既有 metadata，并写入 `last_backfill`。
+
+## 日期段重生成规则
+
+1. 读取 `data/insight_topics.json`。
+2. 找到目标日期段内 `status=new` 的 topic 并作为可替换旧数据。
+3. 保留目标日期段内 `selected`、`imported`、`archived` 和目标日期段外所有 topic。
+4. 从 `INDUSTRY_CONTEXT_SOURCES` 生成社媒运营 topic 蓝图，按日期分配。
+5. 写入 `last_range_regeneration`，记录移除数量、新增数量、日期覆盖和内容赛道分布。
 
 ## 不影响功能使用的验证路径
 
@@ -54,3 +70,4 @@
 - A6：测试与 Harness。
 - A7：性能和安全边界。
 - A8：生产回归。
+- A9：日期段重生成质量与状态保护。

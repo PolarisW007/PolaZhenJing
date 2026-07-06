@@ -17,7 +17,7 @@
       "scope": "Insight topics unit/integration regression",
       "status": "pass",
       "exit_code": 0,
-      "summary": "10 passed"
+      "summary": "15 passed"
     },
     {
       "id": "T3",
@@ -35,7 +35,7 @@
       "scope": "A2A function test case coverage harness",
       "status": "pass",
       "exit_code": 0,
-      "summary": "PASS: function test cases cover 8 documented acceptance id(s), 3 feature(s), 7 case(s)."
+      "summary": "PASS: function test cases cover 9 documented acceptance id(s), 4 feature(s), 9 case(s)."
     },
     {
       "id": "T5",
@@ -90,6 +90,24 @@
       "status": "pass",
       "exit_code": 0,
       "summary": "admin/login=200, admin/workbench=302, admin/insights/topics=302, articles=200"
+    },
+    {
+      "id": "T11",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_regenerate_topics_for_date_range_replaces_only_new_topics -q",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Date-range replace mode unit coverage",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "1 passed; only new topics replaced, selected topic preserved, industry_context topics generated"
+    },
+    {
+      "id": "T12",
+      "command": ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-07-01 --end 2026-07-06 --topics-per-day 1 --replace --dry-run --json",
+      "cwd": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing",
+      "scope": "Date-range replace dry-run",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "dry-run returned added_count=6, date_counts covers 2026-07-01..2026-07-06, lane_counts include 最佳实践/业务模式/商业思考/场景使用"
     }
   ],
   "coverage": [
@@ -100,6 +118,7 @@
     {"acceptance_id": "A5", "case_ids": ["IT-F3-001"], "commands": ["T4"]},
     {"acceptance_id": "A6", "case_ids": ["IT-F1-001", "RG-F1-001", "IT-F2-001", "IT-F3-001"], "commands": ["T1", "T2", "T3", "T4"]},
     {"acceptance_id": "A7", "case_ids": ["UT-F1-001", "UT-F2-001"], "commands": ["T1", "T2", "T4"]},
-    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"], "commands": ["T4"]}
+    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"], "commands": ["T4"]},
+    {"acceptance_id": "A9", "case_ids": ["UT-F4-001", "IT-F4-001"], "commands": ["T11", "T12", "T4"]}
   ]
 }

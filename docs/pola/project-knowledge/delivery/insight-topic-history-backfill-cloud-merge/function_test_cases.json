@@ -144,6 +144,49 @@
           "manual_verification": "使用 curl 和云端 Python 统计脚本记录结果。"
         }
       ]
+    },
+    {
+      "id": "F4",
+      "name": "日期段重生成质量刷新",
+      "source_refs": [
+        "requirements/2026-07-03-insight-topic-history-backfill.md#验收标准",
+        "specs/2026-07-03-insight-topic-history-backfill-spec.md#日期段重生成规则",
+        "architecture/2026-07-03-insight-topic-history-backfill-sdd.md#数据流"
+      ],
+      "acceptance_ids": ["A2", "A3", "A7", "A9"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_regenerate_topics_for_date_range_replaces_only_new_topics",
+          "scenario": "目标日期内同时存在旧新闻式 new 选题和 selected 选题",
+          "assertions": [
+            "只移除 new 状态旧选题",
+            "selected 选题 id 和状态保持不变",
+            "新增选题 source_type 为 industry_context",
+            "新增选题标题不包含新闻表述",
+            "写入 last_range_regeneration"
+          ],
+          "expected": "日期段重生成能清理旧新闻式候选，同时保护已进入运营流程的 topic",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_regenerate_topics_for_date_range_replaces_only_new_topics -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F4-001",
+          "target": "scripts/backfill_insight_topics.py --replace",
+          "scenario": "dry-run 2026-07-01 到 2026-07-06 的日期段重生成",
+          "assertions": [
+            "输出 removed_new_count",
+            "输出 date_counts",
+            "输出 lane_counts",
+            "dry-run 不写数据文件"
+          ],
+          "expected": "上线前可预估替换范围和内容赛道分布",
+          "command": ".venv/bin/python scripts/backfill_insight_topics.py --start 2026-07-01 --end 2026-07-06 --topics-per-day 1 --replace --dry-run --json"
+        }
+      ],
+      "regression_cases": []
     }
   ],
   "coverage": [
@@ -154,6 +197,7 @@
     {"acceptance_id": "A5", "case_ids": ["IT-F3-001"]},
     {"acceptance_id": "A6", "case_ids": ["IT-F1-001", "RG-F1-001", "IT-F2-001", "IT-F3-001"]},
     {"acceptance_id": "A7", "case_ids": ["UT-F1-001", "UT-F2-001"]},
-    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"]}
+    {"acceptance_id": "A8", "case_ids": ["IT-F3-001", "RG-F3-001"]},
+    {"acceptance_id": "A9", "case_ids": ["UT-F4-001", "IT-F4-001"]}
   ]
 }

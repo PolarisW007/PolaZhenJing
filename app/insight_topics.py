@@ -1542,6 +1542,115 @@ def backfill_topics_for_date_range(
     }
 
 
+def _topic_for_date_from_blueprint(blueprint: dict, day: date, sequence: int = 1) -> dict:
+    item = deepcopy(blueprint)
+    date_text = day.isoformat()
+    for key in ("id", "created_at", "updated_at", "draft_markdown", "draft_word_count"):
+        item.pop(key, None)
+    if sequence > 1:
+        item["title"] = f"{item.get('title', 'AI 行业实践选题')}（方向 {sequence}）"
+    item["date"] = date_text
+    item["status"] = "new"
+    item["tags"] = _normalize_tags(
+        ["date-range-regenerated", "industry-context", *item.get("tags", [])]
+    )[:8]
+    item["generated_at"] = _now()
+    item["source_type"] = item.get("source_type") or "industry_context"
+    item["cluster_key"] = _cluster_key(
+        f"{date_text}|{item.get('title', '')}|{sequence}",
+        item.get("tags", []),
+    )
+    return _normalize_topic(item)
+
+
+def regenerate_topics_for_date_range(
+    start_date: Any,
+    end_date: Any,
+    topics_per_day: int = 1,
+    persist: bool = True,
+) -> dict:
+    """Replace new topics in a date range with social-operator industry topics."""
+    try:
+        topics_per_day = int(topics_per_day)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("每天重生成数量必须是整数。") from exc
+    if topics_per_day < 1 or topics_per_day > MAX_BACKFILL_TOPICS_PER_DAY:
+        raise ValueError(f"每天重生成数量必须在 1 到 {MAX_BACKFILL_TOPICS_PER_DAY} 之间。")
+
+    target_days = _iter_dates(start_date, end_date)
+    target_dates = [day.isoformat() for day in target_days]
+    target_date_set = set(target_dates)
+    existing_topics = _topics_from_payload(_load_payload())
+
+    protected_statuses = {"selected", "imported", "archived"}
+    removable_topics = [
+        topic
+        for topic in existing_topics
+        if str(topic.get("date") or "") in target_date_set
+        and str(topic.get("status") or "new") not in protected_statuses
+    ]
+    preserved_topics = [topic for topic in existing_topics if topic not in removable_topics]
+    preserved_in_range = [
+        topic for topic in preserved_topics if str(topic.get("date") or "") in target_date_set
+    ]
+
+    source_signals = collect_industry_context_signals(days=DEFAULT_REFRESH_DAYS)
+    needed = len(target_days) * topics_per_day
+    blueprints = signals_to_topics(source_signals, max_topics=max(needed, len(source_signals)))
+    if not blueprints:
+        raise ValueError("没有可用于重生成的行业实践源。")
+
+    additions: list[dict] = []
+    cursor = 0
+    for day in target_days:
+        for sequence in range(1, topics_per_day + 1):
+            blueprint = blueprints[cursor % len(blueprints)]
+            additions.append(_topic_for_date_from_blueprint(blueprint, day, sequence=sequence))
+            cursor += 1
+
+    final_topics = sorted([*preserved_topics, *additions], key=_topic_sort_key, reverse=True)
+    date_counts: dict[str, int] = {}
+    lane_counts: dict[str, int] = {}
+    for topic in final_topics:
+        date_text = str(topic.get("date") or "")
+        if date_text not in target_date_set:
+            continue
+        date_counts[date_text] = date_counts.get(date_text, 0) + 1
+        label = str(topic.get("content_lane_label") or topic.get("content_lane") or "未标注")
+        lane_counts[label] = lane_counts.get(label, 0) + 1
+
+    last_regeneration = {
+        "regenerated_at": _now(),
+        "start_date": target_dates[0],
+        "end_date": target_dates[-1],
+        "topics_per_day": topics_per_day,
+        "target_days": len(target_dates),
+        "removed_new_count": len(removable_topics),
+        "preserved_in_range_count": len(preserved_in_range),
+        "added_count": len(additions),
+        "source_type": "industry_context",
+        "date_counts": date_counts,
+        "lane_counts": lane_counts,
+        "persisted": bool(persist),
+    }
+    if persist:
+        save_topics(final_topics, metadata={"last_range_regeneration": last_regeneration})
+
+    return {
+        "start_date": target_dates[0],
+        "end_date": target_dates[-1],
+        "target_days": len(target_dates),
+        "topics_per_day": topics_per_day,
+        "removed_new_count": len(removable_topics),
+        "preserved_in_range_count": len(preserved_in_range),
+        "added_count": len(additions),
+        "date_counts": date_counts,
+        "lane_counts": lane_counts,
+        "total_topics": len(final_topics),
+        "persisted": bool(persist),
+    }
+
+
 def collect_polanews_signals(days: int, limit: int = MAX_SIGNALS_PER_SOURCE) -> list[InsightSignal]:
     articles: list[dict] = []
     seen_ids: set[str] = set()

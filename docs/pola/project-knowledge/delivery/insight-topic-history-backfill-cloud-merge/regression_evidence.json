@@ -1,6 +1,6 @@
 {
   "slug": "insight-topic-history-backfill-cloud-merge",
-  "updated_at": "2026-07-03",
+  "updated_at": "2026-07-06",
   "local": {
     "py_compile": "pass",
     "pytest": "10 passed",
@@ -34,6 +34,11 @@
       "cloud service: active",
       "cloud HTTPS smoke: /PolaZhenjing/admin/login=200, protected admin/topics=302, /PolaZhenjing/articles=200"
     ],
+    "replace_mode_follow_up": {
+      "local_pytest": "15 passed for tests/test_admin_workbench_insight_topics.py; 108 passed for tests",
+      "function_harness": "PASS: function test cases cover 9 documented acceptance id(s), 4 feature(s), 9 case(s).",
+      "dry_run": "2026-07-01..2026-07-06 replace dry-run added_count=6, lane_counts includes 最佳实践/业务模式/商业思考/场景使用"
+    },
     "dingtalk_sync": {
       "status": "pass",
       "devlog_doc_url": "https://alidocs.dingtalk.com/i/nodes/7QG4Yx2JpLwEz4m6hQMomb11J9dEq3XD",

@@ -75,6 +75,7 @@
 - 旧数据通过 `_normalize_topic` 补齐新字段。
 - 数据源二阶段只增加 RSS/Atom 配置和查询词，不新增采集类型；真实刷新仍由分源失败隔离兜底。
 - 数据源三阶段只调整 PolaNews 查询词、标签映射和静态行业实践源，不新增运行时进程、密钥、生产数据迁移或额外网络抓取。
+- 7.1-7.6 生成验证发现旧回填脚本只补缺失日期，不能清理已存在的新闻式旧 topic；新增 `scripts/backfill_insight_topics.py --replace` 和 `regenerate_topics_for_date_range()`，用于在备份后重刷目标日期段内 `new` 选题，保护 `selected/imported/archived`。
 
 ## 验证记录
 
@@ -88,6 +89,7 @@
 - RSS live smoke：`collect_rss_signals(days=30, limit_per_feed=4)` 只读执行，采集 30 条信号，新增源中 `deepmind_blog`、`microsoft_official_blog`、`aws_ml_blog`、`github_ai_ml_blog`、`sequoia_stories` 均有返回。
 - 行业实践源单测：`test_industry_context_sources_feed_social_operator_topics` 验证静态行业实践源能生成 best_practice、scenario_use_case、business_model 等社媒运营选题。
 - 查询包 live smoke：`collect_polanews_signals(days=30, limit=20)` 返回 5 条 PolaNews 信号；`collect_topic_signals(days=30)` 返回 135 条，总 source_counts 为 `industry_context=7`、`polanews=5`、`hackernews=55`、`github=30`、`rss=38`，errors 为空。
+- 日期段重生成单测：`test_regenerate_topics_for_date_range_replaces_only_new_topics` 覆盖只替换 `new` 旧选题、保留 selected 选题、生成 `industry_context` 社媒运营选题。
 
 ## 影响面
 

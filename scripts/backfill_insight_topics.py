@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backfill historical insight topics for missing calendar dates."""
+"""Backfill or regenerate historical insight topics for calendar dates."""
 
 from __future__ import annotations
 
@@ -33,6 +33,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Compute the additions without writing data/insight_topics.json.",
     )
     parser.add_argument(
+        "--replace",
+        action="store_true",
+        help=(
+            "Replace existing new topics in the date range with social-operator "
+            "industry-context topics. Selected/imported/archived topics are preserved."
+        ),
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Print machine-readable JSON summary.",
@@ -44,12 +52,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     try:
-        result = insight_topics.backfill_topics_for_date_range(
-            args.start,
-            args.end,
-            topics_per_day=args.topics_per_day,
-            persist=not args.dry_run,
-        )
+        if args.replace:
+            result = insight_topics.regenerate_topics_for_date_range(
+                args.start,
+                args.end,
+                topics_per_day=args.topics_per_day,
+                persist=not args.dry_run,
+            )
+        else:
+            result = insight_topics.backfill_topics_for_date_range(
+                args.start,
+                args.end,
+                topics_per_day=args.topics_per_day,
+                persist=not args.dry_run,
+            )
     except ValueError as exc:
         parser.error(str(exc))
         return 2
@@ -57,16 +73,26 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        action = "would add" if args.dry_run else "added"
-        print(
-            f"{action} {result['added_count']} topic(s), "
-            f"covered {result['target_days'] - len(result['missing_days_after'])}/"
-            f"{result['target_days']} day(s)."
-        )
-        if result["added_dates"]:
-            print("added dates:", ", ".join(result["added_dates"]))
-        if result["missing_days_after"]:
-            print("still missing:", ", ".join(result["missing_days_after"]))
+        if args.replace:
+            action = "would replace" if args.dry_run else "replaced"
+            print(
+                f"{action} {result['added_count']} topic(s), "
+                f"removed {result['removed_new_count']} old new topic(s), "
+                f"covered {len(result['date_counts'])}/{result['target_days']} day(s)."
+            )
+            if result["preserved_in_range_count"]:
+                print("preserved protected topics:", result["preserved_in_range_count"])
+        else:
+            action = "would add" if args.dry_run else "added"
+            print(
+                f"{action} {result['added_count']} topic(s), "
+                f"covered {result['target_days'] - len(result['missing_days_after'])}/"
+                f"{result['target_days']} day(s)."
+            )
+            if result["added_dates"]:
+                print("added dates:", ", ".join(result["added_dates"]))
+            if result["missing_days_after"]:
+                print("still missing:", ", ".join(result["missing_days_after"]))
     return 0
 
 
