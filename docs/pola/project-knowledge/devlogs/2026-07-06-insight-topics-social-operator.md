@@ -64,6 +64,7 @@
   - 新增 `collect_industry_context_signals()`，把这些非新闻、长期有效的行业实践材料作为候选信号，与 PolaNews/HN/GitHub/RSS 合并排序。
   - 扩展关键词标签：workflow、use-case、business-model、commercial-thinking、adoption、context-engineering、evaluation、guardrail。
   - 刷新结果 metadata 新增 `content_lane_counts`，后台刷新面板可看到本次生成 topic 的赛道分布。
+  - 清理生成标题、导语、证据角度中的残留“新闻”表述，统一改为“事件更新/事件搬运/事件复述”，让 topic 更彻底地面向运营判断而不是资讯复述。
 - 边界：不新增外部 API 调用、不新增 RSS 源、不新增模型调用、不改变刷新频率；行业实践源是静态 curated list，只提供来源链接和摘要，不抓取页面正文。
 
 ## 稳定性与安全门禁

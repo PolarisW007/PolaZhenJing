@@ -619,7 +619,7 @@ CONTENT_LANE_TITLE_TEMPLATES = {
     "scenario_use_case": "{subject} 背后，AI 正在进入哪类真实工作流？",
     "product_capability": "{source_label} 的这次能力变化，产品团队应该盯住什么？",
     "business_model": "从 {subject} 看 AI 商业化的付费理由",
-    "commercial_thinking": "{subject} 不只是新闻，它改变了哪条 AI 商业判断？",
+    "commercial_thinking": "{subject} 背后，哪条 AI 商业判断正在被改写？",
     "best_practice": "把 {subject} 变成可复用实践，需要哪些护栏？",
     "practice_recap": "复盘 {subject}：从 demo 到真实流程卡在哪里？",
 }
@@ -1160,7 +1160,7 @@ def _draft_paragraphs(topic: dict) -> list[str]:
         evidence_urls,
         "## 导语",
         (
-            f"{social_hook} 如果只把“{source_signal_title}”当成一条新闻，它很快就会被下一条更新淹没。"
+            f"{social_hook} 如果只把“{source_signal_title}”当成一条事件更新，它很快就会被下一条更新淹没。"
             f"但把它放回最近的 {source_type} 信号、{source_count} 条来源证据和 {tag_text} 的上下文里看，"
             f"它更像一个{lane_label}提醒：技术变化并不是突然砸到桌面上的结论，而是许多弱信号在同一个方向上慢慢汇合。"
         ),
@@ -1192,7 +1192,7 @@ def _draft_paragraphs(topic: dict) -> list[str]:
             "但要把问题拆清楚：谁在受益，谁在付成本，谁的旧优势正在变弱。"
         ),
         (
-            f"围绕 {tag_text}，读者真正需要的不是新闻摘要，而是一张决策地图。"
+            f"围绕 {tag_text}，读者真正需要的不是事件摘要，而是一张决策地图。"
             "它应该告诉创业者该观察哪些早期需求，告诉产品经理该重构哪些入口，告诉工程团队哪些能力不再只是实验，"
             "也告诉普通读者为什么这些变化会穿透到工作方式里。"
         ),
@@ -1200,7 +1200,7 @@ def _draft_paragraphs(topic: dict) -> list[str]:
         (
             "这类社媒内容可以按四步推进："
             + "；".join(content_structure)
-            + "。这样写的好处是，文章不会停留在新闻复述，而会自然落到判断、方法和行动上。"
+            + "。这样写的好处是，文章不会停留在事件复述，而会自然落到判断、方法和行动上。"
         ),
         "## 事实和证据如何组织",
         (
@@ -1834,7 +1834,7 @@ def _topic_from_signal(signal: InsightSignal, generated_at: str) -> dict:
     title = _content_lane_title(signal, lane_key)
     lane_tag = lane_key.replace("_", "-")
     angle = (
-        f"把 {source_label} / {host} 的“{subject}”作为证据切口，不做新闻搬运；"
+        f"把 {source_label} / {host} 的“{subject}”作为证据切口，不做事件搬运；"
         f"围绕“{lane['question']}”展开，提炼对产品、工程、运营和商业判断的影响。"
     )
     source_summary = signal.summary or f"近期来自 {source_label} 的线上信号。"
