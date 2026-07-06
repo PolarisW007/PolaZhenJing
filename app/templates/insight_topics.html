@@ -20,7 +20,9 @@
   }
   .insight-header p,
   .topic-meta,
-  .topic-summary {
+  .topic-summary,
+  .topic-blueprint,
+  .topic-source-signal {
     color: var(--text-muted);
     font-size: 0.84rem;
     line-height: 1.65;
@@ -96,7 +98,44 @@
     font-size: 1rem;
     margin-bottom: 0.45rem;
   }
+  .topic-lane {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(228,191,122,0.35);
+    border-radius: 999px;
+    color: var(--gold-primary);
+    background: rgba(228,191,122,0.08);
+    padding: 0.12rem 0.5rem;
+    margin-left: 0.4rem;
+    font-size: 0.76rem;
+  }
   .topic-summary {
+    margin-top: 0.65rem;
+  }
+  .topic-hook {
+    margin-top: 0.65rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .topic-blueprint {
+    margin-top: 0.65rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .topic-blueprint strong,
+  .topic-source-signal strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .topic-structure {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .topic-structure li {
+    margin: 0.16rem 0;
+  }
+  .topic-source-signal {
     margin-top: 0.65rem;
   }
   .topic-actions {
@@ -137,8 +176,8 @@
 {% block content %}
 <div class="insight-header">
   <div>
-    <h2>洞察文章选题</h2>
-    <p>每日选题池。现在从 PolaNews 和公开线上信号生成，可直接导入上传页形成洞察草稿。</p>
+    <h2>AI 行业社媒运营选题</h2>
+    <p>把 PolaNews 和公开线上信号转译成场景、产品、商业、实践和复盘类选题，可直接导入上传页继续成稿。</p>
   </div>
   <div class="module-actions">
     <a class="btn-ghost" href="{{ url_for('admin_workbench.workbench') }}">返回工作台</a>
@@ -148,7 +187,7 @@
 <section class="refresh-panel">
   <div>
     <h3>线上信号刷新</h3>
-    <p>PolaNews 负责站内周期新闻，Hacker News、GitHub 和公开 RSS 作为外部信号补充；失败源会记录但不影响现有选题。</p>
+    <p>PolaNews、Hacker News、GitHub 和公开 RSS 只作为证据来源；系统会优先生成适合账号运营的洞察选题，而不是新闻搬运标题。</p>
     {% if auto_refresh and auto_refresh.status == 'started' %}
     <div class="refresh-meta">检测到选题池已过期，已在后台自动刷新近 {{ default_refresh_days }} 天线上信号；稍后刷新页面可查看新选题。</div>
     {% elif auto_refresh and auto_refresh.status == 'locked' %}
@@ -190,9 +229,36 @@
   {% for topic in topics %}
   <article class="topic-card">
     <div>
-      <div class="topic-meta">{{ topic.date }} · {{ topic_statuses.get(topic.status, topic.status) }}</div>
+      <div class="topic-meta">
+        {{ topic.date }} · {{ topic_statuses.get(topic.status, topic.status) }}
+        <span class="topic-lane">{{ topic.content_lane_label or '洞察选题' }}</span>
+      </div>
       <h3>{{ topic.title }}</h3>
       <p class="topic-summary">{{ topic.summary }}</p>
+      {% if topic.social_hook %}
+      <div class="topic-hook">{{ topic.social_hook }}</div>
+      {% endif %}
+      <div class="topic-blueprint">
+        {% if topic.target_audience %}
+        <div><strong>读者：</strong>{{ topic.target_audience }}</div>
+        {% endif %}
+        {% if topic.core_question %}
+        <div><strong>问题：</strong>{{ topic.core_question }}</div>
+        {% endif %}
+        {% if topic.content_structure %}
+        <div>
+          <strong>结构：</strong>
+          <ul class="topic-structure">
+            {% for step in topic.content_structure[:4] %}
+            <li>{{ step }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% if topic.source_signal_title %}
+      <div class="topic-source-signal"><strong>来源信号：</strong>{{ topic.source_signal_title }}</div>
+      {% endif %}
     </div>
     <div class="topic-actions">
       <form class="inline-form" method="post" action="{{ url_for('admin_workbench.update_insight_topic_status', topic_id=topic.id) }}">

@@ -1,0 +1,146 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md",
+    "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md",
+    "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "信号转译为社媒选题",
+      "source_refs": [
+        "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md#验收标准",
+        "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md#数据流"
+      ],
+      "acceptance_ids": ["A1", "A2"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles",
+          "scenario": "给定产品更新型线上信号",
+          "assertions": ["topic title 不等于原始 signal title", "content_lane 存在", "content_lane_label 存在"],
+          "expected": "信号被转译为运营选题，不是新闻搬运标题",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "社媒蓝图字段",
+      "source_refs": [
+        "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md#Topic 字段",
+        "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md#页面行为"
+      ],
+      "acceptance_ids": ["A3", "A4"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles",
+          "scenario": "生成 topic 后检查蓝图字段",
+          "assertions": ["social_hook 存在", "target_audience 存在", "core_question 存在", "content_structure 至少 3 项", "source_signal_title 保留原始信号"],
+          "expected": "每个选题可直接进入社媒运营策划",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F2-001",
+          "target": "/admin/insights/topics",
+          "scenario": "管理员打开选题池页面",
+          "assertions": ["页面包含社媒运营说明", "页面展示内容赛道", "页面展示社媒钩子和建议结构"],
+          "expected": "后台页面可见运营蓝图",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_insight_topics_list_and_status_update -q"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "一键导入成稿",
+      "source_refs": [
+        "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md#核心流程",
+        "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md#兼容策略"
+      ],
+      "acceptance_ids": ["A5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "tests/test_admin_workbench_insight_topics.py::test_refresh_topic_import_prefills_long_article_draft",
+          "scenario": "生成 topic 后一键导入上传页",
+          "assertions": ["上传页草稿可见字符 >= 5000", "草稿包含 ## 核心判断", "草稿不包含来源类型/证据链接/状态/评分管理信息"],
+          "expected": "导入生成的是可编辑长稿，不是后台元数据",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_refresh_topic_import_prefills_long_article_draft -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F4",
+      "name": "旧流程兼容",
+      "source_refs": [
+        "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md#验收标准",
+        "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md#兼容策略"
+      ],
+      "acceptance_ids": ["A6"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "tests/test_admin_workbench_insight_topics.py",
+          "scenario": "运行洞察选题现有测试集",
+          "assertions": ["列表、状态、刷新、回填、自动刷新锁、质量过滤继续通过"],
+          "expected": "旧工作流不回归",
+          "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RG-F4-001",
+          "target": "tests/test_upload_rewrite_rate.py tests/test_public_article_homepage.py tests/test_social_publish.py::test_admin_links_respect_script_name_prefix",
+          "scenario": "相邻上传、公共页面、admin prefix 回归",
+          "assertions": ["相关测试通过"],
+          "expected": "后台选题改动不影响相邻主流程",
+          "command": ".venv/bin/python -m pytest tests -q"
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "name": "Harness 交付证据",
+      "source_refs": [
+        "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md#验收标准",
+        "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json"
+      ],
+      "acceptance_ids": ["A7"],
+      "risk": "P3",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
+          "scenario": "运行 Pola function test case harness",
+          "assertions": ["A1-A7 均被用例覆盖"],
+          "expected": "交付证据完整",
+          "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F3-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F4-001", "RG-F4-001"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F5-001"]}
+  ]
+}

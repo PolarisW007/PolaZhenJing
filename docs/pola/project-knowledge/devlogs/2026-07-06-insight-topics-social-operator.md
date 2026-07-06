@@ -1,0 +1,76 @@
+# 开发日志：洞察选题社媒运营生成机制
+
+## 时间
+
+2026-07-06 CST
+
+## 本次目标
+
+- 将 `/PolaZhenjing/admin/insights/topics` 从新闻式选题升级为 AI 行业社媒运营选题蓝图。
+- 公开信号只作为证据，不再直接变成 topic 标题。
+- 每个 topic 提供内容赛道、社媒钩子、目标读者、核心问题和建议结构。
+
+## 计划改动
+
+- `app/insight_topics.py`：升级信号转 topic、归一化字段、草稿模板、排序策略。
+- `app/templates/insight_topics.html`：展示社媒运营字段。
+- `tests/test_admin_workbench_insight_topics.py`：更新旧断言，增加生成机制测试。
+- `docs/pola/project-knowledge/delivery/insight-topics-social-operator/*`：补齐 Harness 交付证据。
+
+## 已完成改动
+
+- `app/insight_topics.py`
+  - 新增六类内容赛道：场景使用、产品能力更新、业务模式、商业思考、最佳实践、实践复盘。
+  - 新增赛道识别、社媒标题模板、社媒钩子、目标读者、核心问题、建议结构、来源信号和证据角色字段。
+  - 将原始线上信号从 topic 标题降级为 `source_signal_title`，用于证据切口，不再直接作为新闻标题搬运。
+  - `_normalize_topic()` 兼容旧 JSON，旧 topic 缺字段时补齐运营蓝图字段；旧草稿策略缺失时生成新版底稿。
+  - `merge_preserving_status()` 支持用 `source_signal_title` 匹配旧 topic，避免标题转译后丢失 selected/imported/archived 状态。
+  - `_upload_article_draft()` 不再因正文长度不足退回管理态完整底稿，而是继续扩写正文型长稿。
+- `app/templates/insight_topics.html`
+  - 页面标题改为 `AI 行业社媒运营选题`。
+  - Topic 卡片展示内容赛道、社媒钩子、读者、核心问题、建议结构和来源信号。
+- `tests/test_admin_workbench_insight_topics.py`
+  - 新增 `test_signals_to_topics_generates_social_operation_blueprints_not_news_titles`。
+  - 回归状态保留、导入上传、质量过滤、页面展示和自动刷新测试。
+- `docs/pola/arch-reference.md`
+  - 更新洞察选题池架构事实和“不直接搬运新闻标题”的约束。
+- `docs/pola/project-knowledge/*`
+  - 补齐需求、PRD、SDD、test report、delivery state、test matrix、regression evidence。
+
+## 稳定性与安全门禁
+
+- 风险等级：P2。
+- 不新增 secret，不新增模型调用，不新增后台进程。
+- 采集源、请求超时、自动刷新锁沿用旧逻辑。
+- 旧数据通过 `_normalize_topic` 补齐新字段。
+
+## 验证记录
+
+- `.venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py`：通过。
+- `.venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q`：`11 passed in 0.73s`。
+- `.venv/bin/python -m pytest tests -q`：`104 passed in 2.16s`。
+- `.venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json`：PASS。
+- `.venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py`：PASS。
+- Flask test client 渲染 `/admin/insights/topics` 管理员页面：HTTP 200，包含社媒标题、赛道、钩子和建议结构。
+- Playwright system Chrome 渲染：通过，截图 `/tmp/polazj-insight-topics-social-operator.png`。
+
+## 影响面
+
+- 用户可见：`/PolaZhenjing/admin/insights/topics` 后台选题页展示从新闻列表升级为运营蓝图。
+- 数据：新增兼容字段写入 `data/insight_topics.json` 时向前兼容；本地测试未修改生产数据。
+- 性能：不新增外部请求、模型调用、后台进程、队列或定时任务；新增逻辑为本地字符串规则和排序。
+- 安全：不新增 secret，不读取或写入 `.env`，不输出 token/cookie。
+
+## 发布状态
+
+- 本地实现与回归通过。
+- 尚未部署生产；如需上线，需要先执行发布门禁：备份云端 `data/insight_topics.json`，拉取本次 commit，重启 `polazj.service`，运行云端 py_compile、pytest 和 HTTPS smoke。
+- 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/gpG2NdyVX37kymb5CP2nkzQYWMwvDqPk`。
+- AI 表格 `开发日志` 表记录：`recordId=oBx4EtxtmE`。
+- 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
+- 同步校验：`dws doc read` 回读成功；`dws aitable record query --record-ids oBx4EtxtmE` 回读成功。
+- 备注：钉钉文档创建时已包含本次开发日志主体；AI 表格创建后尝试用 `dws doc update --mode append` 将最终同步结果回写到同一钉钉文档，两种 CLI 写法均返回后端缺少 `markdown` 参数。最终同步证据已保留在本地开发日志和 AI 表格记录中。
+
+## Commit 状态
+
+未提交。

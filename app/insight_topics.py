@@ -43,6 +43,7 @@ MIN_DRAFT_CHARS = 4500
 MAX_DRAFT_CHARS = 5600
 MAX_BACKFILL_DAYS = 366
 MAX_BACKFILL_TOPICS_PER_DAY = 3
+TOPIC_BLUEPRINT_VERSION = "social-operator-v1"
 
 
 def _env_float(name: str, default: float) -> float:
@@ -259,6 +260,218 @@ PREFERRED_TOPIC_TERMS = {
         "解决方案",
         "自动化",
     ),
+}
+
+CONTENT_LANES = {
+    "scenario_use_case": {
+        "label": "场景使用",
+        "audience": "正在寻找 AI 落地场景的创业者、产品经理和业务负责人",
+        "question": "这条信号说明 AI 正在进入哪个真实工作流，为什么现在可行？",
+        "terms": (
+            "use case",
+            "workflow",
+            "application",
+            "customer",
+            "support",
+            "sales",
+            "marketing",
+            "operation",
+            "场景",
+            "应用",
+            "工作流",
+            "业务",
+            "客服",
+            "销售",
+            "营销",
+            "运营",
+            "落地",
+        ),
+        "structure": [
+            "从一个近期信号切入具体工作现场",
+            "拆解原流程里最耗时或最不稳定的环节",
+            "说明 AI 介入后任务、角色和指标如何变化",
+            "给出普通团队可复用的尝试路径和风险边界",
+        ],
+    },
+    "product_capability": {
+        "label": "产品能力更新",
+        "audience": "关注 AI 产品能力演进的产品经理、研发负责人和独立开发者",
+        "question": "这次能力更新会缩短哪个入口，改变哪个产品体验？",
+        "terms": (
+            "launch",
+            "release",
+            "update",
+            "feature",
+            "capability",
+            "model",
+            "api",
+            "tool",
+            "connector",
+            "mcp",
+            "multimodal",
+            "能力",
+            "更新",
+            "发布",
+            "模型",
+            "工具",
+            "接口",
+            "连接器",
+            "多模态",
+            "产品",
+        ),
+        "structure": [
+            "先讲能力变化，不复述发布稿",
+            "解释它让哪些产品入口更短、哪些限制变少",
+            "对比上一代方案的成本、稳定性和使用门槛",
+            "给出产品团队应观察的指标和二阶影响",
+        ],
+    },
+    "business_model": {
+        "label": "业务模式",
+        "audience": "关心 AI 商业化、定价、交付和市场机会的创业者",
+        "question": "这条信号背后，谁会付钱，为什么愿意持续付钱？",
+        "terms": (
+            "business model",
+            "pricing",
+            "revenue",
+            "monetization",
+            "market",
+            "startup",
+            "customer success",
+            "enterprise",
+            "商业模式",
+            "定价",
+            "收入",
+            "变现",
+            "市场",
+            "创业",
+            "企业",
+            "客户成功",
+            "交付",
+        ),
+        "structure": [
+            "从信号里提炼客户愿意付费的痛点",
+            "拆解产品、服务、平台和结果交付的价值捕获差异",
+            "分析销售、交付、留存和复购的关键门槛",
+            "给出适合小团队验证商业化的最小实验",
+        ],
+    },
+    "commercial_thinking": {
+        "label": "商业思考",
+        "audience": "需要形成行业判断的创始人、管理者和内容读者",
+        "question": "这条信号为什么值得今天重估，它改变了哪类商业判断？",
+        "terms": (
+            "strategy",
+            "organization",
+            "competition",
+            "roi",
+            "adoption",
+            "industry",
+            "trend",
+            "战略",
+            "组织",
+            "竞争",
+            "ROI",
+            "采用",
+            "行业",
+            "趋势",
+            "判断",
+            "商业",
+        ),
+        "structure": [
+            "把信号放进行业变化和组织采用的上下文",
+            "说明它挑战了哪条旧假设",
+            "讨论受益者、付成本的人和被削弱的旧优势",
+            "用一个开放问题收束，引导读者评论和转发",
+        ],
+    },
+    "best_practice": {
+        "label": "最佳实践",
+        "audience": "正在把 AI 用到日常工作的开发者、运营者和团队负责人",
+        "question": "这件事怎样做更稳，哪些做法可以复制，哪些边界必须提前声明？",
+        "terms": (
+            "best practice",
+            "practice",
+            "guide",
+            "playbook",
+            "framework",
+            "implementation",
+            "engineering",
+            "eval",
+            "evaluation",
+            "guardrail",
+            "最佳实践",
+            "实践",
+            "指南",
+            "框架",
+            "实现",
+            "工程",
+            "评估",
+            "护栏",
+            "方法",
+        ),
+        "structure": [
+            "先写使用者遇到的具体问题",
+            "提炼可复用步骤、判断标准和工具组合",
+            "说明失败恢复、评估、权限和上下文管理",
+            "列出读者今天就能试的检查清单",
+        ],
+    },
+    "practice_recap": {
+        "label": "实践复盘",
+        "audience": "想看真实过程、失败原因和迁移经验的实践者",
+        "question": "这次实践为什么能成或为什么卡住，给下一次尝试留下什么经验？",
+        "terms": (
+            "case study",
+            "lessons",
+            "postmortem",
+            "how we built",
+            "migration",
+            "from prototype",
+            "case",
+            "复盘",
+            "案例",
+            "经验",
+            "教训",
+            "迁移",
+            "实践过程",
+            "我们如何",
+            "从原型",
+        ),
+        "structure": [
+            "还原一次真实尝试的起点和约束",
+            "拆出做对的部分、卡住的部分和被低估的成本",
+            "总结可迁移经验和不可复制条件",
+            "把复盘变成读者下一次行动前的提醒",
+        ],
+    },
+}
+
+CONTENT_LANE_PRIORITY = (
+    "scenario_use_case",
+    "best_practice",
+    "product_capability",
+    "business_model",
+    "commercial_thinking",
+    "practice_recap",
+)
+
+CONTENT_LANE_TITLE_TEMPLATES = {
+    "scenario_use_case": "{subject} 背后，AI 正在进入哪类真实工作流？",
+    "product_capability": "{source_label} 的这次能力变化，产品团队应该盯住什么？",
+    "business_model": "从 {subject} 看 AI 商业化的付费理由",
+    "commercial_thinking": "{subject} 不只是新闻，它改变了哪条 AI 商业判断？",
+    "best_practice": "把 {subject} 变成可复用实践，需要哪些护栏？",
+    "practice_recap": "复盘 {subject}：从 demo 到真实流程卡在哪里？",
+}
+
+CONTENT_LANE_HOOK_TEMPLATES = {
+    "scenario_use_case": "别只看“{subject}”这条消息，真正值得写的是它可能把 AI 带进了哪个具体工作流。",
+    "product_capability": "这不是功能清单，而是在提醒产品团队：AI 产品入口和能力边界正在重新排列。",
+    "business_model": "我更关心的不是谁发布了什么，而是谁会因此更愿意持续付费。",
+    "commercial_thinking": "这条信号值得写，不是因为它新，而是因为它正在挑战一个旧的行业判断。",
+    "best_practice": "如果团队也想跟进，先别复制 demo，先看它需要哪些流程、评估和护栏。",
+    "practice_recap": "真正值得复盘的不是案例本身，而是它从原型走向真实流程时暴露了哪些成本。",
 }
 
 DEFAULT_HEADERS = {
@@ -525,6 +738,93 @@ def _topic_focus_score(*parts: str) -> int:
     return min(score, 100)
 
 
+def _content_lane_info(lane_key: str) -> dict[str, Any]:
+    return CONTENT_LANES.get(lane_key) or CONTENT_LANES["commercial_thinking"]
+
+
+def _infer_content_lane_from_text(*parts: str, source: str = "") -> str:
+    haystack = " ".join(part or "" for part in parts).lower()
+    scores: dict[str, int] = {lane_key: 0 for lane_key in CONTENT_LANES}
+    for lane_key, lane in CONTENT_LANES.items():
+        for term in lane["terms"]:
+            term_text = str(term).lower()
+            if term_text == "ai":
+                if _contains_ai_token(haystack):
+                    scores[lane_key] += 12
+                continue
+            if term_text and term_text in haystack:
+                scores[lane_key] += 12
+
+    source = (source or "").lower()
+    if source == "github":
+        scores["best_practice"] += 14
+    if source == "hackernews":
+        scores["practice_recap"] += 8
+        scores["best_practice"] += 6
+    if source in {"openai_blog", "anthropic_news", "huggingface_blog", "google_ai_blog"}:
+        scores["product_capability"] += 14
+    if any(term in haystack for term in ("enterprise", "pricing", "revenue", "商业", "定价", "企业")):
+        scores["business_model"] += 8
+    if any(term in haystack for term in ("workflow", "场景", "应用", "support", "sales", "运营")):
+        scores["scenario_use_case"] += 8
+    if any(term in haystack for term in ("how we built", "case study", "postmortem", "复盘", "案例")):
+        scores["practice_recap"] += 12
+
+    best_score = max(scores.values())
+    if best_score <= 0:
+        return "commercial_thinking"
+    return min(
+        (lane for lane, score in scores.items() if score == best_score),
+        key=lambda lane: CONTENT_LANE_PRIORITY.index(lane),
+    )
+
+
+def _infer_content_lane(signal: InsightSignal) -> str:
+    return _infer_content_lane_from_text(
+        signal.title,
+        signal.summary,
+        " ".join(signal.tags),
+        signal.url,
+        source=signal.source,
+    )
+
+
+def _source_subject(title: str) -> str:
+    subject = _clean_text(title)
+    subject = re.sub(r"^(show hn|ask hn|launch hn)\s*:\s*", "", subject, flags=re.IGNORECASE)
+    subject = re.sub(r"\s*[-|]\s*(openai|anthropic|google|github)\s*$", "", subject, flags=re.IGNORECASE)
+    return _truncate(subject, 54) or "这条 AI 行业信号"
+
+
+def _content_lane_title(signal: InsightSignal, lane_key: str) -> str:
+    source_label = SOURCE_LABELS.get(signal.source, signal.source)
+    subject = _source_subject(signal.title)
+    template = CONTENT_LANE_TITLE_TEMPLATES.get(
+        lane_key,
+        CONTENT_LANE_TITLE_TEMPLATES["commercial_thinking"],
+    )
+    title = template.format(subject=subject, source_label=source_label)
+    return _truncate(title, 86)
+
+
+def _social_hook(lane_key: str, subject: str) -> str:
+    template = CONTENT_LANE_HOOK_TEMPLATES.get(
+        lane_key,
+        CONTENT_LANE_HOOK_TEMPLATES["commercial_thinking"],
+    )
+    return _truncate(template.format(subject=subject), 180)
+
+
+def _content_structure(value: Any, lane_key: str) -> list[str]:
+    if isinstance(value, str):
+        value = [part.strip() for part in re.split(r"[;；\n]+", value) if part.strip()]
+    if isinstance(value, list):
+        structure = [_clean_text(item) for item in value if _clean_text(item)]
+        if len(structure) >= 3:
+            return structure[:5]
+    return list(_content_lane_info(lane_key)["structure"])[:5]
+
+
 def _is_focused_topic_signal(signal: InsightSignal) -> bool:
     focus_score = _topic_focus_score(signal.title, signal.summary)
     if focus_score >= 45:
@@ -637,36 +937,60 @@ def _draft_paragraphs(topic: dict) -> list[str]:
     source_type = SOURCE_LABELS.get(topic.get("source_type"), topic.get("source_type", "公开来源"))
     source_count = int(topic.get("source_count") or 1)
     score = int(topic.get("score") or 0)
+    lane_key = str(topic.get("content_lane") or "commercial_thinking")
+    lane = _content_lane_info(lane_key)
+    lane_label = _clean_text(topic.get("content_lane_label") or lane["label"])
+    social_hook = _clean_text(topic.get("social_hook") or _social_hook(lane_key, title))
+    target_audience = _clean_text(topic.get("target_audience") or lane["audience"])
+    core_question = _clean_text(topic.get("core_question") or lane["question"])
+    content_structure = _content_structure(topic.get("content_structure"), lane_key)
+    source_signal_title = _clean_text(topic.get("source_signal_title") or title)
+    source_role = _clean_text(
+        topic.get("source_role")
+        or f"作为{lane_label}选题的证据切口，支撑判断，不直接作为文章标题。"
+    )
     evidence_links = _normalize_evidence_links(topic.get("evidence_links"), topic.get("source_url") or "")
     evidence_names = "；".join(
         _clean_text(link.get("title") or link.get("source")) for link in evidence_links[:3]
     ) or "公开信号"
     evidence_urls = _evidence_markdown(evidence_links, topic.get("source_url") or "")
+    structure_lines = "\n".join(f"- {step}" for step in content_structure)
 
     return [
         f"# {title}",
         "## 洞察选题",
         f"- 日期：{topic.get('date', '')}",
         f"- 状态：{TOPIC_STATUSES.get(topic.get('status'), topic.get('status', '待处理'))}",
+        f"- 内容赛道：{lane_label}",
+        f"- 目标读者：{target_audience}",
+        f"- 核心问题：{core_question}",
         f"- 标签：{', '.join(tags) if tags else '待补充'}",
         f"- 来源类型：{source_type}",
         f"- 来源数量：{source_count}",
         f"- 选题评分：{score}",
         f"- 主来源：{topic.get('source_url') or ALIDOCS_SOURCE_URL}",
+        f"- 原始信号：{source_signal_title}",
+        f"- 证据角色：{source_role}",
+        f"- 策略版本：{topic.get('draft_strategy_version') or TOPIC_BLUEPRINT_VERSION}",
         "## 写作角度",
         angle,
+        "## 社媒运营蓝图",
+        social_hook,
+        "",
+        "建议结构：",
+        structure_lines,
         "## 关键摘要",
         summary,
         "## 证据链接",
         evidence_urls,
         "## 导语",
         (
-            f"如果只把“{title}”当成一条新闻，它很快就会被下一条更新淹没。"
+            f"{social_hook} 如果只把“{source_signal_title}”当成一条新闻，它很快就会被下一条更新淹没。"
             f"但把它放回最近的 {source_type} 信号、{source_count} 条来源证据和 {tag_text} 的上下文里看，"
-            "它更像一个提醒：技术变化并不是突然砸到桌面上的结论，而是许多弱信号在同一个方向上慢慢汇合。"
+            f"它更像一个{lane_label}提醒：技术变化并不是突然砸到桌面上的结论，而是许多弱信号在同一个方向上慢慢汇合。"
         ),
         (
-            f"这篇底稿先不急着给出宏大的答案，而是从一个朴素问题开始：为什么是现在？"
+            f"这篇底稿先不急着给出宏大的答案，而是从一个朴素问题开始：{core_question}"
             f"为什么这些信号会围绕 {tag_text} 聚在一起？如果它只是噪音，我们会看到什么；如果它是趋势，"
             "产品、工程、内容和商业决策又应该怎么提前调整？"
         ),
@@ -675,6 +999,11 @@ def _draft_paragraphs(topic: dict) -> list[str]:
             f"我的初步判断是：{summary} 这句话背后真正值得写的，不是某个单点事件，"
             "而是它暴露出的组织能力变化。过去我们习惯把新技术理解成工具升级，今天更值得关注的是，"
             "这些工具开始改变任务的分配方式、判断的形成方式，以及团队内部谁拥有解释权。"
+        ),
+        (
+            f"这篇文章的目标读者可以先锁定为：{target_audience}。"
+            "这会让写作从“发生了什么”转向“读者现在该怎么看、该做什么、不该误判什么”。"
+            f"原始信号的角色也要保持克制：{source_role}"
         ),
         (
             f"从 {evidence_names} 这些证据看，信号并不完全一致。有的偏产品，有的偏工程，有的偏资本市场或社区讨论。"
@@ -691,6 +1020,12 @@ def _draft_paragraphs(topic: dict) -> list[str]:
             f"围绕 {tag_text}，读者真正需要的不是新闻摘要，而是一张决策地图。"
             "它应该告诉创业者该观察哪些早期需求，告诉产品经理该重构哪些入口，告诉工程团队哪些能力不再只是实验，"
             "也告诉普通读者为什么这些变化会穿透到工作方式里。"
+        ),
+        "## 建议写作结构",
+        (
+            "这类社媒内容可以按四步推进："
+            + "；".join(content_structure)
+            + "。这样写的好处是，文章不会停留在新闻复述，而会自然落到判断、方法和行动上。"
         ),
         "## 事实和证据如何组织",
         (
@@ -800,6 +1135,8 @@ def _generate_topic_draft(topic: dict) -> str:
 
 def _ensure_topic_draft(topic: dict) -> tuple[str, int]:
     draft = str(topic.get("draft_markdown") or topic.get("draft") or "").strip()
+    if topic.get("_draft_needs_refresh") or topic.get("draft_strategy_version") != TOPIC_BLUEPRINT_VERSION:
+        draft = ""
     if _draft_word_count(draft) < MIN_DRAFT_CHARS:
         draft = _generate_topic_draft(topic)
     return draft, _draft_word_count(draft)
@@ -817,8 +1154,6 @@ def _upload_article_draft(topic: dict) -> str:
         return draft
     article_body = draft[draft.index(marker) + 1 :].strip()
     article_draft = "\n\n".join(part for part in (title_line, article_body) if part).strip()
-    if _draft_word_count(article_draft) < MIN_DRAFT_CHARS:
-        return draft
     extension_index = 1
     extension_templates = [
         (
@@ -882,10 +1217,45 @@ def _normalize_topic(topic: dict) -> dict:
         item.get("source_url") or "",
     )
     item["generated_at"] = str(item.get("generated_at") or "")
-    item["cluster_key"] = str(item.get("cluster_key") or _cluster_key(item["title"], item["tags"]))
+    lane_key = str(item.get("content_lane") or "").strip()
+    if lane_key not in CONTENT_LANES:
+        lane_key = _infer_content_lane_from_text(
+            item["title"],
+            item["angle"],
+            item["summary"],
+            " ".join(item["tags"]),
+            source=item.get("source_type") or "",
+        )
+    lane = _content_lane_info(lane_key)
+    item["content_lane"] = lane_key
+    item["content_lane_label"] = _clean_text(item.get("content_lane_label") or lane["label"])
+    item["target_audience"] = _clean_text(item.get("target_audience") or lane["audience"])
+    item["core_question"] = _clean_text(item.get("core_question") or lane["question"])
+    item["content_structure"] = _content_structure(item.get("content_structure"), lane_key)
+    item["source_signal_title"] = _clean_text(
+        item.get("source_signal_title")
+        or item.get("source_title")
+        or item["title"]
+    )
+    item["source_role"] = _clean_text(
+        item.get("source_role")
+        or f"作为{item['content_lane_label']}选题的证据切口，支撑判断，不直接作为文章标题。"
+    )
+    item["social_hook"] = _clean_text(
+        item.get("social_hook") or _social_hook(lane_key, _source_subject(item["source_signal_title"]))
+    )
+    existing_draft_strategy = str(item.get("draft_strategy_version") or "")
+    item["draft_strategy_version"] = existing_draft_strategy or TOPIC_BLUEPRINT_VERSION
+    item["_draft_needs_refresh"] = existing_draft_strategy != TOPIC_BLUEPRINT_VERSION
+    item["cluster_key"] = str(
+        item.get("cluster_key")
+        or _cluster_key(item["title"], item["tags"] + [item["content_lane"]])
+    )
     draft_markdown, draft_word_count = _ensure_topic_draft(item)
     item["draft_markdown"] = draft_markdown
     item["draft_word_count"] = draft_word_count
+    item["draft_strategy_version"] = TOPIC_BLUEPRINT_VERSION
+    item.pop("_draft_needs_refresh", None)
     item["created_at"] = str(item.get("created_at") or _now())
     item["updated_at"] = str(item.get("updated_at") or item["created_at"])
     return item
@@ -1238,17 +1608,27 @@ def _topic_from_signal(signal: InsightSignal, generated_at: str) -> dict:
     date = (signal.published_at.date().isoformat() if signal.published_at else _today())
     host = _source_host(signal.url) or source_label
     focus_score = _topic_focus_score(signal.title, signal.summary)
+    lane_key = _infer_content_lane(signal)
+    lane = _content_lane_info(lane_key)
+    subject = _source_subject(signal.title)
+    title = _content_lane_title(signal, lane_key)
+    lane_tag = lane_key.replace("_", "-")
     angle = (
-        f"从 {source_label} / {host} 的近期信号切入，观察"
-        f"{'、'.join(tags[:3]) if tags else 'AI 产业'}正在发生的变化，并提炼对产品、工程和商业判断的影响。"
+        f"把 {source_label} / {host} 的“{subject}”作为证据切口，不做新闻搬运；"
+        f"围绕“{lane['question']}”展开，提炼对产品、工程、运营和商业判断的影响。"
     )
-    summary = signal.summary or f"近期来自 {source_label} 的线上信号，适合展开为一篇洞察文章。"
+    source_summary = signal.summary or f"近期来自 {source_label} 的线上信号。"
+    summary = (
+        f"这条信号适合转译为“{lane['label']}”类社媒选题："
+        f"不是复述 {subject}，而是回答“{lane['question']}”。"
+        f"原始摘要：{source_summary}"
+    )
     return {
         "date": date,
-        "title": _truncate(signal.title, 80),
+        "title": title,
         "angle": angle,
         "summary": _truncate(summary, 260),
-        "tags": tags[:8] or [signal.source],
+        "tags": _normalize_tags([lane_tag, "social-operator"] + tags)[:8] or [signal.source],
         "status": "new",
         "source_url": signal.url,
         "source_type": signal.source,
@@ -1256,9 +1636,55 @@ def _topic_from_signal(signal: InsightSignal, generated_at: str) -> dict:
         "evidence_links": [_evidence_link(signal)],
         "score": int(signal.score) + focus_score,
         "focus_score": focus_score,
+        "content_lane": lane_key,
+        "content_lane_label": lane["label"],
+        "social_hook": _social_hook(lane_key, subject),
+        "target_audience": lane["audience"],
+        "core_question": lane["question"],
+        "content_structure": list(lane["structure"]),
+        "source_signal_title": _truncate(signal.title, 140),
+        "source_role": f"作为{lane['label']}选题的证据切口，支撑判断，不直接作为文章标题。",
+        "draft_strategy_version": TOPIC_BLUEPRINT_VERSION,
         "generated_at": generated_at,
-        "cluster_key": _cluster_key(signal.title, tags),
+        "cluster_key": _cluster_key(signal.title, tags + [lane_key]),
     }
+
+
+def _rank_topics_for_social_operation(topics: list[dict], max_topics: int) -> list[dict]:
+    sorted_topics = sorted(
+        topics,
+        key=lambda item: (
+            int(item.get("score") or 0),
+            str(item.get("date", "")),
+        ),
+        reverse=True,
+    )
+    buckets: dict[str, list[dict]] = {lane_key: [] for lane_key in CONTENT_LANES}
+    overflow: list[dict] = []
+    for topic in sorted_topics:
+        lane_key = str(topic.get("content_lane") or "")
+        if lane_key in buckets:
+            buckets[lane_key].append(topic)
+        else:
+            overflow.append(topic)
+
+    ranked: list[dict] = []
+    used_ids: set[str] = set()
+    for lane_key in CONTENT_LANE_PRIORITY:
+        if buckets[lane_key] and len(ranked) < max_topics:
+            topic = buckets[lane_key].pop(0)
+            ranked.append(topic)
+            used_ids.add(topic["id"])
+
+    remaining = [topic for topic in sorted_topics if topic["id"] not in used_ids] + overflow
+    for topic in remaining:
+        if len(ranked) >= max_topics:
+            break
+        if topic["id"] in used_ids:
+            continue
+        ranked.append(topic)
+        used_ids.add(topic["id"])
+    return ranked[:max_topics]
 
 
 def signals_to_topics(
@@ -1298,8 +1724,7 @@ def signals_to_topics(
         if len(topic["summary"]) > len(existing.get("summary", "")):
             existing["summary"] = topic["summary"]
     topics = [_normalize_topic(topic) for topic in clustered.values()]
-    topics.sort(key=lambda item: (item.get("score", 0), item.get("date", "")), reverse=True)
-    return topics[:max_topics]
+    return _rank_topics_for_social_operation(topics, max_topics=max_topics)
 
 
 def merge_preserving_status(existing_topics: list[dict], generated_topics: list[dict]) -> list[dict]:
@@ -1327,6 +1752,9 @@ def merge_preserving_status(existing_topics: list[dict], generated_topics: list[
         generated = _normalize_topic(generated)
         old = (
             existing_by_source_title.get(f"{generated['source_url']}|{generated['title']}")
+            or existing_by_source_title.get(
+                f"{generated['source_url']}|{generated.get('source_signal_title', '')}"
+            )
             or existing_by_source.get(generated["source_url"])
             or existing_by_cluster.get(generated["cluster_key"])
         )

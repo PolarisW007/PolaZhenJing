@@ -52,12 +52,15 @@ def test_insight_topics_list_and_status_update(monkeypatch, tmp_path):
     assert response.status_code == 200
     assert "内容生产 v2" in body
     assert "刷新线上选题" in body
+    assert "AI 行业社媒运营选题" in body
     assert "PolaNews" in body
     assert "好的洞察文章不负责制造确定性" not in body
     topic_id = insight_topics.load_topics()[0]["id"]
     topic = insight_topics.load_topics()[0]
     assert topic["draft_word_count"] >= 4500
     assert "## 核心判断" in topic["draft_markdown"]
+    assert topic["content_lane"] in insight_topics.CONTENT_LANES
+    assert topic["content_lane_label"] in body
     assert f"底稿 {topic['draft_word_count']}" not in body
     assert f"来源：{topic['source_type']}" not in body
     assert f"评分 {topic['score']}" not in body
@@ -169,6 +172,9 @@ def test_refresh_topics_from_online_signals_preserves_status(monkeypatch, tmp_pa
     assert refreshed["evidence_links"][0]["url"] == topic["source_url"]
     assert refreshed["draft_word_count"] >= 4500
     assert "## 核心判断" in refreshed["draft_markdown"]
+    assert refreshed["content_lane"] in insight_topics.CONTENT_LANES
+    assert refreshed["social_hook"]
+    assert "来源信号" in body
 
 
 def test_refresh_topic_import_prefills_long_article_draft(monkeypatch, tmp_path):
@@ -211,6 +217,37 @@ def test_refresh_topic_import_prefills_long_article_draft(monkeypatch, tmp_path)
     assert "来源类型：Hacker News" not in textarea
     assert "## 证据链接" not in textarea
     assert "news.ycombinator.com/item?id=123" not in textarea
+
+
+def test_signals_to_topics_generates_social_operation_blueprints_not_news_titles():
+    raw_title = "New usage analytics and spend controls for enterprise AI teams"
+    topics = insight_topics.signals_to_topics(
+        [
+            insight_topics.InsightSignal(
+                source="openai_blog",
+                title=raw_title,
+                url="https://openai.com/index/usage-analytics-enterprise-ai",
+                summary="OpenAI 更新企业 AI usage analytics、spend controls 和 API 管理能力。",
+                published_at=datetime(2026, 7, 6, tzinfo=timezone.utc),
+                score=72,
+                tags=["openai", "enterprise-ai", "product", "api"],
+            )
+        ]
+    )
+
+    assert len(topics) == 1
+    topic = topics[0]
+    assert topic["title"] != raw_title
+    assert topic["content_lane"] == "product_capability"
+    assert topic["content_lane_label"] == "产品能力更新"
+    assert topic["social_hook"]
+    assert topic["target_audience"]
+    assert topic["core_question"]
+    assert len(topic["content_structure"]) >= 3
+    assert topic["source_signal_title"] == raw_title
+    assert "证据切口" in topic["source_role"]
+    assert topic["draft_strategy_version"] == insight_topics.TOPIC_BLUEPRINT_VERSION
+    assert "## 社媒运营蓝图" in topic["draft_markdown"]
 
 
 def test_backfill_topics_for_date_range_fills_missing_days(monkeypatch, tmp_path):
@@ -329,4 +366,7 @@ def test_signals_to_topics_prefers_ai_application_and_practice_topics():
 
     assert len(topics) == 1
     assert topics[0]["source_url"] == "https://github.com/example/agent-workflow-skill"
+    assert topics[0]["title"] != "AI agent workflow skill for enterprise support"
+    assert topics[0]["content_lane"] in insight_topics.CONTENT_LANES
+    assert topics[0]["social_hook"]
     assert topics[0]["focus_score"] >= 45

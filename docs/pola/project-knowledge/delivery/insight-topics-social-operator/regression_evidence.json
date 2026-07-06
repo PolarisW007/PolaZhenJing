@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-07-06T21:45:56+08:00",
+  "status": "pass",
+  "evidence": [
+    {
+      "type": "syntax",
+      "command": ".venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+      "result": "pass"
+    },
+    {
+      "type": "unit",
+      "command": ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+      "result": "11 passed in 0.73s"
+    },
+    {
+      "type": "regression",
+      "command": ".venv/bin/python -m pytest tests -q",
+      "result": "104 passed in 2.16s"
+    },
+    {
+      "type": "harness",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
+      "result": "PASS: function test cases cover 7 documented acceptance id(s), 5 feature(s), 7 case(s)."
+    },
+    {
+      "type": "harness",
+      "command": ".venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py",
+      "result": "PASS: Pola skill harness found no issues."
+    },
+    {
+      "type": "ui-render",
+      "command": "Flask test client rendered /admin/insights/topics with admin session, then Playwright system Chrome rendered /tmp/polazj-insight-topics-social-operator.html",
+      "result": "pass: h2=AI 行业社媒运营选题; laneCount=3; hookCount=3; structureCount=3; sourceSignalCount=3",
+      "screenshot": "/tmp/polazj-insight-topics-social-operator.png"
+    }
+  ],
+  "known_risks": [
+    "本轮本地实现和回归已通过；如果需要上线，需按发布门禁先备份云端 data/insight_topics.json，再 fast-forward 部署并重启 polazj.service。",
+    "真实线上刷新依赖外部 PolaNews/HN/GitHub/RSS 可用性；现有分源失败隔离和旧数据保留策略继续兜底。"
+  ]
+}

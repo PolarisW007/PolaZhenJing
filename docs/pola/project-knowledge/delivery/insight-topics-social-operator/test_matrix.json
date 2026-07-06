@@ -1,0 +1,20 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
+  "commands": [
+    ".venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py",
+    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q",
+    ".venv/bin/python -m pytest tests -q",
+    ".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
+    ".venv/bin/python /Users/wangchang/.agents/skills/pola-agent-delivery-framework/scripts/validate_pola_skills.py",
+    "Playwright system Chrome render of /tmp/polazj-insight-topics-social-operator.html"
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles -q"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_signals_to_topics_generates_social_operation_blueprints_not_news_titles -q"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q", "Playwright system Chrome render of /tmp/polazj-insight-topics-social-operator.html"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q", "Playwright system Chrome render of /tmp/polazj-insight-topics-social-operator.html"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F3-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py::test_refresh_topic_import_prefills_long_article_draft -q"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F4-001", "RG-F4-001"], "commands": [".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q", ".venv/bin/python -m pytest tests -q"]},
+    {"acceptance_id": "A7", "case_ids": ["UT-F5-001"], "commands": [".venv/bin/python /Users/wangchang/.agents/skills/pola-test-gate/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md --sdd docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md --spec docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md --cases docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json"]}
+  ]
+}

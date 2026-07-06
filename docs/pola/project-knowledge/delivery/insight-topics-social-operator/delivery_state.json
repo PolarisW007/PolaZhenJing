@@ -1,0 +1,23 @@
+{
+  "requirement": "insight-topics-social-operator",
+  "status": "local_pass",
+  "risk": "P2",
+  "updated_at": "2026-07-06T21:45:56+08:00",
+  "documents": {
+    "requirements": "docs/pola/project-knowledge/requirements/2026-07-06-insight-topics-social-operator.md",
+    "prd": "docs/pola/project-knowledge/specs/2026-07-06-insight-topics-social-operator-prd.md",
+    "sdd": "docs/pola/project-knowledge/architecture/2026-07-06-insight-topics-social-operator-sdd.md",
+    "function_test_cases": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/function_test_cases.json",
+    "test_matrix": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/test_matrix.json",
+    "regression_evidence": "docs/pola/project-knowledge/delivery/insight-topics-social-operator/regression_evidence.json"
+  },
+  "acceptance": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+  "verification": [
+    ".venv/bin/python -m py_compile app/insight_topics.py app/admin_workbench.py app/__init__.py: pass",
+    ".venv/bin/python -m pytest tests/test_admin_workbench_insight_topics.py -q: 11 passed",
+    ".venv/bin/python -m pytest tests -q: 104 passed",
+    "validate_function_test_cases.py: PASS, 7 acceptance ids / 5 features / 7 cases",
+    "validate_pola_skills.py: PASS",
+    "Playwright system Chrome render: pass, screenshot=/tmp/polazj-insight-topics-social-operator.png"
+  ]
+}
