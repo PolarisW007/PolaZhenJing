@@ -84,7 +84,14 @@
 ## 发布状态
 
 - 本地实现与回归通过。
-- 尚未部署生产；如需上线，需要先执行发布门禁：备份云端 `data/insight_topics.json`，拉取本次 commit，重启 `polazj.service`，运行云端 py_compile、pytest 和 HTTPS smoke。
+- 已部署生产：2026-07-06 22:30 CST。
+- 发布前云端 HEAD：`6cbadb63ea1c5ef4c0142fd3188e12fe0bb6912d`；发布后云端 HEAD：`d1f49b0`。
+- 备份分支：`backup/pre-insight-social-operator-20260706222858`。
+- 数据备份：`/root/polazj-backups/insight-social-operator-20260706222858/insight_topics.json`。
+- 云端验证：`py_compile` 通过；`tests/test_admin_workbench_insight_topics.py` 12 passed；`tests` 全量 105 passed；RSS live smoke 26 条信号；`polazj.service` active。
+- HTTPS smoke：`/PolaZhenjing/admin/login` 200，`/PolaZhenjing/admin/insights/topics` 302，`/PolaZhenjing/articles` 200。
+- 管理员模板渲染 smoke：包含 `AI 行业社媒运营选题`、`topic-lane`、`topic-hook`、`topic-structure`。
+- 服务日志：发布后 5 分钟 warning/error 为空。
 - 钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/gpG2NdyVX37kymb5CP2nkzQYWMwvDqPk`。
 - AI 表格 `开发日志` 表记录：`recordId=oBx4EtxtmE`。
 - 回填字段：`来源文件` 指向钉钉开发日志文档，`更新内容` 已写入本次变更摘要。
@@ -93,7 +100,12 @@
 - 数据源二阶段钉钉开发日志文档：`https://alidocs.dingtalk.com/i/nodes/9E05BDRVQ2pvPkd5tDBwoXoEJ63zgkYA`。
 - 数据源二阶段 AI 表格 `开发日志` 表记录：`recordId=kEyHOZRCUj`。
 - 数据源二阶段同步校验：`dws doc read --node 9E05BDRVQ2pvPkd5tDBwoXoEJ63zgkYA` 回读成功；`dws aitable record query --record-ids kEyHOZRCUj` 回读成功。
+- 线上部署钉钉发布记录文档：`https://alidocs.dingtalk.com/i/nodes/OG9lyrgJPzp47NdBCvpRDjZyWzN67Mw4`。
+- 线上部署 AI 表格 `开发日志` 表记录：`recordId=bEFPQt5IGz`。
+- 线上部署同步校验：`dws doc read --node OG9lyrgJPzp47NdBCvpRDjZyWzN67Mw4` 回读成功；`dws aitable record query --record-ids bEFPQt5IGz` 回读成功。
 
 ## Commit 状态
 
-未提交。
+- 代码改动提交：`c2950d2 feat: 升级洞察选题社媒运营生成机制`。
+- 数据源改动提交：`d1f49b0 feat: 补强洞察选题数据源池`。
+- 线上部署记录提交：待本次文档提交后回填。
