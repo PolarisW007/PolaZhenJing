@@ -99,6 +99,7 @@ def _job_payload(tmp_path, rewrite_rate):
         "inserted_images": [],
         "revision_instruction": "保持事实不变",
         "rewrite_rate": rewrite_rate,
+        "image_generation_mode": "standard",
         "preserve_original_media": False,
         "original_media": [],
         "style": "deep-technical",
@@ -113,8 +114,9 @@ def _patch_generate_side_effects(monkeypatch):
     monkeypatch.setattr(uploader.jobs, "append_message", lambda *args, **kwargs: None)
     monkeypatch.setattr(uploader, "_cleanup_draft_illustrations", lambda *args, **kwargs: None)
 
-    def fake_images(title, content, slug, project_root):
+    def fake_images(title, content, slug, project_root, image_generation_mode="standard"):
         calls["images"] += 1
+        calls["image_generation_mode"] = image_generation_mode
         return []
 
     def fake_commit(*args, **kwargs):
@@ -141,6 +143,7 @@ def test_generate_job_rewrite_rate_zero_skips_llm_but_runs_images(tmp_path, monk
 
     assert calls["llm"] == 0
     assert calls["images"] == 1
+    assert calls["image_generation_mode"] == "standard"
     post = next((tmp_path / "_posts").glob("*.md"))
     assert "原始正文第一段" in post.read_text(encoding="utf-8")
 

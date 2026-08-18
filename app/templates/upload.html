@@ -65,6 +65,58 @@
     font-size: 0.82rem;
     line-height: 1.65;
   }
+  .image-generation-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .image-generation-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    min-width: 0;
+    padding: 0.8rem 0.85rem;
+    border: 1px solid var(--text-ghost);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.035);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .image-generation-option:has(input:checked) {
+    border-color: rgba(228,191,122,0.62);
+    background: rgba(228,191,122,0.1);
+    box-shadow: 0 0 0 1px rgba(228,191,122,0.12) inset;
+  }
+  .image-generation-option input {
+    flex: 0 0 auto;
+    margin-top: 0.18rem;
+    accent-color: var(--gold-primary);
+  }
+  .image-generation-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .image-generation-title {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .image-generation-desc,
+  .image-generation-help {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+  .image-generation-help {
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
   .rich-editor-help {
     margin-top: 0.55rem;
     color: var(--text-muted);
@@ -218,9 +270,43 @@
   body[data-theme="pmframe"] .tox .tox-statusbar {
     background: #F8F9F7 !important;
   }
+  @media (max-width: 899px) {
+    .image-generation-options {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 559px) {
+    .image-generation-options {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
 </style>
 {% endblock %}
 {% block content %}
+{% macro image_generation_mode_picker() -%}
+<div class="form-group image-generation-mode">
+  <label>AI 生图模式</label>
+  <div class="image-generation-options" role="radiogroup" aria-label="AI 生图模式">
+    <label class="image-generation-option">
+      <input type="radio" name="image_generation_mode" value="cover">
+      <span class="image-generation-copy"><span class="image-generation-title">只生成题图</span><span class="image-generation-desc">1 张 · 文章封面</span></span>
+    </label>
+    <label class="image-generation-option">
+      <input type="radio" name="image_generation_mode" value="summary">
+      <span class="image-generation-copy"><span class="image-generation-title">概括</span><span class="image-generation-desc">3 张 · 题图 + 全文概括</span></span>
+    </label>
+    <label class="image-generation-option">
+      <input type="radio" name="image_generation_mode" value="standard" checked>
+      <span class="image-generation-copy"><span class="image-generation-title">适中</span><span class="image-generation-desc">5 张 · 题图 + 核心观点</span></span>
+    </label>
+    <label class="image-generation-option">
+      <input type="radio" name="image_generation_mode" value="detailed">
+      <span class="image-generation-copy"><span class="image-generation-title">详细</span><span class="image-generation-desc">逐段配图 · 最多 12 段</span></span>
+    </label>
+  </div>
+  <div class="image-generation-help">数量包含题图；手动配图和原文图片不计入 AI 数量。详细模式按可配图正文段落生成，最多 12 张段落图。</div>
+</div>
+{%- endmacro %}
 <h2>上传文章</h2>
 {% if insight_prefill %}
 <div class="flash flash-info">
@@ -276,6 +362,7 @@
         支持 PNG / JPG / WebP。生成图文后会自动插入合适段落；若与 AI 生成图位置冲突，会优先使用上传配图。
       </div>
     </div>
+    {{ image_generation_mode_picker() }}
     <div class="form-group">
       <label for="revision-instruction1">修改建议简述（可选）</label>
       <textarea id="revision-instruction1" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把开头写得更有故事感，弱化技术术语，补充对创业者的启发。"></textarea>
@@ -343,6 +430,7 @@
         支持 PNG / JPG / WebP。系统会尽量保留原图细节，仅对疑似边角水印做局部清理。
       </div>
     </div>
+    {{ image_generation_mode_picker() }}
     <div class="form-group">
       <label for="revision-instruction2">修改建议简述（可选）</label>
       <textarea id="revision-instruction2" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：把结构调整为先讲结论再讲案例，增加更锋利的判断，整体更像公众号长文。"></textarea>
@@ -399,6 +487,7 @@
         支持 PNG / JPG / WebP。上传配图会参与最终排版，并优先于相邻 AI 生成图。
       </div>
     </div>
+    {{ image_generation_mode_picker() }}
     <div class="form-group">
       <label for="revision-instruction3">修改建议简述（可选）</label>
       <textarea id="revision-instruction3" name="revision_instruction" class="form-input compact-textarea" placeholder="例如：保留原文事实，但改成更克制、更有洞察力的叙事。"></textarea>

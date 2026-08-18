@@ -1,0 +1,260 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-08-18-upload-ai-image-modes.md",
+    "docs/pola/project-knowledge/specs/2026-08-18-upload-ai-image-modes-prd.md",
+    "docs/pola/project-knowledge/architecture/2026-08-18-upload-ai-image-modes-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "上传页四档 AI 生图模式",
+      "source_refs": ["requirements#A1", "PRD#4.1"],
+      "acceptance_ids": ["A1"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F1-001",
+          "target": "app/templates/upload.html",
+          "scenario": "管理员加载上传页",
+          "assertions": ["三个表单各渲染四档 radio", "三个表单默认 standard", "页面包含数量和详细上限文案"],
+          "expected": "页面 200 且共渲染 12 个 image_generation_mode 输入",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_upload_page_shows_four_image_modes_in_all_three_forms -q"
+        }
+      ],
+      "integration_cases": [
+        {
+          "id": "IT-F1-001",
+          "target": "scripts/upload_edit_playwright_harness.py",
+          "scenario": "管理员在真实浏览器选择详细模式并切换到手机视口",
+          "assertions": ["详细模式可选择", "手机视口无横向溢出", "桌面和手机截图生成"],
+          "expected": "Playwright harness 退出码 0",
+          "command": ".venv/bin/python scripts/upload_edit_playwright_harness.py --base-url http://127.0.0.1:5019"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "模式解析与状态传递",
+      "source_refs": ["requirements#A2", "SDD#6.3"],
+      "acceptance_ids": ["A2"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F2-001",
+          "target": "app/uploader.py::_parse_image_generation_mode",
+          "scenario": "接收四个合法值、非法值和空值",
+          "assertions": ["合法值原样返回", "非法/空值返回 standard"],
+          "expected": "枚举白名单和旧 draft 默认行为稳定",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_parse_image_generation_mode_uses_safe_default -q"
+        },
+        {
+          "id": "UT-F2-002",
+          "target": "app/uploader.py upload/draft/generate",
+          "scenario": "提交 detailed 并进入生成路由",
+          "assertions": ["draft 保存 detailed", "generate payload 传递 summary 样例"],
+          "expected": "模式跨越风格选择页不丢失",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_upload_draft_persists_image_generation_mode tests/test_upload_image_modes.py::test_generate_route_passes_image_mode_from_draft -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "四档数量与段落锚点",
+      "source_refs": ["requirements#A3", "PRD#2", "SDD#6.2"],
+      "acceptance_ids": ["A3"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F3-001",
+          "target": "app/uploader.py::_generate_illustrations",
+          "scenario": "图片 API 全部成功时执行 cover/summary/standard",
+          "assertions": ["T2I 分别调用 1/3/5 次", "返回 1/3/5 张图片"],
+          "expected": "固定档位总数精确",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_fixed_image_modes_generate_exact_total_counts -q"
+        },
+        {
+          "id": "UT-F3-002",
+          "target": "app/uploader.py visual plan/jobs_spec",
+          "scenario": "视觉 LLM 返回 10 个错误锚点 scene",
+          "assertions": ["summary 仍只生成 2 张正文图", "锚点使用后端选择结果"],
+          "expected": "LLM 不能扩张数量或改变位置",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_visual_llm_cannot_expand_scene_count_or_change_anchors -q"
+        },
+        {
+          "id": "UT-F3-003",
+          "target": "app/uploader.py::_extract_detailed_visual_blocks",
+          "scenario": "详细模式文章包含标题、代码、原图、列表、尾注和三个正文段落",
+          "assertions": ["只选择三个正文段落", "生成 1 张题图 + 3 张正文图"],
+          "expected": "详细模式按可配图正文段落工作",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_detailed_mode_uses_prose_paragraphs_and_skips_non_prose -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F4",
+      "name": "AI 图片批处理安全护栏",
+      "source_refs": ["requirements#A4", "SDD#8"],
+      "acceptance_ids": ["A4"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F4-001",
+          "target": "app/uploader.py detailed limits",
+          "scenario": "文章包含 20 个可配图正文段落",
+          "assertions": ["只选择 12 段", "选择覆盖文章首尾", "锚点不重复"],
+          "expected": "详细模式数量有界且覆盖全文",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_detailed_mode_is_capped_and_spread_across_article -q"
+        },
+        {
+          "id": "UT-F4-002",
+          "target": "app/uploader.py image batch deadline",
+          "scenario": "整批时间预算已经耗尽",
+          "assertions": ["不再发起新的 T2I 请求", "返回已有安全结果"],
+          "expected": "deadline 阻止后续调用且不抛异常",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_image_batch_budget_stops_before_new_api_calls -q"
+        },
+        {
+          "id": "UT-F4-003",
+          "target": "app/uploader.py image byte limits",
+          "scenario": "下一张图片会让批次超过 64MB 等价测试上限",
+          "assertions": ["停止写入超限图片", "保留已完成图片"],
+          "expected": "批次容量有界并可降级",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_image_batch_byte_budget_stops_before_writing_oversized_batch -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F5",
+      "name": "旧文章生成路径兼容",
+      "source_refs": ["requirements#A5", "SDD#11"],
+      "acceptance_ids": ["A5"],
+      "risk": "P2",
+      "unit_cases": [
+        {
+          "id": "UT-F5-001",
+          "target": "tests/test_upload_rewrite_rate.py",
+          "scenario": "AI 改写率 0 和 50 的既有生成路径使用默认 standard 生图",
+          "assertions": ["0% 仍运行图片生成", "50% 仍调用文本 LLM", "文章仍写入"],
+          "expected": "生图模式不破坏改写率语义",
+          "command": ".venv/bin/python -m pytest tests/test_upload_rewrite_rate.py -q"
+        },
+        {
+          "id": "UT-F5-002",
+          "target": "app/uploader.py::_inject_illustrations",
+          "scenario": "题图和正文图同时注入",
+          "assertions": ["题图不改变原 Markdown block index", "正文图位于目标段落之后"],
+          "expected": "段落图位置不回归",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_cover_does_not_shift_original_scene_anchor -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RT-F5-001",
+          "target": "upload/media/edit/article related tests",
+          "scenario": "运行上传、媒体、文章编辑、自动标签和任务关联回归",
+          "assertions": ["相关测试全部通过", "无真实外部 API 调用"],
+          "expected": "旧入口和副作用保持可用",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py tests/test_upload_rewrite_rate.py tests/test_social_publish.py tests/test_article_auto_tagging.py tests/test_article_edit_rich_editor.py tests/test_article_edit_413_fix.py tests/test_article_content.py tests/test_jobs_guard.py -q"
+        }
+      ]
+    },
+    {
+      "id": "F6",
+      "name": "后台任务模式与数量反馈",
+      "source_refs": ["requirements#A6", "PRD#4.2"],
+      "acceptance_ids": ["A6"],
+      "risk": "P3",
+      "unit_cases": [
+        {
+          "id": "UT-F6-001",
+          "target": "app/uploader.py::_run_generate_job",
+          "scenario": "概括模式计划 3 张但只成功题图",
+          "assertions": ["stage 包含概括和计划 3 张", "warning 包含实际 1 张", "文章仍写入"],
+          "expected": "任务反馈透明且失败可降级",
+          "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py::test_generate_job_reports_selected_mode_and_partial_count -q"
+        }
+      ],
+      "integration_cases": [],
+      "regression_cases": []
+    },
+    {
+      "id": "F7",
+      "name": "测试与浏览器回归证据",
+      "source_refs": ["requirements#A7", "SDD#9"],
+      "acceptance_ids": ["A7"],
+      "risk": "P2",
+      "unit_not_applicable_reason": "这是交付证据门禁，不是单一业务纯函数。",
+      "unit_cases": [],
+      "integration_cases": [
+        {
+          "id": "IT-F7-001",
+          "target": "function_test_cases.json and local Playwright harness",
+          "scenario": "校验 A1-A9 覆盖并执行本地浏览器真实渲染",
+          "assertions": ["function cases validator 通过", "Playwright harness 通过并有截图"],
+          "expected": "测试与回归证据可追溯",
+          "manual_verification": "执行 test matrix 中 C2 与 C6，并把结果写入 test/regression evidence。"
+        }
+      ],
+      "regression_cases": []
+    },
+    {
+      "id": "F8",
+      "name": "发布与回滚准备",
+      "source_refs": ["requirements#A8", "SDD#10", "release plan"],
+      "acceptance_ids": ["A8"],
+      "risk": "P2",
+      "unit_not_applicable_reason": "本轮不执行生产发布，发布清单通过文档和人工门禁验证。",
+      "unit_cases": [],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RT-F8-001",
+          "target": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md",
+          "scenario": "审阅生产发布前检查、发布后观察和回滚步骤",
+          "assertions": ["包含备份", "包含服务与日志观察", "包含恢复文件和重启回滚", "明确需要用户授权"],
+          "expected": "runbook 可执行但本轮不部署",
+          "manual_verification": "发布文档由 deploy-release gate 审阅；不得执行生产命令。"
+        }
+      ]
+    },
+    {
+      "id": "F9",
+      "name": "Git 与 secret 安全检查",
+      "source_refs": ["requirements#A9", "SDD#8"],
+      "acceptance_ids": ["A9"],
+      "risk": "P2",
+      "unit_not_applicable_reason": "这是变更集静态门禁，不对应业务纯函数。",
+      "unit_cases": [],
+      "integration_cases": [],
+      "regression_cases": [
+        {
+          "id": "RT-F9-001",
+          "target": "current git diff and task-owned files",
+          "scenario": "提交前检查空白错误和高风险 secret 模式",
+          "assertions": ["git diff --check 通过", "未发现私钥或硬编码凭据", "用户既有改动已隔离"],
+          "expected": "变更集满足安全收尾要求",
+          "manual_verification": "由 pola-devlog-git-finalizer 执行并回填 delivery_state.json。"
+        }
+      ]
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F2-001", "UT-F2-002"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F3-001", "UT-F3-002", "UT-F3-003"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F4-001", "UT-F4-002", "UT-F4-003"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F5-001", "UT-F5-002", "RT-F5-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F6-001"]},
+    {"acceptance_id": "A7", "case_ids": ["IT-F7-001"]},
+    {"acceptance_id": "A8", "case_ids": ["RT-F8-001"]},
+    {"acceptance_id": "A9", "case_ids": ["RT-F9-001"]}
+  ]
+}

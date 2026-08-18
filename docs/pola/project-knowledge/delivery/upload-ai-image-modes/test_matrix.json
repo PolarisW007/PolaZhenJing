@@ -1,0 +1,88 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/upload-ai-image-modes/function_test_cases.json",
+  "commands": [
+    {
+      "id": "C1",
+      "command": ".venv/bin/python -m py_compile app/uploader.py app/jobs.py app/__init__.py scripts/upload_edit_playwright_harness.py",
+      "cwd": ".",
+      "scope": "Python 语法检查",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "py_compile 通过"
+    },
+    {
+      "id": "C2",
+      "command": "python3 <pola-test-gate-skill>/scripts/validate_function_test_cases.py --prd docs/pola/project-knowledge/requirements/2026-08-18-upload-ai-image-modes.md --sdd docs/pola/project-knowledge/architecture/2026-08-18-upload-ai-image-modes-sdd.md --spec docs/pola/project-knowledge/specs/2026-08-18-upload-ai-image-modes-prd.md --cases docs/pola/project-knowledge/delivery/upload-ai-image-modes/function_test_cases.json",
+      "cwd": ".",
+      "scope": "PRD/SDD/SPEC 验收覆盖",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "覆盖 9 个验收项、9 个 feature、17 个 case"
+    },
+    {
+      "id": "C3",
+      "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py tests/test_upload_rewrite_rate.py -q",
+      "cwd": ".",
+      "scope": "本次功能与改写率最小回归",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "21 passed"
+    },
+    {
+      "id": "C4",
+      "command": ".venv/bin/python -m pytest tests/test_upload_image_modes.py tests/test_upload_rewrite_rate.py tests/test_social_publish.py tests/test_article_auto_tagging.py tests/test_article_edit_rich_editor.py tests/test_article_edit_413_fix.py tests/test_article_content.py tests/test_jobs_guard.py -q",
+      "cwd": ".",
+      "scope": "上传、媒体、文章编辑、自动标签、任务关联回归",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "68 passed"
+    },
+    {
+      "id": "C5",
+      "command": ".venv/bin/python -m pytest tests -q",
+      "cwd": ".",
+      "scope": "项目全量 Python 回归",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "120 passed"
+    },
+    {
+      "id": "C6",
+      "command": ".venv/bin/python scripts/upload_edit_playwright_harness.py --base-url http://127.0.0.1:5019",
+      "cwd": ".",
+      "scope": "本地桌面与手机浏览器回归",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "Playwright upload/edit harness passed；桌面/手机和既有编辑保存共 4 张截图"
+    },
+    {
+      "id": "C7",
+      "command": "<pola-agent-delivery-framework>/scripts/validate_pola_skills.py",
+      "cwd": "<skills-root>",
+      "scope": "用户指定 Pola A2A Harness",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "PASS: Pola skill harness found no issues"
+    },
+    {
+      "id": "C8",
+      "command": "git diff --check",
+      "cwd": ".",
+      "scope": "Git 空白错误检查",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "git diff --check 通过；任务新增文件行尾空白扫描通过"
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"], "commands": ["C3", "C6"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F2-001", "UT-F2-002"], "commands": ["C3"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F3-001", "UT-F3-002", "UT-F3-003"], "commands": ["C3"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F4-001", "UT-F4-002", "UT-F4-003"], "commands": ["C1", "C3"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F5-001", "UT-F5-002", "RT-F5-001"], "commands": ["C4", "C5"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F6-001"], "commands": ["C3"]},
+    {"acceptance_id": "A7", "case_ids": ["IT-F7-001"], "commands": ["C2", "C6", "C7"]},
+    {"acceptance_id": "A8", "case_ids": ["RT-F8-001"], "commands": ["C1", "C4"]},
+    {"acceptance_id": "A9", "case_ids": ["RT-F9-001"], "commands": ["C8"]}
+  ]
+}

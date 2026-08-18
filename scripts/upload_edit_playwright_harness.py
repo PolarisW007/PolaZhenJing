@@ -210,6 +210,24 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
             _assert(page.locator("text=上传文章").count() > 0, "Upload page did not render title")
             _assert(page.locator("#paste-form").is_visible(), "Paste form is not visible")
             _assert(page.locator('input[name="rewrite_rate"]').count() >= 15, "Upload rewrite-rate options missing")
+            _assert(
+                page.locator('input[name="image_generation_mode"]').count() == 12,
+                "Upload AI image-mode options missing",
+            )
+            _assert(
+                page.locator('input[name="image_generation_mode"]:checked').count() == 3,
+                "Each upload form should default to the standard AI image mode",
+            )
+            for form_selector in ("#upload-form", "#paste-form", "#tab-url form"):
+                _assert(
+                    page.locator(f'{form_selector} input[name="image_generation_mode"]').count() == 4,
+                    f"Four AI image modes missing in {form_selector}",
+                )
+            page.locator('#paste-form input[name="image_generation_mode"][value="detailed"]').check()
+            _assert(
+                page.locator('#paste-form input[name="image_generation_mode"]:checked').input_value() == "detailed",
+                "Detailed AI image mode is not selectable",
+            )
 
             page.locator('#tab-paste input[name="editor_mode"][value="markdown"]').check()
             page.wait_for_function("() => document.querySelector('#content-format')?.value === 'markdown'", timeout=10_000)
@@ -218,6 +236,31 @@ def run(base_url: str, chrome_path: str, article: str, headed: bool = False) -> 
             page.wait_for_function("() => document.querySelector('#content-format')?.value === 'rich_html'", timeout=15_000)
             page.wait_for_function(EDITOR_HTML_READY, timeout=15_000)
             screenshots.append(_screenshot(page, "upload-rich-switch"))
+            page.set_viewport_size({"width": 390, "height": 844})
+            overflow_elements = page.evaluate(
+                """
+                () => Array.from(document.querySelectorAll('.image-generation-mode, .image-generation-mode *'))
+                  .map(el => {
+                    const rect = el.getBoundingClientRect();
+                    return {
+                      tag: el.tagName.toLowerCase(),
+                      id: el.id || '',
+                      className: typeof el.className === 'string' ? el.className : '',
+                      left: Math.round(rect.left),
+                      right: Math.round(rect.right),
+                      width: Math.round(rect.width)
+                    };
+                  })
+                  .filter(item => item.right > window.innerWidth + 1 || item.left < -1)
+                  .slice(0, 12)
+                """
+            )
+            _assert(
+                not overflow_elements,
+                "Upload AI image-mode cards overflow the mobile viewport: " + repr(overflow_elements),
+            )
+            screenshots.append(_screenshot(page, "upload-image-modes-mobile"))
+            page.set_viewport_size({"width": 1440, "height": 1100})
 
             edit_path = f"/admin/articles/{article}/edit"
             page.goto(edit_path, wait_until="domcontentloaded")

@@ -1,0 +1,77 @@
+{
+  "status": "pass",
+  "environment": "本地 Flask 127.0.0.1:5019；Google Chrome/Playwright；临时管理员 fixture；未连接真实 MiniMax 图片 API",
+  "validated_paths": [
+    {
+      "id": "REG-UI-001",
+      "entry": "http://127.0.0.1:5019/admin/upload",
+      "viewport": "1440x1100",
+      "steps": [
+        "使用 harness 临时管理员登录",
+        "打开上传页并确认三个表单各四档模式",
+        "在粘贴内容表单选择 detailed",
+        "切换 Markdown/富文本并检查编辑器"
+      ],
+      "result": "通过；详细模式可选择，四档卡片与现有表单布局一致",
+      "screenshots": [
+        "tmp/harness/upload-edit/1787047926-upload-rich-switch.png"
+      ],
+      "console_errors": [],
+      "network_failures": []
+    },
+    {
+      "id": "REG-UI-002",
+      "entry": "http://127.0.0.1:5019/admin/upload",
+      "viewport": "390x844",
+      "steps": [
+        "将浏览器切换为手机视口",
+        "检查 AI 生图模式区域及其所有子元素边界",
+        "保存完整页面截图"
+      ],
+      "result": "通过；AI 生图模式卡片单列显示且区域无横向溢出",
+      "screenshots": [
+        "tmp/harness/upload-edit/1787047926-upload-image-modes-mobile.png"
+      ],
+      "console_errors": [],
+      "network_failures": []
+    },
+    {
+      "id": "REG-UI-003",
+      "entry": "http://127.0.0.1:5019/admin/articles/2026-04-11-test-article.md/edit",
+      "viewport": "1440x1100",
+      "steps": [
+        "打开既有文章编辑页",
+        "切换富文本/Markdown并刷新预览",
+        "编辑并保存 harness 临时文章",
+        "从磁盘读取文章确认写回"
+      ],
+      "result": "通过；既有编辑预览与保存路径未回归",
+      "screenshots": [
+        "tmp/harness/upload-edit/1787047927-edit-markdown-rich-preview.png",
+        "tmp/harness/upload-edit/1787047930-edit-save-submitted.png"
+      ],
+      "console_errors": [],
+      "network_failures": []
+    }
+  ],
+  "validated_ids": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+  "side_effects": [
+    "Harness 临时管理员已删除",
+    "Harness 临时文章已删除",
+    "本地 Flask 服务已停止",
+    "未调用真实图片 provider，未产生外部费用",
+    "未写入生产数据、未重启生产服务"
+  ],
+  "logs": [
+    "function cases validator: 9 acceptance ids / 9 features / 17 cases",
+    "core pytest: 21 passed",
+    "related pytest: 68 passed",
+    "full pytest: 120 passed",
+    "Playwright upload/edit harness: passed",
+    "Pola A2A skill harness: passed"
+  ],
+  "risks": [
+    "真实 MiniMax 成功率、延迟、费用和审美质量未验证，需要获得部署/测试额度授权后小流量检查",
+    "手机截图可见既有后台顶部导航横向溢出；断言已限定到本次 image-generation-mode 区域，该历史问题不由本次改动引入"
+  ]
+}

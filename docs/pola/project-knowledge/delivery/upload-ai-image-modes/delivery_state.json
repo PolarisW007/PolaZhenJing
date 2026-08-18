@@ -1,0 +1,103 @@
+{
+  "status": "partial",
+  "mode": "ship_ready",
+  "slug": "upload-ai-image-modes",
+  "updated_at": "2026-08-18T18:20:21+08:00",
+  "stages": [
+    {
+      "name": "project_context",
+      "status": "done",
+      "artifact": "docs/pola/arch-reference.md",
+      "evidence": "app/uploader.py; app/templates/upload.html; app/jobs.py",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "requirement",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/requirements/2026-08-18-upload-ai-image-modes.md",
+      "evidence": "A1-A9",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "architecture",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/architecture/2026-08-18-upload-ai-image-modes-sdd.md",
+      "evidence": "候选方案比较、数据流、文件计划、测试与回滚",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "implementation",
+      "status": "done",
+      "artifact": "app/uploader.py; app/templates/upload.html; tests/test_upload_image_modes.py; scripts/upload_edit_playwright_harness.py",
+      "evidence": ".venv/bin/python -m pytest tests/test_upload_image_modes.py tests/test_upload_rewrite_rate.py -q => 21 passed",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "review",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/analysis/2026-08-18-upload-ai-image-modes-review.md",
+      "evidence": "3 个 P2 已修复；21 targeted tests passed；无 P0/P1",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "test",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/test-reports/2026-08-18-upload-ai-image-modes-test.md",
+      "evidence": "function cases 9/9；21 core；68 related；120 full pytest；Pola Harness pass",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "regression",
+      "status": "done",
+      "artifact": "docs/pola/project-knowledge/delivery/upload-ai-image-modes/regression_evidence.json",
+      "evidence": "local Playwright desktop 1440x1100 + mobile 390x844 passed；4 screenshots",
+      "blockers": [],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "release",
+      "status": "partial",
+      "artifact": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md",
+      "evidence": "本轮只准备 runbook，不执行生产",
+      "blockers": ["生产发布和服务重启需要用户另行明确确认"],
+      "updated_at": "2026-08-18T00:00:00+08:00"
+    },
+    {
+      "name": "finalization",
+      "status": "partial",
+      "artifact": "docs/pola/project-knowledge/devlogs/2026-08-18-upload-ai-image-modes.md",
+      "evidence": "本地 devlog 与交付记录已完成；git diff --check 与 secret 扫描通过；commit/push/deploy 均未执行",
+      "blockers": ["DWS 当前 profile 访问令牌过期，doc info 返回 not_authenticated；需用户执行 dws auth login 后才能同步钉钉文档和 AI 表格"],
+      "updated_at": "2026-08-18T18:20:21+08:00"
+    }
+  ],
+  "acceptance_coverage": [
+    {"acceptance_id": "A1", "requirement": "requirements#A1", "architecture": "SDD#5/#7", "implementation": "app/templates/upload.html", "review": "Pass", "tests": ["UT-F1-001", "IT-F1-001"], "regression": ["REG-UI-001", "REG-UI-002"], "release": "release plan"},
+    {"acceptance_id": "A2", "requirement": "requirements#A2", "architecture": "SDD#6", "implementation": "app/uploader.py parser/draft/payload", "review": "Pass", "tests": ["UT-F2-001", "UT-F2-002"], "regression": ["REG-UI-001"], "release": "release plan"},
+    {"acceptance_id": "A3", "requirement": "requirements#A3", "architecture": "SDD#6", "implementation": "app/uploader.py visual blocks/jobs_spec", "review": "Pass", "tests": ["UT-F3-001", "UT-F3-002", "UT-F3-003"], "regression": ["REG-UI-001"], "release": "release plan"},
+    {"acceptance_id": "A4", "requirement": "requirements#A4", "architecture": "SDD#8", "implementation": "app/uploader.py max scenes/deadline/request/byte limits", "review": "Pass after 3 P2 fixes", "tests": ["UT-F4-001", "UT-F4-002", "UT-F4-003"], "regression": ["local no-provider side-effect check"], "release": "release plan"},
+    {"acceptance_id": "A5", "requirement": "requirements#A5", "architecture": "SDD#11", "implementation": "existing merge/inject/rewrite flow preserved", "review": "Pass", "tests": ["UT-F5-001", "UT-F5-002", "RT-F5-001", "120 full pytest"], "regression": ["REG-UI-003"], "release": "release plan"},
+    {"acceptance_id": "A6", "requirement": "requirements#A6", "architecture": "SDD#6", "implementation": "app/uploader.py job stage/messages", "review": "Pass", "tests": ["UT-F6-001"], "regression": ["local task-message fixture"], "release": "release plan"},
+    {"acceptance_id": "A7", "requirement": "requirements#A7", "architecture": "SDD#9", "implementation": "tests/test_upload_image_modes.py; browser harness", "review": "Pass", "tests": ["function cases validator", "21 core", "68 related", "120 full", "Pola Harness"], "regression": ["Playwright 4 screenshots"], "release": "release plan"},
+    {"acceptance_id": "A8", "requirement": "requirements#A8", "architecture": "SDD#10", "implementation": "生产发布不在本轮授权范围", "review": "Pass；runbook 已准备", "tests": ["C1", "C4", "C5"], "regression": ["REG-UI-001", "REG-UI-002", "REG-UI-003"], "release": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md"},
+    {"acceptance_id": "A9", "requirement": "requirements#A9", "architecture": "SDD#8", "implementation": "有界字节、超时与脱敏日志护栏", "review": "Pass after P2 fixes", "tests": ["C3", "C8"], "regression": ["provider 无付费副作用本地测试"], "release": "release pre-checks"}
+  ],
+  "dirty_worktree_ledger": [
+    {"path": "app/uploader.py", "reason": "同文件已有 MiniMax 官方端点用户改动；保留并在最终 diff 中隔离说明", "include_in_commit": false},
+    {"path": "app/agent.py", "reason": "用户既有 MiniMax 官方端点改动，本次不修改", "include_in_commit": false},
+    {"path": "docs/pola/project-knowledge/*2026-08-15-minimax-m3-official-endpoint*", "reason": "用户既有未跟踪文档", "include_in_commit": false},
+    {"path": ".qoder/skills/", "reason": "用户既有未跟踪目录", "include_in_commit": false},
+    {"path": "tmp/", "reason": "本地临时/截图目录，不建议提交", "include_in_commit": false}
+  ],
+  "security_checks": {
+    "diff_check": "pass: git diff --check + 任务新增文件行尾空白扫描",
+    "secret_scan": "pass: 任务文件常见 secret/private-key 特征扫描无命中",
+    "sensitive_output_handling": "不读取或输出 .env；日志不记录认证头和 provider key"
+  }
+}

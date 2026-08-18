@@ -292,6 +292,20 @@ GHIBLI_STYLE_PROMPT = (
     'no text, no watermark, no logo'
 )
 
+IMAGE_GENERATION_MODE_DEFAULT = 'standard'
+IMAGE_GENERATION_MODES = {
+    'cover': {'label': '只生成题图', 'scene_count': 0},
+    'summary': {'label': '概括', 'scene_count': 2},
+    'standard': {'label': '适中', 'scene_count': 4},
+    'detailed': {'label': '详细', 'scene_count': None},
+}
+DETAILED_IMAGE_MAX_SCENES = 12
+IMAGE_GENERATION_BATCH_TIMEOUT_SECONDS = 900
+IMAGE_GENERATION_REQUEST_TIMEOUT_SECONDS = 180
+MAX_GENERATED_IMAGE_BYTES = 12 * 1024 * 1024
+MAX_GENERATED_IMAGE_BATCH_BYTES = 64 * 1024 * 1024
+MAX_IMAGE_API_RESPONSE_BYTES = 18 * 1024 * 1024
+
 
 def _get_minimax_api_key() -> str | None:
     """Read MINIMAX_TOKEN_PLAN_API_KEY from environment (.env or system env)."""
@@ -301,6 +315,14 @@ def _get_minimax_api_key() -> str | None:
 def _parse_rewrite_rate(value, default: int = REWRITE_RATE_DEFAULT) -> int:
     """Normalize upload rewrite rate to one of the supported presets."""
     return parse_rewrite_rate(value, default=default)
+
+
+def _parse_image_generation_mode(value) -> str:
+    """Normalize the article AI image mode to a supported preset."""
+    normalized = str(value or '').strip().lower()
+    if normalized in IMAGE_GENERATION_MODES:
+        return normalized
+    return IMAGE_GENERATION_MODE_DEFAULT
 
 
 def _form_flag(value) -> bool:
@@ -380,7 +402,8 @@ def _call_llm_rewrite(content: str, title: str, system_prompt: str,
         return None
 
 
-def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
+def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9',
+                      request_timeout: int = IMAGE_GENERATION_REQUEST_TIMEOUT_SECONDS) -> bytes | None:
     """Call MiniMax text-to-image API and return image bytes, or None on failure.
 
     Uses ``response_format='base64'`` per the official example so the bytes are
@@ -409,8 +432,13 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
     req.add_header('Authorization', f'Bearer {api_key}')
 
     try:
-        with urlopen(req, timeout=180) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
+        timeout = max(1, min(int(request_timeout), IMAGE_GENERATION_REQUEST_TIMEOUT_SECONDS))
+        with urlopen(req, timeout=timeout) as resp:
+            raw_response = resp.read(MAX_IMAGE_API_RESPONSE_BYTES + 1)
+        if len(raw_response) > MAX_IMAGE_API_RESPONSE_BYTES:
+            logger.error('MiniMax T2I response exceeded the configured byte limit')
+            return None
+        data = json.loads(raw_response.decode('utf-8'))
     except Exception as e:
         logger.error('MiniMax T2I request failed (%s): %s', MINIMAX_IMAGE_URL, e)
         if hasattr(e, 'read'):
@@ -421,13 +449,26 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
         return None
 
     d = data.get('data') or {}
+    if not isinstance(d, dict):
+        logger.error('MiniMax T2I returned an invalid data object')
+        return None
 
     # Preferred: base64-encoded image bytes straight from the API
     base64_list = d.get('image_base64') or []
     if isinstance(base64_list, list) and base64_list:
         try:
-            import base64
-            return base64.b64decode(base64_list[0])
+            encoded = base64_list[0]
+            if not isinstance(encoded, (str, bytes)):
+                raise ValueError('image_base64 item is not text or bytes')
+            max_encoded_bytes = ((MAX_GENERATED_IMAGE_BYTES + 2) // 3) * 4 + 4
+            if len(encoded) > max_encoded_bytes:
+                logger.error('MiniMax T2I base64 image exceeded the configured byte limit')
+                return None
+            image_bytes = base64.b64decode(encoded)
+            if len(image_bytes) > MAX_GENERATED_IMAGE_BYTES:
+                logger.error('MiniMax T2I decoded image exceeded the configured byte limit')
+                return None
+            return image_bytes
         except Exception as e:
             logger.error('Failed to decode base64 image: %s', e)
 
@@ -440,9 +481,25 @@ def _call_minimax_t2i(prompt: str, aspect_ratio: str = '16:9') -> bytes | None:
         return None
     try:
         with urlopen(urls[0], timeout=60) as img_resp:
-            return img_resp.read()
+            content_length = img_resp.headers.get('Content-Length')
+            if content_length and int(content_length) > MAX_GENERATED_IMAGE_BYTES:
+                logger.error('MiniMax T2I download exceeded the configured byte limit')
+                return None
+            chunks = []
+            total_bytes = 0
+            while True:
+                chunk = img_resp.read(min(64 * 1024, MAX_GENERATED_IMAGE_BYTES - total_bytes + 1))
+                if not chunk:
+                    break
+                total_bytes += len(chunk)
+                if total_bytes > MAX_GENERATED_IMAGE_BYTES:
+                    logger.error('MiniMax T2I download exceeded the configured byte limit')
+                    return None
+                chunks.append(chunk)
+            return b''.join(chunks)
     except Exception as e:
-        logger.error('Failed to download generated image from %s: %s', urls[0], e)
+        image_host = urlparse(urls[0]).hostname or 'unknown'
+        logger.error('Failed to download generated image from host=%s: %s', image_host, e)
         return None
 
 
@@ -502,12 +559,18 @@ def _extract_visual_blocks(content: str, min_blocks: int = 3,
             candidates.append({'block_index': idx, 'excerpt': excerpt})
 
     target_count = min(max_blocks, max(min_blocks, len(candidates)))
+    return _spread_visual_blocks(candidates, target_count)
+
+
+def _spread_visual_blocks(candidates: list[dict], target_count: int) -> list[dict]:
+    """Select visual blocks evenly from the full article without duplicates."""
+    if target_count <= 0 or not candidates:
+        return []
     if len(candidates) <= target_count:
         return candidates
-    if target_count <= 1:
+    if target_count == 1:
         return [candidates[len(candidates) // 2]]
 
-    # Spread selected blocks across the article so scenes map to different beats.
     selected = []
     used = set()
     for i in range(target_count):
@@ -519,6 +582,58 @@ def _extract_visual_blocks(content: str, min_blocks: int = 3,
     return selected
 
 
+def _extract_detailed_visual_blocks(
+        content: str, max_blocks: int = DETAILED_IMAGE_MAX_SCENES) -> list[dict]:
+    """Return each illustration-worthy prose paragraph, bounded and spread.
+
+    Headings, code, standalone media, tables, navigation-like lists and sign-off
+    boilerplate are not prose paragraphs. If the article exceeds the safety
+    limit, blocks are sampled across the whole article instead of taking only
+    the opening paragraphs.
+    """
+    candidates: list[dict] = []
+    raw_blocks = re.split(r'\n\s*\n+', content.strip())
+    for block_index, block in enumerate(raw_blocks):
+        stripped = block.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(('#', '```', '~~~', '![', '<img', '<video', '<iframe')):
+            continue
+
+        lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+        if not lines:
+            continue
+        if all(re.match(r'^(?:[-*+]\s+|\d+[.)]\s+)', line) for line in lines):
+            continue
+        if all(line.startswith('|') or re.match(r'^:?-{3,}:?$', line) for line in lines):
+            continue
+
+        clean = _strip_markdown_noise(stripped)
+        if any(kw in clean for kw in ['点个赞', '在看', '转发', '星标', '联系邮箱', '作者：']):
+            continue
+        cjk_count = sum(1 for ch in clean if '\u4e00' <= ch <= '\u9fff')
+        latin_words = len(re.findall(r'[A-Za-z]{2,}', clean))
+        if len(clean) < 24 or (cjk_count < 10 and latin_words < 8):
+            continue
+        candidates.append({
+            'block_index': block_index,
+            'excerpt': clean[:420],
+        })
+
+    return _spread_visual_blocks(candidates, max(0, int(max_blocks)))
+
+
+def _visual_blocks_for_image_mode(content: str, image_generation_mode: str) -> list[dict]:
+    """Select the exact body anchors required by an AI image mode."""
+    mode = _parse_image_generation_mode(image_generation_mode)
+    scene_count = IMAGE_GENERATION_MODES[mode]['scene_count']
+    if scene_count == 0:
+        return []
+    if scene_count is None:
+        return _extract_detailed_visual_blocks(content)
+    return _extract_visual_blocks(content, min_blocks=scene_count, max_blocks=scene_count)
+
+
 def _article_visual_source(title: str, content: str, max_chars: int = 2800) -> str:
     """Build compact article context for visual-brief LLM."""
     blocks = [_strip_markdown_noise(b) for b in re.split(r'\n\s*\n+', content)]
@@ -528,19 +643,27 @@ def _article_visual_source(title: str, content: str, max_chars: int = 2800) -> s
 
 
 def _call_visual_brief_llm(title: str, content: str,
-                           visual_blocks: list[dict]) -> dict | None:
+                           visual_blocks: list[dict],
+                           image_generation_mode: str = IMAGE_GENERATION_MODE_DEFAULT) -> dict | None:
     """Ask LLM to turn article arguments into concrete image prompts."""
     api_key = _get_minimax_api_key()
     if not api_key:
         return None
 
+    mode = _parse_image_generation_mode(image_generation_mode)
+    mode_label = IMAGE_GENERATION_MODES[mode]['label']
     block_lines = '\n'.join(
         f'{i + 1}. block_index={item["block_index"]}: {item["excerpt"]}'
         for i, item in enumerate(visual_blocks)
+    ) or '无；当前模式只生成题图。'
+    scene_instruction = (
+        f'段落图必须分别对应下面 {len(visual_blocks)} 个指定段落，每张图都要明显不同。'
+        if visual_blocks else
+        '当前模式只生成题图，scenes 必须输出空数组。'
     )
     user_msg = f"""请为一篇中文文章生成插画规划。要求：
 1. 题图必须提取整篇文章的核心观点，生成一个有明确人物、物件、场景和隐喻的场景图，不要只画天空、草地、云。
-2. 段落图必须分别对应下面 3-5 个核心段落，每张图都要明显不同。
+2. {scene_instruction}
 3. 风格统一为吉卜力动画电影感、水彩质感、自然光，但画面主体必须由文章内容决定。
 4. 不要出现文字、logo、水印、界面截图。
 5. 只输出 JSON，不要解释。
@@ -556,7 +679,9 @@ JSON 格式：
 文章内容：
 {_article_visual_source(title, content)}
 
-核心段落：
+生图模式：{mode_label}
+
+指定段落：
 {block_lines}
 """
     payload = json.dumps({
@@ -625,8 +750,9 @@ def _compose_image_prompt(base_prompt: str) -> str:
     )
 
 
-def _generate_illustrations(title: str, content: str, slug: str, project_root: str) -> list[dict]:
-    """Generate 1 cover + 3-5 paragraph scene Ghibli-style illustrations.
+def _generate_illustrations(title: str, content: str, slug: str, project_root: str,
+                            image_generation_mode: str = IMAGE_GENERATION_MODE_DEFAULT) -> list[dict]:
+    """Generate bounded Ghibli-style illustrations for the selected mode.
 
     Saves PNG files under ``assets/images/generated/<slug>/`` and returns a list
     of dicts ``[{'role': 'cover'|'scene', 'relpath': 'assets/images/…', 'alt': …}]``.
@@ -634,10 +760,16 @@ def _generate_illustrations(title: str, content: str, slug: str, project_root: s
     article is then written without images. Individual scene failures do not
     abort the whole batch; the caller will inject whatever survived.
     """
-    visual_blocks = _extract_visual_blocks(content, min_blocks=3, max_blocks=5)
-    plan = _call_visual_brief_llm(title, content, visual_blocks)
+    mode = _parse_image_generation_mode(image_generation_mode)
+    deadline = time.monotonic() + IMAGE_GENERATION_BATCH_TIMEOUT_SECONDS
+    visual_blocks = _visual_blocks_for_image_mode(content, mode)
+    plan = _call_visual_brief_llm(title, content, visual_blocks, mode)
     if not plan:
         plan = _fallback_visual_plan(title, content, visual_blocks)
+    fallback_plan = _fallback_visual_plan(title, content, visual_blocks)
+    plan['image_generation_mode'] = mode
+    plan['requested_image_count'] = 1 + len(visual_blocks)
+    plan['detailed_scene_limit'] = DETAILED_IMAGE_MAX_SCENES
 
     out_dir_rel = os.path.join('assets', 'images', 'generated', slug)
     out_dir_abs = os.path.join(project_root, out_dir_rel)
@@ -650,7 +782,7 @@ def _generate_illustrations(title: str, content: str, slug: str, project_root: s
 
     jobs_spec = []
     cover = plan.get('cover') or {}
-    cover_prompt = cover.get('prompt') or _fallback_visual_plan(title, content, visual_blocks)['cover']['prompt']
+    cover_prompt = cover.get('prompt') or fallback_plan['cover']['prompt']
     jobs_spec.append({
         'role': 'cover',
         'prompt': _compose_image_prompt(cover_prompt),
@@ -661,32 +793,45 @@ def _generate_illustrations(title: str, content: str, slug: str, project_root: s
     })
 
     plan_scenes = plan.get('scenes') if isinstance(plan.get('scenes'), list) else []
-    fallback_scenes = _fallback_visual_plan(title, content, visual_blocks)['scenes']
-    if len(plan_scenes) < 3:
-        plan_scenes = fallback_scenes
-    for idx, scene in enumerate(plan_scenes[:5], start=1):
+    fallback_scenes = fallback_plan['scenes']
+    for idx, fallback in enumerate(fallback_scenes, start=1):
+        scene = plan_scenes[idx - 1] if idx <= len(plan_scenes) else {}
         if not isinstance(scene, dict):
-            continue
-        fallback = fallback_scenes[min(idx - 1, len(fallback_scenes) - 1)]
-        block_index = scene.get('block_index', fallback.get('block_index', idx - 1))
-        try:
-            block_index = int(block_index)
-        except (TypeError, ValueError):
-            block_index = fallback.get('block_index', idx - 1)
+            scene = {}
         jobs_spec.append({
             'role': 'scene',
             'prompt': _compose_image_prompt(scene.get('prompt') or fallback['prompt']),
             'aspect': '4:3',
             'fname': f'scene-{idx}.png',
             'alt': scene.get('alt') or fallback['alt'],
-            'block_index': block_index,
+            # The LLM describes the scene but cannot change quantity/placement.
+            'block_index': fallback['block_index'],
         })
 
     results: list[dict] = []
+    generated_bytes = 0
     for job in jobs_spec:
-        img_bytes = _call_minimax_t2i(job['prompt'], aspect_ratio=job['aspect'])
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            logger.warning(
+                'Illustration batch budget exhausted for mode=%s after %s/%s image(s)',
+                mode, len(results), len(jobs_spec),
+            )
+            break
+        img_bytes = _call_minimax_t2i(
+            job['prompt'],
+            aspect_ratio=job['aspect'],
+            request_timeout=max(1, min(IMAGE_GENERATION_REQUEST_TIMEOUT_SECONDS, int(remaining))),
+        )
         if not img_bytes:
             continue
+        if generated_bytes + len(img_bytes) > MAX_GENERATED_IMAGE_BATCH_BYTES:
+            logger.warning(
+                'Illustration batch byte budget exhausted for mode=%s after %s/%s image(s)',
+                mode, len(results), len(jobs_spec),
+            )
+            break
+        generated_bytes += len(img_bytes)
         fpath = os.path.join(out_dir_abs, job['fname'])
         try:
             with open(fpath, 'wb') as f:
@@ -731,14 +876,17 @@ def _inject_illustrations(content: str, images: list[dict]) -> str:
     if scenes:
         blocks = re.split(r'(\n\s*\n+)', body)
         paragraph_positions = []
-        paragraph_index = -1
+        # The generated cover is prepended after anchors are calculated, so it
+        # must not shift original Markdown block indexes. Existing article media
+        # still counts because it was part of the source content.
+        source_block_index = -2 if cover else -1
         for idx, part in enumerate(blocks):
             if not part.strip() or re.match(r'\n\s*\n+', part):
                 continue
+            source_block_index += 1
             if part.strip().startswith('!['):
                 continue
-            paragraph_index += 1
-            paragraph_positions.append((paragraph_index, idx))
+            paragraph_positions.append((source_block_index, idx))
 
         insertions = []
         for fallback_idx, scene in enumerate(scenes):
@@ -1597,7 +1745,8 @@ def _public_card_url(short_code: str) -> str:
 def _save_draft(content: str, title: str, tags: str, description: str,
                 illustration_files=None, preserve_original_media: bool = False,
                 original_media=None, revision_instruction: str = '',
-                rewrite_rate: int = REWRITE_RATE_DEFAULT) -> str:
+                rewrite_rate: int = REWRITE_RATE_DEFAULT,
+                image_generation_mode: str = IMAGE_GENERATION_MODE_DEFAULT) -> str:
     """Save draft to temp file, return draft ID."""
     os.makedirs(DRAFT_DIR, exist_ok=True)
     draft_id = hashlib.md5(f'{title}{datetime.now().isoformat()}'.encode()).hexdigest()[:12]
@@ -1614,6 +1763,7 @@ def _save_draft(content: str, title: str, tags: str, description: str,
             'original_media': original_media or [],
             'revision_instruction': (revision_instruction or '').strip(),
             'rewrite_rate': _parse_rewrite_rate(rewrite_rate),
+            'image_generation_mode': _parse_image_generation_mode(image_generation_mode),
         }, f, ensure_ascii=False)
     return draft_id
 
@@ -1853,6 +2003,9 @@ def upload():
         rich_content = request.form.get('rich_content', '').strip()
         revision_instruction = request.form.get('revision_instruction', '').strip()
         rewrite_rate = _parse_rewrite_rate(request.form.get('rewrite_rate'))
+        image_generation_mode = _parse_image_generation_mode(
+            request.form.get('image_generation_mode')
+        )
 
         # Handle file upload
         if 'file' in request.files and request.files['file'].filename:
@@ -1950,7 +2103,8 @@ def upload():
                                preserve_original_media=preserve_original_media,
                                original_media=original_media,
                                revision_instruction=revision_instruction,
-                               rewrite_rate=rewrite_rate)
+                               rewrite_rate=rewrite_rate,
+                               image_generation_mode=image_generation_mode)
         session['draft_id'] = draft_id
         return redirect(url_for('uploader.style_select'))
 
@@ -2013,6 +2167,9 @@ def generate():
     inserted_images = draft.get('inserted_images') or []
     revision_instruction = draft.get('revision_instruction', '')
     rewrite_rate = _parse_rewrite_rate(draft.get('rewrite_rate'))
+    image_generation_mode = _parse_image_generation_mode(
+        draft.get('image_generation_mode')
+    )
     style = request.form.get('style', 'deep-technical')
 
     if not content:
@@ -2030,6 +2187,7 @@ def generate():
         'inserted_images': inserted_images,
         'revision_instruction': revision_instruction,
         'rewrite_rate': rewrite_rate,
+        'image_generation_mode': image_generation_mode,
         'preserve_original_media': draft.get('preserve_original_media', False),
         'original_media': draft.get('original_media') or [],
         'style': style,
@@ -2056,6 +2214,9 @@ def _run_generate_job(job_id: str, p: dict):
     inserted_images = p.get('inserted_images') or []
     revision_instruction = p.get('revision_instruction', '')
     rewrite_rate = _parse_rewrite_rate(p.get('rewrite_rate'))
+    image_generation_mode = _parse_image_generation_mode(
+        p.get('image_generation_mode')
+    )
     preserve_original_media = bool(p.get('preserve_original_media'))
     original_media = p.get('original_media') or []
     style = p['style']
@@ -2113,9 +2274,23 @@ def _run_generate_job(job_id: str, p: dict):
         else:
             jobs.append_message(job_id, 'warning', '用户配图处理失败，将继续生成文章。')
 
-    jobs.update_job(job_id, stage='正在生成吉卜力风格插画…', progress=45)
+    image_mode_label = IMAGE_GENERATION_MODES[image_generation_mode]['label']
+    requested_image_count = 1 + len(
+        _visual_blocks_for_image_mode(content, image_generation_mode)
+    )
+    jobs.update_job(
+        job_id,
+        stage=f'正在按「{image_mode_label}」模式生成 AI 插画（计划 {requested_image_count} 张）…',
+        progress=45,
+    )
     try:
-        images = _generate_illustrations(title, content, slug, project_root)
+        images = _generate_illustrations(
+            title,
+            content,
+            slug,
+            project_root,
+            image_generation_mode=image_generation_mode,
+        )
     except Exception as e:
         logger.exception('Illustration generation crashed')
         images = []
@@ -2131,8 +2306,13 @@ def _run_generate_job(job_id: str, p: dict):
                     f'用户配图与 {replaced} 张生成图位置接近，已优先使用用户配图替换。'
                 )
     if images:
-        jobs.append_message(job_id, 'success',
-                            f'已生成 {len(images)} 张吉卜力风格插画。')
+        message_level = 'success' if len(images) == requested_image_count else 'warning'
+        jobs.append_message(
+            job_id,
+            message_level,
+            f'「{image_mode_label}」模式计划 {requested_image_count} 张，'
+            f'实际生成 {len(images)} 张吉卜力风格插画。',
+        )
     elif uploaded_images:
         jobs.append_message(job_id, 'info', '未生成 AI 插画，已使用用户上传配图完成图文排版。')
     else:
