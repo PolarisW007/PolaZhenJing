@@ -2,7 +2,7 @@
 
 日期：2026-08-18
 
-状态：开发完成（本地验证通过，钉钉同步被登录态阻塞）
+状态：生产已部署（产品 commit 与上线验证完成，钉钉同步仍被登录态阻塞）
 
 ## 目标
 
@@ -10,7 +10,7 @@
 
 ## A2A 阶段记录
 
-- `pola-a2a-usage` / `pola-agent-delivery-framework`：按 Ship ready 模式执行，生产部署不在授权范围。
+- `pola-a2a-usage` / `pola-agent-delivery-framework`：开发阶段按 Ship ready 模式执行；用户后续于 2026-08-18 明确授权 Git 提交和生产部署。
 - project-context：已确认 Flask/Jinja 上传页、draft JSON、SQLite 有界后台任务、MiniMax 文本/图片生成、图片合并注入和 Jekyll 写入链路。
 - requirement：`docs/pola/project-knowledge/requirements/2026-08-18-upload-ai-image-modes.md`。
 - PRD/SPEC：`docs/pola/project-knowledge/specs/2026-08-18-upload-ai-image-modes-prd.md`。
@@ -62,13 +62,13 @@
 - 已修复 P2：整批 900 秒预算改为包含视觉规划时间。
 - 已修复 P2：题图插入不再导致原始正文段落锚点整体偏移。
 - 已修复 P2：MiniMax 图片响应、单图和整批二进制增加上限，下载日志不再记录可能带签名参数的完整 URL。
-- 残余风险：真实 provider 成功率、耗时和审美质量需上线后小流量验证；本轮不具备生产授权。
+- 残余风险：真实 provider 成功率、耗时、费用和审美质量未在本次无副作用上线验证中触发，需后续小流量观察。
 
 ## Git 与发布状态
 
-- commit：用户已于 2026-08-18 明确要求执行，待形成本需求独立 commit。
-- push：作为生产从 `origin/main` 发布的必要步骤，已包含在本次授权中。
-- deploy/restart：用户已明确授权生产部署与 `polazj.service` 重启；执行后回填结果。
+- commit：`ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170 feat: 增加文章生成四档 AI 生图模式`。
+- push：已推送 `origin/main`。
+- deploy/restart：已在生产 fast-forward 到产品 commit 并重启 `polazj.service`；服务 active。
 - `git diff --check`：通过。
 - 本任务新增文件行尾空白扫描：通过。
 - 本任务文件常见 secret/private-key 模式扫描：通过（仅输出文件名模式，未读取 `.env`）。
@@ -76,9 +76,18 @@
 ### 发布前生产基线
 
 - 本地、`origin/main`、生产 `main` 均为 `9eb1efee5c7716f59aa98b3c20b8afed809fb2f4`。
-- `polazj.service` 为 active；发布前进程内存约 184MB，近 15 分钟 warning 计数为 1，作为发布后对比基线。
+- `polazj.service` 为 active；发布前进程内存约 184MB。初次 `journalctl | wc -l` 将 `-- No entries --` 提示误计为 1，使用 `journalctl -q` 复核后 warning 基线为 0。
 - 生产根盘使用率 93%，剩余约 3.3GB；`/opt/backups` 约 3.7GB、journald 约 1.6GB。本次仅增加约 192KB 运行文件备份，不进行未授权的旧备份/日志清理。
 - 生产存在 `_posts/` 和 `data/` 的已有跟踪内容改动；部署采用 `git pull --ff-only`，若 Git 判定有重叠则立即停止，不覆盖内容文件。
+
+### 2026-08-19 生产部署
+
+- 发布前 active jobs 为 0，已建立 208KB 运行文件备份与回滚 HEAD。
+- `git pull --ff-only origin main` 成功，保留生产 `_posts/` 和 `data/` 的已有修改，未使用 reset/stash。
+- 生产 `py_compile` 通过，核心 pytest 21 passed，正常命令全量 pytest 120 passed，运行文件 blob 和 commit 一致。
+- 重启前再次确认 active jobs 为 0；重启后 `polazj.service=active`，内存约 90–93MB，`journalctl -q` 复核 warning/error 均为 0。
+- 公网探针：登录页 200，未登录上传页 302 到登录页；生产应用内登录态上传页 200，12 个 radio、3 个默认“适中”和四个中文标签均正确。
+- 残余风险：根盘仍为 93%；未触发真实 MiniMax T2I 和正式文章写入，provider 费用/成功率/审美质量需后续小流量观察。
 
 ## 钉钉同步状态
 

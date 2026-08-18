@@ -2,7 +2,7 @@
   "status": "partial",
   "mode": "ship_ready",
   "slug": "upload-ai-image-modes",
-  "updated_at": "2026-08-18T18:20:21+08:00",
+  "updated_at": "2026-08-19T00:06:05+08:00",
   "stages": [
     {
       "name": "project_context",
@@ -62,19 +62,19 @@
     },
     {
       "name": "release",
-      "status": "partial",
+      "status": "done",
       "artifact": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md",
-      "evidence": "本轮只准备 runbook，不执行生产",
-      "blockers": ["生产发布和服务重启需要用户另行明确确认"],
-      "updated_at": "2026-08-18T00:00:00+08:00"
+      "evidence": "ed3d89f 已推送并部署；生产 21 core / 120 full passed；服务 active；HTTP/UI 探针通过",
+      "blockers": [],
+      "updated_at": "2026-08-19T00:06:05+08:00"
     },
     {
       "name": "finalization",
       "status": "partial",
       "artifact": "docs/pola/project-knowledge/devlogs/2026-08-18-upload-ai-image-modes.md",
-      "evidence": "本地 devlog 与交付记录已完成；git diff --check 与 secret 扫描通过；commit/push/deploy 均未执行",
+      "evidence": "devlog 与交付记录已回填；git diff --check 与 secret 扫描通过；commit/push/deploy 已执行",
       "blockers": ["DWS 当前 profile 访问令牌过期，doc info 返回 not_authenticated；需用户执行 dws auth login 后才能同步钉钉文档和 AI 表格"],
-      "updated_at": "2026-08-18T18:20:21+08:00"
+      "updated_at": "2026-08-19T00:06:05+08:00"
     }
   ],
   "acceptance_coverage": [
@@ -85,8 +85,8 @@
     {"acceptance_id": "A5", "requirement": "requirements#A5", "architecture": "SDD#11", "implementation": "existing merge/inject/rewrite flow preserved", "review": "Pass", "tests": ["UT-F5-001", "UT-F5-002", "RT-F5-001", "120 full pytest"], "regression": ["REG-UI-003"], "release": "release plan"},
     {"acceptance_id": "A6", "requirement": "requirements#A6", "architecture": "SDD#6", "implementation": "app/uploader.py job stage/messages", "review": "Pass", "tests": ["UT-F6-001"], "regression": ["local task-message fixture"], "release": "release plan"},
     {"acceptance_id": "A7", "requirement": "requirements#A7", "architecture": "SDD#9", "implementation": "tests/test_upload_image_modes.py; browser harness", "review": "Pass", "tests": ["function cases validator", "21 core", "68 related", "120 full", "Pola Harness"], "regression": ["Playwright 4 screenshots"], "release": "release plan"},
-    {"acceptance_id": "A8", "requirement": "requirements#A8", "architecture": "SDD#10", "implementation": "生产发布不在本轮授权范围", "review": "Pass；runbook 已准备", "tests": ["C1", "C4", "C5"], "regression": ["REG-UI-001", "REG-UI-002", "REG-UI-003"], "release": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md"},
-    {"acceptance_id": "A9", "requirement": "requirements#A9", "architecture": "SDD#8", "implementation": "有界字节、超时与脱敏日志护栏", "review": "Pass after P2 fixes", "tests": ["C3", "C8"], "regression": ["provider 无付费副作用本地测试"], "release": "release pre-checks"}
+    {"acceptance_id": "A8", "requirement": "requirements#A8", "architecture": "SDD#10", "implementation": "ed3d89f 已推送并部署生产", "review": "Pass；runbook 和回滚点已验证", "tests": ["C1", "C4", "C5", "C9", "C10", "C11"], "regression": ["REG-UI-001", "REG-UI-002", "REG-UI-003", "REG-PROD-001"], "release": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md"},
+    {"acceptance_id": "A9", "requirement": "requirements#A9", "architecture": "SDD#8", "implementation": "有界字节、超时与脱敏日志护栏", "review": "Pass after P2 fixes", "tests": ["C3", "C8", "C9", "C11"], "regression": ["provider 无付费副作用本地/生产探针"], "release": "Deployed"}
   ],
   "dirty_worktree_ledger": [
     {"path": "app/uploader.py", "reason": "同文件已有 MiniMax 官方端点用户改动；保留并在最终 diff 中隔离说明", "include_in_commit": false},

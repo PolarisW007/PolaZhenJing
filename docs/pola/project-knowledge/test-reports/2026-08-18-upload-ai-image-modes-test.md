@@ -2,7 +2,7 @@
 
 日期：2026-08-18
 
-结论：Pass（本地 Ship ready）；生产真实 provider smoke 未执行。
+结论：Pass（本地与生产无副作用门禁均通过）；生产真实 provider smoke 未执行。
 
 ## 功能用例门禁
 
@@ -50,13 +50,23 @@
 
 - 未调用真实 MiniMax T2I，避免未授权费用和生产副作用；发布后需用短文章做 cover/standard 小流量 smoke。
 - AI 图像审美和内容相关性不能由离线测试确定。
-- 本轮未部署、未重启服务、未验证线上登录后页面。
+- 已部署并通过生产应用内登录态页面结构验证；未使用真实管理员浏览器会话截图。
+
+## 2026-08-19 生产验证
+
+- 生产语法检查：通过。
+- 生产核心回归：21 passed。
+- 生产全量回归：120 passed。
+- 生产运行文件 blob：与 `ed3d89f` commit tree 一致。
+- 生产服务：`polazj.service=active`，重启前 active jobs 为 0。
+- 生产 HTTP：登录页 200，未登录上传页 302，应用内登录态上传页 200。
+- 生产 UI 结构：三个表单共 12 个模式 radio，3 个默认“适中”，四个中文标签齐全。
 
 ## Artifact
 
 ```yaml
 artifact: test-evidence
-status: Pass
+status: Pass / production deployed
 function_test_cases: docs/pola/project-knowledge/delivery/upload-ai-image-modes/function_test_cases.json
 test_matrix: docs/pola/project-knowledge/delivery/upload-ai-image-modes/test_matrix.json
 failures: []

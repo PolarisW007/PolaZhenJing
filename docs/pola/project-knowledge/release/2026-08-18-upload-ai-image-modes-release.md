@@ -2,15 +2,15 @@
 
 日期：2026-08-18
 
-状态：Ready for Production Execution（用户已于 2026-08-18 明确授权 Git 提交与线上部署）
+状态：Deployed（产品 commit `ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170` 已于 2026-08-19 部署并通过生产验证）
 
 ## 发布输入审计
 
 | 项 | 内容 | 证据 | 缺口 |
 | --- | --- | --- | --- |
-| 本地版本 | `main` / `9eb1efee5c7716f59aa98b3c20b8afed809fb2f4` + 已验证待提交变更 | `git rev-parse HEAD`; `git status --short` | 待形成独立 commit |
-| 远端版本 | `origin/main` / `9eb1efee5c7716f59aa98b3c20b8afed809fb2f4` | 2026-08-18 `git fetch origin main` + `git rev-parse origin/main` | push 后回填新 commit |
-| 生产版本 | `main` / `9eb1efee5c7716f59aa98b3c20b8afed809fb2f4`，`polazj.service=active` | SSH 只读基线检查 | 部署后回填新 HEAD 与文件版本 |
+| 本地版本 | 运行时产品 commit `ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170` + 本发布记录所在 docs commit | `git rev-parse HEAD` | 无 |
+| 远端版本 | `origin/main` 包含产品 commit 与本发布记录 | `git push origin main` | 无 |
+| 生产版本 | 运行文件来自 `ed3d89f`；仓库 HEAD 在收尾时同步至本发布记录 commit；`polazj.service=active` | SSH HEAD/blob/systemd 验证 | 无 |
 | Requirement/PRD/SDD | 已完成 | 2026-08-18 三份文档 | 无 |
 | Review | Pass，3 个 P2 已修复，无 P0/P1 | `analysis/2026-08-18-upload-ai-image-modes-review.md` | 无 |
 | 测试 | 21 core / 68 related / 120 full；用例 validator/Harness Pass | `test-reports/2026-08-18-upload-ai-image-modes-test.md` | 真实 provider 未测 |
@@ -21,6 +21,7 @@
 - 本地代码、review、测试、浏览器回归和回滚 runbook 已达到 Ship ready；用户已授权提交、push、生产文件更新与 `polazj.service` 重启。
 - 发布前全量回归再次通过：120 passed；`git diff --check` 和常见 secret 特征扫描通过。
 - 生产根盘使用率 93%，剩余约 3.3GB；本次仅备份约 192KB 运行文件且不生成构建产物，可继续，但不在本次授权中清理旧备份或 journald。
+- 产品 commit 已推送、生产 fast-forward 成功，生产全量测试 120 passed，服务重启后 active；发布结论为 **Deployed**。
 
 ## 发布面
 
@@ -75,19 +76,31 @@
 
 回滚后验证：服务 active、上传页登录后 200、旧上传 → 风格 → 生成路径完成、近 15 分钟无新增 traceback。通知对象为本项目管理员/内容发布者；若真实生图产生异常费用，暂停新任务并记录受影响 job ID，不擅自删除文章。
 
-## 待执行项
+## 发布边界
 
-- 形成只包含本需求的独立 commit，排除 `app/agent.py`、`app/uploader.py` 中既有 MiniMax 端点 hunk、2026-08-15 文档、`.qoder/skills/` 与 `tmp/`。
-- push 后确认本地、`origin/main`、生产三方 commit；如生产 fast-forward 因已有内容改动冲突失败，停止而不覆盖。
+- 产品 commit 只包含本需求，已排除 `app/agent.py`、`app/uploader.py` 中既有 MiniMax 端点 hunk、2026-08-15 文档、`.qoder/skills/` 与 `tmp/`。
+- 生产 fast-forward 保留了 `_posts/` 和 `data/` 中的已有运行内容改动，未 reset、stash 或覆盖。
 - 线上仅执行无付费副作用的页面/代码探针；不自动发起真实 MiniMax T2I 请求或生成正式文章。
+
+## 2026-08-19 部署执行记录
+
+- Git：产品 commit `ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170` 已推送至 `origin/main`。
+- 部署前：生产 HEAD 与远端均为 `9eb1efee5c7716f59aa98b3c20b8afed809fb2f4`；`polazj.service=active`，pending/running jobs 为 0。
+- 备份：已备份 `app/uploader.py` 与 `app/templates/upload.html`，备份大小 208KB，记录了回滚 HEAD。
+- 更新：`git pull --ff-only origin main` 成功，生产 HEAD 到达 `ed3d89f`；运行文件 blob 与 commit tree 一致。
+- 生产测试：`py_compile` 通过；本次核心测试 21 passed；项目正常命令的全量测试 120 passed。首次额外注入 `PYTHONPATH=.` 时出现 1 个既有 CLI 导入失败，去掉该非项目标准环境变量后全量通过。
+- 重启：重启前再次确认 active jobs 为 0；`polazj.service` 重启后 active，PID 已更新。
+- HTTP：公网 `/admin/login` 为 200，`/admin/upload` 未登录为 302 到登录页。生产应用内登录态探针为 200，检出 12 个模式 radio、3 个默认“适中”且四个标签齐全。
+- 运行时：重启后内存约 90–93MB，`journalctl -q` 复核 warning/error 均为 0，根盘仍为 93%。
+- 未执行：未发起真实 MiniMax T2I，未写入正式文章，未清理旧备份/日志。
 
 ## Artifact
 
 ```yaml
 artifact: release-plan
-status: Ready for production execution / user authorized
-version_source: main@9eb1efee + uncommitted task changes
-commits: [pending local commit]
+status: Deployed / production checks passed
+version_source: runtime files@ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170 + release record@this document commit
+commits: [ed3d89fa58796ffdb4a12ecc20e69ffdf15e2170]
 surfaces:
   - Flask backend
   - Jinja upload UI

@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "environment": "本地 Flask 127.0.0.1:5019；Google Chrome/Playwright；临时管理员 fixture；未连接真实 MiniMax 图片 API",
+  "environment": "本地 Flask 127.0.0.1:5019 + Google Chrome/Playwright；生产 systemd/HTTP/应用内登录态探针；未连接真实 MiniMax 图片 API",
   "validated_paths": [
     {
       "id": "REG-UI-001",
@@ -52,15 +52,30 @@
       ],
       "console_errors": [],
       "network_failures": []
+    },
+    {
+      "id": "REG-PROD-001",
+      "entry": "https://aipd.me/PolaZhenjing/admin/upload",
+      "viewport": "HTTP + production Flask application probe",
+      "steps": [
+        "确认本地、origin/main 与生产产品 commit 一致",
+        "确认重启前 pending/running jobs 为 0 且服务重启后 active",
+        "检查公网登录页和未登录上传页响应",
+        "在生产应用内登录态请求上传页并统计模式控件"
+      ],
+      "result": "通过；login 200，upload unauthenticated 302，authenticated 200，12 radios，3 standard defaults，4 labels",
+      "screenshots": [],
+      "console_errors": [],
+      "network_failures": []
     }
   ],
-  "validated_ids": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+  "validated_ids": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9"],
   "side_effects": [
     "Harness 临时管理员已删除",
     "Harness 临时文章已删除",
     "本地 Flask 服务已停止",
     "未调用真实图片 provider，未产生外部费用",
-    "未写入生产数据、未重启生产服务"
+    "未写入正式文章数据；已在 active jobs 为 0 后重启生产服务"
   ],
   "logs": [
     "function cases validator: 9 acceptance ids / 9 features / 17 cases",
@@ -68,7 +83,10 @@
     "related pytest: 68 passed",
     "full pytest: 120 passed",
     "Playwright upload/edit harness: passed",
-    "Pola A2A skill harness: passed"
+    "Pola A2A skill harness: passed",
+    "production core pytest: 21 passed",
+    "production full pytest: 120 passed",
+    "production HTTP/UI/version/systemd probes: passed"
   ],
   "risks": [
     "真实 MiniMax 成功率、延迟、费用和审美质量未验证，需要获得部署/测试额度授权后小流量检查",

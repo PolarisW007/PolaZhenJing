@@ -72,6 +72,33 @@
       "status": "pass",
       "exit_code": 0,
       "summary": "git diff --check 通过；任务新增文件行尾空白扫描通过"
+    },
+    {
+      "id": "C9",
+      "command": "production: py_compile + pytest core/full",
+      "cwd": "production checkout",
+      "scope": "生产代码与全量回归",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "py_compile pass；21 core passed；120 full passed"
+    },
+    {
+      "id": "C10",
+      "command": "production: public HTTP + authenticated Flask upload-page probe",
+      "cwd": "production checkout",
+      "scope": "线上 HTTP 与上传页四档 UI 结构",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "login 200；upload unauthenticated 302；authenticated 200；12 radios / 3 standard defaults / 4 labels"
+    },
+    {
+      "id": "C11",
+      "command": "production: commit/blob/systemd/jobs/runtime checks",
+      "cwd": "production checkout",
+      "scope": "版本一致性与运行健康",
+      "status": "pass",
+      "exit_code": 0,
+      "summary": "HEAD/blob 一致；active jobs=0 before restart/observation；service active；journal warning/error=0"
     }
   ],
   "coverage": [
@@ -82,7 +109,7 @@
     {"acceptance_id": "A5", "case_ids": ["UT-F5-001", "UT-F5-002", "RT-F5-001"], "commands": ["C4", "C5"]},
     {"acceptance_id": "A6", "case_ids": ["UT-F6-001"], "commands": ["C3"]},
     {"acceptance_id": "A7", "case_ids": ["IT-F7-001"], "commands": ["C2", "C6", "C7"]},
-    {"acceptance_id": "A8", "case_ids": ["RT-F8-001"], "commands": ["C1", "C4"]},
-    {"acceptance_id": "A9", "case_ids": ["RT-F9-001"], "commands": ["C8"]}
+    {"acceptance_id": "A8", "case_ids": ["RT-F8-001"], "commands": ["C1", "C4", "C9", "C10", "C11"]},
+    {"acceptance_id": "A9", "case_ids": ["RT-F9-001"], "commands": ["C8", "C9", "C11"]}
   ]
 }
