@@ -2,7 +2,7 @@
   "status": "partial",
   "mode": "ship_ready",
   "slug": "upload-ai-image-modes",
-  "updated_at": "2026-08-19T00:06:05+08:00",
+  "updated_at": "2026-08-19T00:19:05+08:00",
   "stages": [
     {
       "name": "project_context",
@@ -64,9 +64,9 @@
       "name": "release",
       "status": "done",
       "artifact": "docs/pola/project-knowledge/release/2026-08-18-upload-ai-image-modes-release.md",
-      "evidence": "ed3d89f 已推送并部署；生产 21 core / 120 full passed；服务 active；HTTP/UI 探针通过",
+      "evidence": "ed3d89f 已推送并部署；生产 21 core / 120 full passed；服务 active；HTTP/UI 探针通过；15 分钟观察稳定",
       "blockers": [],
-      "updated_at": "2026-08-19T00:06:05+08:00"
+      "updated_at": "2026-08-19T00:19:05+08:00"
     },
     {
       "name": "finalization",

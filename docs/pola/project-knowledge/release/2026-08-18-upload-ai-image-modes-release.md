@@ -91,7 +91,8 @@
 - 生产测试：`py_compile` 通过；本次核心测试 21 passed；项目正常命令的全量测试 120 passed。首次额外注入 `PYTHONPATH=.` 时出现 1 个既有 CLI 导入失败，去掉该非项目标准环境变量后全量通过。
 - 重启：重启前再次确认 active jobs 为 0；`polazj.service` 重启后 active，PID 已更新。
 - HTTP：公网 `/admin/login` 为 200，`/admin/upload` 未登录为 302 到登录页。生产应用内登录态探针为 200，检出 12 个模式 radio、3 个默认“适中”且四个标签齐全。
-- 运行时：重启后内存约 90–93MB，`journalctl -q` 复核 warning/error 均为 0，根盘仍为 93%。
+- 运行时：完成 15 分钟发布后观察；内存稳定在约 93MB，`journalctl -q` 复核 warning/error 均为 0，active jobs 为 0，根盘仍为 93%。
+- 观察结束时公网 login/upload 仍为 200/302，产品运行文件 blob 仍与 `ed3d89f` 一致。
 - 未执行：未发起真实 MiniMax T2I，未写入正式文章，未清理旧备份/日志。
 
 ## Artifact

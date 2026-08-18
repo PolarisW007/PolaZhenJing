@@ -85,7 +85,7 @@
 - 发布前 active jobs 为 0，已建立 208KB 运行文件备份与回滚 HEAD。
 - `git pull --ff-only origin main` 成功，保留生产 `_posts/` 和 `data/` 的已有修改，未使用 reset/stash。
 - 生产 `py_compile` 通过，核心 pytest 21 passed，正常命令全量 pytest 120 passed，运行文件 blob 和 commit 一致。
-- 重启前再次确认 active jobs 为 0；重启后 `polazj.service=active`，内存约 90–93MB，`journalctl -q` 复核 warning/error 均为 0。
+- 重启前再次确认 active jobs 为 0；重启后 `polazj.service=active`。已完成 15 分钟观察：内存稳定约 93MB，`journalctl -q` warning/error 均为 0，active jobs 为 0，公网响应正常。
 - 公网探针：登录页 200，未登录上传页 302 到登录页；生产应用内登录态上传页 200，12 个 radio、3 个默认“适中”和四个中文标签均正确。
 - 残余风险：根盘仍为 93%；未触发真实 MiniMax T2I 和正式文章写入，provider 费用/成功率/审美质量需后续小流量观察。
 
