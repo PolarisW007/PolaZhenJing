@@ -1,34 +1,37 @@
 {% extends "base.html" %}
 {% block title %}注册{% endblock %}
+{% block head_extra %}
+{% if captcha_config.enabled %}
+<script>
+  window.AliyunCaptchaConfig = {
+    region: {{ captcha_config.region | tojson }},
+    prefix: {{ captcha_config.prefix | tojson }},
+  };
+</script>
+<script src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"></script>
+{% endif %}
+{% endblock %}
 {% block content %}
 <h2>注册</h2>
 <form method="POST">
   <input type="hidden" name="next" value="{{ next_url }}">
   <div class="form-group">
     <label for="username">用户名</label>
-    <input type="text" id="username" name="username" class="form-input" required autofocus>
+    <input type="text" id="username" name="username" class="form-input" autocomplete="username" required autofocus>
   </div>
   <div class="form-group">
     <label for="email">邮箱</label>
-    <input type="email" id="email" name="email" class="form-input" placeholder="yourname@example.com" required>
+    <input type="email" id="email" name="email" class="form-input" autocomplete="email" placeholder="yourname@example.com" required>
   </div>
   <div class="form-group">
     <label for="password">密码（至少6位）</label>
-    <input type="password" id="password" name="password" class="form-input" minlength="6" required>
+    <input type="password" id="password" name="password" class="form-input" autocomplete="new-password" minlength="6" required>
   </div>
   <button type="submit" class="btn-gold">注册并验证邮箱</button>
 </form>
-{% if third_party_providers %}
-<div class="auth-divider"><span>快捷登录 / 注册</span></div>
-<div class="provider-grid" aria-label="第三方快捷登录">
-  {% for item in third_party_providers %}
-  <a class="provider-button provider-{{ item.provider }}" href="{{ url_for('auth.third_party_start', provider=item.provider, next=next_url) }}">
-    <span class="provider-mark">{{ item.label[:1] }}</span>
-    <span>{{ item.label }}</span>
-  </a>
-  {% endfor %}
-</div>
-{% endif %}
+
+{% include "_auth_quick_methods.html" %}
+
 <div class="form-links">
   <a href="{{ url_for('auth.login', next=next_url) }}">已有账号？去登录</a>
 </div>

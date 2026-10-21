@@ -2,21 +2,39 @@ import functools
 import base64
 import binascii
 import io
-import random
 import sqlite3
-import string
 import time
 import uuid
 from pathlib import Path
+from urllib.parse import urlparse
 
-from flask import (Blueprint, flash, g, jsonify, redirect, render_template,
+from flask import (Blueprint, current_app, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image, ImageDraw, ImageOps, UnidentifiedImageError
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from . import get_db
-from .mailer import send_verification_code
+from .identity.audit import log_auth_event
+from .identity.contacts import contacts_for_user, ensure_contact, login_method_count
+from .identity.providers import (
+    consume_auth_request,
+    create_auth_request,
+    get_provider,
+    provider_status,
+    testing_identity_from_args,
+    upsert_provider_identity,
+    verify_nonce,
+)
+from .identity.providers.base import ProviderError
+from .identity.verification import (
+    VerificationError,
+    bind_contact_with_otp,
+    consume_otp,
+    login_or_create_with_otp,
+    send_otp,
+)
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/admin')
 
@@ -70,17 +88,20 @@ DEFAULT_USER_PERMISSIONS = {
 }
 ADMIN_PERMISSIONS = set(PERMISSION_CATALOG)
 
-THIRD_PARTY_PROVIDERS = [
-    {'provider': 'wechat', 'label': '微信'},
-    {'provider': 'alipay', 'label': '支付宝'},
-    {'provider': 'google', 'label': 'Google'},
-    {'provider': 'apple', 'label': 'Apple'},
-    {'provider': 'huawei', 'label': '华为'},
-]
+PROVIDER_LABELS = {
+    'wechat': '微信',
+    'apple': 'Apple',
+    'google': 'Google',
+    'alipay': '支付宝',
+    'huawei': '华为',
+}
 
 
 def _provider_context():
-    return [item.copy() for item in THIRD_PARTY_PROVIDERS]
+    return [
+        {**item, 'label': PROVIDER_LABELS.get(item['provider'], item['provider'].capitalize())}
+        for item in provider_status(current_app.config)
+    ]
 
 
 def _valid_preference(field, value):
@@ -176,9 +197,34 @@ def _account_admin_context(db):
 def _render_account(user, **extra):
     profile = user_payload(user)
     db = get_db()
+    identities = db.execute(
+        '''
+        SELECT provider, display_name, provider_email, linked_at, last_login_at
+        FROM user_identities
+        WHERE user_id = ?
+        ORDER BY provider
+        ''',
+        (user['id'],),
+    ).fetchall()
+    audits = db.execute(
+        '''
+        SELECT event_type, provider, result, reason, created_at
+        FROM auth_audit_logs
+        WHERE user_id = ?
+        ORDER BY id DESC
+        LIMIT 10
+        ''',
+        (user['id'],),
+    ).fetchall()
     context = {
         'user': user,
         'profile': profile,
+        'contacts': contacts_for_user(db, user['id']),
+        'identity_status': _provider_context(),
+        'captcha_config': _captcha_context(),
+        'identities': identities,
+        'auth_audits': audits,
+        'login_method_count': login_method_count(db, user['id']),
         'theme_options': THEME_OPTIONS,
         'font_options': FONT_OPTIONS,
         'permission_catalog': PERMISSION_CATALOG,
@@ -195,13 +241,129 @@ def _safe_next(default_endpoint='uploader.upload'):
     return url_for(default_endpoint)
 
 
+def _safe_redirect_value(value, default_endpoint='auth.account'):
+    parsed = urlparse(value or '')
+    if value and value.startswith('/') and not value.startswith('//') and not parsed.netloc:
+        return value
+    return url_for(default_endpoint)
+
+
+def _captcha_context():
+    return {
+        'enabled': bool(current_app.config.get('POLAUUH_ALIYUN_CAPTCHA_ENABLED')),
+        'scene_id': current_app.config.get('POLAUUH_ALIYUN_CAPTCHA_SCENE_ID', ''),
+        'prefix': current_app.config.get('POLAUUH_ALIYUN_CAPTCHA_PREFIX', ''),
+        'region': 'cn',
+        'email_enabled': bool(current_app.config.get('POLAUUH_MAIL_ENABLED')),
+        'sms_enabled': bool(current_app.config.get('POLAUUH_SMS_ENABLED')),
+    }
+
+
+def _load_session_user():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+    user = get_db().execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    if user is None:
+        session.clear()
+    return user
+
+
+def _login_user(user):
+    session.clear()
+    session['user_id'] = user['id']
+    session['username'] = user['username']
+    session['email'] = user['email']
+    session['nickname'] = (
+        (user['nickname'] if 'nickname' in user.keys() else '') or user['username']
+    )
+    session['avatar_url'] = user['avatar_url'] if 'avatar_url' in user.keys() else ''
+    session['role'] = (
+        'admin'
+        if _is_admin_user(user)
+        else (user['role'] if 'role' in user.keys() else 'user')
+    )
+
+
+def _provider_redirect_uri(provider):
+    return url_for('auth.provider_callback', provider=provider, _external=True)
+
+
+def _oauth_cookie_serializer():
+    return URLSafeTimedSerializer(current_app.secret_key, salt='polauuh-oauth-nonce')
+
+
+def _oauth_cookie_value(state, nonce):
+    return _oauth_cookie_serializer().dumps({'state': state, 'nonce': nonce})
+
+
+def _oauth_cookie_nonce(state):
+    token = request.cookies.get('polauuh_oauth_nonce', '')
+    if not token:
+        return ''
+    try:
+        payload = _oauth_cookie_serializer().loads(token, max_age=600)
+    except (BadSignature, SignatureExpired):
+        return ''
+    if payload.get('state') != state:
+        return ''
+    return str(payload.get('nonce') or '')
+
+
+def _set_oauth_cookie(response, state, nonce):
+    response.set_cookie(
+        'polauuh_oauth_nonce',
+        _oauth_cookie_value(state, nonce),
+        max_age=600,
+        httponly=True,
+        secure=True,
+        samesite='None',
+        path='/',
+    )
+    return response
+
+
+def _clear_oauth_cookie(response):
+    response.delete_cookie('polauuh_oauth_nonce', path='/')
+    return response
+
+
+def _is_json_request():
+    return request.is_json or 'application/json' in (request.headers.get('Accept') or '')
+
+
+def _verification_error_status(code):
+    if code in {'rate_limited', 'otp_attempts_exceeded'}:
+        return 429
+    if code in {'delivery_failed', 'captcha_not_configured'}:
+        return 503
+    if code == 'account_disabled':
+        return 403
+    return 400
+
+
+def _provider_error_status(code):
+    return {
+        'provider_disabled': 404,
+        'provider_not_configured': 503,
+        'provider_network_error': 502,
+        'identity_conflict': 409,
+        'account_disabled': 403,
+    }.get(code, 400)
+
+
 def _is_admin_user(user):
+    if user is None:
+        return False
     role = user['role'] if 'role' in user.keys() else ''
     if role == 'admin':
         return True
     email = (user['email'] or '').lower()
     username = (user['username'] or '').lower()
-    return email == 'wsyxjer@gmail.com' or username in {'admin', 'sirius'}
+    return (
+        email in current_app.config['POLAUUH_ADMIN_EMAILS']
+        or username in current_app.config['POLAUUH_ADMIN_USERNAMES']
+    )
 
 
 def user_payload(user):
@@ -214,6 +376,11 @@ def user_payload(user):
     role = 'admin' if _is_admin_user(user) else (user['role'] if 'role' in user.keys() else 'user')
     preferences = _ensure_preferences(db, user['id'])
     permissions = _permissions_for(user)
+    contacts = contacts_for_user(db, user['id'])
+    identities = db.execute(
+        'SELECT provider FROM user_identities WHERE user_id = ? ORDER BY provider',
+        (user['id'],),
+    ).fetchall()
     return {
         'id': user['id'],
         'username': user['username'],
@@ -221,6 +388,20 @@ def user_payload(user):
         'nickname': display_name,
         'avatar_url': user['avatar_url'] if 'avatar_url' in user.keys() else '',
         'role': role,
+        'contacts': {
+            'email_verified': bool(
+                user['email_verified']
+                or any(
+                    item['contact_type'] == 'email' and item['verified_at']
+                    for item in contacts
+                )
+            ),
+            'phone_verified': any(
+                item['contact_type'] == 'phone' and item['verified_at']
+                for item in contacts
+            ),
+        },
+        'identity_providers': [row['provider'] for row in identities],
         'permissions': permissions,
         'preferences': {
             'theme': preferences.get('theme') or DEFAULT_PREFERENCES['theme'],
@@ -312,27 +493,31 @@ def login():
         ).fetchone()
         if user is None:
             error = '账号不存在。'
+        elif (user['status'] if 'status' in user.keys() else 'active') != 'active':
+            error = '账号当前不可用。'
+        elif not (user['password_enabled'] if 'password_enabled' in user.keys() else 1):
+            error = '该账号尚未设置密码，请使用验证码或第三方登录。'
         elif not check_password_hash(user['password_hash'], password):
             error = '密码错误。'
 
         if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['email'] = user['email']
-            session['nickname'] = (
-                (user['nickname'] if 'nickname' in user.keys() else '')
-                or user['username']
+            _login_user(user)
+            db.execute(
+                'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?',
+                (user['id'],),
             )
-            session['avatar_url'] = user['avatar_url'] if 'avatar_url' in user.keys() else ''
-            session['role'] = 'admin' if _is_admin_user(user) else (user['role'] if 'role' in user.keys() else 'user')
+            log_auth_event(db, 'login_success', 'password', 'success', user_id=user['id'])
+            db.commit()
             return redirect(_safe_next())
 
+        log_auth_event(db, 'login_failed', 'password', 'failed', reason=error)
+        db.commit()
         flash(error, 'error')
     return render_template(
         'login.html',
         next_url=request.args.get('next', ''),
-        third_party_providers=_provider_context(),
+        identity_status=_provider_context(),
+        captcha_config=_captcha_context(),
     )
 
 
@@ -340,7 +525,7 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip()
+        email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         db = get_db()
         error = None
@@ -352,79 +537,276 @@ def register():
         elif not password or len(password) < 6:
             error = '密码至少6位。'
         if error is None:
+            verification_required = current_app.config['POLAUUH_EMAIL_VERIFICATION_REQUIRED']
             try:
-                db.execute(
-                    'INSERT INTO users (username, email, password_hash, nickname, role) VALUES (?, ?, ?, ?, ?)',
-                    (username, email, generate_password_hash(password), username, 'user')
+                cursor = db.execute(
+                    '''
+                    INSERT INTO users
+                    (username, email, password_hash, password_enabled, nickname, role, email_verified)
+                    VALUES (?, ?, ?, 1, ?, 'user', ?)
+                    ''',
+                    (
+                        username,
+                        email,
+                        generate_password_hash(password),
+                        username,
+                        0 if verification_required else 1,
+                    ),
                 )
-                db.commit()
-
-                # Generate and send verification code
-                code = ''.join(random.choices(string.digits, k=6))
-                session['verify_code'] = code
-                session['verify_code_time'] = time.time()
-                session['verify_email'] = email
-                session['pending_user'] = username
-                session['verify_next'] = request.form.get('next', '')
-
-                sent = send_verification_code(email, code)
-                if sent:
+                ensure_contact(
+                    db,
+                    cursor.lastrowid,
+                    'email',
+                    email,
+                    verified=not verification_required,
+                    primary=True,
+                )
+                if verification_required:
+                    result = send_otp(db, 'email', email, 'bind')
+                    session['verify_email'] = email
+                    session['verify_purpose'] = 'bind'
+                    session['pending_user'] = username
+                    session['verify_next'] = request.form.get('next', '')
+                    if current_app.config.get('TESTING'):
+                        session['verify_debug_code'] = result.get('debug_code')
                     flash('验证码已发送到您的邮箱。', 'info')
                     return redirect(url_for('auth.verify'))
-                else:
-                    flash('注册成功。邮件发送失败，请直接登录。', 'warning')
-                    return redirect(url_for('auth.login', next=request.form.get('next', '')))
-
+                db.commit()
+                flash('注册成功，请登录。', 'success')
+                return redirect(url_for('auth.login', next=request.form.get('next', '')))
             except sqlite3.IntegrityError:
+                db.rollback()
                 error = f'用户 {username} 或邮箱 {email} 已被注册。'
+            except VerificationError as exc:
+                db.rollback()
+                error = str(exc)
 
         flash(error, 'error')
     return render_template(
         'register.html',
         next_url=request.args.get('next', ''),
-        third_party_providers=_provider_context(),
+        identity_status=_provider_context(),
+        captcha_config=_captcha_context(),
+    )
+
+
+@auth_bp.route('/auth/otp/send', methods=['POST'])
+def otp_send():
+    payload = request.get_json(silent=True) or request.form
+    db = get_db()
+    try:
+        result = send_otp(
+            db,
+            payload.get('channel', ''),
+            payload.get('target', ''),
+            payload.get('purpose', 'register_login'),
+            payload.get('captcha_verify_param', ''),
+        )
+    except (VerificationError, ValueError) as exc:
+        code = exc.code if isinstance(exc, VerificationError) else 'invalid_request'
+        body = {'ok': False, 'error': code, 'message': str(exc)}
+        if isinstance(exc, VerificationError) and exc.retry_after:
+            body['retry_after'] = exc.retry_after
+        return jsonify(body), _verification_error_status(code)
+    return jsonify({'ok': True, **result})
+
+
+@auth_bp.route('/auth/otp/verify', methods=['POST'])
+def otp_verify():
+    payload = request.get_json(silent=True) or request.form
+    db = get_db()
+    purpose = payload.get('purpose', 'register_login')
+    try:
+        if purpose in {'bind', 'change'}:
+            user = _load_session_user()
+            if user is None:
+                return jsonify({'ok': False, 'error': 'login_required'}), 401
+            bind_contact_with_otp(
+                db,
+                user['id'],
+                payload.get('channel', ''),
+                payload.get('target', ''),
+                purpose,
+                payload.get('code', ''),
+            )
+            return jsonify({'ok': True, 'status': 'bound'})
+        user, login_status = login_or_create_with_otp(
+            db,
+            payload.get('channel', ''),
+            payload.get('target', ''),
+            purpose,
+            payload.get('code', ''),
+        )
+    except (VerificationError, ValueError) as exc:
+        code = exc.code if isinstance(exc, VerificationError) else 'invalid_request'
+        return jsonify(
+            {'ok': False, 'error': code, 'message': str(exc)}
+        ), _verification_error_status(code)
+    _login_user(user)
+    return jsonify(
+        {
+            'ok': True,
+            'status': login_status,
+            'redirect': _safe_redirect_value(payload.get('next', '')),
+        }
     )
 
 
 @auth_bp.route('/auth/<provider>/start')
-def third_party_start(provider):
-    provider_meta = next(
-        (item for item in THIRD_PARTY_PROVIDERS if item['provider'] == provider),
-        None,
-    )
-    if provider_meta is None:
-        flash('暂不支持该快捷登录方式。', 'error')
-    else:
-        flash(
-            f"{provider_meta['label']}快捷登录入口已接入，生产授权参数接通后即可完成验证登录。",
-            'info',
+def provider_start(provider):
+    db = get_db()
+    next_url = _safe_redirect_value(request.args.get('next', ''))
+    try:
+        adapter = get_provider(provider)
+        if not adapter.is_enabled(current_app.config):
+            raise ProviderError('provider_disabled', '第三方登录尚未启用。')
+        if not adapter.is_configured(current_app.config):
+            raise ProviderError('provider_not_configured', '第三方登录尚未配置。')
+        bind_user_id = None
+        if request.args.get('mode') == 'bind':
+            user = _load_session_user()
+            if user is None:
+                raise ProviderError('login_required', '请先登录后再绑定第三方身份。')
+            bind_user_id = user['id']
+        auth_request = create_auth_request(
+            db,
+            adapter.provider,
+            next_url,
+            bind_user_id=bind_user_id,
         )
-    return redirect(url_for('auth.login', next=request.args.get('next', '')))
+        nonces = dict(session.get('provider_nonces') or {})
+        nonces[auth_request['state']] = auth_request['nonce']
+        session['provider_nonces'] = nonces
+        authorization_url = adapter.build_authorization_url(
+            current_app.config,
+            auth_request['state'],
+            auth_request['nonce'],
+            _provider_redirect_uri(adapter.provider),
+            next_url,
+        )
+    except ProviderError as exc:
+        log_auth_event(db, 'provider_start_failed', provider, 'failed', reason=exc.code)
+        db.commit()
+        if _is_json_request():
+            return jsonify(
+                {'ok': False, 'error': exc.code, 'message': str(exc)}
+            ), _provider_error_status(exc.code)
+        flash(str(exc), 'error')
+        return redirect(url_for('auth.login', next=next_url))
+    return _set_oauth_cookie(
+        redirect(authorization_url),
+        auth_request['state'],
+        auth_request['nonce'],
+    )
+
+
+@auth_bp.route('/auth/<provider>/callback', methods=['GET', 'POST'])
+def provider_callback(provider):
+    db = get_db()
+    auth_request = None
+    try:
+        adapter = get_provider(provider)
+        if not adapter.is_enabled(current_app.config):
+            raise ProviderError('provider_disabled', '第三方登录尚未启用。')
+        if not adapter.is_configured(current_app.config):
+            raise ProviderError('provider_not_configured', '第三方登录尚未配置。')
+        args = request.values
+        auth_request = consume_auth_request(db, adapter.provider, args.get('state', ''))
+        nonces = dict(session.get('provider_nonces') or {})
+        state = args.get('state', '')
+        session_nonce = nonces.pop(state, '')
+        raw_nonce = _oauth_cookie_nonce(state) or session_nonce
+        session['provider_nonces'] = nonces
+        verify_nonce(raw_nonce, auth_request['nonce_hash'])
+        identity = testing_identity_from_args(adapter.provider, args)
+        if identity is None:
+            identity = adapter.exchange_callback(
+                args,
+                _provider_redirect_uri(adapter.provider),
+                nonce=raw_nonce,
+            )
+        user, login_status = upsert_provider_identity(
+            db,
+            identity,
+            auth_request['bind_user_id'],
+        )
+        db.execute(
+            'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?',
+            (user['id'],),
+        )
+        log_auth_event(
+            db,
+            'login_success',
+            adapter.provider,
+            'success',
+            user_id=user['id'],
+            metadata={'status': login_status},
+        )
+        db.commit()
+    except (ProviderError, sqlite3.IntegrityError) as exc:
+        if isinstance(exc, ProviderError):
+            code = exc.code
+            message = str(exc)
+        else:
+            code = 'identity_conflict'
+            message = '该第三方身份已绑定其它账号。'
+            db.rollback()
+        log_auth_event(db, 'provider_callback_failed', provider, 'failed', reason=code)
+        db.commit()
+        if _is_json_request():
+            response = jsonify({'ok': False, 'error': code, 'message': message})
+            response.status_code = _provider_error_status(code)
+            return _clear_oauth_cookie(response)
+        flash(message, 'error')
+        next_url = auth_request['next_url'] if auth_request else ''
+        return _clear_oauth_cookie(redirect(url_for('auth.login', next=next_url or '')))
+    _login_user(user)
+    redirect_url = auth_request['next_url'] or url_for('auth.account')
+    if _is_json_request():
+        return _clear_oauth_cookie(
+            jsonify({'ok': True, 'status': login_status, 'redirect': redirect_url})
+        )
+    flash('第三方身份已连接。' if login_status == 'bound' else '登录成功。', 'success')
+    return _clear_oauth_cookie(redirect(redirect_url))
 
 
 @auth_bp.route('/verify', methods=['GET', 'POST'])
 def verify():
     if request.method == 'POST':
         code = request.form.get('code', '').strip()
-        stored_code = session.get('verify_code')
-        code_time = session.get('verify_code_time', 0)
         email = session.get('verify_email')
 
-        if not stored_code or not email:
+        if not email:
             flash('没有待验证的请求。', 'error')
             return redirect(url_for('auth.register'))
 
-        if time.time() - code_time > 300:  # 5 min expiry
-            flash('验证码已过期，请重新注册。', 'error')
-            return redirect(url_for('auth.register'))
-
-        if code != stored_code:
-            flash('验证码错误。', 'error')
-            return render_template('verify.html')
+        stored_code = session.get('verify_code')
+        if stored_code:
+            if time.time() - session.get('verify_code_time', 0) > 300:
+                flash('验证码已过期，请重新注册。', 'error')
+                return redirect(url_for('auth.register'))
+            if code != stored_code:
+                flash('验证码错误。', 'error')
+                return render_template('verify.html')
+        else:
+            try:
+                consume_otp(
+                    get_db(),
+                    'email',
+                    email,
+                    session.get('verify_purpose', 'bind'),
+                    code,
+                )
+            except VerificationError as exc:
+                flash(str(exc), 'error')
+                return render_template('verify.html')
 
         # Mark email as verified
         db = get_db()
         db.execute('UPDATE users SET email_verified = 1 WHERE email = ?', (email,))
+        user = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+        if user:
+            ensure_contact(db, user['id'], 'email', email, verified=True, primary=True)
         db.commit()
 
         next_url = session.get('verify_next', '')
@@ -433,6 +815,8 @@ def verify():
         session.pop('verify_code', None)
         session.pop('verify_code_time', None)
         session.pop('verify_email', None)
+        session.pop('verify_purpose', None)
+        session.pop('verify_debug_code', None)
         session.pop('pending_user', None)
         session.pop('verify_next', None)
 
@@ -454,20 +838,28 @@ def change_password():
         user = db.execute('SELECT * FROM users WHERE id = ?',
                           (session['user_id'],)).fetchone()
 
-        if not check_password_hash(user['password_hash'], current):
+        password_enabled = user['password_enabled'] if 'password_enabled' in user.keys() else 1
+        if password_enabled and not check_password_hash(user['password_hash'], current):
             flash('当前密码错误。', 'error')
         elif len(new_pw) < 6:
             flash('新密码至少6位。', 'error')
         elif new_pw != confirm:
             flash('两次输入的新密码不一致。', 'error')
         else:
-            db.execute('UPDATE users SET password_hash = ? WHERE id = ?',
-                       (generate_password_hash(new_pw), session['user_id']))
+            db.execute(
+                'UPDATE users SET password_hash = ?, password_enabled = 1, '
+                'updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                (generate_password_hash(new_pw), session['user_id']),
+            )
             db.commit()
             flash('密码已更新。', 'success')
-            return redirect(url_for('uploader.upload'))
+            return redirect(url_for('auth.account'))
 
-    return render_template('password.html')
+    user = _load_session_user()
+    password_enabled = bool(
+        user and (user['password_enabled'] if 'password_enabled' in user.keys() else 1)
+    )
+    return render_template('password.html', password_enabled=password_enabled)
 
 
 @auth_bp.route('/account', methods=['GET', 'POST'])
@@ -578,6 +970,88 @@ def account():
         return redirect(url_for('auth.account'))
 
     return _render_account(user)
+
+
+@auth_bp.route('/account/identities/<provider>/unlink', methods=['POST'])
+@login_required
+def unlink_identity(provider):
+    db = get_db()
+    user = _load_session_user()
+    identity = db.execute(
+        'SELECT * FROM user_identities WHERE user_id = ? AND provider = ?',
+        (user['id'], provider),
+    ).fetchone()
+    if identity is None:
+        flash('未找到该第三方身份。', 'error')
+        return redirect(url_for('auth.account'))
+    if login_method_count(db, user['id']) <= 1:
+        flash('至少需要保留一种可用登录方式。', 'error')
+        return redirect(url_for('auth.account'))
+    db.execute('DELETE FROM user_identities WHERE id = ?', (identity['id'],))
+    log_auth_event(db, 'identity_unlinked', provider, 'success', user_id=user['id'])
+    db.commit()
+    flash('第三方身份已解绑。', 'success')
+    return redirect(url_for('auth.account'))
+
+
+@auth_bp.route('/account/contacts/<int:contact_id>/unlink', methods=['POST'])
+@login_required
+def unlink_contact(contact_id):
+    db = get_db()
+    user = _load_session_user()
+    contact = db.execute(
+        'SELECT * FROM user_contacts WHERE id = ? AND user_id = ?',
+        (contact_id, user['id']),
+    ).fetchone()
+    if contact is None:
+        flash('未找到该联系方式。', 'error')
+        return redirect(url_for('auth.account'))
+    if login_method_count(db, user['id']) <= 1:
+        flash('至少需要保留一种可用登录方式。', 'error')
+        return redirect(url_for('auth.account'))
+
+    db.execute('DELETE FROM user_contacts WHERE id = ?', (contact_id,))
+    if contact['contact_type'] == 'phone':
+        replacement = db.execute(
+            "SELECT id FROM user_contacts WHERE user_id = ? AND contact_type = 'phone' "
+            'AND verified_at IS NOT NULL ORDER BY id LIMIT 1',
+            (user['id'],),
+        ).fetchone()
+        db.execute(
+            'UPDATE users SET primary_phone_contact_id = ? WHERE id = ?',
+            (replacement['id'] if replacement else None, user['id']),
+        )
+    elif contact['contact_type'] == 'email':
+        replacement = db.execute(
+            "SELECT id, contact_value FROM user_contacts WHERE user_id = ? AND contact_type = 'email' "
+            'AND verified_at IS NOT NULL ORDER BY id LIMIT 1',
+            (user['id'],),
+        ).fetchone()
+        replacement_email = (
+            replacement['contact_value']
+            if replacement
+            else f"user-{user['id']}@polauuh.local"
+        )
+        db.execute(
+            'UPDATE users SET primary_email_contact_id = ?, email = ?, email_verified = ? '
+            'WHERE id = ?',
+            (
+                replacement['id'] if replacement else None,
+                replacement_email,
+                1 if replacement else 0,
+                user['id'],
+            ),
+        )
+    log_auth_event(
+        db,
+        'contact_unlinked',
+        f"{contact['contact_type']}_otp",
+        'success',
+        user_id=user['id'],
+    )
+    db.commit()
+    flash('联系方式已解绑。', 'success')
+    return redirect(url_for('auth.account'))
 
 
 @auth_bp.route('/api/me')

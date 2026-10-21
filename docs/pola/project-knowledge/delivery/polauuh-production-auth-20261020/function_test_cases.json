@@ -1,0 +1,48 @@
+{
+  "source_docs": [
+    "docs/pola/project-knowledge/requirements/2026-10-20-polauuh-production-auth.md",
+    "docs/pola/project-knowledge/specs/2026-10-20-polauuh-production-auth-spec.md",
+    "docs/pola/project-knowledge/architecture/2026-10-20-polauuh-production-auth-sdd.md"
+  ],
+  "features": [
+    {
+      "id": "F1",
+      "name": "生产承载实现与 provider 契约",
+      "source_refs": ["Requirement#A1", "Requirement#A2", "SDD#Provider 数据流"],
+      "acceptance_ids": ["A1", "A2"],
+      "risk": "P1",
+      "unit_cases": [{"id": "UT-F1-001", "target": "tests/test_polauuh_provider_adapters.py tests/test_polauuh_provider_entrypoints.py", "scenario": "运行五个平台授权、回调、验签和错误契约测试", "assertions": ["五个平台 adapter 通过", "禁用和缺配置状态明确", "网络失败不返回 500"], "expected": "生产承载仓库不再使用占位 provider", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python -m pytest tests/test_polauuh_provider_adapters.py tests/test_polauuh_provider_entrypoints.py -q"}],
+      "integration_cases": [{"id": "IT-F1-001", "target": "scripts/polauuh_auth_harness.py", "scenario": "Google mock 回调和 identity payload", "assertions": ["callback 通过", "身份写入", "审计写入"], "expected": "统一 provider 回调可在 Flask 链路执行", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python scripts/polauuh_auth_harness.py"}],
+      "regression_cases": []
+    },
+    {
+      "id": "F2",
+      "name": "OTP、身份表与兼容迁移",
+      "source_refs": ["Requirement#A3", "Requirement#A4", "SDD#数据迁移"],
+      "acceptance_ids": ["A3", "A4"],
+      "risk": "P1",
+      "unit_cases": [{"id": "UT-F2-001", "target": "tests/test_polauuh_identity_flows.py tests/test_polauuh_delivery_clients.py", "scenario": "OTP、Captcha、频控、冲突、解绑和投递 client", "assertions": ["投递失败失效", "Captcha 在短信前", "最后登录方式受保护"], "expected": "身份和 OTP 数据链路满足安全契约", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python -m pytest tests/test_polauuh_identity_flows.py tests/test_polauuh_delivery_clients.py -q"}],
+      "integration_cases": [{"id": "IT-F2-001", "target": "scripts/polauuh_auth_harness.py", "scenario": "临时数据库执行密码、OTP、手机号绑定、SSO 和审计", "assertions": ["11 项检查通过", "schema 存在", "旧 SSO 通过"], "expected": "新增 schema 与原登录态兼容", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python scripts/polauuh_auth_harness.py"}],
+      "regression_cases": []
+    },
+    {
+      "id": "F3",
+      "name": "完整本地与生产发布门禁",
+      "source_refs": ["Requirement#A5", "Requirement#A6", "Requirement#A7", "SDD#发布与回滚"],
+      "acceptance_ids": ["A5", "A6", "A7"],
+      "risk": "P1",
+      "unit_cases": [{"id": "UT-F3-001", "target": "tests/", "scenario": "运行生产承载仓库完整回归", "assertions": ["147 项通过", "Python 编译通过", "无 P0/P1 review finding"], "expected": "代码达到发布门禁", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python -m pytest -q"}],
+      "integration_cases": [],
+      "regression_cases": [{"id": "RT-F3-001", "target": "docs/pola/project-knowledge/release/2026-10-21-polauuh-production-auth.md", "scenario": "备份、数据库副本、canary、切换、HTTP/浏览器/日志和全系 Harness", "assertions": ["服务 active", "登录注册 SSO 通过", "未配置 provider 保持禁用"], "expected": "生产发布可回滚且不影响旧路径", "manual_verification": "按发布记录执行并回填线上证据。"}]
+    }
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "IT-F1-001"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001", "IT-F2-001"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F3-001", "RT-F3-001"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F3-001", "RT-F3-001"]},
+    {"acceptance_id": "A7", "case_ids": ["RT-F3-001"]}
+  ]
+}

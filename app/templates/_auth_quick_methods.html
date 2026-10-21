@@ -1,0 +1,175 @@
+<div class="auth-divider"><span>验证码登录 / 注册</span></div>
+<div class="otp-panel" data-otp-panel data-next="{{ next_url }}">
+  <div class="auth-segments" role="group" aria-label="验证码渠道">
+    <button type="button" class="auth-segment is-active" data-otp-channel="email">邮箱</button>
+    <button type="button" class="auth-segment" data-otp-channel="sms" {% if not captcha_config.sms_enabled %}disabled title="短信服务待配置"{% endif %}>手机号</button>
+  </div>
+  <div class="form-group">
+    <label for="otp-target">邮箱</label>
+    <input type="email" id="otp-target" class="form-input" autocomplete="email" placeholder="yourname@example.com" data-otp-target>
+  </div>
+  <div class="otp-code-row">
+    <input type="text" class="form-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 位验证码" data-otp-code>
+    <button type="button" class="btn-ghost otp-send" data-otp-send-email {% if not captcha_config.email_enabled %}disabled{% endif %}>发送验证码</button>
+    <button type="button" id="otp-send-sms" class="btn-ghost otp-send" data-otp-send-sms hidden>真人验证</button>
+  </div>
+  <div id="captcha-element"></div>
+  <button type="button" class="btn-gold" data-otp-submit>验证并登录</button>
+  <p class="form-help otp-status" role="status" aria-live="polite" data-otp-status></p>
+</div>
+
+<div class="auth-divider"><span>第三方快捷登录</span></div>
+<div class="provider-grid" aria-label="第三方快捷登录">
+  {% for item in identity_status %}
+    {% if item.available %}
+    <a class="provider-button provider-{{ item.provider }}" href="{{ url_for('auth.provider_start', provider=item.provider, next=next_url) }}">
+      <span class="provider-mark">{{ item.label[:1] }}</span>
+      <span>{{ item.label }}</span>
+    </a>
+    {% else %}
+    <button type="button" class="provider-button provider-{{ item.provider }} is-disabled" disabled title="平台参数待配置">
+      <span class="provider-mark">{{ item.label[:1] }}</span>
+      <span>{{ item.label }}</span>
+    </button>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<script>
+  (() => {
+    const panel = document.querySelector("[data-otp-panel]");
+    if (!panel) return;
+    const target = panel.querySelector("[data-otp-target]");
+    const code = panel.querySelector("[data-otp-code]");
+    const status = panel.querySelector("[data-otp-status]");
+    const submit = panel.querySelector("[data-otp-submit]");
+    const emailSend = panel.querySelector("[data-otp-send-email]");
+    const smsSend = panel.querySelector("[data-otp-send-sms]");
+    const channels = [...panel.querySelectorAll("[data-otp-channel]")];
+    let channel = "email";
+    let countdownTimer = null;
+
+    function setStatus(message, failed = false) {
+      status.textContent = message;
+      status.classList.toggle("is-error", failed);
+    }
+
+    function selectedSendButton() {
+      return channel === "sms" ? smsSend : emailSend;
+    }
+
+    function selectChannel(nextChannel) {
+      channel = nextChannel;
+      channels.forEach((button) => button.classList.toggle("is-active", button.dataset.otpChannel === channel));
+      target.value = "";
+      target.type = channel === "email" ? "email" : "tel";
+      target.autocomplete = channel === "email" ? "email" : "tel";
+      target.placeholder = channel === "email" ? "yourname@example.com" : "手机号";
+      target.previousElementSibling.textContent = channel === "email" ? "邮箱" : "手机号";
+      emailSend.hidden = channel !== "email";
+      smsSend.hidden = channel !== "sms";
+      setStatus("");
+    }
+
+    function startCountdown(seconds) {
+      window.clearInterval(countdownTimer);
+      const button = selectedSendButton();
+      let remaining = Number(seconds || 60);
+      button.disabled = true;
+      button.textContent = `${remaining}s`;
+      countdownTimer = window.setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          window.clearInterval(countdownTimer);
+          button.disabled = false;
+          button.textContent = channel === "sms" && {{ captcha_config.enabled | tojson }} ? "真人验证" : "发送验证码";
+          return;
+        }
+        button.textContent = `${remaining}s`;
+      }, 1000);
+    }
+
+    async function sendOtp(captchaVerifyParam = "") {
+      const value = target.value.trim();
+      if (!value) {
+        setStatus(channel === "email" ? "请输入邮箱。" : "请输入手机号。", true);
+        return;
+      }
+      const button = selectedSendButton();
+      button.disabled = true;
+      setStatus("正在发送...");
+      try {
+        const response = await fetch("{{ url_for('auth.otp_send') }}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "Accept": "application/json"},
+          body: JSON.stringify({
+            channel,
+            target: value,
+            purpose: "register_login",
+            captcha_verify_param: captchaVerifyParam,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || "发送失败");
+        setStatus("验证码已发送。");
+        startCountdown(payload.retry_after);
+      } catch (error) {
+        button.disabled = false;
+        setStatus(error.message || "发送失败，请稍后重试。", true);
+      }
+    }
+
+    channels.forEach((button) => button.addEventListener("click", () => selectChannel(button.dataset.otpChannel)));
+    emailSend.addEventListener("click", () => sendOtp());
+    {% if captcha_config.sms_enabled and not captcha_config.enabled %}
+    smsSend.addEventListener("click", () => sendOtp());
+    {% endif %}
+
+    submit.addEventListener("click", async () => {
+      if (!target.value.trim() || !code.value.trim()) {
+        setStatus("请输入联系方式和验证码。", true);
+        return;
+      }
+      submit.disabled = true;
+      setStatus("正在验证...");
+      try {
+        const response = await fetch("{{ url_for('auth.otp_verify') }}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "Accept": "application/json"},
+          body: JSON.stringify({
+            channel,
+            target: target.value.trim(),
+            code: code.value.trim(),
+            purpose: "register_login",
+            next: panel.dataset.next || "",
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || "验证失败");
+        window.location.assign(payload.redirect);
+      } catch (error) {
+        submit.disabled = false;
+        setStatus(error.message || "验证失败，请重试。", true);
+      }
+    });
+
+    {% if captcha_config.sms_enabled and captcha_config.enabled %}
+    if (window.initAliyunCaptcha) {
+      window.initAliyunCaptcha({
+        SceneId: {{ captcha_config.scene_id | tojson }},
+        mode: "popup",
+        element: "#captcha-element",
+        button: "#otp-send-sms",
+        success: (captchaVerifyParam) => sendOtp(captchaVerifyParam),
+        fail: () => setStatus("真人验证未通过，请重试。", true),
+        getInstance: () => {},
+        slideStyle: {width: 360, height: 40},
+        language: "cn",
+      });
+    } else {
+      smsSend.disabled = true;
+      setStatus("真人验证组件加载失败，请稍后重试。", true);
+    }
+    {% endif %}
+  })();
+</script>

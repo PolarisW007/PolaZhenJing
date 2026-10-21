@@ -1,0 +1,12 @@
+{
+  "status": "partial",
+  "environment": "本地 Flask test client 与隔离 SQLite；生产 canary/公网回归待执行",
+  "validated_paths": [
+    {"id": "REG-LOCAL-001", "entry": "scripts/polauuh_auth_harness.py", "steps": ["初始化临时数据库", "执行登录、OTP、provider mock、SSO 和审计"], "result": "11/11 通过", "screenshots": [], "console_errors": [], "network_failures": []},
+    {"id": "REG-PROD-001", "entry": "https://aipd.me/PolaUUH/admin/login", "steps": ["生产 canary", "正常重启 polazj.service", "公网 HTTP 和浏览器回归", "全系 Harness 与日志观察"], "result": "待执行", "screenshots": [], "console_errors": [], "network_failures": []}
+  ],
+  "validated_ids": ["A1", "A2", "A3"],
+  "side_effects": ["本地只写临时 SQLite", "未发送真实短信", "未交换真实 provider token"],
+  "logs": ["147 passed in 3.25s", "auth harness 11/11", "OTP/OAuth lost-claim regression passed"],
+  "risks": ["生产尚待发布", "第三方凭据未配置", "Google HTTPS 出站超时", "Captcha/SMS 产品参数未齐"]
+}

@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block title %}PolaUUH 统一用户中心{% endblock %}
+{% block head_extra %}
+{% if captcha_config.enabled %}
+<script>
+  window.AliyunCaptchaConfig = {
+    region: {{ captcha_config.region | tojson }},
+    prefix: {{ captcha_config.prefix | tojson }},
+  };
+</script>
+<script src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"></script>
+{% endif %}
+{% endblock %}
 {% block content %}
 <h2>PolaUUH 统一用户中心</h2>
 <form method="POST" enctype="multipart/form-data">
@@ -75,6 +86,85 @@
   </div>
   <button type="submit" class="btn-gold">保存</button>
 </form>
+<section class="account-section">
+  <h3>登录与身份</h3>
+  <div class="security-list">
+    {% for contact in contacts %}
+    <div class="security-row">
+      <div>
+        <strong>{{ '邮箱' if contact.contact_type == 'email' else '手机号' }}</strong>
+        <small>{{ contact.display_value }}{% if contact.is_primary %} · 主要{% endif %}{% if contact.verified_at %} · 已验证{% endif %}</small>
+      </div>
+      {% if login_method_count > 1 %}
+      <form method="POST" action="{{ url_for('auth.unlink_contact', contact_id=contact.id) }}">
+        <button class="btn-danger" type="submit">解绑</button>
+      </form>
+      {% endif %}
+    </div>
+    {% else %}
+    <p class="form-help">暂无已绑定联系方式。</p>
+    {% endfor %}
+  </div>
+
+  <div class="contact-bind" data-contact-bind>
+    <div class="auth-segments" role="group" aria-label="绑定渠道">
+      <button type="button" class="auth-segment is-active" data-bind-channel="email">绑定邮箱</button>
+      <button type="button" class="auth-segment" data-bind-channel="sms" {% if not captcha_config.sms_enabled %}disabled title="短信服务待配置"{% endif %}>绑定手机号</button>
+    </div>
+    <div class="form-group">
+      <label for="bind-target">新邮箱</label>
+      <input type="email" id="bind-target" class="form-input" autocomplete="email" data-bind-target>
+    </div>
+    <div class="otp-code-row">
+      <input type="text" class="form-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6 位验证码" data-bind-code>
+      <button type="button" class="btn-ghost otp-send" data-bind-send-email {% if not captcha_config.email_enabled %}disabled{% endif %}>发送验证码</button>
+      <button type="button" id="account-send-sms" class="btn-ghost otp-send" data-bind-send-sms hidden>真人验证</button>
+    </div>
+    <div id="account-captcha-element"></div>
+    <button type="button" class="btn-gold" data-bind-submit>确认绑定</button>
+    <p class="form-help otp-status" role="status" aria-live="polite" data-bind-status></p>
+  </div>
+
+  {% set connected_providers = identities | map(attribute='provider') | list %}
+  <div class="provider-grid account-provider-grid" aria-label="第三方身份">
+    {% for item in identity_status %}
+      {% if item.provider in connected_providers %}
+      <div class="provider-account-row">
+        <span class="provider-mark">{{ item.label[:1] }}</span>
+        <strong>{{ item.label }}</strong>
+        {% if login_method_count > 1 %}
+        <form method="POST" action="{{ url_for('auth.unlink_identity', provider=item.provider) }}">
+          <button class="btn-danger" type="submit">解绑</button>
+        </form>
+        {% else %}
+        <small>已绑定</small>
+        {% endif %}
+      </div>
+      {% elif item.available %}
+      <a class="provider-button provider-{{ item.provider }}" href="{{ url_for('auth.provider_start', provider=item.provider, mode='bind', next=url_for('auth.account')) }}">
+        <span class="provider-mark">{{ item.label[:1] }}</span>
+        <span>绑定{{ item.label }}</span>
+      </a>
+      {% else %}
+      <button type="button" class="provider-button provider-{{ item.provider }} is-disabled" disabled title="平台参数待配置">
+        <span class="provider-mark">{{ item.label[:1] }}</span>
+        <span>{{ item.label }}</span>
+      </button>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if auth_audits %}
+  <div class="audit-list">
+    {% for event in auth_audits %}
+    <div class="audit-row">
+      <span>{{ event.event_type }}{% if event.provider %} · {{ event.provider }}{% endif %}</span>
+      <small>{{ event.result }} · {{ event.created_at }}</small>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
 <section class="account-section">
   <h3>应用权限申请</h3>
   <p class="form-help">如果某个应用暂时没有权限，可以在这里提交申请，管理员会在统一账号中心处理。</p>
@@ -258,6 +348,38 @@
   .admin-actions .form-input {
     min-width: 220px;
   }
+  .security-list,
+  .audit-list {
+    display: grid;
+    margin-bottom: 1rem;
+  }
+  .security-row,
+  .audit-row,
+  .provider-account-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--text-ghost);
+  }
+  .security-row > div,
+  .audit-row > span { flex: 1; }
+  .security-row strong,
+  .security-row small { display: block; }
+  .security-row small,
+  .audit-row small,
+  .provider-account-row small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+  .contact-bind {
+    margin: 1rem 0 1.5rem;
+    padding-top: 0.5rem;
+  }
+  .account-provider-grid { margin-bottom: 1.25rem; }
+  .provider-account-row strong { flex: 1; color: var(--text-secondary); font-size: 0.85rem; }
+  .audit-row { justify-content: space-between; font-size: 0.78rem; }
   @media (max-width: 720px) {
     .form-grid-2,
     .admin-row {
@@ -419,6 +541,105 @@
         dataInput.value = drawAvatarData();
       }
     });
+  })();
+
+  (() => {
+    const panel = document.querySelector("[data-contact-bind]");
+    if (!panel) return;
+    const target = panel.querySelector("[data-bind-target]");
+    const code = panel.querySelector("[data-bind-code]");
+    const status = panel.querySelector("[data-bind-status]");
+    const submit = panel.querySelector("[data-bind-submit]");
+    const emailSend = panel.querySelector("[data-bind-send-email]");
+    const smsSend = panel.querySelector("[data-bind-send-sms]");
+    const channelButtons = [...panel.querySelectorAll("[data-bind-channel]")];
+    let channel = "email";
+
+    function setStatus(message, failed = false) {
+      status.textContent = message;
+      status.classList.toggle("is-error", failed);
+    }
+
+    function setChannel(value) {
+      channel = value;
+      channelButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.bindChannel === channel));
+      target.value = "";
+      target.type = channel === "email" ? "email" : "tel";
+      target.autocomplete = channel === "email" ? "email" : "tel";
+      target.previousElementSibling.textContent = channel === "email" ? "新邮箱" : "新手机号";
+      emailSend.hidden = channel !== "email";
+      smsSend.hidden = channel !== "sms";
+      setStatus("");
+    }
+
+    async function sendCode(captchaVerifyParam = "") {
+      if (!target.value.trim()) {
+        setStatus("请输入要绑定的联系方式。", true);
+        return;
+      }
+      const button = channel === "email" ? emailSend : smsSend;
+      button.disabled = true;
+      setStatus("正在发送...");
+      try {
+        const response = await fetch("{{ url_for('auth.otp_send') }}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "Accept": "application/json"},
+          body: JSON.stringify({channel, target: target.value.trim(), purpose: "bind", captcha_verify_param: captchaVerifyParam}),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || "发送失败");
+        setStatus("验证码已发送。");
+      } catch (error) {
+        button.disabled = false;
+        setStatus(error.message || "发送失败，请稍后重试。", true);
+      }
+    }
+
+    channelButtons.forEach((button) => button.addEventListener("click", () => setChannel(button.dataset.bindChannel)));
+    emailSend.addEventListener("click", () => sendCode());
+    {% if captcha_config.sms_enabled and not captcha_config.enabled %}
+    smsSend.addEventListener("click", () => sendCode());
+    {% endif %}
+    submit.addEventListener("click", async () => {
+      if (!target.value.trim() || !code.value.trim()) {
+        setStatus("请输入联系方式和验证码。", true);
+        return;
+      }
+      submit.disabled = true;
+      setStatus("正在验证...");
+      try {
+        const response = await fetch("{{ url_for('auth.otp_verify') }}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "Accept": "application/json"},
+          body: JSON.stringify({channel, target: target.value.trim(), code: code.value.trim(), purpose: "bind"}),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.message || "绑定失败");
+        window.location.reload();
+      } catch (error) {
+        submit.disabled = false;
+        setStatus(error.message || "绑定失败，请重试。", true);
+      }
+    });
+
+    {% if captcha_config.sms_enabled and captcha_config.enabled %}
+    if (window.initAliyunCaptcha) {
+      window.initAliyunCaptcha({
+        SceneId: {{ captcha_config.scene_id | tojson }},
+        mode: "popup",
+        element: "#account-captcha-element",
+        button: "#account-send-sms",
+        success: (captchaVerifyParam) => sendCode(captchaVerifyParam),
+        fail: () => setStatus("真人验证未通过，请重试。", true),
+        getInstance: () => {},
+        slideStyle: {width: 360, height: 40},
+        language: "cn",
+      });
+    } else {
+      smsSend.disabled = true;
+      setStatus("真人验证组件加载失败，请稍后重试。", true);
+    }
+    {% endif %}
   })();
 
   (() => {

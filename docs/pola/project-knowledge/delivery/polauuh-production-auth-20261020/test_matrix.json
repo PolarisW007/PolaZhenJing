@@ -1,0 +1,18 @@
+{
+  "function_test_cases": "docs/pola/project-knowledge/delivery/polauuh-production-auth-20261020/function_test_cases.json",
+  "commands": [
+    {"id": "C1", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python -m py_compile app/*.py app/identity/*.py app/identity/providers/*.py wiki.py scripts/*.py", "cwd": "PolaZhenJing auth worktree", "scope": "Python 编译", "status": "pass", "exit_code": 0, "summary": "通过"},
+    {"id": "C2", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python -m pytest -q", "cwd": "PolaZhenJing auth worktree", "scope": "完整回归", "status": "pass", "exit_code": 0, "summary": "147 passed in 3.25s"},
+    {"id": "C3", "command": "/Users/wangchang/Desktop/WSYCursorCode/PolaZhenJing/.venv/bin/python scripts/polauuh_auth_harness.py", "cwd": "PolaZhenJing auth worktree", "scope": "身份集成 Harness", "status": "pass", "exit_code": 0, "summary": "11/11 passed"},
+    {"id": "C4", "command": "production backup, canary, deploy and regression", "cwd": "/PolaZhenjing", "scope": "生产数据库副本、服务、HTTP、浏览器、日志和全系 Harness", "status": "planned", "exit_code": null, "summary": "待执行"}
+  ],
+  "coverage": [
+    {"acceptance_id": "A1", "case_ids": ["UT-F1-001", "IT-F1-001"], "commands": ["C1", "C2", "C3"]},
+    {"acceptance_id": "A2", "case_ids": ["UT-F1-001", "IT-F1-001"], "commands": ["C2", "C3"]},
+    {"acceptance_id": "A3", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": ["C2", "C3"]},
+    {"acceptance_id": "A4", "case_ids": ["UT-F2-001", "IT-F2-001"], "commands": ["C2", "C3", "C4"]},
+    {"acceptance_id": "A5", "case_ids": ["UT-F3-001", "RT-F3-001"], "commands": ["C1", "C2", "C3", "C4"]},
+    {"acceptance_id": "A6", "case_ids": ["UT-F3-001", "RT-F3-001"], "commands": ["C4"]},
+    {"acceptance_id": "A7", "case_ids": ["RT-F3-001"], "commands": ["C4"]}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "slug": "polauuh-production-auth-20261020",
+  "status": "ready_for_release",
+  "mode": "deploy",
+  "updated_at": "2026-10-21",
+  "stages": [
+    {"name": "project_context", "status": "done", "artifact": "docs/pola/project-knowledge/README.md", "evidence": "AGENTS.md", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "requirement", "status": "done", "artifact": "docs/pola/project-knowledge/requirements/2026-10-20-polauuh-production-auth.md", "evidence": "用户需求", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "architecture", "status": "done", "artifact": "docs/pola/project-knowledge/architecture/2026-10-20-polauuh-production-auth-sdd.md", "evidence": "docs/pola/project-knowledge/specs/2026-10-20-polauuh-production-auth-spec.md", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "implementation", "status": "done", "artifact": "app/identity/", "evidence": "app/auth.py app/__init__.py templates", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "review", "status": "done", "artifact": "current task diff", "evidence": "无 P0/P1；完整测试通过", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "test", "status": "done", "artifact": "docs/pola/project-knowledge/delivery/polauuh-production-auth-20261020/test_matrix.json", "evidence": "147 passed; harness 11/11", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "regression", "status": "partial", "artifact": "docs/pola/project-knowledge/delivery/polauuh-production-auth-20261020/regression_evidence.json", "evidence": "本地集成通过", "blockers": ["生产 canary 和公网回归待执行"], "updated_at": "2026-10-21"},
+    {"name": "release", "status": "pending", "artifact": "docs/pola/project-knowledge/release/2026-10-21-polauuh-production-auth.md", "evidence": "", "blockers": [], "updated_at": "2026-10-21"},
+    {"name": "git_finalization", "status": "pending", "artifact": "docs/pola/project-knowledge/devlogs/2026-10-21-polauuh-production-auth.md", "evidence": "", "blockers": [], "updated_at": "2026-10-21"}
+  ],
+  "acceptance_coverage": [
+    {"acceptance_id": "A1", "requirement": "requirement", "architecture": "SDD", "implementation": "provider adapters", "review": "pass", "tests": ["UT-F1-001", "IT-F1-001"], "regression": ["REG-LOCAL-001"], "release": "pending"},
+    {"acceptance_id": "A2", "requirement": "requirement", "architecture": "provider flow", "implementation": "providers", "review": "pass", "tests": ["UT-F1-001", "IT-F1-001"], "regression": ["REG-LOCAL-001"], "release": "credentials pending"},
+    {"acceptance_id": "A3", "requirement": "requirement", "architecture": "OTP flow", "implementation": "verification/mail/sms", "review": "pass", "tests": ["UT-F2-001", "IT-F2-001"], "regression": ["REG-LOCAL-001"], "release": "SMS disabled until configured"},
+    {"acceptance_id": "A4", "requirement": "requirement", "architecture": "migration", "implementation": "schema and compatibility", "review": "pass", "tests": ["UT-F2-001", "IT-F2-001"], "regression": ["REG-PROD-001"], "release": "pending"},
+    {"acceptance_id": "A5", "requirement": "requirement", "architecture": "test strategy", "implementation": "tests and harness", "review": "pass", "tests": ["UT-F3-001", "RT-F3-001"], "regression": ["REG-PROD-001"], "release": "pending"},
+    {"acceptance_id": "A6", "requirement": "requirement", "architecture": "release", "implementation": "docs and git", "review": "pass", "tests": ["RT-F3-001"], "regression": ["REG-PROD-001"], "release": "pending"},
+    {"acceptance_id": "A7", "requirement": "requirement", "architecture": "external dependencies", "implementation": "provider state", "review": "pass", "tests": ["RT-F3-001"], "regression": ["REG-PROD-001"], "release": "pending external credentials"}
+  ],
+  "dirty_worktree_ledger": [],
+  "security_checks": {"diff_check": "pass", "secret_scan": "pass; staged high-confidence credential and private-key patterns not found", "sensitive_output_handling": "secret、验证码、token、cookie 和私钥不写入源码、文档或日志"}
+}
