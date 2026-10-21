@@ -42,6 +42,8 @@
 - 公网只读服务 harness 的 102 项核心页面、API、资产和匿名鉴权合同全部通过；五个 provider 因未配置正式凭据保持禁用并返回站内提示，不计为核心服务故障。
 - Nginx 配置检查通过，systemd 无失败单元，PolaNews 与 PolaRead Supervisor 进程均为 RUNNING。
 - Aliyun DirectMail 真实请求返回 `Forbidden`，说明当前 RAM 账号只有短信权限；邮件 OTP 保持禁用，未伪报成功。
+- 动态偏好门禁提交 `c4861fc` 已推送并发布到生产验收脚本，发布前备份位于 `/opt/pola-backups/unified-auth-harness-c4861fc-20261021-2138`；本地/生产 SHA-256 一致，生产跨应用检查 5/5。
+- 最终增量日志窗口内 Nginx、PolaNews、PolaRead 无连接拒绝、upstream 超时、ASGI 异常或进程重启；仅有 1 条 760.83ms 的 PolaRead 慢查询。
 
 ## 外部同步
 

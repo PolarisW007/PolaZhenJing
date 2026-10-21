@@ -43,3 +43,4 @@ Nginx 路由、端口、Cookie 域和生产数据库路径不改变；只正常�
 - 数据库迁移、5018 canary、生产编译、全量测试、身份 harness、跨应用 SSO、Nginx 和公开页面/API 回归通过。
 - PolaRead 兼容修复通过独立分支交付，生产 SSO 新旧路径均正常；PolaRead 全量测试 381 项通过。
 - 统一认证 harness 已升级为动态校验当前统一偏好，不再依赖旧的固定主题值。
+- 验收脚本提交 `c4861fc` 已发布且 5/5 通过；脚本备份位于 `/opt/pola-backups/unified-auth-harness-c4861fc-20261021-2138`，无需重启服务。
