@@ -120,7 +120,21 @@ def make_session_cookie(email: str) -> tuple[str, dict[str, Any]]:
         return morsel.output(header="", sep="").strip(), payload
 
 
-def run_checks(cookie: str) -> list[CheckResult]:
+def preference_overlay_matches(settings: dict[str, Any], expected: dict[str, Any]) -> bool:
+    data = settings.get("data", {})
+    theme = expected.get("theme")
+    font_family = expected.get("font_family")
+    return (
+        isinstance(theme, str)
+        and bool(theme)
+        and isinstance(font_family, str)
+        and bool(font_family)
+        and data.get("theme") == theme
+        and data.get("font_family") == font_family
+    )
+
+
+def run_checks(cookie: str, expected_preferences: dict[str, Any]) -> list[CheckResult]:
     results: list[CheckResult] = []
     for check in DEFAULT_CHECKS:
         try:
@@ -154,8 +168,7 @@ def run_checks(cookie: str) -> list[CheckResult]:
             )
             prefs_ok = (
                 status == 200
-                and settings.get("data", {}).get("theme") == "dream-gold"
-                and settings.get("data", {}).get("font_family") == "system"
+                and preference_overlay_matches(settings, expected_preferences)
             )
             results.append(CheckResult(
                 name="polaread-preferences-overlay",
@@ -174,8 +187,7 @@ def run_checks(cookie: str) -> list[CheckResult]:
             prefs_ok = (
                 status == 200
                 and settings.get("success") is True
-                and settings.get("data", {}).get("theme") == "dream-gold"
-                and settings.get("data", {}).get("font_family") == "system"
+                and preference_overlay_matches(settings, expected_preferences)
             )
             results.append(CheckResult(
                 name="polanews-preferences-overlay",
@@ -194,7 +206,7 @@ def main() -> int:
     args = parser.parse_args()
 
     cookie, user = make_session_cookie(args.email)
-    results = run_checks(cookie)
+    results = run_checks(cookie, user.get("preferences") or {})
     payload = {
         "ok": all(result.ok for result in results),
         "user": {
